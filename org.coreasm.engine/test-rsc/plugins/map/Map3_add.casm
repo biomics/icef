@@ -1,0 +1,48 @@
+CoreASM Map3_add
+
+use Standard
+use Map
+init Start
+
+/*
+ * @minsteps 1
+ * @maxsteps 1
+ *
+ * @require "{ -> }\n{ -> }\n{0->0}\n"
+ * @require "1->a"
+ * @require "2->b"
+ * @require "3->c"
+ * @require "4->d"
+ * @require "3->z"
+ * @require "1->u"
+ * @require "2->v"
+ * @require "3->w"
+ */
+rule Start =
+	seqblock
+		map0 := {->}
+		map1 := {0->"0"}
+		map2 := {1->"a", 2->"b"}
+		map3 := {3->"c", 4->"d"}
+		map4 := {1->"x", 2->"y", 3->"z"}
+		map5 := {1->"u", 2->"v", 3->"w"}
+		map6 := {->}
+		map7 := {->}
+		map8 := {->}
+		print map0
+		add map0 to map0
+		print map0
+		add map0 to map1
+		print map1
+		add map2 to map6
+		add map3 to map6
+		print map6
+		add map4 to map7
+		add map2 to map7
+// @refuse "1->x"
+// @refuse "2->y"
+		print map7
+		add map4 to map8
+		add map5 to map8
+		print map8
+	endseqblock

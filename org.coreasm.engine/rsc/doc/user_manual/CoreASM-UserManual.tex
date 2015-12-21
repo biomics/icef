@@ -1,0 +1,2410 @@
+% !TeX spellcheck = en_US
+% !TeX program = pdflatex 
+% ---------------------------------------------------------
+% CoreASM-UserManual.tex 	$Revision: #1 $
+%
+% "CoreASM User Manual"
+%
+% Copyright (c) 2006-2007 Roozbeh Farahbod
+%
+% This work is licensed under the Creative Commons 
+% Attribution-NonCommercial-NoDerivs License. To view 
+% a copy of this license, visit the following link:
+%
+%   http://creativecommons.org/licenses/by-nc-nd/2.0/ca/ 
+% 
+% ---------------------------------------------------------
+
+\documentclass{article}
+
+\newcommand{\version}{1.6.5-beta}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{csquotes}
+\usepackage{fixme}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage{stmaryrd}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{makeidx}
+\usepackage{tcolorbox}
+\usepackage{xspace}
+\usepackage{bold-extra}
+\usepackage{cmtt}
+\definecolor{darkgreen}{rgb}{0,0.3,0}
+\usepackage[colorlinks=true, citecolor=blue, linkcolor=blue, urlcolor=darkgreen]{hyperref}
+
+\setlength{\oddsidemargin}{0.2in}
+\setlength{\textwidth}{5.8in}
+\addtolength{\parskip}{0.07in}
+
+\pagestyle{fancy}
+\lhead{{\small \leftmark}}
+\rhead{{\small \CoreASM\ {\scshape Language User Manual}}}
+
+% ----------------- Commands
+\newcommand{\CoreASM}{{\sffamily CoreASM}\xspace}
+\newcommand{\JASMine}{{\sffamily JASMine}\xspace}
+\newcommand{\Carma}{{\sffamily Carma}\xspace}
+
+\newcommand{\codecom}[1]{\textcolor[gray]{0.5}{// #1}}
+\newcommand{\ruleform}[2]{\pform{$\blacktriangleright$}{#1}{#2}}
+\newcommand{\funcform}[2]{\pform{$\blacklozenge$}{#1}{#2}}
+\newcommand{\opform}[2]{\pform{$\vartriangleright$}{#1}{#2}}
+\newcommand{\pform}[3]{\vspace*{4mm} \noindent #1 #2 \vspace{1mm}\textcolor[gray]{0.7}{\dotfill}\mbox{{\sffamily \footnotesize #3}}}
+\newcommand{\optional}[1]{$\underset{optional}{\underline{\mbox{#1}}}$}
+
+\newcommand{\indexrule}[1]{\index{#1 rule@\asm{#1} rule}}
+\newcommand{\indexexp}[1]{\index{#1 expression@\asm{#1} expression}}
+\newcommand{\indexfunc}[1]{\index{#1 function@\asm{#1} function}}
+
+\newcommand{\Rfun}[1]{\mbox{\it #1}}
+\newcommand{\Rdom}[1]{\ensuremath{\mbox{\scshape\small #1}}\xspace}
+
+\newcommand{\copyrightNotice}[1]{{Copyright \copyright\ #1}}
+
+
+\usepackage{hyperref}
+\usepackage{menukeys}
+
+%asm listing configuration
+\input{lst-asm-conf.tex}
+
+\makeindex
+
+\begin{document}
+% ----------------- Title and Abstract
+
+\title{\huge \CoreASM Language User Manual \\ {\Large engine version \version} \\ {\large \url{github.com/CoreASM/}}}
+
+\author{Roozbeh Farahbod \\ \texttt{info@coreasm.org}\\\\Marcel Dausend \\ \texttt{marcel.dausend@uni-ulm.de}}  
+
+\date{\copyrightNotice{2006-2014} \\~\\ {\bf DRAFT of \today} \\ {This document is still under construction to match the latest version of the engine. Your criticism is welcome!}}
+
+ \maketitle
+
+\newpage
+\tableofcontents
+\newpage
+
+% ----------------- Main Body
+
+\section{Installing \CoreASM}
+
+There are currently two user interfaces available for the \CoreASM engine: a
+command-line interface called \Carma, and a graphical interactive
+development environment in the Eclipse platform, known as the \CoreASM Eclipse
+Plugin.
+
+% Since the specifics of how to install plugins on Eclipse can vary from version to version, 
+% please see -website- for up-to-date information" ecc.
+% For instructions on how to download and install and use \CoreASM with any of these
+% interfaces, please visit \url{www.coreasm.org/download}.
+
+\subsection{\CoreASM with \Carma}
+
+All sources of the \CoreASM engine with \Carma can be downloaded at \url{https://github.com/CoreASM/coreasm.core}.
+
+
+\subsubsection{System Requirements}
+
+You need to have Sun Microsystems Java 1.6 (JVM) installed on your machine.
+
+\subsubsection{Installing \Carma}
+You can build \CoreASM with \Carma using the maven build system provided in the source package.
+
+\subsubsection{Running \Carma}
+
+Under \Carma's home directory (where you installed Carma), 
+simply run `carma' (under POSIX systems) or `carma.bat' (under Windows systems). 
+To be able to run \Carma form other directories, change the value of {\ttfamily CARMA\_HOME} environment 
+variable in `carma' or `carma.bat' (depending on your operating system) so that it points to the folder 
+in which Carma is installed.
+
+To start, try Carma with `{\ttfamily --help}' to see the list of command-line arguments. 
+
+\subsection{\CoreASM Eclipse Plugin}
+
+This section explains how to install the \CoreASM Eclipse plugin.
+
+\subsubsection{System Requirements}
+The following infrastructure is required for the CoreASM Eclipse plugin:
+\begin{itemize}
+	\item Java SE Runtime Environment 7\\\url{http://www.oracle.com/technetwork/java/javase/downloads/index.html}
+	\item Eclipse IDE for Java Developers (version \emph{Kepler} suggested)\\\url{http://www.eclipse.org/downloads/}
+\end{itemize}
+
+\noindent This version of the CoreASM Eclipse Plugin has been developed and tested under
+\begin{table}[h]
+\begin{tabular}{l}
+	\begin{tabular}[c]{@{}l@{}}Ubuntu Linux 64bit v14.10 \&\\ Windows 7 and 8.1\end{tabular}\\
+	\textit{with}\\
+	\begin{tabular}[c]{@{}l@{}}Kepler Service Release 2 64 bit \&\\ Luna Eclipse Standard 4.4 64 bit\end{tabular}\\
+	Oracle Java SE JDK 7
+\end{tabular}
+\end{table}
+
+\subsubsection{Installing \CoreASM Eclipse Plugin}
+
+The Plugin can be installed either from the Eclipse Marketplace or by performing the following steps:
+
+\begin{itemize}
+\item Check if the required software (see above) is already installed on the target machine and if not, install the software.
+\item Open the \menu{Help}-menu inside Eclipse
+\item Select the menu item \menu[,]{Help, Install New Software...}
+\item Paste the url of this site \url{http://webcoreasm.informatik.uni-ulm.de/coreasm-repository} into the field "work with" and press \keys{ENTER}
+\item Next press \keys{Select All}- and afterwards \keys{Next}-button
+\item Confirm the selection of the "CoreASM Eclipse Plugin" for installation by pressing the \keys{Next}-button
+\item Accept the license and start the installation by pressing the \keys{Finish}-button
+\item When the warning appears that you are installing unsigned content, you have to press the \keys{Okay}-button to continue
+\item Last, you have to restart Eclipse so that the "CoreASM Eclipse Plugin" becomes available to you
+\end{itemize}
+
+If you like, you can build CoreASM by your own using the sources on github. The sources and our wiki are available at \url{https://github.com/CoreASM/coreasm.core}.
+
+\subsubsection{Using \CoreASM Eclipse Plugin}
+
+\paragraph{Creating a New Project} ~
+
+\begin{enumerate}
+    \item From the Eclipse menu choose: \menu[,]{File, New, Project\ldots}
+    \item Choose \menu[,]{General, Project} from the "New Project'' dialog. Click \keys{Next}.
+    \item Give the project a name. Click \keys{Finish}. 
+\end{enumerate}
+
+\paragraph{Creating a New \CoreASM Specification} ~
+
+\noindent {\em Method 1:}
+
+\begin{enumerate}
+	\item From the Eclipse menu choose: \menu[,]{File, New, Other\ldots}
+	\item In the New dialog choose \menu[,]{CoreASM, CoreASM Specification}. Click \keys{Next}.
+    \item Choose the project container for the specification.
+    \item Enter the name of the new \CoreASM specification file. The file must have the extension {\ttfamily .casm} or {\ttfamily .coreasm}. 
+	\item Click \keys{Finish}. 
+\end{enumerate}
+
+\noindent {\em Method 2:}
+
+\begin{enumerate}
+    \item File the Eclipse menu choose: \menu[,]{File, New, File\ldots}
+    \item In the new file dialog choose a project container for the new file and enter a name for the new file. Again, The file must have the extension {\ttfamily .casm} or {\ttfamily .coreasm}.
+    \item Click \keys{Finish}. 
+\end{enumerate}
+
+\paragraph{Running a \CoreASM Specification} ~
+
+\noindent {\em Method 1:}
+
+Shortcut method for running a specification with default configuration:
+
+\begin{enumerate}
+    \item Press the "play"-button that is usually used to compile and run programs, e.\,g. in Java
+    \item[] or
+    \vspace{-1em}
+\end{enumerate}
+\begin{enumerate}
+    \item In the Eclipse window, right click on a \CoreASM specification file.
+    \item In the context menu choose: \menu[,]{Run as\ldots, CoreASM Specification} 
+\end{enumerate}
+
+\noindent {\em Method 2:}
+
+If you need more control of the parameters for repeated execution, 
+you can create a specific \CoreASM Launch Configuration as follows:
+
+\begin{enumerate}
+    \item From the Eclipse menu choose: \menu[,]{Run, Run\ldots}
+	\item In the ``Run'' dialog, choose the ``ASM Specification'' launch configuration
+group and create a new ASM launch configuration (right click then select \menu{New}, or
+click the New launch configuration button on the tool bar).
+    \item Enter a name for the launch configuration.
+    \item Enter the project and specification file to be run. This can be done via the browse buttons.
+    \item Configure the ``Termination Conditions'' and ``Output Verbosity'' options as desired.
+    \item Click \keys{Apply}.
+    \item Click \keys{Run} to run the specification. 
+\end{enumerate}
+
+Once the configuration has been launched once, it can be run again through the Run Button/Drop down menu in the main Eclipse toolbar.
+
+\paragraph{Controlling the Execution of the \CoreASM Engine} ~
+
+While the engine is running, you can click on the 
+``Stop CoreASM Engine'' button to stop the run. To pause a running engine, 
+click on the ``Pause CoreASM Engine'' button. If you pause the engine, the 
+run can be resumed by clicking on the ``Resume CoreASM Engine'' button. 
+
+For more control, you are welcome to use the CoreASM debugger. Further details about debugging CoreASM specifications are described in the \href{https://github.com/CoreASM/coreasm.core/blob/master/org.coreasm.eclipse/rsc/doc/CoreASM_Eclipse_Debugger_Manual.pdf?raw=true}{manual of the CoreASM debugger}.
+
+\subsection{Using \CoreASM Compiler}
+
+\label{sec:compilerusage}
+
+The CoreASM Eclipse plugin contains a compiler, which compiles a specification into an executable jar archive.
+Only a subset of the CoreASM plugins described in this manual is currently compilable, but all standard plugins
+can be used (some with restrictions, see section \ref{sec:compiler} for more information).
+It is recommended to verify specifications using the \CoreASM Engine, as the compiler does not provide further
+debugging features.
+
+\paragraph{Launching the compiler}
+
+The compiler can be launched by right-clicking on a specification, selecting \keys{Export} and then clicking on
+\keys{CoreASM to Jar Export} in the \keys{CoreASM} section.
+This will open the configuration dialog for customization of the compilation process.
+Pressing the \keys{Finish} Button will start the compiler. Any generated warnings and errors will be displayed
+after the process has finished. If the operation was successful, the compiler will have generated an executable
+jar at the configured location.
+
+\paragraph{Configuring the compiler}
+
+The compiler can be configured to include different logging messages and termination conditions.
+Further options change the paths used for the output and preprocessor manipulation.
+Table \ref{tab:compiler} lists all options found in the configuration dialog.
+
+\begin{table}%
+\begin{tabular}{l l}
+\textbf{option} & \textbf{description} \\
+\hline
+\vspace{-.75em}&\\
+Specification Name 				& The path to the specification. Should not \\ 
+													& be changed and will be filled in automatically \\
+outputFile 								& The file name for the generated jar\\
+keepTempFiles 						& Whether the compiler should keep generated java\\ 
+													& sources (location will be displayed at the end\\ 
+													& of the compilation)\\
+removeExistingFiles 			& Whether files already existing in the\\ 
+													& temporary directory should be removed \\
+terminateOnError 					& Whether the program should terminate\\ 
+													& on errors. Currently always true\\
+terminateOnFailedUpdates 	& Whether the program should terminate\\ 
+													& on failed updates\\
+terminateOnEmptyUpdate 		& Whether the program should terminate\\ 
+													& upon generating an empty update in a step\\
+terminateOnSameUpdate 		& Whether the program should terminate\\ 
+													& upon generating the same updates in two steps\\
+terminateOnUndefAgent 		& Whether the program should terminate\\ 
+													& when there is no agent with a runnable program\\
+terminateOnStepCount 			& Whether the program should terminate\\ 
+													& after a certain number of steps\\
+logUpdatesAfterStep 			& Whether the generated updates should\\ 
+													& be logged after each step\\
+logStateAfterStep 				& Whether the complete state should be\\ 
+													& logged after each step\\
+logEndOfStep 							& Whether the end of a step should be\\ 
+													& logged\\
+logAgentSetAfterStep 			& Whether the selected agent set should\\ 
+													& be logged after a step\\
+noCompile 								& Whether the compiler should generate\\ 
+													& a jar archive or nor\\
+logTimings 								& Whether the compiler should display\\ 
+													& timing information\\
+preprocessorRuns 					& How many times the preprocessor is\\ 
+													& allowed to run before generating an error\\
+hideCoreASMOutput 				& If the compiler should hide messages\\ 
+													& generated by the CoreASM Parser\\
+\end{tabular}
+\caption{Compiler options}
+\label{tab:compiler}
+\end{table}
+
+% ----------------- Section: CoreASM Specification
+\section{\CoreASM Specification}
+
+
+Figure~\ref{fig:specStructure} shows a typical structure of a \CoreASM specification\footnote{
+As of version 1.1, this structure is not required anymore and different components of the specification
+can appear in any order. The only requirement is that the specification must start with a \CoreASM
+phrase.}.
+Every specification starts with the keyword \CoreASM\index{CoreASM@\CoreASM} followed by the name
+of the specification. Plugins that are required in the specification are then listed one by 
+one with the keyword \asm{use}\index{use@\asm{use}} followed by the name of the plugin. 
+
+The \emph{Header}\index{Header block} block is where various definitions take place. What goes into this  
+section depends on the plugins that are used. The \CoreASM Kernel 
+does not define anything for the header section. 
+
+The \emph{init rule}\index{init rule} of the specification (the rule
+that creates the initial state) is defined by keyword 
+\asm{init}\index{init@\asm{init}|see{init rule}} followed
+by a rule name. This would be the rule that initializes the state of the machine
+that is defined by the specification. The body of the init rule must be declared
+in the \emph{Rule Declaration}\index{Rule Declaration} block.
+
+A sample \CoreASM specification is presented in \hyperref[spec:thisiscoreasm]{CoreASM-Says-Hello example}.
+
+\AsmKeyword{CoreASM}
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{0.65\textwidth}
+\begin{tcolorbox}
+\small
+\asm{CoreASM SpecificationName}\\\\
+\asm{use SamplePlugin}\\
+\asm{use ...}\\
+	\begin{tcolorbox}
+	\sf Header Block
+	\end{tcolorbox}
+	\vspace{1em}
+	\asm{init InitRuleName}
+	\vspace{1em}
+	\begin{tcolorbox}
+	\sf Rule Declaration Block\\
+	...
+	\vspace{1em}
+	\end{tcolorbox}
+\end{tcolorbox}
+\end{minipage}
+\end{center}
+\caption{Typical Structure of a \CoreASM Specification}
+\label{fig:specStructure}
+\end{figure}
+\fxnote{removed}
+\subsection{Running \CoreASM Specifications}
+\label{running}
+
+To run a \CoreASM specification you need to have a \CoreASM engine driver. Currently, there are
+two engine drivers available:
+
+\begin{itemize}
+	\item \CoreASM Eclipse Plugin is a plugin for the Eclipse (see \url{www.eclipse.org}) 
+		development environment that provides syntax highlighting and a nice GUI to control 
+		specification runs.
+
+	\item \Carma is a command-line \CoreASM engine driver. To run a specification using 
+		\Carma simply run \Carma on the command line and pass it the name of the specification 
+		file as an argument. Make sure to specify a termination condition (e.g., \asm{--steps 20}
+		or \asm{--empty-updates}) for the run.
+		Run \Carma with \asm{--help} for a complete list of options that controls its behavior.  
+
+		The following command runs \asm{MySpec} using \Carma and stops after 30 steps, or after
+		a step that generates empty updates; it also dumps the final state before termination.
+
+		\begin{quote}\asm{carma --steps 30 --empty-updates --dump-final-state MySpec.coreasm} \end{quote} 
+
+		Alternatively, to run the specification of \hyperref[spec:thisiscoreasm]{CoreASM-Says-Hello example}, one can use the following options which would make \Carma to mark the end of each step and stop after 30 steps or when there is no agent with a defined program:
+
+		\begin{quote}\asm{carma --marksteps --steps 30 --no-agent ThisIsCoreASM.coreasm} \end{quote} 
+
+		In this example, \Carma will stop after three steps.
+
+		%Here are some examples to run 
+		%\Carma with a sample specification:
+\end{itemize}
+%\subsection{This Is CoreASM}
+%\label{thisiscoreasm}
+
+\begin{tcolorbox}[boxrule=0.0pt,colback=gray!5!white,title={CoreASM-Says-Hello example},label={spec:thisiscoreasm}]
+\begin{lstlisting}[backgroundcolor=\color{gray!5!white},frame=none]
+CoreASM ThisIsCoreASM
+
+use Standard
+
+init InitRule
+
+rule InitRule =
+	par
+		terminate := false
+		program(self) := @MainProgram
+	endpar
+
+rule MainProgram =
+	if not terminate then
+		par
+			print "This is CoreASM."
+			terminate := true
+		endpar
+	else
+		program(self) := undef
+\end{lstlisting}
+\end{tcolorbox}
+
+
+% -------------------------------- * KERNEL
+\section{Kernel}
+\label{kernel}
+%keyword rule is replaced with constant needed in declaration
+\lstset{deletekeywords=[1]{rule}}
+\AsmConstantOrEnum{rule}
+
+Kernel\index{CoreASM kernel}\index{kernel|see{CoreASM kernel}} of the \CoreASM engine provides the minimum set of vocabulary and rules to 
+have a \CoreASM specification.
+
+Basic values such as \asm{undef}\index{undef@\asm{undef}}, \asm{true}\index{true@\asm{true}}, and \asm{false}\index{false@\asm{false}} are defined in the 
+kernel along with the background of Boolean values (\asm{BOOLEAN})\index{Boolean background} and the universe 
+of \asm{Agents}\index{Agents@\asm{Agents}}. A function called \asm{program}\indexfunc{program} is also defined in the kernel which 
+maps agents to their programs (\CoreASM rules). At any time during the evaluation of a 
+rule, \asm{self}\index{self@\asm{self}} refers the the agent that is running the enclosing rule.
+
+\CoreASM kernel also defines a couple of important operators:
+
+\AsmVariable{value}
+\opform{\asm{value$_1$ = value$_2$}}{Kernel}
+
+This is the equality operator\index{equality operator}\index{=@=|see{equality operator}}. 
+
+\AsmKeyword{ruleelement}
+\AsmVariable{id}
+\opform{\asm{ruleelement id}}{Kernel}\index{ruleelement@\asm{ruleelement}}
+
+This operator returns the rule element of a rule with the given name (\asm{id}). Rule element is an element in the CoreASM state that represents a rule defined in the specification. It is useful in  assigning rules to programs of agents. In the following example, \asm{Main} is the name 
+of a rule:
+
+\begin{lstlisting}
+program(self) := ruleelement Main
+\end{lstlisting}
+
+The above rule, assigns the rule named \asm{Main} as the value of the program 
+of the agent running this rule.
+
+\opform{\asm{@ id}}{Kernel}\index{atsign@\asm{@} sign}
+
+\AsmRule{Main}
+Returns the rule element (rule body) or function element of a rule or function 
+with the given name (\asm{id}). If the given name is the name of a rule, it works exactly 
+the same as \asm{ruleelement}. Thus, if \asm{Main} is rule, we can have:
+
+\begin{lstlisting}
+program(self) := @$$Main
+\end{lstlisting}
+
+\subsection{Rule Forms}
+
+The following rule forms are defined in the kernel:
+
+\ruleform{\asm{ loc := value}}{Kernel}\index{update rule}\index{:=@\asm{:=}|see{update rule}}
+
+Assigns the value of \asm{value} to the location \asm{loc}.
+
+\ruleform{\asm{import id do rule}}{Kernel}\index{import@\asm{import}}
+
+Imports a new element, assigns it as the value of the environment variable \asm{id},
+and evaluates \asm{rule}.
+
+\ruleform{\asm{skip}}{Kernel}\indexrule{skip}
+
+Does nothing. This is like a NoOp.
+  
+
+\subsection{Kernel Engine Properties}
+
+The following properties affect the behavior of the \CoreASM engine. 
+
+\begin{description}
+	\item[engine.error.printStackTrace] if equals to \asm{"yes"}, the engine will 
+		print the stack trace of errors and exceptions. The default value is \asm{"no"}. 
+
+	\item[engine.limits.maxProcessors] the maximum number of processors the engine 
+		can use for simulation. The default value is \asm{"1"}. 
+
+	\item[scheduler.printProcessorStats] if equals to \asm{"yes"}, the engine 
+		will print some information on processor utilization after every step. The default value is \asm{"no"}. 
+
+	\item[scheduler.threadBatchSize] in a multi-threaded simulation, the value
+		of this property defines the minimum number of agents assigned to every thread.
+	The default value is \asm{"1"}.
+	
+	\item[engine.pluginFolders] a colon-separated list of folders that provide additional plugins. 
+
+	\item[engine.pluginLoadRequest] a comma separated list of plugins to be loaded in addition to those listed in the specification being loaded.
+\end{description}
+
+% -------------------------------- * BASIC ASM PLUGINS
+\section{Basic ASM Plugins}\index{Basic ASM plugin}
+\label{basicASM}
+
+In this section we list the plugins that provide the basic ASM rule forms. All
+the plugins in this section can be loaded individually (as instructed in each
+section) or all together with the following \asm{use} phrase, 
+
+\begin{lstlisting}
+use BasicASMPlugins
+\end{lstlisting}
+
+\noindent which automatically loads the following plugins: BlockRule,
+ConditionalRule, ChooseRule, ForallRule, LetRule, and
+Number.
+
+Note that the words ``Plugin'' and ``Plugins'' in the name of the plugins are optional.
+For example, Basic ASM plugins can also be loaded using the following line:
+
+\begin{lstlisting}
+use BasicASM
+\end{lstlisting}
+
+
+% -------------------------------- BLOCK RULE
+\subsection{Block Rule}
+\label{block}
+
+The Block Rule plugin\index{Block Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use BlockRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form:
+
+\ruleform{\asm{par rule$_1$} \optional{\asm{rule$_2$ $\:\ldots$ rule$_n$}} \asm{endpar}}{Block Rule Plugin}\index{block rule}\index{par@\asm{par}|see{block rule}}
+
+Instructs the engine to evaluate all the given rules in parallel. The update 
+generated by this rule is the union of all the updates generated by \asm{rule$_1$} to \asm{rule$_n$}. %A block rule must have at least two rules ($n \geq 2$).
+
+
+% -------------------------------- CHOOSE
+\subsection{Choose Rule}
+\label{choose}
+
+The Choose Rule plugin\index{Choose Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use ChooseRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form:
+
+\ruleform{
+		\asm{choose id  in value}
+		\optional{\asm{with guard}}
+		\asm{do rule$_1$}
+		\optional{\asm{ifnone rule$_2$}}
+		\optional{\asm{endchoose}}
+	}{Choose Rule Plugin}\index{choose rule@\asm{choose} rule}
+
+Chooses an element from the {\em enumerable}\index{enumerable}\footnote{An {\em enumerable} is an element
+that can be enumerated; i.e., that is a collection of other values. Sets, universes, and 
+some backgrounds are enumerable values.} 
+\asm{value} which
+satisfies \asm{guard}, assigns it as the value of \asm{id} and evaluates \asm{rule$_11$}.  If the \asm{ifnone} clause is provided, \asm{rule$_2$} will be evaluated if no element can be found. The last keyword \asm{endchoose} is optional. 
+
+The following example chooses the minimum price $p$ from the set of $prices$ and prints (see Section~\ref{io}) 
+$p$ on the screen:
+
+\AsmVariable{p, pi, prices}
+\begin{lstlisting}
+choose p in prices with (forall pi in prices holds p <= pi) do
+	print p
+\end{lstlisting}
+
+See Section~\ref{predicate} for more information on \asm{forall} expressions.
+
+The ChooseRule plugin also provides the following expression form to non-deterministically \emph{pick} a value from
+an enumerable that satisfies the given (optional) condition:
+
+\opform{
+	\asm{pick id in value}
+	\optional{\asm{with guard}}
+	}{Choose Rule Plugin}{\indexexp{pick}}
+
+\AsmVariable{foo, x}
+\noindent For example, the following assignment non-deterministically assigns \asm{true} or \asm{false} to location \asm{foo}:
+
+\begin{lstlisting}
+foo := pick x in {true, false}
+\end{lstlisting}
+
+% -------------------------------- CONDITIONAL
+\subsection{Conditional Rule}
+\label{conditional}
+
+The Conditional Rule plugin\index{Conditional Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use ConditionalRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule forms:
+
+\ruleform{
+	\asm{if value then rule}
+	}{Conditional Rule Plugin}
+	\index{conditional rule}
+	\index{if@\asm{if-then-else} rule|see{conditional rule}}
+
+Evaluates \asm{rule} only if \asm{value} is \asm{true}. It expects \asm{value} to be a Boolean value (being either \asm{true} or \asm{false}).
+
+\ruleform{
+	\asm{if value then rule$_1$ else rule$_2$}
+	}{Conditional Rule Plugin}
+	\index{conditional rule}
+
+Evaluates \asm{rule$_1$} only if \asm{value} is \asm{true} and \asm{rule$_2$} only if \asm{value} is \asm{false}. It expects \asm{value} to be a Boolean value (being either \asm{true} or \asm{false}).
+
+The Conditional Rule plugin also provides a conditional operation of the form:
+
+\opform{
+		\asm{value$_c$ ? value$_t$ : value$_f$}
+	}{Conditional Rule Plugin}
+	\index{conditional operation}
+
+The value of this operator is \asm{value$_t$}, if \asm{value$_c$} evaluates to \asm{true}; it is \asm{value$_f$},
+if \asm{value$_c$} evaluates to \asm{false}; otherwise, it is \asm{undef}. 
+
+
+% -------------------------------- FORALL
+\subsection{Forall Rule}
+\label{forall}
+
+The Forall Rule plugin\index{Forall Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use ForallRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form:
+
+\ruleform{
+		\asm{forall id in value}
+		\optional{\asm{with guard}}
+		\asm{do rule}
+		\optional{\asm{endforall}}
+	}{Forall Rule Plugin}
+	\index{forall rule@\asm{forall} rule}
+
+For all the elements in the enumerable \asm{value} that satisfy \asm{guard}, assigns the
+element to \asm{id}, and evaluates \asm{rule}.
+The following examples assigns the \asm{DefaultProgram} rule as the program of
+all the agents program of which is \asm{undef}:
+
+\begin{lstlisting}
+forall a in Agents with program(a) = undef do
+	program(a) := ruleelement DefaultProgram
+\end{lstlisting}
+
+% -------------------------------- LET
+\subsection{Let Rule}
+\label{let}
+
+The Let Rule plugin\index{Let Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use LetRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form:
+
+\ruleform{
+		\asm{let id$_1$ = value$_1$}\hspace{-.4em}
+		\optional{\asm{, id$_2$ = value$_2$, }
+			\hspace{.4em}\ldots\hspace{-.4em}
+			\asm{, id$_n$ = value$_n$}
+		}
+		\asm{in rule}
+	}{Let Rule Plugin}
+	\index{let rule@\asm{let} rule}
+
+For all the given pairs of \asm{id} and \asm{value}, assigns \asm{value$_i$} as the value of
+the environment variable \asm{id$_i$}, and evaluates \asm{rule}.
+ 
+
+% -------------------------------- CASE
+\subsection{Case Rule}
+\label{case}
+
+The Case Rule plugin\index{Case Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use CaseRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form:
+
+\ruleform{
+		\asm{case value of value$_1$ : rule$_1$}
+		\ldots
+		\asm{value$_n$ : rule$_n$ endcase}
+	}{Case Rule Plugin}
+	\index{case rule@\asm{case} rule}
+
+The case condition \asm{value} will be evaluated first and then
+all the guards \asm{value$_i$} will be evaluated in an unspecified order. Afterward, rules
+with a guard value equal to the value of the case condition will be evaluated.
+Finally, the updates generated by the matching cases are united to form the
+set of updates generated by the case rule.
+ 
+% -------------------------------- PREDICATE LOGIC
+\subsection{Predicate Logic}
+\label{predicate}
+
+The Predicate Logic plugin\index{Predicate Logic plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use PredicateLogic
+\end{lstlisting}
+
+\noindent This plugin provides the following functions and expression forms: 
+
+\opform{
+	\asm{forall id in value holds guard}
+	}{Predicate Logic Plugin}
+	\indexexp{forall}
+
+This Boolean expression holds if \asm{guard} holds for all the elements of \asm{value} (which must be an enumerable value). 
+
+\opform{
+		\asm{exists id in value with guard}
+	}{Predicate Logic Plugin}
+	\indexexp{exists}
+
+This Boolean expression holds if there exists at least one element in \asm{value} (which must be an enumerable value) that satisfies \asm{guard}.
+
+\opform{
+		\asm{value$_1$ != value$_2$}
+	}{Predicate Logic Plugin}
+	\index{not-equal operator}
+%	\index{not-equal@\asm{!=}|see{not-equal operators}} %cannot be compiled?!
+
+This is the not-equal operator which is defined on all elements. The semantics of 
+this operator is equivalent to "\asm{not (value$_1$ = value$_2$)}". 
+
+\opform{
+		\asm{value$_1$ bin-op value$_2$}
+	}{Predicate Logic Plugin}
+	\index{Boolean operators}
+
+Performs a binary operation on the given values. The following operators are defined
+on Boolean values:
+
+\begin{quote}\asm{or}, \asm{xor}, \asm{and}, \asm{implies} \end{quote}
+\index{Boolean operators}
+\index{or@\asm{or}|see{Boolean operators}}
+\index{xor@\asm{xor}|see{Boolean operators}}
+\index{and@\asm{and}|see{Boolean operators}}
+\index{implies@\asm{implies}|see{Boolean operators}}
+
+\noindent The following two operators are also defined which require \asm{value$_2$} to be an enumerable:
+
+\begin{quote}\asm{memberof} and \asm{not memberof} \end{quote}
+\index{membership operators}
+\index{memberof@\asm{memberof} operator|see{membership operators}} 
+
+\opform{\asm{not value}}{Predicate Logic Plugin}\index{not@\asm{not} operator}
+
+This is the negation operator which is defined on Boolean values.
+
+
+
+% -------------------------------- NUMBER
+\subsection{Number Background}
+\label{number}
+
+The Number plugin\index{Number plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Number
+\end{lstlisting}
+\noindent This plugin provides the number background (\asm{Number})\index{Number background} and
+a valuable set of functions and expression forms. 
+
+\opform{
+	\asm{value$_1$ bin-op value$_2$}
+}{Number Plugin}
+
+Performs binary operations on number values. Currently supported operators are
+
+\begin{quote}\asm{+ - * / div \% > >= < <= = }\end{quote}
+
+which result in Number or Boolean values.
+
+\opform{
+	$|\:$\asm{ value }$\:|$
+}{Number Plugin}
+\index{size-of operator}
+\index{=bar@\texttt{"|x"|}|see{size-of operator}}
+
+If \asm{value} is enumerable (such as a set), this operator will evaluate to the size of \asm{value}.
+
+\AsmDerivedFunction{infinity}
+\funcform{
+	\asm{infinity: -> Number}
+}{Number Plugin}
+\index{infinity@\asm{infinity} function}
+
+Is the positive infinity.
+
+\AsmDerivedFunction{toNumber}
+\funcform{
+	\asm{toNumber: Element -> Number}
+}{Number Plugin}
+\index{toNumber@\asm{toNumber} function}
+
+This is a conversion function that maps any value to a Number value (which can also be \asm{undef}).
+The following example uses this function to read a number from the environment:
+
+\AsmVariable{amount, val}
+\AsmDerivedFunction{input}
+\AsmRule{DepositAmount}
+\begin{lstlisting}
+seq
+	amount := input("Input Amount")
+next
+	let val = toNumber(amount) in
+		if val = undef then
+			print "Error"
+		else
+			DepositAmount(val)
+\end{lstlisting}
+
+\AsmDerivedFunction{isNaturalNumber}
+\funcform{
+	\asm{isNaturalNumber: Number -> Boolean}
+}{Number Plugin}
+\index{isNaturalNumber@\asm{isNaturalNumber} function}
+
+Returns \asm{true} if the argument is a Natural number (i.e., positive non-zero integer).
+
+\AsmDerivedFunction{isIntegerNumber}
+\funcform{
+	\asm{isIntegerNumber : Number -> Boolean}
+}{Number Plugin}
+\index{isIntegerNumber@\asm{isIntegerNumber} function}
+
+Returns \asm{true} if the argument is an Integer number.
+
+\AsmDerivedFunction{isRealNumber}
+\funcform{
+	\asm{isRealNumber: Number -> Boolean}
+}{Number Plugin}
+\index{isRealNumber@\asm{isRealNumber} function}
+
+Returns \asm{true} if the argument is a valid non-infinite Real number.
+
+\AsmDerivedFunction{isEvenNumber}
+\funcform{
+	\asm{isEvenNumber: Number -> Boolean}
+}{Number Plugin}
+\index{isEvenNumber@\asm{isEvenNumber} function}
+
+Returns \asm{true} if the argument is an Integer number divisible by two.
+
+\AsmDerivedFunction{isOddNumber}
+\funcform{
+	\asm{isOddNumber: Number -> Boolean}
+}{Number Plugin}
+\index{isOddNumber@\asm{isOddNumber} function}
+
+Returns \asm{true} if the argument is an Integer number which is not divisible by two.
+
+\AsmDerivedFunction{size}
+\funcform{
+	\asm{size: Element -> Number}
+}{Number Plugin}
+\index{size function@\asm{size} function}
+
+Returns the size of the given collection.
+
+\smallskip
+The Number plugin also provides a background for number ranges (\asm{Number_Range})\index{Number Range background}.
+Number range elements are enumerable and can be defined using the following syntax.
+
+\opform{
+	\asm{[ value$_{start}$ .. value$_{end}$}
+	\optional{\asm{step value$_{step}$}}
+	\asm{]}
+}{Number Plugin}
+\index{number range elements}\index{\{x\}@\texttt{"[ "]}|see{number range elements}}
+
+\AsmDerivedFunction{RandomGuess}
+Creates a range of numbers from \asm{value$_{start}$} to \asm{value$_{end}$} with the optional step. It is 
+also possible to use `\asm{:}' instead of \asm{step}.
+In the following example, \asm{RandomGuess} returns a random number between 1 and 100:
+
+\AsmVariable{rand}
+\begin{lstlisting}
+derived RandomGuess =
+	return rand in
+		choose x in [ 1 .. 100 ] do
+			rand := x
+\end{lstlisting}
+
+
+% -------------------------------- * COREASM PLUGINS
+\section{Standard Plugins}\index{Standard plugins}
+\label{standard}
+
+Most of the \CoreASM plugins, including all the Basic ASM plugins, are included in the Standard plugins package. 
+In this section we list the plugins that are provided by the Standard plugins package in addition to the ones 
+listed in the previous section. All
+these plugins can be loaded individually (as instructed in each
+section) or all together with the following \asm{use} phrase, 
+
+\begin{lstlisting}
+use Standard
+\end{lstlisting}
+
+\noindent which automatically loads all the plugins listed in Section~\ref{basicASM} 
+in addition to the ones listed in this section.
+
+
+% -------------------------------- KERNEL EXTENSIONS
+\subsection{Kernel Extensions}
+\label{kernelext}
+
+The Kernel Extensions plugin\index{Kernel Extensions plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use KernelExtensions
+\end{lstlisting}
+
+This plugin extends the Kernel capabilities in handling function and rule elements. The current version provides the following expression and rule forms. 
+
+\opform{
+	\asm{id (value$_1$, ..., value$_n$) (value'$_1$, ...,value'$_m$)}
+}{Kernel Extensions Plugin}
+\indexexp{application}\vspace{-2mm}
+
+\opform{
+	\asm{(value) (value'$_1$, ..., value'$_m$)}
+}{Kernel Extensions Plugin}
+\indexexp{application}
+
+\AsmDerivedFunction{foo, bar}
+The above two forms apply the arguments \asm{value'$_i$} to the function element at location \asm{(value) (value$_1$, ..., value$_n$)} or to 
+the function element resulting from evaluation of \asm{value}. If the function element refers to a function in the state, 
+the location of the above expressions are also set to the location of the function with the given arguments; otherwise (e.g., in case 
+of non-state functions) the location will be not be defined. Here are some examples, assuming that \asm{foo} and \asm{bar} are two 
+defined functions, and \asm{bar = @foo}:
+
+\begin{lstlisting}
+print bar()(5,4) //printing the value of foo(5, 4)
+(bar)(1, 3) := 4 //assigning 4 to foo(1, 3) 
+\end{lstlisting}
+
+\ruleform{
+	\asm{call id (value$_1$, ..., value$_n$) (value'$_1$, ...,value'$_m$)}
+}{Kernel Extensions Plugin}
+\indexexp{call}
+
+
+\ruleform{
+	\asm{call (value) (value'$_1$, ..., value'$_m$)}
+}{Kernel Extensions Plugin}
+\indexexp{call}
+
+The above two rules call the rule element value of \asm{id (value$_1$,..., value$_n$)} (the first form) or \asm{value} (the second form) 
+with the arguments \asm{value'$_i$}. For example, if we have \asm{foo(5) = @MyRule} and 
+
+\newcommand{\rulekeywd}{{\asmlstkeyword rule}}
+\AsmRule{MyRule}
+\AsmVariable{a,b}
+\begin{lstlisting}
+/@\rulekeywd@/ MyRule (a,b) =
+	print a + " talks to " + b
+\end{lstlisting}
+\AsmConstantOrEnum{rule}
+
+then we can call this rule by:
+
+\begin{lstlisting}
+call foo(5) ("John", "Mary") // prints "John talks to Mary"
+\end{lstlisting}
+
+This plugin is not yet part of the Standard Plugin package.
+
+
+% -------------------------------- ABSTRACT
+\subsection{Abstraction}
+\label{abstraction}
+
+The Abstraction plugin\index{Abstraction plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Abstraction
+\end{lstlisting}
+
+This plugin provides the following rule form, which is useful when the specifier wants to leave the detail of a rule abstract. 
+
+\ruleform{
+	\asm{abstract value}
+}{Abstraction Plugin}
+\indexrule{abstract}
+
+\AsmRule{SendMessage}
+In the following example, the rule \asm{SendMessage} is left abstract:
+
+\begin{lstlisting}
+/@\rulekeywd@/ SendMessage =
+	abstract "Sending the message." 
+\end{lstlisting}
+
+
+% -------------------------------- EXTEND
+\subsection{Extend Rule}
+\label{extend}
+
+The Extend Rule plugin\index{Extend Rule plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use ExtendRule
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form:
+
+\ruleform{
+	\asm{extend value with id do rule}
+}{Extend Rule Plugin}
+\index{extend rule@\asm{extend} rule}
+
+This rule has two semantics depending on \asm{value}: 
+
+\begin{enumerate}
+	\item If \asm{value} is a universe, it imports a new element, assigns it to \asm{id}, and evaluates 
+\asm{rule}. The resulting update set is the union of the updates generated by \asm{rule} and
+a single update to add the imported element to the universe \asm{value}. 
+
+	\item If \asm{value} is a background, it gets the default element from the background, assigns it to 
+\asm{id} and evaluates \asm{rule}. The resulting update set is the updates generated by
+\asm{rule}.
+\end{enumerate}
+
+In the following example, the universe \asm{Agents} is extended with a new agent and 
+the program of that agent is set to \asm{MainProgram}:
+
+\AsmRule{MainProgram}
+\begin{lstlisting}
+extend Agents with a do
+	program(a) := @MainProgram
+\end{lstlisting}
+
+\noindent However, the same result can be achieved by:
+
+\begin{lstlisting}
+import a do
+	par
+		Agents(a) := true
+		program(a) := @MainProgram
+	endpar
+\end{lstlisting}
+
+% -------------------------------- TURBO ASM
+\subsection{TurboASM Rules}
+\label{turboasm}
+
+The TurboASM plugin\index{TurboASM plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use TurboASM
+\end{lstlisting}
+
+\noindent This plugin provides the following rule forms:
+
+\ruleform{
+	\asm{seq rule$_1$ next rule$_2$}
+	\optional{\asm{next rule$_3$ ... next rule$_n$}}
+	\optional{\asm{endseq}}
+}{TurboASM Plugin}
+\index{seq rule@\asm{seq} rule}
+
+Evaluates \asm{rule$_1$}, applies the generated updates in a virtual state, and evaluates \asm{rule$_2$} in that state. 
+The resulting update set is a sequential composition of the updates generated by \asm{rule$_1$}, \asm{rule$_2$}, and all other rules \asm{rule$_n$}. 
+The keyword \asm{next} is meant to improve readability specially where the sequence rule is combined with other rule forms. In order to avoid ambiguities, the optional keyword \asm{endseq} can be used to explicitly complete a \asm{seq ... next} group.
+
+\ruleform{
+	\asm{seqblock rule$_1$ ... rule$_n$ endseqblock}
+}{TurboASM Plugin}
+\index{sequence block rule}
+\index{seq block rule@\asm{seqblock}|see{sequence block rule}}
+
+\ruleform{
+	\asm{seq rule$_1$ ... rule$_n$ endseq}
+}{TurboASM Plugin}
+\index{sequence block rule}
+\index{seq block rule@\asm{seqblock}|see{sequence block rule}}
+
+\ruleform{
+	\asm{[ rule$_1$ ... rule$_n$ ]}
+}{TurboASM Plugin}
+\index{sequence block rule}
+\index{seq block rule@\asm{seqblock}|see{sequence block rule}}
+
+Similar to the \asm{seq} rule (above), these block rules execute the contained rules in sequence. First, \asm{rule$_1$} is evaluated and the generated updates are applied to a virtual state. This state is the base for the evaluation of \asm{rule$_2$} which may produce further updates to this virtual state, and so on.
+The resulting update set is a sequential composition of the updates generated by \asm{rule$_1$} \ldots \asm{rule$_n$}.
+
+\ruleform{
+	\asm{iterate rule}
+}{TurboASM Plugin}
+
+Repeatedly evaluates \asm{rule}, until the update set produced is either empty or inconsistent; at that point, 
+the accumulated updates are computed (the resulting update set can be inconsistent if the computation of 
+the last step had produced an inconsistent set of updates). 
+%Evaluates \rule and if the resulting update set is not empty, applies the updates in a virtual state. 
+%Repeats evaluating \rule while the resulting update set is not empty and it is not inconsistent. 
+
+\ruleform{
+	\asm{while (value) rule}
+}{TurboASM Plugin}
+\indexrule{while}
+
+This rule is equivalent to:
+
+\begin{lstlisting}
+iterate
+	if value then rule
+\end{lstlisting}
+
+\ruleform{
+	\asm{loc <- rule}
+}{TurboASM Plugin}
+\index{return result rule}
+\index{<- rule@\asm{<-} rule|see{return result rule}}
+
+Replaces all the occurrences of \asm{result} in \asm{rule} with \asm{loc} and
+evaluates the rule. In the ASM book this is written as "\asm{loc <- rule}".
+In the following example, the evaluation of
+\asm{MainProgram} assigns the value of 5 divided by 2 (i.e., 2.5) to
+\asm{division}:
+
+\AsmRule{Divide}
+\AsmFunction{error}
+\begin{lstlisting}
+/@\rulekeywd@/ Divide(a, b) =
+	if b > 0 then
+		result := a / b
+	else
+		par
+			result := undef
+			error := true
+		endpar
+		
+/@\rulekeywd@/ MainProgram =
+	division <- Divide(5, 2)
+\end{lstlisting}
+
+\funcform{
+	\asm{return value in rule}
+}{TurboASM Plugin}
+\index{return}
+
+First, \asm{rule} is evaluated; \asm{value} is then evaluated in the state obtained by provisionally, and the \asm{value} is returned, while 
+the updates and the provisional state itself are discarded.
+
+\paragraph{Remark}
+\textit{The \asm{return}-construct has been changed from a \emph{rule}-construct to an \emph{expression}-construct. This decision has been taken in order to clarify the roles of derived function and rules. Now, after removing "return rules" all macro rules in principal have side-effects and only derived functions are side-effect-free by definition.}
+
+\ruleform{
+	\asm{local id$_1$}\hspace{-.4em}
+	\optional{, \asm{id$_2$, ..., id$_n$}}
+	\asm{in rule}
+}{TurboASM Plugin}
+\indexrule{local}
+
+\AsmVariable{newValue}
+Evaluates \asm{rule} but discards all the updates to locations addressed by \asm{id}-s (as location names). 
+In the following example, \asm{newValue} will get the local value of \asm{foo(5, 7)} (i.e., \asm{25}) 
+but the update to \asm{foo(5, 7)} will be discarded afterwards.
+
+\begin{lstlisting}
+	/@\rulekeywd@/ LocalRule =
+		local foo in
+			seq
+				foo(5, 7) := 25
+			/i/@\vspace{-1.2em}@/ next i/
+				newValue := foo(5, 7)
+\end{lstlisting}\fxnote{why is there a single seq? Does it really work?}
+\vspace{-1em}
+% -------------------------------- STRING
+\subsection{String Background}
+\label{string}
+
+The String plugin\index{String plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use String
+\end{lstlisting}
+
+\noindent This plugin provides the string background (\asm{String})\index{String background} and
+few functions and expression forms. 
+
+\opform{
+	\asm{value$_1$ + value$_2$}
+}{String Plugin}
+\index{string concatenation}
+
+If both values are string, this operator concatenates the given string values in to one. If one of the values is not a string value, it tries to convert it into a string value, and then concatenates the values. This operator is not defined on two non-string values.
+
+With this operator, one can simply put values together to create a customized message:
+
+\begin{lstlisting}
+print "The amount of /@\asmstring\$@/" + amount + " is deposited to your account."
+\end{lstlisting}
+\vspace{-1em}
+
+\AsmDerivedFunction{toString}
+\funcform{
+	\asm{toString: Element -> String}
+}{String Plugin}
+\index{toString function@\asm{toString} function}
+
+A conversion function that maps any value to a String value (which can also be \asm{undef}).
+
+\AsmDerivedFunction{strlen}
+\funcform{
+	\asm{strlen: String -> Number}
+}{String Plugin}
+\index{strlen function@\asm{strlen} function}
+
+Returns the length of the given String value.
+
+\AsmDerivedFunction{matches}
+\funcform{
+	\asm{matches: String -> String}
+}{String Plugin}
+\index{matches function@\asm{matches} function}
+
+Returns \asm{true}, if the first parameter matches the given regular expression provided by the second parameter. Otherwise \asm{false} is returned. The syntax for the regular expressions follows the java language definition. For example, the function \asm{matches("42", "[0-9]+")} returns \asm{true}.
+
+% -------------------------------- INPUT - OUTPUT
+\subsection{Input and Output}
+\label{io}
+
+The IO plugin\index{IO plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use IO
+\end{lstlisting}
+
+\noindent This plugin provides the following rule form and function which enable user input and output as well as file input and output:
+
+\paragraph{Remark}
+\textit{All values that describe file destinations are terms from the String background. A file destination can be either described relatively to the executed specification, i.\,e. the main specification that is executed by CoreASM (not necessary the module which contains the print-to-file construct), e.\,g. \asm{"./"}, or the file destination is described relatively to the systems root folder, e.\,g. \asm{"c:\"} or \asm{"/"} }
+
+\ruleform{
+	\asm{print value}
+}{IO Plugin}
+\indexrule{print}
+
+Prints out \asm{value} to the environment. Depending on the environment (engine driver) this value can be printed on the standard output.
+
+\ruleform{
+	\asm{print value$_1$ to value$_2$}
+}{IO Plugin}
+\indexrule{print in file}
+
+Prints \asm{value$_1$} into a new file named \asm{value$_2$}, if consistent. If it does not exist, this file will be created. If it already exists it is overwritten without any further warning.  Instead of the keyword \asm{to}, maybe some linux users prefer the operator \texttt{\frq} (which can be used, too).
+
+\ruleform{
+	\asm{print value$_1$ into value$_2$}
+}{IO Plugin}
+\indexrule{print into file}
+
+Prints \asm{value$_1$} into an existing file named \asm{value$_2$}, if consistent. If the file already exists the value is appended to the existing content of the file. If it does not exist, this file will be created. The alternative operator \texttt{\frqq} can be used Instead of the keyword \asm{into}.
+
+\AsmDerivedFunction{input}
+\funcform{
+	\asm{input: String -> String}
+}{IO Plugin}
+\index{input function@\asm{input} function}
+
+\AsmVariable{arg}
+Reads a string value from the environment. Given a step and given an argument \asm{arg}, every evaluation of \asm{input(arg)} during this step will result in the same value. Please refer to Section~\ref{string} for an introduction to the String Plugin. 
+
+\AsmDerivedFunction{read}
+\funcform{
+\asm{read : String -> List}
+}{IO Plugin}
+\index{read function@\asm{read} function}
+
+The derived function \asm{read(value)} returns the content from the given filename as List of elements from the String Background. The returned list contains the lines from the source file in ascending order.
+
+The machine specified in \hyperref[spec:sayshello]{CoreASM-Says-Hello example with IO extension} is an extension of our \hyperref[spec:thisiscoreasm]{CoreASM-Says-Hello example} that reads a name from the environment and prints out a greeting to that name:
+
+\begin{tcolorbox}[boxrule=0.0pt,colback=gray!5!white,title={CoreASM-Says-Hello example with IO extension},label={spec:sayshello}]
+\begin{lstlisting}[backgroundcolor=\color{gray!5!white},frame=none]
+CoreASM ThisIsCoreASM
+
+use Standard
+
+init InitRule
+
+/@\rulekeywd@/ InitRule =
+	par
+		terminate := false
+		program(self) := @MainProgram
+		name := input("What is your name?")
+	endpar
+
+/@\rulekeywd@/ MainProgram =
+	if not terminate then
+		par
+			print "This is CoreASM."
+			terminate := true
+			print "Hello " + name + "!"
+		endpar
+	else
+		program(self) := undef
+\end{lstlisting}
+\end{tcolorbox}
+
+% -------------------------------- COLLECTION
+\subsection{Collection}
+
+The Collection plugin\index{Collection plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Collection
+\end{lstlisting}
+
+This plugin provides the foundation for collections (i.e., sets, lists, maps, etc.) in \CoreASM and provides some general functions 
+on collections. However, each specific collection background (e.g., list or set) is provided by its corresponding plugin. 
+
+\AsmDerivedFunction{foldl}
+\funcform{
+	\asm{foldl : Element times Function times Element -> Element}
+}{Collection Plugin}
+\index{fold-left function@\asm{foldl} function}
+
+\asm{foldl(c, @func, init)} processes the collection \asm{c} (e.g., a set or a list) using the binary function \asm{func} and the initial value \asm{init} and returns the final result.\fxnote{Does this example still work?}
+
+\[ \Rfun{foldl} ([x_1,\ldots,x_n], f, i) \equiv f(x_n, f(x_{n-1}, \ldots f(x_1, init))) \ldots ) \] 
+
+\AsmDerivedFunction{foldr} 
+\funcform{
+	\asm{foldr : Element times Function times Element -> Element}
+}{Collection Plugin}\index{fold-right function@\asm{foldr} function}
+
+\asm{foldr(c, @func, init)} processes the collection \asm{c} (a set or a list)
+using the binary function \asm{func} and the initial value
+\asm{init} and returns the final result.
+
+\[ \Rfun{foldr} ([x_1,\ldots,x_n], f, i) \equiv f(x_1, f(x_2, \ldots f(x_n, init))) \ldots ) \] 
+ 
+\funcform{$\mbox{\asm{fold}} : \Rdom{Element} \times \Rdom{Function} \times \Rdom{Element} \rightarrow \Rdom{Element}$}{Collection Plugin}\index{fold function@\asm{fold} function}
+
+This is the same as \asm{foldr}; see above.
+
+\AsmDerivedFunction{map}
+\funcform{
+	\asm{map : Element times Function times Element -> Element}
+}{Collection Plugin}
+\index{map function@\asm{map} function}
+
+\asm{map(c, @func)} applies the unary function \asm{func} to all the elements of \asm{c} (any collection, such as list and set) 
+and returns a new collection (with the same structure as that of \asm{c}).  
+
+\[ \Rfun{map} ([x_1,\ldots,x_n], f) \equiv [ f(x_1), f(x_2), \ldots f(x_n) ] \] 
+
+\AsmDerivedFunction{filter}
+\funcform{
+	\asm{filter : Element times Function times Element -> Element}
+}{Collection Plugin}
+\index{filter function@\asm{filter} function}
+
+\asm{filter(c, @func)} applies the boolean unary function \asm{func} to all the elements of \asm{c} and returns a new collection with only those elements of \asm{c} for which \asm{func} returns \asm{true}. 
+
+
+% -------------------------------- SET
+\subsection{Set Background}
+\label{set}
+
+The Set plugin\index{Set plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Set
+\end{lstlisting}
+
+\noindent This plugin provides the set background (\asm{Set})\index{Set background} and a number of functions and expression forms. 
+
+\opform{
+	\asm{\{}
+	\optional{\asm{value$_1$, ..., value$_n$}}
+	\asm{\}}
+}{Set Plugin}
+\index{set element}
+\index{\{\}@\texttt{"\{\ldots"\}}|see{set element}}
+\index{set enumeration}
+
+Creates a set element that includes the listed values. The values should be basic terms (i.e., no operators) or
+they should be surrounded in parentheses.
+
+\opform{
+	\asm{\{ id } \textbar \asm{id in value}
+	\optional{\asm{with guard}}
+	\asm{\}}
+}{Set Plugin}\index{set element}\index{set comprehension}
+
+This is the basic form set comprehension. It creates a set of all the elements in \asm{value} which satisfy \asm{guard}. Of course, \asm{value} must be enumerable.
+
+\AsmConstantOrEnum{exp}
+\opform{
+	\asm{\{id is exp } \textbar \asm{id$_1$ in value$_1$}\hspace{-.4em}
+	\optional{\asm{, ..., id$_n$ in value$_n$}}
+	\optional{\asm{with guard}}
+	\asm{\}}
+}{Set Plugin}
+\index{set element}
+\index{set comprehension}
+
+Creates a set element that contains all the elements of the form \asm{exp} which satisfy the \asm{guard}. In this form, \asm{exp} is a function of \asm{id$_1$, ...,id$_n$} and every \asm{id$_i$} is bound to an enumerable \asm{value$_i$}. 
+\AsmDerivedFunction{SetAdd}
+\AsmVariable{set1, set2, x1, x2}
+In the following example, \asm{SetAdd} takes two sets \asm{set1} and \asm{set2} as input and produces a new set by adding every element of \asm{set1} to all the elements of \asm{set2}:   
+
+\begin{lstlisting}
+derived SetAdd(set1, set2) =
+	return a in
+		a := { x is (x1 + x2) | x1 in set1, x2 in set2 } 
+\end{lstlisting}
+
+The result of evaluating \asm{SetAdd(\{1, 2, 3\}, \{10, 20\})} would be:
+
+\begin{quote} \asm{ \{22.0, 23.0, 12.0, 21.0, 13.0, 11.0\}} \end{quote}
+
+\opform{
+	\asm{value$_1$ bin-op value$_22$}
+}{Set Plugin}
+
+Performs a set binary operation where both \asm{value$_1$} and \asm{value$_2$} are sets.
+Currently, \asm{subset}\indexexp{subset}, \asm{union}\indexexp{union}, \asm{intersect}\indexexp{intersect}, and \asm{diff}\indexexp{diff} are supported.
+
+\smallskip
+Set background also provides two important rule forms which allow for parallel incremental updates of set data structures.
+
+\ruleform{
+	\asm{add value to loc}
+}{Set Plugin}
+\indexrule{add-to-set}
+
+If \asm{loc} is a location in the state (e.g., a function) and its value is a set, this rule produces an update instruction (partial update) that adds \asm{value} to \asm{loc}.
+
+\ruleform{
+	\asm{remove value from loc}
+}{Set Plugin}
+\indexrule{remove-from-set}
+
+If \asm{loc} is a location in the state (e.g., a function) and its value is a set, 
+this rule produces an update instruction (partial update)
+that removes \asm{value} to \asm{loc}.
+
+% -------------------------------- BAG
+\subsection{Bag Background}
+\label{bag}
+
+The Bag plugin\index{Bag plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Bag
+\end{lstlisting}
+
+\noindent This plugin provides the bag background (\asm{Bag})\index{Bag background} equivalent to multi sets and a number of functions and expression forms.
+
+\opform{
+	\asm{<<}
+	\optional{\asm{value$_1$, ..., value$_n$}}
+	\asm{>>}
+}{Bag Plugin}
+\index{bag element}
+\index{\{\}@\texttt{"\{\ldots"\}}|see{bag element}}
+\index{bag enumeration}
+
+Creates a bag element that includes the listed values. The values should be basic terms (i.e., no operators) or
+they should be surrounded in parentheses.
+
+\opform{
+	\asm{<< id } \textbar \asm{id in value}
+	\optional{\asm{with guard}}
+	\asm{>>}
+}{Bag Plugin}\index{bag element}\index{bag comprehension}
+
+This is the basic form bag comprehension. It creates a bag of all the elements in \asm{value} which satisfy \asm{guard}. Of course, \asm{value} must be enumerable.
+
+\AsmConstantOrEnum{exp}
+\opform{
+	\asm{<< id is exp } \textbar \asm{id$_1$ in value$_1$}\hspace{-.4em}
+	\optional{\asm{, ..., id$_n$ in value$_n$}}
+	\optional{\asm{with guard}}
+	\asm{>>}
+}{Bag Plugin}
+\index{bag element}
+\index{bag comprehension}
+
+\opform{
+	\asm{value$_1$ bin-op value$_22$}
+}{Bag Plugin}
+
+Performs a bag binary operation where both \asm{value$_1$} and \asm{value$_2$} are bags.
+Currently, \asm{subset}\indexexp{subset}, \asm{union}\indexexp{union}, \asm{intersect}\indexexp{intersect}, and \asm{diff}\indexexp{diff} are supported.
+
+Creates a bag element that contains all the elements of the form \asm{exp} which satisfy the \asm{guard}. In this form, \asm{exp} is a function of \asm{id$_1$, ...,id$_n$} and every \asm{id$_i$} is bound to an enumerable \asm{value$_i$}. 
+\AsmDerivedFunction{BagMerge}
+\AsmVariable{bag1, bag2, x1, x2}
+In the following example, \asm{BagAdd} takes two bags \asm{bag1} and \asm{bag2} as input and produces a bag that contains all elements of \asm{bag1} and all elements of \asm{bag2}:
+
+\begin{lstlisting}
+derived BagMerge(bag1, bag2) = bag1 + bag2
+\end{lstlisting}
+
+The result of evaluating \asm{BagAdd(<<1, 2, 3>>, <<2, 3, 3>>} would be:
+
+\begin{quote} \asm{ << 1, 2, 2, 3, 3, 3 >>} \end{quote}
+
+
+\smallskip
+Bag background also provides two important rule forms which allow for parallel incremental updates of bag data structures.
+
+\ruleform{
+	\asm{add value to loc}
+}{Bag Plugin}
+\indexrule{add-to-bag}
+
+If \asm{loc} is a location in the state (e.g., a function) and its value is a bag, this rule produces an update instruction (partial update) that adds \asm{value} to \asm{loc}.
+
+\ruleform{
+	\asm{remove value from loc}
+}{Bag Plugin}
+\indexrule{remove-from-bag}
+
+If \asm{loc} is a location in the state (e.g., a function) and its value is a bag, this rule produces an update instruction (partial update) that removes \asm{value} to \asm{loc}.
+
+
+% -------------------------------- LIST
+\subsection{List Background}
+\label{list}
+
+The List plugin\index{List plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use List
+\end{lstlisting}
+
+\noindent This plugin provides a list background (\asm{List})\index{List background} and a rich set of functions and operators on lists.
+
+\opform{
+	\asm{[}
+	\optional{\asm{value$_1$, value$_2$, ..., value$_n$}}
+	\asm{]}
+}{List Plugin}
+\index{list element}
+\index{[]@\asm{[...]}|see{list element}}
+
+Creates a list element that includes \asm{value$_1$} to \asm{value$_n$} in the given order.\footnote{The old form of \asm{<<x1,... ,xn>>} still works but it is deprecated and may not be supported in future releases of the \CoreASM engine.}
+List elements are enumerable. The index of the first element is 1.
+
+\opform{
+	\asm{value$_1$ + value$_2$}
+}{List Plugin}
+\index{list concatenation}
+
+If both values are list, this operator concatenates the given lists in to one list. 
+
+\AsmDerivedFunction{toList}
+\funcform{
+	\asm{toList: Element -> List}
+}{List Plugin}
+\indexfunc{toList}
+
+\AsmVariable{e}
+If \asm{e} is an enumerable (e.g., number range, set, etc.), \asm{toList(e)} will return a list that includes all the elements of \asm{e}. If \asm{e} is not ordered (e.g., a set), the order of elements in the returned list will be non-deterministic; otherwise the elements will be in the same order.
+
+\AsmDerivedFunction{flattenList}
+\funcform{
+	\asm{flattenList: List -> List}
+}{List Plugin}
+\indexfunc{flattenList}
+
+\AsmVariable{l}
+If \asm{l} is a netsting list, \asm{flattenList(l)} will return a flatten version of \asm{l}.
+
+\AsmDerivedFunction{head}
+\funcform{
+	\asm{head: List -> Element}
+}{List Plugin}
+\indexfunc{head}
+
+Returns the first element of the list.
+
+\AsmDerivedFunction{last}
+\funcform{
+	\asm{last: List -> Element}
+}{List Plugin}
+\indexfunc{last}
+
+Returns the last element of the list.
+
+\AsmDerivedFunction{tail}
+\funcform{
+	\asm{tail: List -> List}
+}{List Plugin}
+\indexfunc{tail}
+
+Returns all but the first element of the list.
+
+\AsmDerivedFunction{cons}
+\funcform{
+	\asm{cons: Element times List -> List}
+}{List Plugin}\indexfunc{cons}
+
+Creates a new list with the given element as its head and given list as its tail.
+
+\AsmDerivedFunction{nth}
+\funcform{
+	\asm{nth: List times Number -> Element}
+}{List Plugin}
+\indexfunc{nth}
+
+Returns the n$^{th}$ element of the list. The index of the first element is 1.
+
+\AsmDerivedFunction{setnth}
+\funcform{
+	\asm{setnth: List times Number times Element -> List}
+}{List Plugin}
+\indexfunc{setnth}
+
+\AsmVariable{i, list}
+\asm{setnth(list, i, e)}, if \asm{i} is a valid index for \asm{list}, returns a new list in which the 
+element at index \asm{i} is \asm{e}. 
+
+\AsmDerivedFunction{take}
+\funcform{
+	\asm{take: List times Number -> List}
+}{List Plugin}
+\indexfunc{take}
+
+\asm{take(list, i)} returns the first \asm{i} elements of list \asm{list}. 
+
+\AsmDerivedFunction{drop}
+\funcform{
+	\asm{drop: List times Number -> List}
+}{List Plugin}
+\indexfunc{drop}
+
+\asm{drop(list, i)} returns what is left after dropping the first $i$ elements of the list \asm{list}. 
+
+\AsmDerivedFunction{reverse}
+\funcform{
+	\asm{reverse: List -> List}
+}{List Plugin}
+\indexfunc{reverse}
+
+Returns a list consisting of the given list's elements in reverse order. 
+
+\AsmDerivedFunction{indexes}
+\funcform{
+	\asm{indexes: List times Element -> List}
+}{List Plugin}
+\indexfunc{indexes}
+
+Returns a potentially empty list of the indexes of the given element in given list.
+
+\AsmDerivedFunction{indices}
+\funcform{
+	\asm{indices: List times Element -> List}
+}{List Plugin}
+\indexfunc{indices}
+
+The same as \asm{indexes}; see above.
+
+\AsmDerivedFunction{zip}
+\funcform{
+	\asm{zip: List times List -> List}
+}{List Plugin}
+\indexfunc{zip}
+
+The function \asm{zip} takes two lists and returns a list of corresponding pairs. If one input list is short, excess elements of the longer list are discarded. 
+
+\AsmDerivedFunction{zipwith}
+\funcform{
+	\asm{zipwith: List times List times Function -> List}
+}{List Plugin}
+\indexfunc{zipwith}
+
+The function \asm{zipwith} generalises zip by zipping with the function given as the last argument, instead of a tupling function. For example, \asm{zipwith (l1, l2, @max)} is applied to two lists to produce a list of corresponding maximums (requires \asm{use Math}).
+
+\AsmDerivedFunction{replicate}
+\funcform{
+	\asm{replicate: Element times Number -> List}
+}{List Plugin}
+\indexfunc{replicate}
+
+\AsmVariable{n}
+The function \asm{replicate(x, n)} returns a new list where the given element \asm{x} is repeated \asm{n} times. 
+
+\medskip
+
+List background also provides the following rule forms to manipulate lists:  
+
+\ruleform{
+	\asm{add value to loc}
+}{List Plugin}
+\indexrule{add-to-list}
+
+If \asm{loc} is a location in the state and its value is a list, this rule 
+produces an update that adds \asm{value} to \asm{loc}. In lists order matters, so the update produced by this rule is NOT incremental (not like the one for sets). As a result, there cannot be two parallel \asm{add} rules operating on the same list. 
+
+\ruleform{
+	\asm{remove value from loc}
+}{List Plugin}
+\indexrule{remove-from-list}
+
+If \asm{loc} is a location in the state and its value is a list, this rule produces an update that removes the first occurrence of \asm{value} from \asm{loc}.
+As for \asm{add}, this rule is also NOT incremental (not like the one for sets) and there cannot be two parallel \asm{remove} rules operating on the same list.
+
+\ruleform{
+	\asm{shift left value into loc}
+}{List Plugin}
+\indexrule{shift-left-list}
+
+If \asm{loc} is a location in the state and \asm{value} is a list, it removes the first element of the list and puts it in the given location (shifting the list to left).
+
+\ruleform{
+	\asm{shift right value into loc}
+	}{List Plugin}\indexrule{shift-right-list}
+
+If \asm{loc} is a location in the state and \asm{value} is a list, it removes the last element of the list and puts it in the given location (shifiting the list to right).
+
+\smallskip
+In the following example, \asm{SortSet} sorts elements of a given set into a list:  
+  
+\AsmVariable{tempSet, set}
+\begin{lstlisting}
+	/@\rulekeywd@/ SortSet(set) =
+		seq
+			par
+				result := [ ]
+				tempSet := set
+			endpar
+		next
+			while ( | tempSet | > 0 )
+				choose x in tempSet with forall y in tempSet holds x <= y do
+					par
+						remove x from tempSet
+						add x to result
+					endpar
+\end{lstlisting}
+
+% -------------------------------- QUEUE
+\subsection{Queue}
+\label{queue}
+
+The Queue plugin\index{Queue plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Queue
+\end{lstlisting}
+
+\noindent This plugin provides the following queue\index{queue} operations (rule forms) on lists:
+
+\ruleform{
+	\asm{enqueue value into loc}
+}{Queue Plugin}
+\indexrule{enqueue}
+
+If \asm{loc} is a location in the state and its value is a queue (i.e., a list), it adds \asm{value} to the end of the queue.
+
+\ruleform{
+	\asm{dequeue loc$_v$ from loc$_q$}
+}{Queue Plugin}
+\indexrule{dequeue}
+
+If \asm{loc$_q$} is a location in the state and its value is a queue (i.e., a list), it removes the first element of this queue and assigns it as the value of the location \asm{loc$_v$}. 
+
+
+% -------------------------------- STACK
+\subsection{Stack}
+\label{stack}
+
+The Stack plugin\index{Stack plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+	use Stack
+\end{lstlisting}
+
+\noindent This plugin provides the following stack\index{stack} operations and functions on lists:
+
+\ruleform{
+	\asm{push value into loc}
+}{Stack Plugin}
+\indexrule{push}
+
+If \asm{loc} is a location in the state and its value is a stack (i.e., a list), it pushes \asm{value} to the front of the stack.
+
+\ruleform{
+	\asm{pop loc$_v$ from loc$_s$}
+}{Stack Plugin}
+\indexrule{pop}
+
+If \asm{loc$_s$} is a location in the state and its value is a stack (i.e., a list), it removes the first element of the stack (top of the stack) and assigns it as the value of \asm{loc$_v$}.
+
+\AsmDerivedFunction{peek}
+\funcform{
+	\asm{peek: List -> Element}
+}{Stack Plugin}
+\indexfunc{peek}
+
+Returns the top of the stack (first element of the list) without changing the stack.
+
+
+% -------------------------------- MAP
+\subsection{Map Background}
+\label{map}
+
+The Map plugin\index{Map plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Map
+\end{lstlisting}
+
+\noindent This plugin provides a map background (\asm{Map})\index{Map background}.
+
+\opform{
+	\asm{\{} \asm{->} \asm{\}}
+}{Map Plugin}
+\index{map element}
+\index{[]@\asm{[...]}|see{map element}}
+
+Creates an empty map.
+
+\opform{
+	\asm{\{ value$_{k1}$ -> value$_{v1}$}\hspace{-.4em}
+	\optional{, \asm{value$_{k2}$ -> value$_{v2}$, ..., value$_{kn}$ -> value$_{vn}$}}
+	\asm{\}}
+}{Map Plugin}
+\index{map element}
+\index{[]@\asm{[...]}|see{map element}}
+
+Creates a map with the given key-value pairs. Map elements are enumerable; every map can be viewed as a set of pairs  
+which are represented by lists of size 2.
+
+\AsmDerivedFunction{toMap}
+\funcform{
+	\asm{toMap: Element -> Map}
+}{Map Plugin}
+\indexfunc{toMap}
+
+If \asm{e} is an enumerable (e.g., a set) consisting of pairs of elements (lists of size two) 
+of the form $[k_i, v_i]$ such that $\forall [k_i, v_i] \not\exists [k_j, v_j] ~~k_i = k_j \wedge v_i \neq v_j$, 
+\asm{toMap(e)} returns a map element representing a mapping of $k_i$s to $v_i$s;
+otherwise, it returns \asm{undef}. For example, the following two expressions create equal maps:
+
+\begin{lstlisting}
+	toMap({[1, "John"], [2, "Mary"]})
+
+		/@\itshape results in@/
+	
+	{ 1 -> "John", 2 -> "Mary"}
+\end{lstlisting}
+
+\AsmDerivedFunction{mapToPairs}
+\funcform{
+	\asm{mapToPairs: Map -> Set}
+}{Map Plugin}
+\indexfunc{mapToPairs}
+
+Returns a set of pairs of the form $(key, value)$ from the given map elements. The pairs are list elements of
+size two. For example, the following two expressions are equal:
+
+\begin{lstlisting}
+	mapToPairs({1 -> "John", 2 -> "Mary"})
+
+		/@\itshape results in@/
+
+	{[1, "John"], [2, "Mary"]}
+\end{lstlisting}
+
+
+Map background also provides the following rule forms to manipulate maps:  
+
+\ruleform{
+	\asm{add value to loc}
+}{Map Plugin}
+\indexrule{add-to-map}
+
+If \asm{loc} is a location in the state, its value is a map, and \asm{value} is a map, this rule produces an update that copied all of the mappings from \asm{value} to \asm{loc}. These mappings will replace any mappings that \asm{loc} had for any of the keys shared with \asm{value}. 
+In the current version of Map plugin, the update produced by this rule is NOT incremental (not like the one for sets). As a result, there cannot be two parallel \asm{add} rules operating on the same map. 
+
+\ruleform{
+	\asm{remove value from loc}
+}{Map Plugin}
+\indexrule{remove-from-map}
+
+If \asm{loc} is a location in the state and its value is a map, this rule produces an 
+update that removes \asm{value} from \asm{loc} according to the following:
+\begin{enumerate}
+	\item if \asm{value} is a map, this rule removes all the exact mappings 
+		of \asm{value} from \asm{loc};
+	\item if \asm{value} is not a map but an enumerable, this rule removes all the 
+		mappings for the elements of \asm{value} (as keys) from \asm{loc};
+	\item if \asm{value} is neither a map nor an enumerable, this rule removes the mapping
+		for \asm{value} (as a key) from \asm{loc} if present.
+\end{enumerate} 
+In the current version of Map plugin, the update produced
+by this rule is NOT incremental (not like the one for sets). As a result, there cannot be two parallel 
+\asm{remove} rules operating on the same map. 
+
+% -------------------------------- SIGNATURE
+\subsection{Signature Plugin}
+\label{signature}
+
+The Signature plugin\index{Signature plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Signature
+\end{lstlisting}
+
+\noindent The signature plugin extends the header section of \CoreASM
+specifications (see Figure~\ref{fig:specStructure}) to add support for definition of functions, universes, and custom data types and also extends the engine to support for certain forms of type checking. This plugin is still under development. The current version includes the following features:
+
+\begin{itemize}
+	\item Definition of universes through the following syntax (with optional initial elements):
+	\begin{quote} \asm{universe id}
+	\optional{\asm{= \{ id$_1$, ..., id$_n$\} } } \end{quote}
+	\index{universe@\asm{universe}}
+	\item Definition of enumeration backgrounds through the following syntax:
+	\begin{quote} \asm{enum id}
+		\optional{\asm{= \{ id$_1$, ..., id$_n$\} } } 
+	\end{quote}
+	\index{enumeration backgrounds}
+	\index{enum@\asm{enum}|see{enumeration background}}
+	For example, the following line defines a new enumeration background of four elements:
+
+	\AsmConstantOrEnum{Product}
+	\begin{lstlisting}
+	enum Product = { Soda, Juice, Sandwich, Candy }
+	\end{lstlisting}
+
+	The elements are in fact defined as constant functions that hold values of the background \asm{Product}. 
+
+	\item Definition of functions through the following syntax:
+	\begin{quote}
+		\asm{function id$_f$}
+		\optional{\asm{: id$_{u1}$ * ... * id$_{un}$ -> id$_r$}}
+	\end{quote}
+	\index{function@\asm{function}}
+	\index{controlled@\asm{controlled}} 
+
+	As an example, the following signature defines a function named \asm{priceTable} that maps pairs of string values to numbers:
+
+	\AsmFunction{priceTable}
+	\begin{lstlisting}[autogobble=true]
+	function priceTable : STRING * STRING -> NUMBER
+	\end{lstlisting}
+
+	\item Definition of derived functions through the following syntax:
+	\begin{quote}
+	\asm{derived id$_f$}
+	\optional{\asm{( id$_1$, ..., id$_n$)}}
+	\asm{= expression }
+	\end{quote}
+	\index{derived function@\asm{derived}} 
+	
+	As an example, the following declaration defines a derived function $f(x, y) = x^2 + y^2$: 
+
+	\AsmDerivedFunction{f}
+	\begin{lstlisting}
+	derived f(x, y) = x$^2$ + y$^2$	
+	\end{lstlisting}
+
+\end{itemize}
+
+\medskip
+
+Depending on the properties of the engine (see the Options Plugin, Section~\ref{options}) the Signature plugin can use the signature information to perform the following checks:
+\begin{itemize}
+
+	\item {\bf Type checking on assignments}: if the ``\asm{Signature.TypeChecking}'' property is set to ``\asm{warning}'',
+	``\asm{strict}'' or ``\asm{on}'', before the updates are applied to the state, the Signature Plugin checks the types of arguments and assigned values against the defined signatures and issues a warning (in case of ``\asm{warning}'') or stops the execution of the engine with an error (in case of ``\asm{strict}'' or ``\asm{on}'').
+
+	\item {\bf Unknown identifiers:} if the ``\asm{Signature.NoUndefinedId}'' property is set to ``\asm{warning}'', ``\asm{strict}'' or ``\asm{on}'', the Signature Plugin issues a warning (in case of ``\asm{warning}'') or stops the execution of the engine with an error (in case of ``\asm{strict}'' or ``\asm{on}'') if a function name is used and its signature is not defined in the header of the specification. This feature helps in identifying typos in the specification. 
+\end{itemize}
+
+\section{Additional Plugins}
+\label{additional}
+
+The plugins listed in this section are currently not part of any plugin packages.
+% -------------------------------- MODULARITY
+\subsection{Modularity}
+\label{Modularity}
+
+The Modularity plugin\index{Modularity plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Modularity
+\end{lstlisting}
+
+This plugin allows one to break the specification into separate files or {\em modules}. As its current version, the functionality provided is limited to introducing an \asm{include} keyword that would load another file into the current specification. 
+\AsmConstantOrEnum{filename}
+\begin{quote} \asm{include "filename"} \end{quote}
+\index{include@\asm{include}}
+
+Included files can themselves have other \asm{include} clauses to further break down the specification.
+
+% -------------------------------- OPTIONS
+\subsection{Options}
+\label{options}
+
+The Options plugin\index{Options plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Options
+\end{lstlisting}
+
+\noindent The Options plugin extends the header section of \CoreASM specifications (see Figure~\ref{fig:specStructure}) to provide the following syntax to set values of engine properties: 
+
+\AsmConstantOrEnum{property}
+\begin{quote} \asm{option property value}\end{quote}
+\index{option@\asm{option}}
+
+Other plugins (such as the Signature Plugin, see Section~\ref{signature}) can use these options to customize their behavior.
+
+% -------------------------------- SCHEDULING
+\subsection{Scheduling Policies}
+\label{scheduling}
+
+The Scheduling Policies plugin\index{Scheduling Policies plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use SchedulingPolicies
+\end{lstlisting}
+
+This plugin provides alternative scheduling policies for simulation of multi-agent specifications. For any specification (for any run), only one scheduling policy can be defined, using the following option:
+\AsmConstantOrEnum{polic, policyname}
+\begin{quote} \asm{option SchedulingPolicies.polic policyname} \end{quote}
+
+Currently, there are two scheduling policies provided by this plugin:
+\AsmConstantOrEnum{allfirst, onebyone}
+\begin{itemize}
+  \item \asm{allfirst} Tries executing all the agents in every computation step. If this fails at any step,	the policy falls back to the engine's default scheduling policy.
+
+  \item \asm{onebyone} Executes only one agent in every step. It tries to be {\em fair} by not executing an agent more than once unless all other agents have been given a chance to execute.
+
+\end{itemize}
+
+The following rules are also provided by this plugin to control the execution of agents during a simulation.
+
+\ruleform{
+	\asm{suspend value}
+}{SchedulingPolicies Plugin}
+\indexrule{suspend}
+
+If \asm{value} is an agent, this rule \asm{suspends} the execution of that agent from the next computation step. The suspended agents will not be chosen by the engine for execution.  
+
+\ruleform{
+	\asm{resume value}
+}{SchedulingPolicies Plugin}
+\indexrule{resume}
+
+If \asm{value} is an agent which has been suspended, this rule {\em resumes} the execution of that agent from the next computation step;
+i.e., the agent will be available for execution from the next step.
+
+\ruleform{
+	\asm{terminate value}
+}{SchedulingPolicies Plugin}
+\indexrule{terminate}
+
+If \asm{value} is an agent, it will no longer be available for scheduling for the rest of the current run of the machine. 
+
+\ruleform{
+	\asm{shutdown}
+}{SchedulingPolicies Plugin}
+\indexrule{shutdown}
+
+Clears the \asm{Agents} universe, such that there will be no agent available to contribute to the next computation step.  Depending on the parameters of the run, this can stop the execution of the engine.
+
+% -------------------------------- TIME
+\subsection{Time}
+\label{time}
+
+The Time plugin\index{Time plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Time
+\end{lstlisting}
+
+\noindent This plugin provides the following monitored function: 
+
+\AsmDerivedFunction{now}
+\funcform{
+	\asm{now: -> Number}
+}{Time Plugin}
+\index{now function@\asm{now} function}
+
+Returns a value representing the current time of the system. Of course, given a step, the value of now is fixed.
+
+\AsmDerivedFunction{stepcount}
+\funcform{
+	\asm{stepcount: -> Number}
+}{Time Plugin}
+\index{stepcount function@\asm{stepcount} function}
+
+Returns the number of computation steps performed so far by the engine excluding the current step.
+
+% -------------------------------- DEBUG INFO
+\subsection{DebugInfo} 
+\label{debugInfo}
+
+DebugInfo plugin is a \CoreASM plugin to maintain logging information for debugging purposes and it 
+can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use DebugInfo
+\end{lstlisting}
+
+The plugin adds the following rule to the \CoreASM language:
+
+\AsmDerivedFunction{debuginfo}
+\ruleform{
+	\asm{debuginfo id value}
+}{DebugInfo Plugin}
+\indexrule{debuginfo}
+
+\noindent which, upon evaluation, adds the string representation of the given \asm{value} to the logging channel identified by the given \asm{id}. 
+
+\AsmConstantOrEnum{activeChannels}
+The set of active channels are to be defined as a space-separated list of channel ids, set as the value \asm{DebugInfo.activeChannels} engine property. This can be done either through the Options plugin or by setting the values directly from the engine driver (e.g., \Carma). For example, using the Options plugin one can add the following line to a spec to turn the logging on for channels {\em warning} and {\em error}:
+
+\begin{lstlisting}
+option DebugInfo.activeChannels "warning, error"
+\end{lstlisting}
+
+\noindent In order to turn all channels on, one can use the special channel id {\em ALL}:
+
+
+\begin{lstlisting}
+option DebugInfo.activeChannels  ALL // or "ALL"
+\end{lstlisting}
+
+Since this rule is only used for debugging purposes, the evaluation of \asm{debuginfo} results in an empty update set and a print out of the debugging information (if the corresponding channel is active) to the standard output, whether or not the updates of the enclosing rule block is discarded by the engine or not. Applications of the engine can set redirect the output of this plugin using the plugin's service interface (see \asm{org.coreasm.engine.plugin.Plugin\#getPluginInterface()}). 
+
+\subsubsection*{Example}
+
+\AsmVariable{mode, counter, ch1, ch2}
+\AsmRule{R1}
+\begin{lstlisting}
+CoreASM DebugInfoExample
+
+use Standard
+use DebugInfo
+use Options
+
+option DebugIinfo.activeChannels ALL
+//option DebugIinfo.activeChannels "ch1  ch2"
+//option DebugIinfo.activeChannels "ch1, ch2"
+//option DebugIinfo.activeChannels ch1
+//option DebugIinfo.activeChannels NONE
+
+init R1
+
+/@\rulekeywd@/ R1 =
+	if mode = undef then
+		par
+			debuginfo ch1 "initializing."
+			mode := "counting"
+			counter := 0
+		endpar
+	else
+		par
+			debuginfo ch2 mode
+			counter := counter + 1
+		endpar
+\end{lstlisting}
+
+
+% -------------------------------- MATH
+\subsection{Math}
+\label{math}
+
+The Math plugin\index{Math plugin} can be loaded by the following \asm{use} phrase:
+
+\begin{lstlisting}
+use Math
+\end{lstlisting}
+
+\noindent Math Plugin extends the \CoreASM engine to provide some basic mathematical functions. Most of these functions are equivalent of their Java counterparts in \asm{java.lang.Math}. For such functions, the following descriptions are basically taken from the {\em Java 2 Platform Standard Edition 5.0 API Specification}. 
+
+\subsubsection{Constants}
+
+\begin{itemize}
+\item {\bf \asm{MathE}} \\ The value that is closer than any other to $e$, the base of the natural logarithms.
+\item {\bf \asm{MathPI}} \\   The value that is closer than any other to $\pi$, the ratio of the circumference of a 
+ circle to its diameter. 
+\end{itemize}
+
+\subsubsection{Basic Derived Functions}
+
+\AsmDerivedFunction{abs, acos, asin, atan, atan2, cuberoot, cbrt, ceil, cos, cosh, exp, expm1, floor, hypot, IEEEremainder, log, log10, log1p, max, min, pow, random, round, signum, sin, sinh, sqrt, tan, tanh, toDegrees, toRadians }
+\AsmVariable{v, v1, v2}
+\begin{itemize}
+\item {\bf \asm{abs(v)} }   Returns the absolute value of $v$.
+\item {\bf \asm{acos(v)} }   Returns the arc cosine of an angle, in the range of $0$ through $\pi$.
+\item {\bf \asm{asin(v)} }   Returns the arc sine of an angle, in the range of $-\pi/2$ through $\pi/2$.
+\item {\bf \asm{atan(v)} }   Returns the arc tangent of an angle, in the range of $-\pi/2$ through $\pi/2$.
+\item {\bf \asm{atan2(x, y)} }  Converts rectangular coordinates $(x, y)$ to polar $(r, \theta)$ and returns $\theta$.
+\item {\bf \asm{cuberoot(v)} }   Returns the cube root of $v$.
+\item {\bf \asm{cbrt(v)} }   Returns the cube root of $v$.
+\item {\bf \asm{ceil(v)} }   Returns the smallest (closest to negative infinity) value that is greater than or equal to the argument and is equal to a mathematical integer.
+\item {\bf \asm{cos(v)} }   Returns the trigonometric cosine of an angle.
+\item {\bf \asm{cosh(v)} }   Returns the hyperbolic cosine of $v$.
+\item {\bf \asm{exp(v)} }   Returns Euler's number $e$ raised to the power of $v$.
+\item {\bf \asm{expm1(v)} }   Returns $e^v -1$.
+\item {\bf \asm{floor(v)} }   Returns the largest (closest to positive infinity) value that is less than or equal to the argument and is equal to a mathematical integer.
+\item {\bf \asm{hypot(x, y)} }   Returns $\sqrt{x^2 + y^2}$ without intermediate overflow or underflow.
+\item {\bf \asm{IEEEremainder(v1, v2)} }   Computes the remainder operation on two arguments as prescribed by the IEEE 754 standard.
+\item {\bf \asm{log(v)} }   Returns the natural logarithm (base $e$) of $v$.
+\item {\bf \asm{log10(v)} }   Returns the base $10$ logarithm of $v$.
+\item {\bf \asm{log1p(v)} }   Returns the natural logarithm of the sum of the argument and 1; i.e., $ln(v + 1)$.
+\item {\bf \asm{max(v1, v2)} }   Returns the greater of two values.
+\item {\bf \asm{min(v1, v2)} }   Returns the smaller of two values.
+\item {\bf \asm{pow(x, y)} }   Returns the value of the first argument raised to the power of the second argument.
+\item {\bf \asm{random()} }   Returns a random value with a positive sign, greater than or equal to $0.0$ and less than $1.0$.
+\item {\bf \asm{round(v)} }   Returns the closest mathematical integer to the argument.
+\item {\bf \asm{signum(v)} }  Returns zero if the argument is zero, $1.0$ if the argument is greater than zero, $-1.0$ if the argument is less than zero.
+\item {\bf \asm{sin(v)} }   Returns the trigonometric sine of an angle.
+\item {\bf \asm{sinh(v)} }   Returns the hyperbolic sine of $v$.
+\item {\bf \asm{sqrt(v)} }   Returns the correctly rounded positive square root of $v$; i.e., $\sqrt{v}$.
+\item {\bf \asm{tan(v)} }   Returns the trigonometric tangent of an angle.
+\item {\bf \asm{tanh(v)} }   Returns the hyperbolic tangent of $v$.
+\item {\bf \asm{toDegrees(v)} }   Converts an angle measured in radians to an approximately equivalent angle measured in degrees.
+\item {\bf \asm{toRadians(v)} }   Converts an angle measured in degrees to an approximately equivalent angle measured in radians.
+
+\end{itemize}
+\subsubsection{Special Derived Functions}
+
+\begin{itemize}
+\AsmDerivedFunction{powerset, max, min, sum}
+\item {\bf \asm{powerset(set)} }  Computes the powerset of the given set. 
+
+\item {\bf \asm{powerset(\{e1,...,en\})} } This function returns the powerset of the given set of elements.
+
+\item {\bf \asm{max(\{v1,...,vn\})} }  Returns the maximum value in a collection of numbers. 
+	If there is one non-number in the collection, it returns \asm{undef}.
+
+\item {\bf \asm{min(\{v1,...,vn\})} }  Returns the minimum value in a collection of numbers.
+	If there is one non-number in the collection, it returns \asm{undef}.
+
+\item {\bf \asm{sum(\{v1,...,vn\})} }   This function returns the sum of a collection of numbers. 
+	If there is one non-number in the collection, it returns \asm{undef}.
+
+\item {\bf \asm{sum(\{v1,...,vn\}, @f)} }   This function returns the sum of a collection of numbers, 
+	after applying function {\bf \asm{f}} to the values in the collection. If there is one non-number 
+	in the collection, it returns \asm{undef}.
+
+\end{itemize}
+
+\subsubsection{An Example}
+
+\begin{tcolorbox}[boxrule=0.0pt,colback=gray!5!white,title={Using Math Plugin},label={spec:mathexample}]
+\begin{lstlisting}[backgroundcolor=\color{gray!5!white},frame=none]
+CoreASM MathPluginExample
+
+use StandardPlugin
+use MathPlugin
+
+init Init
+
+/@\rulekeywd@/ Init =
+	par
+		program(self) := @Main
+		a(1) := 5
+		a(2) := 10
+		a(100) := 500
+	endpar
+
+/@\rulekeywd@/ Main =
+	let e = MathE in
+		par
+			print "'e' = " + e
+			print "log(e) = " + log(e)
+			print "sin(30) = " + round( sin( toRadians(30) ) * 10 ) / 10
+			print "asin(0.5) = " + round( toDegrees( asin(0.5) ) )
+			print "min(51, 43) = " + min(51, 43)
+			print "sum( {1, 2, 100} ) = " + sum({1, 2, 100})
+			print "sum( {1, 2, 100}, @a ) = " + sum({1, 2, 100}, @a)
+			print "{2, 3} is in P({1, 2, 3}) = " + ({2, 3} memberof powerset({1,2,3}))
+			choose x in powerset({1, 2, 3, 4}) do
+				if x memberof powerset({1, 2, 3}) then
+					print x + " is a member of powerset({1, 2, 3})"
+				else
+					print x + " is not a member of powerset({1, 2, 3})"
+		endpar
+\end{lstlisting}
+\end{tcolorbox}
+
+As an example, the output of the \CoreASM Spec~\hyperref[spec:mathexample]{MathPluginExample} would be the following:
+
+\definecolor{shellgray}{rgb}{0.2,0.2,0.2}
+\definecolor{black}{rgb}{0,0,0}
+\newenvironment{shell}
+	{\noindent \color{shellgray}\vspace{0.2cm} \begin{minipage}{0.9\textwidth} \vspace{0.2cm}}
+	{\vspace{0.2cm} \end{minipage} \vspace{0.2cm} \color{black}}
+
+\begin{shell}
+\begin{verbatim}
+sum( {1, 2, 100} ) = 103
+min(51, 43) = 43
+asin(0.5) = 30
+powerset({1, 2, 3}) = {{}, {3}, {2}, {3, 2}, {1}, {3, 1}, {2, 1}, {3, 2, 1}}
+{2, 3} memberof powerset({1, 2, 3} = true
+log(e) = 1
+sum( {1, 2, 100}, @a ) = 515
+'e' = 2.718281828459045
+{2, 1, 4} is not a member of powerset({1, 2, 3})
+sin(30) = 0.5
+\end{verbatim}
+\end{shell}
+
+\section{Notes about the \CoreASM Compiler}
+\label{sec:compiler}
+
+As mentioned in section \ref{sec:compilerusage}, the \CoreASM Compiler currently does not provide support
+for all \CoreASM Plugins. 
+Supported are:
+\begin{itemize}
+	\item All Standard plugins
+	\begin{itemize}
+		\item BlockRulePlugin
+		\item ChooseRulePlugin
+		\item ConditionalRulePlugin
+		\item ExtendRulePlugin
+		\item ForallRulePlugin
+		\item IOPlugin
+		\item LetRulePlugin
+		\item NumberPlugin
+		\item PredicateLogicPlugin
+		\item SetPlugin
+		\item SignaturePlugin
+		\item StringPlugin
+		\item TurboASMPlugin
+		\item CollectionPlugin
+		\item ListPlugin
+		\item MapPlugin
+		\item AbstractionPlugin
+		\item CaseRulePlugin
+		\item OptionsPlugin
+		\item KernelExtensionsPlugin
+	\end{itemize}
+	\item MathPlugin
+	\item ModularityPlugin
+	\item TimePlugin
+\end{itemize}
+
+Still, some restrictions apply to several of the mentioned plugins.
+
+\paragraph{Kernel}
+
+The MacroCall operation has some slight differences between the interpreter and the compiler versions.
+They shouldn't influence a well written specification, but can still provide errors.
+
+\paragraph{SignaturePlugin}
+
+The SignaturePlugin provides an undef-handler to the \CoreASM engine, which allows to generate warnings and
+errors upon using undefined locations.
+This currently doesn't work in the compiler.
+
+\paragraph{TurboASMPlugin}
+
+The TurboASMPlugin Return Result rule might not work as intended in all instances, but should provide the same
+result as the \CoreASM Engine in most cases.
+
+\paragraph{KernelExtensionsPlugin}
+
+The KernelExtensionsPlugin is only implemented partially, missing some functionality.
+
+\printindex
+
+\end{document}
+

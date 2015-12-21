@@ -1,0 +1,21 @@
+CoreASM List10_drop
+
+use Standard
+use ListPlugin
+use List
+
+init Start
+
+/*
+ * @minsteps 1
+ * @maxsteps 1
+ *
+ * @require "[9]\n[6, 7]\n[]\n[1, 2, 3]\n"
+ */
+rule Start =
+	seqblock
+		print drop([6,8,9],2)
+		print drop(drop([1,2,3,4,5,6,7],3),2)
+		print drop([1],5)
+		print drop([1,2,3],0)
+	endseqblock
