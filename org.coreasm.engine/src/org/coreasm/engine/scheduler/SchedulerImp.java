@@ -82,6 +82,8 @@ public class SchedulerImp implements Scheduler {
 
 	private AgentContextMap agentContextMap;
 
+	private String schedulingPolicyName;
+
 	public SchedulerImp(ControlAPI engine) {
 		this.capi = engine;
 		updateInstructions = new UpdateMultiset();
@@ -352,11 +354,11 @@ public class SchedulerImp implements Scheduler {
 	 * program; }
 	 */
 
-	public Element getInitAgent() {
+	public Element getEnvironmentAgent() {
 		return environmentAgent;
 	}
 
-	public void setInitAgent(Element agent) {
+	public void setEnvironmentAgent(Element agent) {
 		environmentAgent = agent;
 	}
 
@@ -441,6 +443,11 @@ public class SchedulerImp implements Scheduler {
 					+ "\" engine property (" + sizeStr + ").");
 		}
 		return size;
+	}
+
+	
+	public void setSchedulingPolicyName(String schedulingPolicyName) {
+		this.schedulingPolicyName = schedulingPolicyName;
 	}
 
 }

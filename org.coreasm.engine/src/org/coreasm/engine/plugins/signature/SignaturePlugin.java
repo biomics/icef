@@ -41,6 +41,7 @@ import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.FunctionElement.FunctionClass;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MapFunction;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.Signature;
 import org.coreasm.engine.absstorage.UniverseElement;
@@ -96,6 +97,7 @@ public class SignaturePlugin extends Plugin
     private HashMap<String,UniverseElement> universes;
     private HashMap<String,BackgroundElement> backgrounds;
     private HashMap<String,RuleElement> rules;
+    private HashMap<String,PolicyElement> policies;
     
     private Set<String>	dependencyNames;
     private Map<String, GrammarRule> parsers = null;
@@ -650,6 +652,9 @@ public class SignaturePlugin extends Plugin
         if (rules == null) {
             rules = new HashMap<String,RuleElement>();
         }
+        if (policies == null) {
+            policies = new HashMap<String,PolicyElement>();
+        }
         
         ASTNode node = capi.getParser().getRootNode().getFirst();
         
@@ -971,7 +976,7 @@ public class SignaturePlugin extends Plugin
     }
 
 	public Set<String> getRuleNames() {
-		return Collections.emptySet();
+		return rules.keySet();
 	}
 
 	public Map<String, RuleElement> getRules() {
@@ -1047,6 +1052,18 @@ public class SignaturePlugin extends Plugin
 			dependencyNames.add("TurboASMPlugin");
 		}
 		return dependencyNames;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		if (rules == null)
+			processSignatures();
+		return policies;
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return policies.keySet();
 	}
     
 }

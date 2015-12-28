@@ -40,6 +40,7 @@ import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.NameElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
@@ -902,6 +903,14 @@ public class InterpreterImp implements Interpreter {
 		return storage.getRule(name);
 	}
 	
+	/** 
+	 * Returns the policy element of the state that has the specified name.
+	 * @param name name of the policy 
+	 */
+	private PolicyElement policyValue(String name) {
+		return storage.getPolicy(name);
+	}
+	
 	/**
 	 * Handles a call to a rule.
 	 * 
@@ -1174,6 +1183,7 @@ public class InterpreterImp implements Interpreter {
 		// starting from the first child under CoreASM keyword
 		ASTNode rootNode = capi.getParser().getRootNode();
 		ASTNode initNode = null;
+		ASTNode scheduleNode = null;
 		
 		for (ASTNode child: rootNode.getAbstractChildNodes())
 			if (child.getGrammarRule().equals(Kernel.GR_INITIALIZATION))
@@ -1184,6 +1194,16 @@ public class InterpreterImp implements Interpreter {
 					capi.error("More than one init rule declarations found.", child, this);
 					return;
 				}
+		
+		for (ASTNode child: rootNode.getAbstractChildNodes())
+			if (child.getGrammarRule().equals(Kernel.GR_SCHEDULING))
+				if (scheduleNode == null)
+					scheduleNode = child;
+				else {
+					logger.error("Too many 'scheduling' policy declarations.");
+					capi.error("More than one scheduling policy declarations found.", child, this);
+					return;
+				}
 					
 		if (initNode == null) {
 			logger.debug("No init rule is specified.");
@@ -1191,9 +1211,19 @@ public class InterpreterImp implements Interpreter {
 			return;
 		}
 		
+		if (scheduleNode == null) {
+			logger.debug("No scheduling policy is specified.");
+			capi.error("No scheduling policy is specified.");
+			return;
+		}
+		
 		// node is pointing to the 'init' node, so we get
 		// its first child which holds the name of the init rule
 		String initRuleName = initNode.getFirst().getToken();
+		
+		// node is pointing to the 'scheduling' node, so we get
+		// its first child which holds the name of the init rule
+		String schedulingPolicyName = scheduleNode.getFirst().getToken();
 		
 		// fetching the rule with the given name from the state
 		RuleElement initRule = ruleValue(initRuleName);
@@ -1208,9 +1238,23 @@ public class InterpreterImp implements Interpreter {
 				return;
 			}
 		
+		// fetching the policy with the given name from the state
+				PolicyElement schedulingPolicy = policyValue(schedulingPolicyName);
+				if (schedulingPolicy == null) { 
+					logger.error("Scheduling policy does not exists.");
+					capi.error("Scheduling policy '" + schedulingPolicyName + "' does not exists.", scheduleNode, this);
+					return;
+				} else
+					if (schedulingPolicy.getParam().size() > 0) {
+						logger.error("Scheduling policy cannot have parameters.");
+						capi.error("Scheduling policy '" + schedulingPolicyName + "' should not have parameters.", scheduleNode, this);
+						return;
+					}
+		
 		// creating the first agent to run the initial step
 		Element initAgent = new EnvironmentAgent();
-        capi.getScheduler().setInitAgent(initAgent);
+        capi.getScheduler().setEnvironmentAgent(initAgent);
+        capi.getScheduler().setSchedulingPolicyName(schedulingPolicyName);
 		Location l = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));
 		try {
 			// assigning the init rule as the program of the agent

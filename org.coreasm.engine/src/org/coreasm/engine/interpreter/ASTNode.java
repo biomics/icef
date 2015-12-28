@@ -39,13 +39,16 @@ public class ASTNode extends Node implements Serializable {
 	/** grammar classes */
 	public static final String ID_CLASS = "Id";
 	public static final String RULE_CLASS = "Rule";
+	public static final String POLICY_CLASS = "Policy";
 	public static final String EXPRESSION_CLASS = "Expression";
 	public static final String FUNCTION_RULE_CLASS = "FunctionRule";
+	public static final String FUNCTION_POLICY_CLASS = "FunctionPolicy";
 	public static final String DECLARATION_CLASS = "Declaration";
 	public static final String UNARY_OPERATOR_CLASS = "UnaryOperator";
 	public static final String BINARY_OPERATOR_CLASS = "BinaryOperator";
     public static final String TERNARY_OPERATOR_CLASS = "TernaryOperator";
     public static final String INDEX_OPERATOR_CLASS = "IndexOperator";
+   
     
 	/** grammar class of this node */
 	protected String grammarClass;

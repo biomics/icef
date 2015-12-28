@@ -1,4 +1,4 @@
-/*
+/* AbstractStorage old
  * AbstractStorage.java 	1.0 	$Revision: 243 $
  * 
  * Copyright (C) 2005 Roozbeh Farahbod 
@@ -35,6 +35,9 @@ public interface AbstractStorage extends State {
 	
 	/** 'ruleElement' function name */
 	public static final String RULE_ELEMENT_FUNCTION_NAME = "ruleElement";
+	
+	/** 'policyElement' function name */
+	public static final String POLICY_ELEMENT_FUNCTION_NAME = "policyElement";
 
 	/** 'universeElement' function name */
 	public static final String UNIVERSE_ELEMENT_FUNCTION_NAME = "universeElement";

@@ -24,6 +24,7 @@ import org.coreasm.compiler.plugins.time.CompilerTimePlugin;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.plugin.Plugin;
@@ -126,6 +127,16 @@ public class TimePlugin extends Plugin implements VocabularyExtender {
 
 	public VersionInfo getVersionInfo() {
 		return VERSION_INFO;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 	

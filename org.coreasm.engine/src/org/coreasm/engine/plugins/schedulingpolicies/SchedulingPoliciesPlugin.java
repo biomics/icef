@@ -38,6 +38,7 @@ import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MapFunction;
 import org.coreasm.engine.absstorage.NameElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -409,5 +410,15 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 			targetModes.put(EngineMode.emStartingStep, ExtensionPointPlugin.DEFAULT_PRIORITY);
 		}
 		return targetModes;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 }

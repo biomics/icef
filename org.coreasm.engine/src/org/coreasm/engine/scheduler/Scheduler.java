@@ -195,14 +195,14 @@ public interface Scheduler {
 	public void executeAgentPrograms() throws EngineException;
 
     /**
-     * Sets the value of <i>initAgent</i> in the scheduler.
+     * Sets the value of <i>EnvironmentAgent</i> in the scheduler.
      */
-    public void setInitAgent(Element agent);
+    public void setEnvironmentAgent(Element agent);
         
     /**
-     * Returns the value of <i>initAgent</i> in the scheduler.
+     * Returns the value of <i>EnvironmentAgent</i> in the scheduler.
      */    
-    public Element getInitAgent();
+    public Element getEnvironmentAgent();
     
     /**
      * Sets <i>stepCount</i> to the specified value.
@@ -219,4 +219,10 @@ public interface Scheduler {
      * Increments <i>stepCount</i> by 1.
      */       
     public void incrementStepCount();
+
+    /**
+     * Sets the name of the scheduling policy, to look it up in the abstract storage
+     * @param schedulingPolicyName
+     */
+	public void setSchedulingPolicyName(String schedulingPolicyName);
 }

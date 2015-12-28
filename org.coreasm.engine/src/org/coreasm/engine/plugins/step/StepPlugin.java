@@ -25,6 +25,7 @@ import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.interpreter.ASTNode;
@@ -311,5 +312,15 @@ public class StepPlugin extends Plugin implements ParserPlugin,
 
 	public ControlStateElement uniqueCtlState(ASTNode node, Interpreter interpreter) {
 		return new ControlStateElement(interpreter.getCurrentCallStack(), node);
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 }

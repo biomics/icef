@@ -1,3 +1,4 @@
+
 package org.coreasm.engine.parser;
 
 import java.util.HashMap;
@@ -215,6 +216,27 @@ public class ParserTools
 		}
 	}
 	
+	public static class PolicySignatureParseMap
+	extends ArrayParseMap
+	{
+
+		public PolicySignatureParseMap() {
+			super(Kernel.PLUGIN_NAME);
+		}
+		
+		@Override
+		public Node map(Object[] from) {
+			Node node = new ASTNode(
+					"Kernel",
+					ASTNode.DECLARATION_CLASS,
+					"PolicySignature",
+					null,
+					((Node)from[0]).getScannerInfo()
+				);
+			addChildren(node,from);
+			return node;
+		}
+	}
 
 	public static class RuleDeclarationParseMap
 	extends ArrayParseMap
@@ -254,7 +276,44 @@ public class ParserTools
 
 	}
 	
-	
+	public static class PolicyDeclarationParseMap
+	extends ArrayParseMap
+	{
+
+		public PolicyDeclarationParseMap() {
+			super(Kernel.PLUGIN_NAME);
+		}
+		
+		public Node map(Object[] vals) {
+			ScannerInfo info = null;
+			info = ((Node)vals[0]).getScannerInfo();
+			
+			Node node = new ASTNode(
+					null,
+					ASTNode.DECLARATION_CLASS,
+					Kernel.GR_POLICYDECLARATION,
+					null,
+					info
+					);
+
+			for (int i=0; i < vals.length; i++) {
+				Node child = (Node)vals[i];
+				if (child != null)
+					// to give proper names to ASTNode children:
+					if (child instanceof ASTNode) {
+						if (((ASTNode)child).getGrammarClass().equals("PolicySignature"))
+							node.addChild("alpha", child);
+						else
+							node.addChild("beta", child);
+					} else
+						node.addChild(child);
+			}
+			
+			return node;
+		}
+
+	}
+
 	
 	public static class CoreASMParseMap
 	extends ArrayParseMap
@@ -296,6 +355,33 @@ public class ParserTools
 	{
 
 		public FunctionRuleTermParseMap() {
+			super(Kernel.PLUGIN_NAME);
+		}
+		
+		public Node map(Object[] v) {
+			Node node = new FunctionRuleTermNode(((Node)v[0]).getScannerInfo());
+			node.addChild("alpha", (Node)v[0]); // ID
+			
+			for (int i=1; i < v.length; i++) {
+				if (v[i] != null && v[i] instanceof ASTNode) {
+					// Then it should be a TupleTerm
+					for (Node n: ((Node)v[i]).getChildNodes())
+						if (n instanceof ASTNode) 
+							node.addChild("lambda", n);
+						else 
+							node.addChild(n);
+				}
+			}
+			return node;
+		}
+
+	}
+	
+	public static class FunctionPolicyTermParseMap
+	extends ArrayParseMap
+	{
+
+		public FunctionPolicyTermParseMap() {
 			super(Kernel.PLUGIN_NAME);
 		}
 		
