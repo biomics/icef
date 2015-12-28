@@ -21,9 +21,9 @@ import org.coreasm.engine.absstorage.Element;
  * @author  Roozbeh Farahbod
  * 
  */
-public class InitAgent extends Element {
+public class EnvironmentAgent extends Element {
 
 	public String toString() {
-		return "InitAgent";
+		return "Environment";
 	}
 }

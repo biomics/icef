@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.coreasm.engine.ControlAPI;
@@ -25,6 +26,7 @@ import org.coreasm.engine.EngineException;
 import org.coreasm.engine.EngineProperties;
 import org.coreasm.engine.InvalidSpecificationException;
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.AbstractUniverse;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.Enumerable;
@@ -50,7 +52,7 @@ import EDU.oswego.cs.dl.util.concurrent.FJTaskRunnerGroup;
 public class SchedulerImp implements Scheduler {
 
 	/** Maximum number of agents selected in each round */
-	public static final int MAX_SELECTED_AGENTS = 10;
+	public static final int MAX_SELECTED_AGENTS = 100;
 
 	protected static final Logger logger = LoggerFactory
 			.getLogger(SchedulerImp.class);
@@ -63,7 +65,7 @@ public class SchedulerImp implements Scheduler {
 	private Set<Element> agentSet;
 	private Set<Element> selectedAgentSet;
 
-	private Element initAgent;
+	private Element environmentAgent;
 
 	// private FJTaskRunnerGroup runnerGroup = null;
 	private int batchSize = -1;
@@ -144,17 +146,14 @@ public class SchedulerImp implements Scheduler {
 	public synchronized void retrieveAgents() {
 		// debugged by Roozbeh Farahbod, 17-Jan-2006
 		AbstractStorage storage = capi.getStorage();
-
-		FunctionElement agentSetFlat = storage
-				.getUniverse(AbstractStorage.AGENTS_UNIVERSE_NAME);
-
-		if (agentSetFlat instanceof Enumerable) {
-			if (stepCount < 1) {
-				agentSet = new HashSet<Element>();
-				agentSet.add(initAgent);
-			} else {
-				agentSet = new HashSet<Element>();
-				// pick only those that have a non-null program
+		Map<String, AbstractUniverse> universes = storage.getUniverses();
+		agentSet = new HashSet<Element>();
+		agentSet.add(environmentAgent);
+		for (String au: universes.keySet())
+    	{
+			FunctionElement agentSetFlat = 	storage.getUniverse(au);
+			if (agentSetFlat instanceof Enumerable) {
+					// pick only those that have a non-null program
 				for (Element agent : ((Enumerable) agentSetFlat).enumerate()) {
 					Location loc = new Location(
 							AbstractStorage.PROGRAM_FUNCTION_NAME,
@@ -163,24 +162,28 @@ public class SchedulerImp implements Scheduler {
 						if (!storage.getValue(loc).equals(Element.UNDEF))
 							agentSet.add(agent);
 					} catch (InvalidLocationException e) {
-						capi.error("Cannot get the value of lcoation " + loc
+						capi.error("Cannot get the value of location " + loc
 								+ ".");
-						logger.error("Cannot get the value of lcoation " + loc
+						logger.error("Cannot get the value of location " + loc
 								+ ".");
 					}
 				}
-			}
-
-		} else {
-			String msg = "Value of \"Agents\" is not enumerable. Cannot determine the agent set.";
-			logger.error(msg);
-			throw new EngineError(msg);
-		}
-
+			} 
+			/*else {
+				String msg = "Value of \"Agents\" is not enumerable. Cannot determine the agent set.";
+				logger.error(msg);
+				throw new EngineError(msg);
+			}*/
+    	}
 		/*
 		 * We want to group the schedules for the whole run, so we set the group
 		 * handle to be this instance of scheduling policy that we are using in
 		 * this run.
+		 */
+		/* TODO BSL we now have agentSet as the set of all elements in the superuniverse 
+		 * that have a program. Nevertheless, the idea is to not choose from these, but 
+		 * to resolve the scheduling policy and then check on the universes which
+		 * are the agents that have to be scheduled (put in the schedule)
 		 */
 		schedule = schedulingPolicy.getNewSchedule(schedulingPolicy, agentSet);
 	}
@@ -350,11 +353,11 @@ public class SchedulerImp implements Scheduler {
 	 */
 
 	public Element getInitAgent() {
-		return initAgent;
+		return environmentAgent;
 	}
 
 	public void setInitAgent(Element agent) {
-		initAgent = agent;
+		environmentAgent = agent;
 	}
 
 	public int getStepCount() {

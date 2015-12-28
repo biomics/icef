@@ -1209,7 +1209,7 @@ public class InterpreterImp implements Interpreter {
 			}
 		
 		// creating the first agent to run the initial step
-		Element initAgent = new InitAgent();
+		Element initAgent = new EnvironmentAgent();
         capi.getScheduler().setInitAgent(initAgent);
 		Location l = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));
 		try {

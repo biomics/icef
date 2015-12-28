@@ -1,7 +1,11 @@
 package CompilerRuntime;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.coreasm.engine.absstorage.AbstractUniverse;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Enumerable;
 import org.coreasm.engine.absstorage.FunctionElement;
@@ -13,7 +17,9 @@ import org.coreasm.engine.scheduler.SchedulingPolicy;
 public class Scheduler {
 	private CompilerRuntime.Runtime runtime;
 	private CompilerRuntime.Rule initRule;
+	//The SchedulingPolicy is the old policy
 	private SchedulingPolicy policy;
+	private CompilerRuntime.Policy schPolicy;
 	private java.util.Iterator<java.util.Set<Element>> schedule;
 	
 	private CompilerRuntime.UpdateList updateInstructions;
@@ -29,12 +35,13 @@ public class Scheduler {
 	private java.util.concurrent.ExecutorService threadPool;
 	
 	
-	public Scheduler(CompilerRuntime.Rule initRule, SchedulingPolicy policy){
+	
+	public Scheduler(CompilerRuntime.Rule initRule, CompilerRuntime.Policy schPolicy){
 		runtime = CompilerRuntime.RuntimeProvider.getRuntime();
 		if(runtime == null) System.out.println("runtime is null");
 		this.initRule = initRule;
 		
-		this.policy = policy;
+		this.schPolicy = schPolicy;
 		
 		updateInstructions = new CompilerRuntime.UpdateList();
 		updateSet = new CompilerRuntime.UpdateList();
@@ -76,46 +83,54 @@ public class Scheduler {
     	agentSet = null;
     	selectedAgentSet.clear();
     }
-    
+	
     public void retrieveAgents() throws CoreASMCException{
     	AbstractStorage storage = runtime.getStorage();
     	
-    	FunctionElement agentSetFlat = storage
-    			.getUniverse(CompilerRuntime.AbstractStorage.AGENTS_UNIVERSE_NAME);
-    
-    	/*if(stepCount < 1){
-    		//first step, add initial agent to the agent set
-    		agentSet = new java.util.HashSet<CompilerRuntime.Rule>();
-    		agentSet.add(initRule);
-    	}
-    	else*/{
-    		//otherwise retrieve all current agents from the abstract storage
-    		agentSet = new java.util.HashSet<Element>();
-    		
-    		for(Element agent : ((Enumerable) agentSetFlat).enumerate()){
-    			java.util.ArrayList<Element> tmp = new java.util.ArrayList<Element>();
-    			tmp.add(agent);
-    			
-    			Location loc = new Location(CompilerRuntime.AbstractStorage.PROGRAM_FUNCTION_NAME, tmp);
-    			
-				try {
-	    			Element rule = storage.getValue(loc);
-					
-					if(!rule.equals(Element.UNDEF)){
-						agentSet.add((CompilerRuntime.Rule)rule);
-						((CompilerRuntime.Rule) rule).setAgent(agent);
-					}
-				} catch (InvalidLocationException e) {
-					throw new CompilerRuntime.CoreASMCException("invalid agent found");
-				}
-    		}
-    	}
     	
+    	Map<String, AbstractUniverse> universes = storage.getUniverses();
+    	agentSet = new java.util.HashSet<Element>();
+    	for (String au: universes.keySet())
+    	{
+	    	//if(au == CompilerRuntime.AbstractStorage.AGENTS_UNIVERSE_NAME)
+	    	{
+	    		FunctionElement agentSetFlat = storage.getUniverse(au);
+	        
+	        	/*if(stepCount < 1){
+	        		//first step, add initial agent to the agent set
+	        		agentSet = new java.util.HashSet<CompilerRuntime.Rule>();
+	        		agentSet.add(initRule);
+	        	}
+	        	else*/{
+	        		//otherwise retrieve all current agents from the abstract storage
+	        		
+	        		
+	        		for(Element agent : ((Enumerable) agentSetFlat).enumerate()){
+	        			java.util.ArrayList<Element> tmp = new java.util.ArrayList<Element>();
+	        			tmp.add(agent);
+	        			
+	        			Location loc = new Location(CompilerRuntime.AbstractStorage.PROGRAM_FUNCTION_NAME, tmp);
+	        			
+	    				try {
+	    	    			Element rule = storage.getValue(loc);
+	    					
+	    					if(!rule.equals(Element.UNDEF)){
+	    						agentSet.add((CompilerRuntime.Rule)rule);
+	    						((CompilerRuntime.Rule) rule).setAgent(agent);
+	    					}
+	    				} catch (InvalidLocationException e) {
+	    					throw new CompilerRuntime.CoreASMCException("invalid agent found");
+	    				}
+	        		}
+	        	}
+	    	}
+    	}
+    	//TODO BSL Use inspiration from the SchedulingPolicies to obtain the set of agents that run this round
+    	agentSet = new java.util.HashSet<Element>();
     	schedule = policy.getNewSchedule(policy, agentSet);
-    	
     }
-    
-    public boolean selectAgents(){
+
+	public boolean selectAgents(){
     	if(agentsCombinationExists()){
     		selectedAgentSet = schedule.next();
     		lastSelectedAgents = java.util.Collections.unmodifiableSet(selectedAgentSet);
@@ -203,4 +218,9 @@ public class Scheduler {
     public void incrementStepCount(){
     	this.stepCount++;
     }
+
+	public void setPolicy(Policy schPolicy) {
+		// TODO BSL extension. The scheduler now has the policy
+		this.schPolicy = schPolicy;
+	}
 }

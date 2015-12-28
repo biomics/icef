@@ -7,13 +7,14 @@ public interface AbstractStorage extends State{
 	/** 'program' function name */
 	public static final String PROGRAM_FUNCTION_NAME = "program";
 	/** 'Agents' universe name */
+	//TODO in BSl, this universe is not explicitly a part of the background.
 	public static final String AGENTS_UNIVERSE_NAME = "Agents";
 	/** 'functionElement' function name */
 	public static final String FUNCTION_ELEMENT_FUNCTION_NAME = "functionElement";
 	/** 'universeElement' function name */
 	public static final String UNIVERSE_ELEMENT_FUNCTION_NAME = "universeElement";
 	
-	public void initAbstractStorage(CompilerRuntime.Rule initRule);
+	public void initAbstractStorage(CompilerRuntime.Rule initRule, CompilerRuntime.Policy schPolicy);
 	
 	public void fireUpdateSet(UpdateList updates) throws InvalidLocationException;
 	
