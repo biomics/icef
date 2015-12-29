@@ -42,6 +42,7 @@ import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.NameElement;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.Node.NameNodeTuple;
@@ -165,7 +166,7 @@ public class InterpreterImp implements Interpreter {
 				//         used as macro-call rules are prevented and reported by the 
 				//         engine. But in general, this is not a bad guard.
 				if (pos.isEvaluated() && pos.getUpdates() == null)
-					pos.setNode(pos.getLocation(), new UpdateMultiset(), pos.getValue());
+					pos.setNode(pos.getLocation(), new UpdateMultiset(),new TriggerMultiset(), pos.getValue());
 				
 				if (pos.isEvaluated())
 					notifyListenersAfterNodeEvaluation(pos);
@@ -347,13 +348,13 @@ public class InterpreterImp implements Interpreter {
 		if (token == null) 
 			return pos;
 		else if (token.equals(Kernel.KW_TRUE))
-			pos.setNode(null, null, BooleanElement.TRUE);
+			pos.setNode(null, null, null, BooleanElement.TRUE);
 		else if (token.equals(Kernel.KW_FALSE)) 
-			pos.setNode(null, null, BooleanElement.FALSE);
+			pos.setNode(null, null, null, BooleanElement.FALSE);
 		else if (token.equals(Kernel.KW_UNDEF)) 
-			pos.setNode(null, null, Element.UNDEF);
+			pos.setNode(null, null, null, Element.UNDEF);
 		else if (token.equals(Kernel.KW_SELF))
-			pos.setNode(null, null, self);
+			pos.setNode(null, null, null, self);
 		return pos;
 	}
 	
@@ -381,7 +382,7 @@ public class InterpreterImp implements Interpreter {
 						
 						// If we have a local value for that...
 						if (getEnv(x) != null)
-							pos.setNode(null, null, getEnv(x));
+							pos.setNode(null, null,null, getEnv(x));
 						else {
 							// If this 'x' refers to a function in the state...
 							final FunctionElement f = storage.getFunction(x);
@@ -389,7 +390,7 @@ public class InterpreterImp implements Interpreter {
 							if (f != null) {
 								final Location l = new Location(x, ElementList.NO_ARGUMENT, f.isModifiable());
 								try {
-									pos.setNode(l, null, storage.getValue(l));
+									pos.setNode(l, null, null, storage.getValue(l));
 								} catch (InvalidLocationException e) {
 									throw new EngineError("Location is invalid in 'interpretExpressions()'." + 
 											"This cannot happen!");
@@ -425,14 +426,14 @@ public class InterpreterImp implements Interpreter {
 								if (name != null) {
 									final Location l = new Location(name, vList, f.isModifiable());
 									try {
-										pos.setNode(l, null, storage.getValue(l));
+										pos.setNode(l, null, null, storage.getValue(l));
 									} catch (InvalidLocationException e) {
 										throw new EngineError("Location is invalid in 'interpretExpressions()'." + 
 												"This cannot happen!");
 									}
 								}
 								else
-									pos.setNode(new Location(x, vList, f.isModifiable()), null, f.getValue(vList));
+									pos.setNode(new Location(x, vList, f.isModifiable()), null, null,f.getValue(vList));
 							} else
 								pos = toBeEvaluated;
 						} else
@@ -477,10 +478,10 @@ public class InterpreterImp implements Interpreter {
 							
 				// if rule element exists
 				if (ruleElement != null)
-					pos.setNode(null,null,ruleElement);
+					pos.setNode(null,null,null,ruleElement);
 				// else no such rule exists return undef
 				else
-					pos.setNode(null,null,Element.UNDEF);
+					pos.setNode(null,null,null,Element.UNDEF);
 			}
 			
 			else if (pos instanceof RuleOrFuncElementNode) {
@@ -505,29 +506,29 @@ public class InterpreterImp implements Interpreter {
 				    if (e instanceof FunctionElement) {
                         if (((FunctionElement) e).isModifiable()) {
                             Location l = new Location(AbstractStorage.FUNCTION_ELEMENT_FUNCTION_NAME, ElementList.create(new NameElement(name)));
-                            pos.setNode(l,null,e);
+                            pos.setNode(l,null,null, e);
                         }
                         else {
-                            pos.setNode(null,null,e);                            
+                            pos.setNode(null,null,null, e);                            
                         }
                     }
                     else if (e instanceof RuleElement) {
                         Location l = new Location(AbstractStorage.RULE_ELEMENT_FUNCTION_NAME, ElementList.create(new NameElement(name)));
-                        pos.setNode(l,null,e);
+                        pos.setNode(l,null, null,e);
                     }
                     else {
-                        pos.setNode(null,null,e);
+                        pos.setNode(null,null,null,e);
                     }
                 }
 				else {
-					pos.setNode(null, null, Element.UNDEF);
+					pos.setNode(null, null, null, Element.UNDEF);
                 }
 			} else
 				// if pos is of the form '(' ... ')'
 				if (pos instanceof EnclosedTermNode) {
 					final ASTNode innerNode = pos.getFirst();
 					if (innerNode.isEvaluated())
-						pos.setNode(null, null, innerNode.value);
+						pos.setNode(null, null, null, innerNode.value);
 					else
 						pos = innerNode;
 				}
@@ -593,7 +594,7 @@ public class InterpreterImp implements Interpreter {
 			}
 
 			if (theRule != null) {
-				pos.getFirst().setNode(null, null, theRule);	// Make sure we can always return from the rule
+				pos.getFirst().setNode(null, null, null, theRule);	// Make sure we can always return from the rule
 				if (args.isEmpty()) { // If the current node is of the form 'x' with no arguments
 					if (pos instanceof MacroCallRuleNode) {
 						if (theRule.getParam().size() == 0)
@@ -603,7 +604,7 @@ public class InterpreterImp implements Interpreter {
 									"' does not match its signature.", pos, this);
 					}
 					else // treat rules like RuleOrFuncElementNode, so they can be passed to rules as parameter
-						pos.setNode(new Location(AbstractStorage.RULE_ELEMENT_FUNCTION_NAME, ElementList.create(new NameElement(x))),null,theRule);
+						pos.setNode(new Location(AbstractStorage.RULE_ELEMENT_FUNCTION_NAME, ElementList.create(new NameElement(x))),null,null,theRule);
 				} else { // if current node is 'x(...)' (with arguments)
 					if (theRule.getParam().size() != args.size())
 						capi.error(	"The number of arguments passed to '" + theRule.getName() + 
@@ -637,7 +638,7 @@ public class InterpreterImp implements Interpreter {
 									l + ", is not modifiable.", pos, this);
 						else {
 							Update u = new Update(l, rhs.getValue(), Update.UPDATE_ACTION, self, pos.scannerInfo);
-							pos.setNode(null, new UpdateMultiset(u), null);
+							pos.setNode(null, new UpdateMultiset(u), null, null);
 						}
 					}
 					else
@@ -655,14 +656,14 @@ public class InterpreterImp implements Interpreter {
 				pos = ruleNode;
 			} else {
 				removeEnv(id);
-				pos.setNode(null, ruleNode.getUpdates(), null);
+				pos.setNode(null, ruleNode.getUpdates(), null, null);
 			}
 			
 		}
 
 		//If the current node is an 'skip'
 		else if (x != null && x.equals("skip")) {
-			pos.setNode(null, new UpdateMultiset(), null);
+			pos.setNode(null, new UpdateMultiset(),null, null);
 		}
 		
 
@@ -751,7 +752,7 @@ public class InterpreterImp implements Interpreter {
 			
 			// one result so return it
 			if (setResultElements.size() == 1)
-				pos.setNode(null,null,(Element)setResultElements.toArray()[0]);
+				pos.setNode(null,null,null,(Element)setResultElements.toArray()[0]);
 			// multiple results so error
 			else if (setResultElements.size() > 1)
 			{
@@ -860,9 +861,9 @@ public class InterpreterImp implements Interpreter {
     	try {
     		// in case there is a value in the stack
 			value = storage.getValue(loc);
-	        pos.setNode(loc, null, value);
+	        pos.setNode(loc, null, null, value);
 		} catch (InvalidLocationException e) {
-	        pos.setNode(loc, null, Element.UNDEF);
+	        pos.setNode(loc, null, null, Element.UNDEF);
 		} 
     }
 
@@ -957,7 +958,7 @@ public class InterpreterImp implements Interpreter {
 			Element value = wCopy.getValue();
 			if (value == null)	// make sure that the value of the node will not be set to null
 				value = Element.UNDEF;
-			pos.setNode(null, wCopy.getUpdates(), value);
+			pos.setNode(null, wCopy.getUpdates(), null, value);
 		
 			clearTree(wCopy);
 			
@@ -1171,7 +1172,7 @@ public class InterpreterImp implements Interpreter {
 	 */
 	public void clearTree(ASTNode root) {
 		if (root != null) {
-			root.setNode(null, null, null);
+			root.setNode(null, null, null, null);
 			for (ASTNode child = root.getFirst(); child != null; child = child.getNext())
 				clearTree(child);
 		}

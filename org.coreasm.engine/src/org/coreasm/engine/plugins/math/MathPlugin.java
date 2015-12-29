@@ -226,7 +226,7 @@ public class MathPlugin extends Plugin implements VocabularyExtender, ParserPlug
 		if (token == null) 
 			return pos;
 		else if (token.equals(KW_RANDOM_VALUE)) {
-			pos.setNode(null, null, NumberElement.getInstance(Math.random()));
+			pos.setNode(null, null, null, NumberElement.getInstance(Math.random()));
 		}
 		return pos;
 	}

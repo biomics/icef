@@ -201,7 +201,7 @@ public class ForallRulePlugin extends Plugin implements ParserPlugin,
 	                	    				interpreter.removeEnv(var.getKey());
 	                	    		}
 	                				// [pos] := (undef,{},undef)
-	                    			forallNode.setNode(null, new UpdateMultiset(), null);
+	                    			forallNode.setNode(null, new UpdateMultiset(), null, null);
 	                	            return forallNode;
 	            				}
                 	         	// pos := delta
@@ -244,7 +244,7 @@ public class ForallRulePlugin extends Plugin implements ParserPlugin,
         				UpdateMultiset updateSet = updates.remove(pos);
         				if (updateSet == null)
         					updateSet = new UpdateMultiset();
-        				forallNode.setNode(null, updateSet, null);
+        				forallNode.setNode(null, updateSet, null, null);
         	            return forallNode;
         			}
         			// pos := delta
@@ -302,7 +302,7 @@ public class ForallRulePlugin extends Plugin implements ParserPlugin,
             }
             else if (forallNode.getIfnoneRule() != null && forallNode.getIfnoneRule().isEvaluated()) {
                 // [pos] := (undef,u,undef)
-                pos.setNode(null,forallNode.getIfnoneRule().getUpdates(),null);
+                pos.setNode(null,forallNode.getIfnoneRule().getUpdates(),null,null);
                 return pos;
             }
             if (pos == forallNode.getIfnoneRule()) {

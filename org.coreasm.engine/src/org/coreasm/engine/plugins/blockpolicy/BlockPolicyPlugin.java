@@ -12,7 +12,7 @@
  *
  */
 
-package org.coreasm.engine.plugins.blockrule;
+package org.coreasm.engine.plugins.blockpolicy;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,9 +22,10 @@ import java.util.Set;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasm.compiler.interfaces.CompilerPlugin;
-import org.coreasm.compiler.plugins.blockrule.CompilerBlockRulePlugin;
+import org.coreasm.compiler.plugins.blockpolicy.CompilerBlockPolicyPlugin;
 import org.coreasm.engine.EngineTools;
 import org.coreasm.engine.VersionInfo;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
@@ -51,57 +52,58 @@ import org.slf4j.LoggerFactory;
  *  
  */
 
-public class BlockRulePlugin extends Plugin 
+public class BlockPolicyPlugin extends Plugin 
 		implements InterpreterPlugin, ParserPlugin {
  
-	private static final Logger logger = LoggerFactory.getLogger(BlockRulePlugin.class);
+	private static final Logger logger = LoggerFactory.getLogger(BlockPolicyPlugin.class);
 	
 	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 0, 1, "");
 	
-	public static final String PLUGIN_NAME = BlockRulePlugin.class.getSimpleName();
+	public static final String PLUGIN_NAME = BlockPolicyPlugin.class.getSimpleName();
 
 	private Map<String, GrammarRule> parsers = null;
 	
 	private final String[] keywords = {"par", "endpar"};
 	private final String[] operators = {"{", "}"};
 	
-	private final CompilerPlugin compilerPlugin = new CompilerBlockRulePlugin(this);
+	private final CompilerPlugin compilerPlugin = new CompilerBlockPolicyPlugin(this);
 	
     public ASTNode interpret(Interpreter interpreter, ASTNode pos) {
         String gRule = pos.getGrammarRule();
         
-        if ((gRule != null) && (gRule.equals("BlockRule"))) {
-            ASTNode currentRule = pos.getFirst();
+        if ((gRule != null) && (gRule.equals("BlockPolicy"))) {
+            ASTNode currentPolicy = pos.getFirst();
    
-            // check if all rules in the block have been
+            // check if all policies in the block have been
             // interpreted.  if not, interpret them by
-            // giving the uninterpreted rule node back to the
+            // giving the uninterpreted policy node back to the
             // interpreter
-            while (currentRule != null) {
-                if (!currentRule.isEvaluated()) {
-                    return currentRule;
+            while (currentPolicy != null) {
+                if (!currentPolicy.isEvaluated()) {
+                    return currentPolicy;
                 }
-                currentRule = currentRule.getNext();
+                currentPolicy = currentPolicy.getNext();
             }
 
-            // all rules have been evaluated.
+            // all policys have been evaluated.
             // accumulate all the updates for this block
-            currentRule = pos.getFirst();
-            UpdateMultiset updates = new UpdateMultiset();
+            currentPolicy = pos.getFirst();
+            TriggerMultiset triggers = new TriggerMultiset();
             
-            while (currentRule != null) {
+            while (currentPolicy != null) {
             	// TODO A decision needs to be made on the following pattern
             	//      Do we want to have this pattern in other plugins as well?
-            	if (!EngineTools.hasUpdates(interpreter, currentRule, capi, logger)) {
+            	//TODO BSL fix this to hasTriggers
+            	if (!EngineTools.hasUpdates(interpreter, currentPolicy, capi, logger)) {
         			return pos;
             	} else {
-            		updates.addAll(currentRule.getUpdates());
-            		currentRule = currentRule.getNext();
+            		triggers.addAll(currentPolicy.getTriggers());
+            		currentPolicy = currentPolicy.getNext();
             	}
             }
             
-            // set the UpdateMultiset for this node
-            pos.setNode(null,updates, null, null);
+            // set the TriggerMultiset for this node
+            pos.setNode(null,null,triggers,null);
             return pos;
         }
         else {
@@ -132,17 +134,17 @@ public class BlockRulePlugin extends Plugin
 	public Map<String, GrammarRule> getParsers() {
 		if (parsers == null) {
 			parsers = new HashMap<String, GrammarRule>();
-			
-			Parser<Node> ruleParser = 
+			//TODO BSL change to getPolicyParser
+			Parser<Node> policyParser = 
 				((KernelServices)capi.getPlugin("Kernel").getPluginInterface()).getRuleParser();
 			
 			ParserTools pTools = ParserTools.getInstance(capi);
 			
-			Parser<Node> blockRuleParser = Parsers.array(  
+			Parser<Node> blockPolicyParser = Parsers.array(  
 						Parsers.or(
 								pTools.getKeywParser("par", this.getName()),
 								pTools.getOprParser("{")),
-						pTools.plus(ruleParser),
+						pTools.plus(policyParser),
 						Parsers.or(
 								pTools.getKeywParser("endpar", getName()),
 								pTools.getOprParser("}"))
@@ -151,9 +153,9 @@ public class BlockRulePlugin extends Plugin
 						@Override
 						public Node map(Object[] from) {
 							ASTNode node = new ASTNode(
-									BlockRulePlugin.PLUGIN_NAME,
-									ASTNode.RULE_CLASS,
-									"BlockRule",
+									BlockPolicyPlugin.PLUGIN_NAME,
+									ASTNode.POLICY_CLASS,
+									"BlockPolicy",
 									null,
 									((Node)from[0]).getScannerInfo());
 							addChildren(node, from);
@@ -167,9 +169,9 @@ public class BlockRulePlugin extends Plugin
 								parent.addChild(child); //super.addChild(parent, child);
 						}
 					});
-			parsers.put("Rule", 
-					new GrammarRule("Rule",
-							"'par' Rule+ 'endpar'", blockRuleParser, this.getName()));
+			parsers.put("Policy", 
+					new GrammarRule("Policy",
+							"'par' Policy+ 'endpar'", blockPolicyParser, this.getName()));
 			
 		}
 		return parsers;

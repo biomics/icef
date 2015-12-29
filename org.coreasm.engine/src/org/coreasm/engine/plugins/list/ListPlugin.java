@@ -316,7 +316,7 @@ public class ListPlugin extends Plugin implements ParserPlugin,
 					return pos;
 				}
 			
-			pos.setNode(null, null, new ListElement(values));
+			pos.setNode(null, null, null, new ListElement(values));
 		}
 		else if (pos instanceof ShiftRuleNode) {
 			ShiftRuleNode node = (ShiftRuleNode)pos;
@@ -356,7 +356,7 @@ public class ListPlugin extends Plugin implements ParserPlugin,
 							updates.add(u1);
 							updates.add(u2);
 
-							pos.setNode(null, updates, null);
+							pos.setNode(null, updates, null, null);
 						} else
 							capi.error("Cannot shift an empty list.", node.getListNode(), interpreter);
 							
@@ -396,7 +396,7 @@ public class ListPlugin extends Plugin implements ParserPlugin,
 						} else 
 							// if any domain is empty, the whole result is also empty
 							if (((Enumerable)domain.getValue()).enumerate().size() == 0) { 
-								pos.setNode(null, null, new ListElement());
+								pos.setNode(null, null, null, new ListElement());
 								return pos;
 							}
 					}
@@ -467,7 +467,7 @@ public class ListPlugin extends Plugin implements ParserPlugin,
 						
 						return guard;
 					} else {
-						pos.setNode(null, null, new ListElement(newList.get(pos)));
+						pos.setNode(null, null, null, new ListElement(newList.get(pos)));
 					}
 				}
 			} 
@@ -498,7 +498,7 @@ public class ListPlugin extends Plugin implements ParserPlugin,
 					
 					return guard;
 				} else {
-					pos.setNode(null, null, new ListElement(newList.get(pos)));
+					pos.setNode(null, null, null, new ListElement(newList.get(pos)));
 					return pos;
 				}
 			}
@@ -506,7 +506,7 @@ public class ListPlugin extends Plugin implements ParserPlugin,
 			return pos;
 		}
 		else if (pos instanceof TrueGuardNode) {
-			pos.setNode(null, null, BooleanElement.TRUE);
+			pos.setNode(null, null, null, BooleanElement.TRUE);
 			return pos;
 		}
 		

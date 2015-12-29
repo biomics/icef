@@ -275,7 +275,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 				} else {
 					pos.setNode(null, new UpdateMultiset(
 							new Update(getSchedulingStatusLocation(agentNode.getValue()), 
-									suspendedFlag, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())), null);
+									suspendedFlag, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())),null, null);
 
 					logger.debug("Suspending agent '{}'.", agentNode.getValue());
 				}
@@ -293,7 +293,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 							
 							pos.setNode(null, new UpdateMultiset(
 									new Update(getSchedulingStatusLocation(agentNode.getValue()), 
-											Element.UNDEF, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())), null);
+											Element.UNDEF, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())), null, null);
 
 							logger.debug("Resuming agent '{}'", agentNode.getValue());
 						} else
@@ -316,7 +316,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 							updates.add(new Update(getSchedulingStatusLocation(agentNode.getValue()), 
 											terminatedFlag, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo()));
 
-							pos.setNode(null, updates, null);
+							pos.setNode(null, updates, null, null);
 
 							logger.debug("Terminating agent '{}'.", agentNode.getValue());
 						}
@@ -331,7 +331,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 								final Location agentsLoc = new Location(AbstractStorage.AGENTS_UNIVERSE_NAME, new ElementList(a));
 								updates.add(new Update(agentsLoc, BooleanElement.FALSE, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo()));
 							}
-							pos.setNode(null, updates, null);
+							pos.setNode(null, updates, null, null);
 
 							logger.debug("Shutting down.");
 						}

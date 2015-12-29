@@ -203,7 +203,7 @@ public class NumberPlugin extends Plugin implements ParserPlugin,
 				try {
 					rangeElement = numberRangeBackgroundElement.getNewValue(
 							from, to, step);
-					pos.setNode(null, null, rangeElement);
+					pos.setNode(null, null, null,rangeElement);
 				} catch (IllegalArgumentException e) {
 					capi.error(e.getMessage(), pos, interpreter);
 				}
@@ -223,9 +223,9 @@ public class NumberPlugin extends Plugin implements ParserPlugin,
 				if (value instanceof Enumerable) {
 					if (sizeFunction == null)
 						sizeFunction = new SizeFunctionElement();
-					pos.setNode(null, null, sizeFunction.getValue((Enumerable)value));
+					pos.setNode(null, null, null, sizeFunction.getValue((Enumerable)value));
 				} else
-					pos.setNode(null, null, Element.UNDEF);
+					pos.setNode(null, null, null, Element.UNDEF);
 			}
 		}
 
@@ -249,7 +249,7 @@ public class NumberPlugin extends Plugin implements ParserPlugin,
 				}
 
 				// result of this node is the number element produced
-				pos.setNode(null, null, ne);
+				pos.setNode(null, null, null, ne);
 			}
 		}
 

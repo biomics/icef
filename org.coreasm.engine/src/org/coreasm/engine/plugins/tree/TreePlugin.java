@@ -418,7 +418,7 @@ implements ParserPlugin, InterpreterPlugin,	VocabularyExtender, TreeOptionsReade
 						updates.addAll(l);
 						updates.add(u);
 
-						pos.setNode(null, updates, null); // treeNode);
+						pos.setNode(null, updates,null, null); // treeNode);
 
 
 						// make list into tree t
@@ -474,7 +474,7 @@ implements ParserPlugin, InterpreterPlugin,	VocabularyExtender, TreeOptionsReade
 				updates.addAll(l);
 				// Pass the information back
 				// pos.setNode(null, updates, parent);
-				pos.setNode(null, updates, null);
+				pos.setNode(null, updates, null, null);
 			} else if (pos instanceof RemoveChildFromRuleNode) {
 				RemoveChildFromRuleNode node = (RemoveChildFromRuleNode) pos;
 
@@ -505,7 +505,7 @@ implements ParserPlugin, InterpreterPlugin,	VocabularyExtender, TreeOptionsReade
 
 
 				// pos.setNode(null, null, pa);
-				pos.setNode(null, updates, null);
+				pos.setNode(null, updates, null, null);
 			} else if (pos instanceof RemoveChildAtRuleNode) {
 				RemoveChildAtRuleNode node = (RemoveChildAtRuleNode) pos;
 				ASTNode firstNode = node.getFirst();
@@ -531,7 +531,7 @@ implements ParserPlugin, InterpreterPlugin,	VocabularyExtender, TreeOptionsReade
 				List<Update> l = InternalUpdate.processInternalUpdates(internalUpdates, interpreter, pos.getScannerInfo());
 				updates.addAll(l);
 
-				pos.setNode(null, updates, null);
+				pos.setNode(null, updates, null, null);
 			} // if
 
 			return pos;

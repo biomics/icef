@@ -352,14 +352,14 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 					capi.warning(PLUGIN_NAME, "TurboASM Plugin: Inconsistent updates computed in sequence. Leaving the sequence", 
 							secondRule, interpreter);
 					//TODO better logging (tell where was it)
-					pos.setNode(null, firstRule.getUpdates(), null);
+					pos.setNode(null, firstRule.getUpdates(), null, null);
 				}
 			} else {
 				// second rule is evaluated...
 				
 				UpdateMultiset composed = storage.compose(firstRule.getUpdates(), secondRule.getUpdates());
 				storage.popState();
-				pos.setNode(null, composed, null);
+				pos.setNode(null, composed, null, null);
 			}
 			
 			
@@ -391,12 +391,12 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 						} catch (EngineError e) {
 							storage.popState();
 							// inconsistent aggregation or updateset
-							pos.setNode(null, composedUpdates.get(pos), null);
+							pos.setNode(null, composedUpdates.get(pos), null, null);
 							composedUpdates.remove(pos);
 						}
 					} else {
 						storage.popState();
-						pos.setNode(null, composedUpdates.get(pos), null);
+						pos.setNode(null, composedUpdates.get(pos), null, null);
 						composedUpdates.remove(pos);
 					}
 				}
@@ -437,18 +437,18 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 								} catch (EngineError e) {
 									storage.popState();
 									// inconsistent aggregation or updateset
-									pos.setNode(null, composedUpdates.get(pos), null);
+									pos.setNode(null, composedUpdates.get(pos), null, null);
 									composedUpdates.remove(pos);
 								}
 							} else {
 								storage.popState();
-								pos.setNode(null, composedUpdates.get(pos), null);
+								pos.setNode(null, composedUpdates.get(pos), null, null);
 								composedUpdates.remove(pos);
 							}
 						}
 					} else {
 						storage.popState();
-						pos.setNode(null, composedUpdates.get(pos), null);
+						pos.setNode(null, composedUpdates.get(pos), null, null);
 						composedUpdates.remove(pos);
 					}
 				} else
@@ -512,12 +512,12 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 									} else
 										throw new EngineError("You should not see this error (TurboASMPlugin:return rule)");
 								} catch (EngineError e) {
-									pos.setNode(null, new UpdateMultiset(), Element.UNDEF);
+									pos.setNode(null, new UpdateMultiset(), null, Element.UNDEF);
 								}
 							} else {
 								// expression is evaluated...
 								storage.popState();
-								pos.setNode(null, new UpdateMultiset(), exp.getValue());
+								pos.setNode(null, new UpdateMultiset(), null, exp.getValue());
 							}
 						} else 
 							if (pos instanceof LocalRuleNode) {
@@ -536,12 +536,12 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 										if (!fNames.contains(u.loc.name))
 											newUpdates.add(u);
 									}
-									pos.setNode(null, newUpdates, rule.getValue());
+									pos.setNode(null, newUpdates, null, rule.getValue());
 								}
 								
 							} else 
 								if (pos instanceof EmptyNode)
-									pos.setNode(null, new UpdateMultiset(), null);
+									pos.setNode(null, new UpdateMultiset(), null, null);
 								else
 									throw new InterpreterException(this.getName() + " cannot interpret the given node.");
 		

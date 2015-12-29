@@ -119,7 +119,7 @@ public class StringPlugin extends Plugin
 				StringElement se = stringBackgroundElement.getNewValue(x);
 					
 				// result of this node is the string element produced
-				pos.setNode(null,null,se);
+				pos.setNode(null,null,null,se);
 	        	}
 		}
 		

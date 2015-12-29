@@ -247,7 +247,7 @@ public class SignalsPlugin extends Plugin implements ParserPlugin,
             SignalElement newSignal = getSignalsMap().get(pos);
             updates.add(new Update(inboxLoc, newSignal, SetPlugin.SETADD_ACTION, interpreter.getSelf(), pos.getScannerInfo()));
             getSignalsMap().remove(pos);
-            pos.setNode(null, updates, null);
+            pos.setNode(null, updates, null, null);
             
             ServiceRequest sr = new ServiceRequest("debuginfo");
             sr.parameters.put("message", "Signal to be sent: " + newSignal);
@@ -301,7 +301,7 @@ public class SignalsPlugin extends Plugin implements ParserPlugin,
 
 			            return onsignalNode.getDoRule();
 					} else {
-						pos.setNode(null, new UpdateMultiset(), null);
+						pos.setNode(null, new UpdateMultiset(), null, null);
 						return pos;
 					}
 				} else {
@@ -320,7 +320,7 @@ public class SignalsPlugin extends Plugin implements ParserPlugin,
 	            Location inboxLoc = new Location(SIG_INBOX_FUNC_NAME, new ElementList(interpreter.getSelf()));
 	            updates.add(new Update(inboxLoc, getSignalsMap().get(pos), SetPlugin.SETREMOVE_ACTION, interpreter.getSelf(), pos.getScannerInfo()));
 	            getSignalsMap().remove(pos);
-	            pos.setNode(null, updates, null);
+	            pos.setNode(null, updates, null, null);
             }
         }
 

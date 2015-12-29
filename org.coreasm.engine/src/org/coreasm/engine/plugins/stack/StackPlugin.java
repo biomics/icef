@@ -203,7 +203,7 @@ public class StackPlugin extends Plugin implements ParserPlugin,
 									interpreter.getSelf(),
 									pos.getScannerInfo());
 							
-							pos.setNode(null, new UpdateMultiset(u1, u2), null);
+							pos.setNode(null, new UpdateMultiset(u1, u2), null, null);
 						} else
 							capi.error("Cannot pop into a non-location.", pos, interpreter);
 					} else
@@ -241,7 +241,7 @@ public class StackPlugin extends Plugin implements ParserPlugin,
 									Update.UPDATE_ACTION, 
 									interpreter.getSelf(),
 									pos.getScannerInfo());
-							pos.setNode(null, new UpdateMultiset(u1), null);
+							pos.setNode(null, new UpdateMultiset(u1), null, null);
 						} else 
 							capi.error("There is no value to push into stack", eNode, interpreter);
 					} else

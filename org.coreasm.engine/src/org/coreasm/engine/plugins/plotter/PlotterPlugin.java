@@ -199,7 +199,7 @@ public class PlotterPlugin extends Plugin implements
 					/* create an update of the form: 'nextPlotFunctions(window, function) := true' */
 					l = new Location(PLOT_LOCATION_NAME, ElementList.create(window, functionNode.getValue(), getStringRep(functionNode)));
 					Update update = new Update(l, BooleanElement.TRUE, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo());
-					pos.setNode(null, new UpdateMultiset(update), null);
+					pos.setNode(null, new UpdateMultiset(update), null, null);
 				} else
 					capi.error("Cannot plot a non-function value.", functionNode, interpreter);
 			}

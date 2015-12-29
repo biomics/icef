@@ -259,7 +259,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 							}
 						} else
 							value = fe.getValue(vList);
-						pos.setNode(loc, null, value);
+						pos.setNode(loc, null, null, value);
 					} else
 						pos = toBeEvaluated;
 				} else { 

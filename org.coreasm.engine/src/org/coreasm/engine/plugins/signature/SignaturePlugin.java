@@ -1027,7 +1027,7 @@ public class SignaturePlugin extends Plugin
             if (functions.keySet().contains(id)) {
                 FunctionElement f = functions.get(id);
                 Location l = new Location(id,args);
-                pos.setNode(l, null, f.getValue(l.args));
+                pos.setNode(l, null, null, f.getValue(l.args));
             }
             else {
             	String msg = "unknown identifier \""+id+"\".";

@@ -36,6 +36,7 @@ import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
@@ -354,7 +355,7 @@ public class GraphPlugin extends Plugin implements VocabularyExtender, ParserPlu
 			if (v != null && v instanceof Enumerable) {
 				Enumerable vs = (Enumerable)v;
 				if (vs.size() == 2) {
-					pos.setNode(null, null, new EdgeElement(vs.enumerate()));
+					pos.setNode(null, null, null,new EdgeElement(vs.enumerate()));
 					return pos;
 				}
 			}
@@ -384,7 +385,7 @@ public class GraphPlugin extends Plugin implements VocabularyExtender, ParserPlu
 						showGraph((GraphElement)g, true, loc);
 				} else
 					showGraph((GraphElement)g, false, null);
-				pos.setNode(null, new UpdateMultiset(), null);
+				pos.setNode(null, new UpdateMultiset(),new TriggerMultiset(), null);
 				return pos;
 			}
 

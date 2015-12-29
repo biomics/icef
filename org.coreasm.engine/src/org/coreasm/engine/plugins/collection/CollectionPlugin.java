@@ -182,6 +182,7 @@ public class CollectionPlugin extends Plugin
 		String gClass = pos.getGrammarClass();
         
 		// if collection related rule
+		//TODO BSL maybe needs to have POLICY_CLASS case?
 		if (gClass.equals(ASTNode.RULE_CLASS))
 		{
 			// add/to rule
@@ -211,7 +212,7 @@ public class CollectionPlugin extends Plugin
 											atNode.getAddElement(),
 											interpreter.getSelf(),
 											pos),
-											
+									null,		
 									null);
 							} catch (InterpreterException e) {
 								capi.error(e.getMessage(), pos, interpreter);
@@ -254,6 +255,7 @@ public class CollectionPlugin extends Plugin
 												rfNode.getRemoveElement(), 
 												interpreter.getSelf(),
 												pos),
+										null,
 										null);
 							} catch (InterpreterException e) {
 								capi.error(e.getMessage(), pos, interpreter);

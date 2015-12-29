@@ -187,7 +187,7 @@ public class QueuePlugin extends Plugin implements ParserPlugin,
 							Update u1 = new Update(locNode.getLocation(), queue.head(), Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo());
 							Update u2 = new Update(queueNode.getLocation(), queue.tail(), Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo());
 							
-							pos.setNode(null, new UpdateMultiset(u1, u2), null);
+							pos.setNode(null, new UpdateMultiset(u1, u2), null, null);
 						} else
 							capi.error("Cannot dequeue into a non-location.", pos, interpreter);
 					} else
@@ -225,7 +225,7 @@ public class QueuePlugin extends Plugin implements ParserPlugin,
 									Update.UPDATE_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo());
-							pos.setNode(null, new UpdateMultiset(u1), null);
+							pos.setNode(null, new UpdateMultiset(u1), null, null);
 						} else 
 							capi.error("There is no value to insert into queue", eNode, interpreter);
 					} else

@@ -186,7 +186,7 @@ public class ForeachRulePlugin extends Plugin implements ParserPlugin,
 	                	    				interpreter.removeEnv(var.getKey());
 	                	    		}
 	                				// [pos] := (undef,{},undef)
-	                    			foreachNode.setNode(null, new UpdateMultiset(), null);
+	                    			foreachNode.setNode(null, new UpdateMultiset(), null, null);
 	                	            return foreachNode;
 	            				}
                 	         	// pos := delta
@@ -230,7 +230,7 @@ public class ForeachRulePlugin extends Plugin implements ParserPlugin,
         				if (updateSet == null)
         					updateSet = new UpdateMultiset();
         				storage.popState();
-        				foreachNode.setNode(null, updateSet, null);
+        				foreachNode.setNode(null, updateSet, null, null);
         	            return foreachNode;
         			}
         			// pos := delta
@@ -291,7 +291,7 @@ public class ForeachRulePlugin extends Plugin implements ParserPlugin,
             }
             else if (foreachNode.getIfnoneRule() != null && foreachNode.getIfnoneRule().isEvaluated()) {
                 // [pos] := (undef,u,undef)
-                pos.setNode(null,foreachNode.getIfnoneRule().getUpdates(),null);
+                pos.setNode(null,foreachNode.getIfnoneRule().getUpdates(),null, null);
                 return pos;
             }
             if (pos == foreachNode.getIfnoneRule()) {

@@ -554,7 +554,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 						v = ((JObjectElement)v).object;
 					*/
 					Update u = createDefUpdate(Type.Store, interpreter.getSelf(), pos.getScannerInfo(), jobj, fieldName, v);
-					pos.setNode(null, new UpdateMultiset(u), null);
+					pos.setNode(null, new UpdateMultiset(u), null, null);
 				}
 				
 			} else 
@@ -623,7 +623,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 				}
 				
 				Update u = createDefUpdate(Type.Invoke, interpreter.getSelf(), pos.getScannerInfo(), loc, jobj, methodName, argsInJava);
-				pos.setNode(null, new UpdateMultiset(u), null);
+				pos.setNode(null, new UpdateMultiset(u), null, null);
 			} else 
 				capi.error("Not a Java object.", jnode, interpreter);
 				
@@ -760,7 +760,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 		}
 		*/
 		Update u = createDefUpdate(Type.Create, self, sinfo, l, className, arguments, self);
-		pos.setNode(null, new UpdateMultiset(u), null);
+		pos.setNode(null, new UpdateMultiset(u), null, null);
 	}
 	
 	/*

@@ -295,6 +295,7 @@ public class IOPlugin extends Plugin implements
 									interpreter.getSelf(),
 									pos.getScannerInfo()
 									)), 
+					null,
 					null);
 		}
 		return pos;
@@ -321,6 +322,7 @@ public class IOPlugin extends Plugin implements
 									(pos.isAppend() ? APPEND_ACTION : WRITE_ACTION),
 									interpreter.getSelf(),
 									pos.getScannerInfo())),
+					null,
 					null);
 		}
 		return pos;

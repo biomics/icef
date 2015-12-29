@@ -263,12 +263,12 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 				return pos.getFirst();
 			if (!pos.getFirst().getNext().isEvaluated())
 				return pos.getFirst().getNext();
-			pos.setNode(null, null, new MapletElement(pos.getFirst().getValue(), pos.getFirst().getNext().getValue()));
+			pos.setNode(null, null, null, new MapletElement(pos.getFirst().getValue(), pos.getFirst().getNext().getValue()));
 		} 
 		else if (pos instanceof MapTermNode) {
 			if (pos.getFirst() == null) {
 				// it's an empty map
-				pos.setNode(null, null, new MapElement());
+				pos.setNode(null, null, null, new MapElement());
 			} else {
 				// evaluate all child nodes (all the maplets)
 				for (ASTNode maplet : pos.getAbstractChildNodes())
@@ -278,7 +278,7 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 				Map<Element, Element> map = new HashMap<Element, Element>();
 				for (ASTNode maplet : pos.getAbstractChildNodes())
 					map.put(maplet.getFirst().getValue(), maplet.getFirst().getNext().getValue());
-				pos.setNode(null, null, new MapElement(map));
+				pos.setNode(null, null, null, new MapElement(map));
 			}
 		}
 		else if (pos instanceof MapCompNode) {
@@ -310,7 +310,7 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 						} else 
 							// if any domain is empty, the whole result is also empty
 							if (((Enumerable)domain.getValue()).enumerate().size() == 0) { 
-								pos.setNode(null, null, new MapElement());
+								pos.setNode(null, null, null, new MapElement());
 								return pos;
 							}
 					}
@@ -381,7 +381,7 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 						
 						return guard;
 					} else {
-						pos.setNode(null, null, new MapElement(newMap.get(pos)));
+						pos.setNode(null, null, null, new MapElement(newMap.get(pos)));
 					}
 				}
 			} 
@@ -413,7 +413,7 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 					
 					return guard;
 				} else {
-					pos.setNode(null, null, new MapElement(newMap.get(pos)));
+					pos.setNode(null, null, null, new MapElement(newMap.get(pos)));
 					return pos;
 				}
 			}
@@ -421,7 +421,7 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 			return pos;
 		}
 		else if (pos instanceof TrueGuardNode) {
-			pos.setNode(null, null, BooleanElement.TRUE);
+			pos.setNode(null, null, null, BooleanElement.TRUE);
 			return pos;
 		}
 		return pos;

@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 
 /** 
@@ -59,6 +60,9 @@ public class ASTNode extends Node implements Serializable {
 	/** updates associated with this node */
 	protected UpdateMultiset updates;
 	
+	/** triggers associated with this node */
+	protected TriggerMultiset triggers;
+	
 	/** a value associated with this node */
 	protected Element value;
 	
@@ -84,6 +88,7 @@ public class ASTNode extends Node implements Serializable {
 		this.location = null;
 		this.value = null;
 		this.updates = null;
+		this.triggers = null;
 		if (this.grammarClass == null)
 			this.grammarClass = "";
 		if (this.grammarRule == null)
@@ -157,6 +162,16 @@ public class ASTNode extends Node implements Serializable {
 	}
 	
 	/**
+	 * Returns the collection of update instructions (if any) generated 
+	 * from evaluting this node. This is <i>updates(node)</i>.
+	 * 
+	 * @return <code>Collection</code> of <code>Update</code>
+	 */
+	public TriggerMultiset getTriggers(){
+		return triggers;
+	}
+	
+	/**
 	 * Returns the value associated with this node.
 	 * 
 	 */
@@ -175,7 +190,7 @@ public class ASTNode extends Node implements Serializable {
 	 * Returns <code>true</code> if this node is evaluated.
 	 */
 	public boolean isEvaluated() {
-		return (updates != null || value != null || location != null);
+		return (updates != null || value != null || location != null || triggers != null);
 	}
 	
 	/**
@@ -186,10 +201,11 @@ public class ASTNode extends Node implements Serializable {
 	 * @param updates collection of updates
 	 * @param value value
 	 */
-	public void setNode(Location loc, UpdateMultiset updates, Element value) {
+	public void setNode(Location loc, UpdateMultiset updates, TriggerMultiset triggers, Element value) {
 		this.location = loc;
 		this.updates = updates;
 		this.value = value;
+		this.triggers = triggers;
 	}
 
 	/**

@@ -237,11 +237,11 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
                 // choose t in s
             	int i = Tools.randInt(elements.size());
                 Element picked = elements.get(i);
-                node.setNode(null, null, picked);
+                node.setNode(null, null, null, picked);
             }
             else {
                 // [pos] := (undef,undef,uu)
-                node.setNode(null, null, Element.UNDEF);
+                node.setNode(null, null, null, Element.UNDEF);
             }
         }
         else {
@@ -295,7 +295,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
                 else {
                 	remained.remove(node.getDomain());
                 	// [pos] := (undef,undef, uu)
-                	node.setNode(null, null, Element.UNDEF);
+                	node.setNode(null, null, null, Element.UNDEF);
                 	return node;
                 }
             }
@@ -323,7 +323,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
                 remained.remove(node.getDomain());
                 
                 // [pos] := (undef,undef, value)
-                node.setNode(null, null, picked);
+                node.setNode(null, null, null, picked);
                 return node;
             }
             else {
@@ -394,7 +394,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     			for (String x : variableMap.keySet())
         			interpreter.removeEnv(x);
     			// [pos] := (undef,{},undef)
-                pos.setNode(null, new UpdateMultiset(), null);
+                pos.setNode(null, new UpdateMultiset(), null, null);
                 return pos;
     		}
     		// pos := gamma
@@ -407,7 +407,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     		for (String x : variableMap.keySet())
     			interpreter.removeEnv(x);
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null);
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null, null);
             return pos;
     	}
 	}
@@ -481,14 +481,14 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     		for (String x : variableMap.keySet())
     			interpreter.removeEnv(x);
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null);
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null, null);
             return pos;
     	}
     	
     	// if rule 'R2' is evaluated
     	else {
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getIfnoneRule().getUpdates(),null);
+            pos.setNode(null,chooseNode.getIfnoneRule().getUpdates(),null, null);
             return pos;
     	}
 	}
@@ -556,7 +556,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     		}
             
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null);
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null,null);
             return pos;
     	}
 	}
@@ -624,7 +624,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     		}
             
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null);
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null, null);
             return pos;
     	}
 
@@ -637,7 +637,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     		}
             
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getIfnoneRule().getUpdates(),null);
+            pos.setNode(null,chooseNode.getIfnoneRule().getUpdates(),null,null);
             return pos;
     	}
         
@@ -666,7 +666,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             	    				interpreter.removeEnv(var.getKey());
             	    		}
             				// [pos] := (undef,{},undef)
-                			chooseNode.setNode(null, new UpdateMultiset(), null);
+                			chooseNode.setNode(null, new UpdateMultiset(), null, null);
             	            return chooseNode;
             			}
                 		// pos := delta
@@ -704,7 +704,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 		if (shouldChoose) {
 			if (chooseNode.getIfnoneRule() == null) {
 				// [pos] := (undef,{},undef)
-				chooseNode.setNode(null, new UpdateMultiset(), null);
+				chooseNode.setNode(null, new UpdateMultiset(),null, null);
 	            return chooseNode;
 			}
 			// pos := delta

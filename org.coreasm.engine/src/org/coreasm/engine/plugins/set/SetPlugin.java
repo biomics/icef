@@ -218,7 +218,7 @@ public class SetPlugin extends Plugin
 					}
 					
 					// result of this node is the set element produced
-					pos.setNode(null,null,new SetElement(elements));
+					pos.setNode(null,null,null, new SetElement(elements));
 				}		
 	        }
 			
@@ -254,7 +254,7 @@ public class SetPlugin extends Plugin
 							} else 
 								// if any domain is empty, the whole result is also empty
 								if (((Enumerable)domain.getValue()).enumerate().size() == 0) { 
-									pos.setNode(null, null, new SetElement());
+									pos.setNode(null, null, null, new SetElement());
 									return pos;
 								}
 						}
@@ -334,7 +334,7 @@ public class SetPlugin extends Plugin
 							
 							return guard;
 						} else {
-							pos.setNode(null, null, new SetElement(newSet.get(pos)));
+							pos.setNode(null, null, null, new SetElement(newSet.get(pos)));
 						}
 							
 					}
@@ -366,7 +366,7 @@ public class SetPlugin extends Plugin
 						
 						return guard;
 					} else {
-						pos.setNode(null, null, new SetElement(newSet.get(pos)));
+						pos.setNode(null, null, null, new SetElement(newSet.get(pos)));
 						return pos;
 					}
 				}
@@ -375,7 +375,7 @@ public class SetPlugin extends Plugin
 			}
 			
 			else if (pos instanceof TrueGuardNode) {
-				pos.setNode(null, null, BooleanElement.TRUE);
+				pos.setNode(null, null, null, BooleanElement.TRUE);
 				return pos;
 			}
 		}

@@ -422,7 +422,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
             	    				interpreter.removeEnv(var.getKey());
             	    		}
             				// [pos] := (undef,undef,ff)
-                			existsExpNode.setNode(null, null, BooleanElement.FALSE);
+                			existsExpNode.setNode(null, null, null, BooleanElement.FALSE);
             	            return existsExpNode;
                     	}
             			remained.put(variable.getValue(), s);
@@ -457,7 +457,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
         	if (shouldChoose) {
         		// all combinations have been evaluated
     			// [pos] := (undef,undef,ff)             
-        		pos.setNode(null,null,BooleanElement.FALSE);
+        		pos.setNode(null,null,null, BooleanElement.FALSE);
         		return pos;
         	}
         }
@@ -483,7 +483,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
                 //considered.remove(existsExpNode.getDomain());
                 
                 // [pos] := (undef,undef,tt)                
-                pos.setNode(null,null,BooleanElement.TRUE);
+                pos.setNode(null,null,null,BooleanElement.TRUE);
                 return pos;
             }
             else {
@@ -549,7 +549,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
             	    				interpreter.removeEnv(var.getKey());
             	    		}
             				// [pos] := (undef,undef,tt)
-                			forallExpNode.setNode(null, null, BooleanElement.TRUE);
+                			forallExpNode.setNode(null, null, null, BooleanElement.TRUE);
             	            return forallExpNode;
                     	}
             			remained.put(variable.getValue(), s);
@@ -584,7 +584,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
         	if (shouldChoose) {
         		// all combinations have been evaluated
     			// [pos] := (undef,undef,tt)             
-        		pos.setNode(null,null,BooleanElement.TRUE);
+        		pos.setNode(null,null,null,BooleanElement.TRUE);
         		return pos;
         	}
         }
@@ -614,7 +614,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
                 //considered.remove(forallExpNode.getDomain());
                 
                 // [pos] := (undef,undef,ff)             
-                pos.setNode(null,null,BooleanElement.FALSE);
+                pos.setNode(null,null,null, BooleanElement.FALSE);
                 return pos;
             }
         }                                                
