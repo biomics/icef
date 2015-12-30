@@ -38,6 +38,13 @@ public class KernelServices implements PluginServiceInterface {
 	public Parser<Node> getRuleParser() {
 		return kernel.getParser("Rule");
 	}
+	
+	/**
+	 * @return the Rule parser hook from the Kernel plugin
+	 */
+	public Parser<Node> getPolicyParser() {
+		return kernel.getParser("Policy");
+	}
 
 	/**
 	 * @return the Guard parser hook from the Kernel plugin

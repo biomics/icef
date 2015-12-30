@@ -1,17 +1,3 @@
-/*  
- * BlockRulePlugin.java    $Revision: 243 $
- * 
- * Last modified on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $ by $Author: rfarahbod $
- *
- * Copyright (C) 2006 George Ma
- * Copyright (C) 2007 Roozbeh Farahbod
- *
- * Licensed under the Academic Free License version 3.0 
- *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
- *
- */
-
 package org.coreasm.engine.plugins.blockpolicy;
 
 import java.util.Collections;
@@ -26,7 +12,6 @@ import org.coreasm.compiler.plugins.blockpolicy.CompilerBlockPolicyPlugin;
 import org.coreasm.engine.EngineTools;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.TriggerMultiset;
-import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.Node;
@@ -134,9 +119,8 @@ public class BlockPolicyPlugin extends Plugin
 	public Map<String, GrammarRule> getParsers() {
 		if (parsers == null) {
 			parsers = new HashMap<String, GrammarRule>();
-			//TODO BSL change to getPolicyParser
 			Parser<Node> policyParser = 
-				((KernelServices)capi.getPlugin("Kernel").getPluginInterface()).getRuleParser();
+				((KernelServices)capi.getPlugin("Kernel").getPluginInterface()).getPolicyParser();
 			
 			ParserTools pTools = ParserTools.getInstance(capi);
 			
