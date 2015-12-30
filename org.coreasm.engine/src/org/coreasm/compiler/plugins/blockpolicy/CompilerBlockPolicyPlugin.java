@@ -2,13 +2,13 @@ package org.coreasm.compiler.plugins.blockpolicy;
 
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.engine.plugin.Plugin;
-import org.coreasm.engine.plugins.blockrule.BlockRulePlugin;
+import org.coreasm.engine.plugins.parrule.ParRulePlugin;
 import org.coreasm.compiler.CodeType;
 import org.coreasm.compiler.CompilerEngine;
 import org.coreasm.compiler.interfaces.CompilerCodePlugin;
 import org.coreasm.compiler.interfaces.CompilerPlugin;
 import org.coreasm.compiler.plugins.blockpolicy.code.ucode.BlockPolicyHandler;
-import org.coreasm.compiler.plugins.blockrule.code.ucode.BlockRuleHandler;
+import org.coreasm.compiler.plugins.parrule.code.ucode.BlockRuleHandler;
 
 /**
  * Provides the block rule.
@@ -41,7 +41,7 @@ public class CompilerBlockPolicyPlugin extends CompilerCodePlugin implements Com
 
 	@Override
 	public String getName() {
-		return BlockRulePlugin.PLUGIN_NAME;
+		return ParRulePlugin.PLUGIN_NAME;
 	}
 
 	@Override

@@ -1302,6 +1302,12 @@ public class Engine implements ControlAPI {
 	public List<InterpreterListener> getInterpreterListeners() {
 		return interpreterListeners;
 	}
+
+	@Override
+	public CoreASMError getError() {
+		
+		return lastError;
+	}
 }
 
 /**

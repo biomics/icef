@@ -1,5 +1,5 @@
 /*  
- * BlockRulePlugin.java    $Revision: 243 $
+ * ParRulePlugin.java    $Revision: 243 $
  * 
  * Last modified on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $ by $Author: rfarahbod $
  *
@@ -12,7 +12,7 @@
  *
  */
 
-package org.coreasm.engine.plugins.blockrule;
+package org.coreasm.engine.plugins.parrule;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ import java.util.Set;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasm.compiler.interfaces.CompilerPlugin;
-import org.coreasm.compiler.plugins.blockrule.CompilerBlockRulePlugin;
+import org.coreasm.compiler.plugins.parrule.CompilerParRulePlugin;
 import org.coreasm.engine.EngineTools;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.UpdateMultiset;
@@ -51,26 +51,26 @@ import org.slf4j.LoggerFactory;
  *  
  */
 
-public class BlockRulePlugin extends Plugin 
+public class ParRulePlugin extends Plugin 
 		implements InterpreterPlugin, ParserPlugin {
  
-	private static final Logger logger = LoggerFactory.getLogger(BlockRulePlugin.class);
+	private static final Logger logger = LoggerFactory.getLogger(ParRulePlugin.class);
 	
 	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 0, 1, "");
 	
-	public static final String PLUGIN_NAME = BlockRulePlugin.class.getSimpleName();
+	public static final String PLUGIN_NAME = ParRulePlugin.class.getSimpleName();
 
 	private Map<String, GrammarRule> parsers = null;
 	
 	private final String[] keywords = {"par", "endpar"};
 	private final String[] operators = {"{", "}"};
 	
-	private final CompilerPlugin compilerPlugin = new CompilerBlockRulePlugin(this);
+	private final CompilerPlugin compilerPlugin = new CompilerParRulePlugin(this);
 	
     public ASTNode interpret(Interpreter interpreter, ASTNode pos) {
         String gRule = pos.getGrammarRule();
         
-        if ((gRule != null) && (gRule.equals("BlockRule"))) {
+        if ((gRule != null) && (gRule.equals("ParRule"))) {
             ASTNode currentRule = pos.getFirst();
    
             // check if all rules in the block have been
@@ -138,7 +138,7 @@ public class BlockRulePlugin extends Plugin
 			
 			ParserTools pTools = ParserTools.getInstance(capi);
 			
-			Parser<Node> blockRuleParser = Parsers.array(  
+			Parser<Node> parRuleParser = Parsers.array(  
 						Parsers.or(
 								pTools.getKeywParser("par", this.getName()),
 								pTools.getOprParser("{")),
@@ -151,9 +151,9 @@ public class BlockRulePlugin extends Plugin
 						@Override
 						public Node map(Object[] from) {
 							ASTNode node = new ASTNode(
-									BlockRulePlugin.PLUGIN_NAME,
+									ParRulePlugin.PLUGIN_NAME,
 									ASTNode.RULE_CLASS,
-									"BlockRule",
+									"ParRule",
 									null,
 									((Node)from[0]).getScannerInfo());
 							addChildren(node, from);
@@ -169,7 +169,7 @@ public class BlockRulePlugin extends Plugin
 					});
 			parsers.put("Rule", 
 					new GrammarRule("Rule",
-							"'par' Rule+ 'endpar'", blockRuleParser, this.getName()));
+							"'par' Rule+ 'endpar'", parRuleParser, this.getName()));
 			
 		}
 		return parsers;

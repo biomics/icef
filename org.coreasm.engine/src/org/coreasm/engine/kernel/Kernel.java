@@ -981,7 +981,7 @@ public class Kernel extends Plugin
     	ParserTools parserTools = ParserTools.getInstance(capi);
     	Parser<Node> idParser = parserTools.getIdParser();
     	
-    	String grammarRule = "RulePolicyTerm | FunctionPolicyTerm | ConstantTerm";
+    	String grammarRule = "FunctionRuleTerm | FunctionPolicyTerm | ConstantTerm";
        	bterms.add(functionPolicyTermParser);
        	bterms.add(refConstantTermParser.lazy());
        	

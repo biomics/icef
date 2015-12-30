@@ -34,7 +34,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 
 	public StandardPlugins() {
 		names = new HashSet<String>();
-		names.add("BlockRulePlugin");
+		names.add("ParRulePlugin");
 		names.add("ChooseRulePlugin");
 		names.add("ConditionalRulePlugin");
 		names.add("ExtendRulePlugin");

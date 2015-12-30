@@ -1,5 +1,5 @@
 /*  
- * BlockRulePlugin.java    $Revision: 243 $
+ * BlockPolicyPlugin.java    $Revision: 243 $
  * 
  * Last modified on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $ by $Author: rfarahbod $
  *
@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** 
- * Plugin for BlockRule construct:
+ * Plugin for BlockPolicy construct:
  *    par
  *       rule_1
  *       rule_2

@@ -548,6 +548,13 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 * @return a list of {@link CoreASMWarning} instances.
 	 */
 	public List<CoreASMWarning> getWarnings();
+	
+	/**
+	 * Returns the error occurred during the last/current step.
+	 * 
+	 * @return a  {@link CoreASMError} instance.
+	 */
+	public CoreASMError getError();
 
 }
 

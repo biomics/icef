@@ -12,7 +12,7 @@
  *
  */
 
-package org.coreasm.engine.plugins.blockrule;
+package org.coreasm.engine.plugins.parrule;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -73,7 +73,7 @@ public class ApplicationTermNode extends ASTNode {
 					if (n instanceof ASTNode)
 						argsList.add((ASTNode)n);
 					else
-						logger.warn("Bad argument node in a FunctionRulePolicyTerm!");
+						logger.warn("Bad argument node in a FunctionRuleTerm!");
 			}
 		}
 		return argsList;

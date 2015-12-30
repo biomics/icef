@@ -38,7 +38,7 @@ public class BasicASMPlugins extends Plugin implements PackagePlugin {
 	
 	public BasicASMPlugins() {
 		names = new HashSet<String>();
-		names.add("BlockRulePlugin");
+		names.add("ParRulePlugin");
 		names.add("ChooseRulePlugin");
 		names.add("ConditionalRulePlugin");
 		names.add("ForallRulePlugin");
