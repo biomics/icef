@@ -1,13 +1,13 @@
-package org.coreasm.compiler.plugins.parrule;
+package org.coreasm.compiler.plugins.blockrule;
 
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.engine.plugin.Plugin;
-import org.coreasm.engine.plugins.parrule.ParRulePlugin;
+import org.coreasm.engine.plugins.blockrule.BlockRulePlugin;
 import org.coreasm.compiler.CodeType;
 import org.coreasm.compiler.CompilerEngine;
 import org.coreasm.compiler.interfaces.CompilerCodePlugin;
 import org.coreasm.compiler.interfaces.CompilerPlugin;
-import org.coreasm.compiler.plugins.parrule.code.ucode.BlockRuleHandler;
+import org.coreasm.compiler.plugins.blockrule.code.ucode.BlockRuleHandler;
 
 /**
  * Provides the block rule.
@@ -16,7 +16,7 @@ import org.coreasm.compiler.plugins.parrule.code.ucode.BlockRuleHandler;
  * @author Spellmaker
  *
  */
-public class CompilerParRulePlugin extends CompilerCodePlugin implements CompilerPlugin{
+public class CompilerBlockRulePlugin extends CompilerCodePlugin implements CompilerPlugin{
 
 	private Plugin interpreterPlugin;
 
@@ -29,7 +29,7 @@ public class CompilerParRulePlugin extends CompilerCodePlugin implements Compile
 	 * Constructs a new instance
 	 * @param parent The interpreter version
 	 */
-	public CompilerParRulePlugin(Plugin parent){
+	public CompilerBlockRulePlugin(Plugin parent){
 		this.interpreterPlugin = parent;
 	}
 	
@@ -40,11 +40,11 @@ public class CompilerParRulePlugin extends CompilerCodePlugin implements Compile
 
 	@Override
 	public String getName() {
-		return ParRulePlugin.PLUGIN_NAME;
+		return BlockRulePlugin.PLUGIN_NAME;
 	}
 
 	@Override
 	public void registerCodeHandlers() throws CompilerException {
-		register(new BlockRuleHandler(), CodeType.U, null, "ParRule", null);
+		register(new BlockRuleHandler(), CodeType.U, null, "BlockRule", null);
 	}
 }

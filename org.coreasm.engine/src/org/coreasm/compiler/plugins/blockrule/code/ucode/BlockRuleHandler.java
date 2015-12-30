@@ -1,4 +1,4 @@
-package org.coreasm.compiler.plugins.parrule.code.ucode;
+package org.coreasm.compiler.plugins.blockrule.code.ucode;
 
 import org.coreasm.compiler.CodeType;
 import org.coreasm.compiler.CompilerEngine;

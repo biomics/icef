@@ -704,10 +704,4 @@ public class SlimEngine implements ControlAPI {
 		
 	}
 
-	@Override
-	public CoreASMError getError() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

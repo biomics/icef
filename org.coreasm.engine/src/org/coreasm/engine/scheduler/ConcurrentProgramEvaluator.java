@@ -182,11 +182,7 @@ public class ConcurrentProgramEvaluator extends FJTask {
 		
 		// if an error occurred in the engine, just return an empty multiset
 		if (capi.hasErrorOccurred()) 
-			{
-				result = new UpdateMultiset();
-				if (logger.isDebugEnabled())
-					logger.debug("There was an error: "+capi.getError());
-			}
+			result = new UpdateMultiset();
 		else
 			result = rootNode.getUpdates();
 		
