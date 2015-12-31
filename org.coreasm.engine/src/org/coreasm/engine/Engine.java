@@ -937,15 +937,15 @@ public class Engine implements ControlAPI {
 							*/
 
 						case emUpdateFailed:
-							if (scheduler.isSingleAgentInconsistent())
-								next(EngineMode.emStepFailed);
-							else {
-								scheduler.handleFailedUpdate();
-								if (scheduler.environmentPresent())
-									next(EngineMode.emSelectingAgents);
-								else
+//							if (scheduler.isSingleAgentInconsistent())
+//								next(EngineMode.emStepFailed);
+//							else {
+//								scheduler.handleFailedUpdate();
+//								if (scheduler.environmentPresent())
+//									next(EngineMode.emSelectingAgents);
+//								else
 									next(EngineMode.emStepFailed);
-							}
+//							}
 							break;
 
 							/*
