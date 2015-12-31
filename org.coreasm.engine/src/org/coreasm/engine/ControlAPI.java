@@ -172,5 +172,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	 * 
 	 */
 	public boolean hasErrorOccurred();
+	
+	public CoreASMError getError();
 }
 

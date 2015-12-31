@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 
 /** 
@@ -114,6 +115,14 @@ public interface Interpreter {
 	 * results).
 	 */
 	public void initProgramExecution();
+	
+	/**
+	 * Prepares the interpreter for evaluation of a program. The most important
+	 * task is clearing the tree of the program (i.e., removing previous evaluation
+	 * results).
+	 * @param policy 
+	 */
+	public void initPolicyExecution(PolicyElement policy);
 
 	/**
 	 * Handles a call to a rule.
@@ -209,28 +218,52 @@ public interface Interpreter {
 	 */
 	public class CallStackElement {
 		public final RuleElement rule;
+		public final PolicyElement policy;
 		
-		protected CallStackElement(RuleElement r) {
+		protected CallStackElement(RuleElement r, PolicyElement p) {
 			rule = r;
+			policy = p;
 		}
 		
 		public String toString() {
-			String params = rule.getParam().toString();
-			params = "(" + params.substring(1, params.length() - 1) + ")";
-			
-			return rule.name + params; 
+			String ruleResult = "null";
+			String policyResult = "null";
+			if (rule!=null){
+				String ruleParams = rule.getParam().toString();
+				ruleParams = "(" + ruleParams.substring(1, ruleParams.length() - 1) + ")";
+				ruleResult =rule.name + ruleParams;
+			}
+			if (policy!=null){
+				String policyParams = policy.getParam().toString();
+				policyParams = "(" + policyParams.substring(1, policyParams.length() - 1) + ")";
+				policyResult =policy.name + policyParams;
+			}
+			return ruleResult +" and "+policyResult; 
 		}
 		
 		public boolean equals(Object o) {
 			if (o instanceof CallStackElement) {
 				CallStackElement cse = (CallStackElement)o;
-				return this.rule.equals(cse.rule);
+				if(rule!=null && cse.rule!=null)
+				{
+					return this.rule.equals(cse.rule);
+				}
+				else if(policy!=null && cse.policy!=null)
+				{
+					return this.policy.equals(cse.policy) ;
+				}
+				else 
+					return false;
+				
 			} else
 				return false;
 		}
 		
 		public int hashCode() {
-			return rule.hashCode();
+			if (rule!=null)
+				return rule.hashCode();
+			else
+				return policy.hashCode();
 		}
 	}
 

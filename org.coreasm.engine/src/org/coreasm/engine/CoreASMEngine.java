@@ -64,6 +64,7 @@ public interface CoreASMEngine extends VersionInfoProvider {
 		emSelectingAgents, 
 //		emChoosingAgents,
 		emRunningAgents,
+		emResolvePolicy,
 		emStepSucceeded, 
 		emStepFailed, 
 		emUpdateFailed, 

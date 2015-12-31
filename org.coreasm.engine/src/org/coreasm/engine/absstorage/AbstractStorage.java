@@ -200,6 +200,12 @@ public interface AbstractStorage extends State {
 	 * of a rule in the state.
 	 */
 	public boolean isRuleName(String token);
+	
+	/**
+	 * Return <code>true<code> if the given name is the name
+	 * of a rule in the state.
+	 */
+	public boolean isPolicyName(String token);
 
 	/**
 	 * @return the last inconsistent updates. Returns <code>null</code>

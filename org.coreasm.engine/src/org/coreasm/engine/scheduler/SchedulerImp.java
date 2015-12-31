@@ -33,11 +33,19 @@ import org.coreasm.engine.absstorage.Enumerable;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.PolicyElement;
+import org.coreasm.engine.absstorage.RuleElement;
+import org.coreasm.engine.absstorage.Trigger;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
+import org.coreasm.engine.interpreter.InterpreterException;
+import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.SchedulerPlugin;
+import org.coreasm.engine.scheduler.DefaultSchedulingPolicy.DefaultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,13 +73,12 @@ public class SchedulerImp implements Scheduler {
 	private Set<Element> agentSet;
 	private Set<Element> selectedAgentSet;
 
-	private Element environmentAgent;
 
 	// private FJTaskRunnerGroup runnerGroup = null;
 	private int batchSize = -1;
 	private int numberOfCPUs = -1;
 	private SchedulingPolicy schedulingPolicy = null;
-	private Iterator<Set<Element>> schedule = null;
+	private Set<Element> schedule = new HashSet<Element>();
 	private boolean shouldPrintProcessorStats = false;
 
 	// TODO: may want to define it as a long
@@ -82,7 +89,8 @@ public class SchedulerImp implements Scheduler {
 
 	private AgentContextMap agentContextMap;
 
-	private String schedulingPolicyName;
+	private Element environmentAgent;
+	private PolicyElement  policy;
 
 	public SchedulerImp(ControlAPI engine) {
 		this.capi = engine;
@@ -97,9 +105,12 @@ public class SchedulerImp implements Scheduler {
 	public void prepareInitialState() throws InvalidSpecificationException {
 		Interpreter interpreter = capi.getInterpreter();
 
-		// prepare the initial agent
+		// prepare the initial agent. This also loads the scheduling policy
 		interpreter.prepareInitialState();
-
+		
+		logger.debug("Scheduling policy '" + policy.getName() + " was loaded");
+		logger.debug("Done preparing the initial state.");
+		//FIXME BSL changed this
 		loadSchedulingPolicy();
 
 		shouldPrintProcessorStats = (capi.getProperty(
@@ -187,22 +198,101 @@ public class SchedulerImp implements Scheduler {
 		 * to resolve the scheduling policy and then check on the universes which
 		 * are the agents that have to be scheduled (put in the schedule)
 		 */
-		schedule = schedulingPolicy.getNewSchedule(schedulingPolicy, agentSet);
-	}
+		//schedule = schedulingPolicy.getNewSchedule(schedulingPolicy, agentSet);
+		}
 
 	public boolean selectAgents() {
+		schedule.add(environmentAgent);
+		//we need to filter scheduled agents that have no program
+		for (Element e : schedule)
+		{
+			if (agentSet.contains(e))
+					selectedAgentSet.add(e);
+		}
 		if (agentsCombinationExists()) {
-			selectedAgentSet = schedule.next();
 			logger.debug("Selected Agent Set is '{}'.", selectedAgentSet);
 			lastSelectedAgents = Collections.unmodifiableSet(selectedAgentSet);
 			return true;
 		} else {
+			logger.debug("Selected Agent Set is empty!");
 			selectedAgentSet = Collections.emptySet();
 			lastSelectedAgents = selectedAgentSet;
 			return false;
 		}
 
 	}
+//	@Override
+//	public boolean selectAgents() {
+//		ArrayList<Element> agentsList = new ArrayList<Element>(agentSet);
+//		return false;
+//	}
+//	
+	/*
+	 * Evaluates the policy.
+	 */
+	public void evaluatePolicy() throws EngineException {
+		AgentContext context = agentContextMap.get(environmentAgent); 
+		Interpreter inter;
+		if (context == null) {
+			context = new AgentContext(environmentAgent);
+			agentContextMap.put(environmentAgent, context);
+			context.interpreter = new InterpreterImp(capi);
+			inter = context.interpreter;
+		} else {
+			inter = context.interpreter;
+			inter.cleanUp();
+		}
+		inter.cleanUp();
+		ASTNode rootNode = null;
+		if (policy.equals(Element.UNDEF)) 
+			throw new EngineException("Policy " + policy.denotation() + " is undefined.");
+		inter.setSelf(environmentAgent);
+		
+		ASTNode policyNode = policy.getBody();
+		rootNode = context.nodeCopyCache.get(policyNode);
+		if (rootNode == null) {
+			rootNode = (ASTNode)inter.copyTree(policyNode); 
+			context.nodeCopyCache.put(policyNode, rootNode);
+		} else {
+			inter.clearTree(rootNode);
+		}
+		
+		inter.setPosition(rootNode);
+		// allow the interpreter to perform internal initialization 
+		// prior to program execution
+		
+		inter.initPolicyExecution(policy);
+		do 
+			inter.executeTree();	
+		while (!(inter.isExecutionComplete() || capi.hasErrorOccurred()));
+		
+		// if rootNode hasn't been evaluated after inter.isExecutionComplete() returned true, the AST has been corrupted
+		if (!rootNode.isEvaluated() && !capi.hasErrorOccurred()) 
+			throw new EngineException("AST of " + policy.denotation() + " has been corrupted.");
+		
+		TriggerMultiset result = null;
+		// if an error occurred in the engine, just return an empty multiset
+		if (capi.hasErrorOccurred()) 
+		{
+			result = new TriggerMultiset();
+			if (logger.isDebugEnabled())
+				logger.debug("Scheduling policy "+policy.getName()+ "caused an error: " + capi.getError().message);
+
+		}
+		else
+		{
+			result = rootNode.getTriggers();
+			if (logger.isDebugEnabled())
+				logger.debug("Scheduling policy "+policy.getName()+ " selects the agents " + result.toString());
+		} 
+		Set<Element> theSet = new HashSet<Element>();
+		for(Trigger t : result)
+		{
+			theSet.add(t.agent);
+		}
+		schedule = theSet; 
+	}
+	
 
 	/*
 	 * Removed from the concurrent version of the engine.
@@ -346,7 +436,7 @@ public class SchedulerImp implements Scheduler {
 	}
 
 	public boolean agentsCombinationExists() {
-		return schedule.hasNext();
+		return selectedAgentSet.size()>0;
 	}
 
 	/*
@@ -445,9 +535,11 @@ public class SchedulerImp implements Scheduler {
 		return size;
 	}
 
-	
-	public void setSchedulingPolicyName(String schedulingPolicyName) {
-		this.schedulingPolicyName = schedulingPolicyName;
+	@Override
+	public void setPolicy(PolicyElement schedulingPolicy) {
+		this.policy = schedulingPolicy;
+		
 	}
+
 
 }

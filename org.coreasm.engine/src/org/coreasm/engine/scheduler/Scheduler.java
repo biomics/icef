@@ -19,6 +19,7 @@ import java.util.Set;
 import org.coreasm.engine.EngineException;
 import org.coreasm.engine.InvalidSpecificationException;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 
@@ -224,5 +225,7 @@ public interface Scheduler {
      * Sets the name of the scheduling policy, to look it up in the abstract storage
      * @param schedulingPolicyName
      */
-	public void setSchedulingPolicyName(String schedulingPolicyName);
+	public void setPolicy(PolicyElement schedulingPolicy);
+
+	public void evaluatePolicy() throws EngineException;
 }

@@ -33,13 +33,10 @@ public class SchedulePrimitiveParseMap extends ParseMap<Object[], Node> {
 		
 		for (int i=0; i < v.length; i++) {
 			if (i == 0)
-				node.addChild("alpha", (Node)v[i]); 	// LHS
+				node.addChild("alpha", (Node)v[i]); 	// ID
 			else
-				if (i == 2) 
-					node.addChild("beta", (Node)v[i]); 	// LHS
-				else
-					if (v[i] != null)
-						node.addChild((Node)v[i]);  	// whitespace or ':='
+				if (v[i] != null)
+					node.addChild((Node)v[i]);  	// whitespace or ':='
 		}
 		return node;
 	}

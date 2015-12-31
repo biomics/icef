@@ -42,6 +42,7 @@ import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.NameElement;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
+import org.coreasm.engine.absstorage.Trigger;
 import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
@@ -49,8 +50,10 @@ import org.coreasm.engine.interpreter.Node.NameNodeTuple;
 import org.coreasm.engine.kernel.ConstantValueNode;
 import org.coreasm.engine.kernel.EnclosedTermNode;
 import org.coreasm.engine.kernel.Kernel;
+import org.coreasm.engine.kernel.MacroCallPolicyNode;
 import org.coreasm.engine.kernel.MacroCallRuleNode;
 import org.coreasm.engine.kernel.RuleOrFuncElementNode;
+import org.coreasm.engine.kernel.SchedulePrimitiveNode;
 import org.coreasm.engine.kernel.UpdateRuleNode;
 import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.plugin.InterpreterPlugin;
@@ -96,6 +99,8 @@ public class InterpreterImp implements Interpreter {
 	private final Map<String, Collection<String>> oprImpPluginsCache = new HashMap<String, Collection<String>>();
 	
 	private final Stack<CallStackElement> ruleCallStack = new Stack<CallStackElement>();
+
+	private final Stack<CallStackElement> policyCallStack = new Stack<CallStackElement>();
 
 	/**
 	 * Creates a new interpreter with a link to the given
@@ -165,9 +170,16 @@ public class InterpreterImp implements Interpreter {
 				// UPDATE: this should not be a problem anymore as unknown identifiers
 				//         used as macro-call rules are prevented and reported by the 
 				//         engine. But in general, this is not a bad guard.
-				if (pos.isEvaluated() && pos.getUpdates() == null)
-					pos.setNode(pos.getLocation(), new UpdateMultiset(),new TriggerMultiset(), pos.getValue());
-				
+				if (pos.isEvaluated()){
+					if(pos.getUpdates() == null){
+						if(pos.getTriggers() == null)
+							pos.setNode(pos.getLocation(), new UpdateMultiset(),new TriggerMultiset(), pos.getValue());
+						else
+							pos.setNode(pos.getLocation(), new UpdateMultiset(),pos.getTriggers(), pos.getValue());
+					}
+					else if(pos.getTriggers() == null)
+							pos.setNode(pos.getLocation(), pos.getUpdates(),new TriggerMultiset(), pos.getValue());
+				}
 				if (pos.isEvaluated())
 					notifyListenersAfterNodeEvaluation(pos);
 				
@@ -234,13 +246,22 @@ public class InterpreterImp implements Interpreter {
 		// I changed it so that if it is evaluated, it won't be evaluated again -- Roozbeh 21-May-2007
 		if (newPos == pos && !pos.isEvaluated()) {
 			// try expressions
-			newPos = interpretExpressions(pos);
+			newPos = interpretExpressions(pos);{
 			if (newPos == pos && !pos.isEvaluated())
 				// if pos was not an expression, try rules
 				newPos = interpretRules(pos);
+				if (newPos == pos && !pos.isEvaluated())
+				{	// if pos was not a rule, try a policy
+					newPos = interpretPolicies(pos);
+					//TODO BSL sometimes these appear to be FunctionRuleTerms?
+					//capi.warning("Policy Interpretation", "InterpretPoliciesResult '" + newPos.toString());
+				}
+			}
+				
 		}
 		// return the new pointer to pos (could be the same as the old one)
 		return newPos;
+		
 	}
 	
 	public boolean isExecutionComplete() {
@@ -267,7 +288,7 @@ public class InterpreterImp implements Interpreter {
 //			throw new EngineError("Cannot set value of 'self' while a program is being evaluated.");
 		this.self = newSelf;
 		ruleCallStack.insertElementAt(
-				new CallStackElement((RuleElement)storage.getChosenProgram(newSelf)), 0);
+				new CallStackElement((RuleElement)storage.getChosenProgram(newSelf), null), 0);
 	}
 	
 	public Element getSelf() {
@@ -671,6 +692,111 @@ public class InterpreterImp implements Interpreter {
 	}
 	
 	/**
+	 * Interpretation of kernel rules
+	 * @throws InterpreterException 
+	 */
+	private ASTNode interpretPolicies(ASTNode pos) throws InterpreterException {
+		final String gRule = pos.getGrammarRule();
+		String x = pos.getToken();
+		// If the current node is a macro call term...
+		if (gRule.equals(Kernel.GR_FUNCTION_POLICY_TERM) || pos instanceof MacroCallPolicyNode) {
+			FunctionPolicyTermNode fpNode = null;
+			PolicyElement thePolicy = null;
+			if (pos instanceof MacroCallPolicyNode) {
+				if (pos.getFirst() instanceof FunctionPolicyTermNode)
+					fpNode = (FunctionPolicyTermNode)pos.getFirst();
+				else if (pos.getFirst() instanceof ConstantValueNode) {
+					ConstantValueNode constantValueNode = (ConstantValueNode)pos.getFirst();
+					if (constantValueNode.getValue() instanceof PolicyElement)
+						thePolicy = (PolicyElement)constantValueNode.getValue();
+				}
+			}
+			else
+				fpNode = (FunctionPolicyTermNode)pos;
+			
+			List<ASTNode> args = pos.getFirst().getAbstractChildNodes();
+			
+			if (thePolicy == null) {
+				if (!fpNode.hasName())
+					throw new CoreASMError("A FunctionPolicyTerm must have a name.", fpNode);
+			
+				// If the current node is of the form 'x' or 'x(...)'
+				x = fpNode.getName();
+				args = fpNode.getArguments();
+				
+				if (storage.isPolicyName(x))
+					thePolicy = policyValue(x);
+				else {
+					try {
+						Element e = getEnv(x);
+						if (e == null)
+							e = storage.getValue(new Location(x, ElementList.NO_ARGUMENT));
+						if (e instanceof PolicyElement)
+							thePolicy = (PolicyElement)e;
+						else if (pos instanceof MacroCallPolicyNode) {
+							if (pos.getFirst().getValue() instanceof PolicyElement)
+								thePolicy = (PolicyElement)pos.getFirst().getValue();
+							else
+								capi.error("\"" + x + "\" is not a policy name.", pos, this);
+						}
+					} catch (InvalidLocationException e) {
+						throw new EngineError("Location is invalid in 'interpretPolicies()'." + 
+								"This cannot happen!");
+					}
+				}
+			}
+
+			if (thePolicy != null) {
+				pos.getFirst().setNode(null, null, null, thePolicy);	// Make sure we can always return from the rule
+				if (args.isEmpty()) { // If the current node is of the form 'x' with no arguments
+					if (pos instanceof MacroCallPolicyNode) {
+						if (thePolicy.getParam().size() == 0)
+							pos = policyCall(thePolicy, thePolicy.getParam(), null, pos);
+						else
+							capi.error("The number of arguments passed to '" + thePolicy.getName() + 
+									"' does not match its signature.", pos, this);
+					}
+					else // treat rules like RuleOrFuncElementNode, so they can be passed to rules as parameter
+						pos.setNode(new Location(AbstractStorage.POLICY_ELEMENT_FUNCTION_NAME, ElementList.create(new NameElement(x))),null,null,thePolicy);
+				} else { // if current node is 'x(...)' (with arguments)
+					if (thePolicy.getParam().size() != args.size())
+						capi.error(	"The number of arguments passed to '" + thePolicy.getName() + 
+									"' does not match its signature.", pos, this);
+					else if (pos instanceof MacroCallPolicyNode)
+						pos = policyCall(thePolicy, thePolicy.getParam(), args, pos);
+					else
+						capi.error("'" + thePolicy.getName() + "'" + " is not a derived function!", pos, this);
+				}
+			}
+		}
+		
+		// If the current node is an assignment
+		else if (pos instanceof SchedulePrimitiveNode) {
+			final ASTNode agent = pos.getFirst();
+			// if agent is not evaluated...
+			if (!agent.isEvaluated())
+				pos = agent;
+			else {
+					Element agentName = agent.getValue();
+					if (agentName != null) {
+						{
+							Trigger trigger = new Trigger(agentName, pos.scannerInfo);
+							pos.setNode(null, null, new TriggerMultiset(trigger), null);
+							//capi.warning("Policy Interpretation", "Trigger obtained: " + trigger.toString());
+						}
+					}
+					else
+						capi.error("Cannot compute policy!", pos, this);
+				}
+		}
+		//If the current node is an 'none'
+		else if (x != null && x.equals("none")) {
+			pos.setNode(null, null,new TriggerMultiset(), null);
+		}
+		return pos;
+	}
+	
+	/**
 	 * Interpretation of operators
 	 * 
 	 * @throws InterpreterException 
@@ -938,7 +1064,7 @@ public class InterpreterImp implements Interpreter {
 		if (wCopy == null || !wCopy.isEvaluated()) {
 			// checking the parameters and the arguments
 			// as their number should match
-			ruleCallStack.push(new CallStackElement(rule));
+			ruleCallStack.push(new CallStackElement(rule, null));
 			if (params != null && args != null && args.size() != params.size()) {  
 				capi.error("Number of arguments does not match the number of parameters.", pos, this);
 				return pos;
@@ -964,6 +1090,64 @@ public class InterpreterImp implements Interpreter {
 			
 			ruleCallStack.pop();
 			notifyOnRuleExit(rule, args, pos, self);
+			
+			unhideEnvVars();
+			return pos;
+		}
+	}
+	
+	/**
+	 * Handles a call to a policy.
+	 * 
+	 * @param policy policy element
+	 * @param params parameters
+	 * @param args arguments
+	 * @param pos current node being interpreted
+	 */
+	public synchronized ASTNode policyCall(PolicyElement policy, List<String> params, List<ASTNode> args, ASTNode pos) {
+		if (logger.isDebugEnabled()) {
+			logger.info("Interpreting policy call '" + policy.name + "' (agent: " + this.getSelf() + ", stack size: " + ruleCallStack.size() + ")");
+		}
+		
+		if (args != null)
+			args = Collections.unmodifiableList(args);
+		
+		Map<String, ASTNode> workCopies = this.workCopies.get(pos);
+		if (workCopies == null) {
+			workCopies = new HashMap<String, ASTNode>();
+			this.workCopies.put(pos, workCopies);
+		}
+		ASTNode wCopy = workCopies.get(policy.getName());
+		// If there is no work copy created for this policy call
+		if (wCopy == null || !wCopy.isEvaluated()) {
+			// checking the parameters and the arguments
+			// as their number should match
+			ruleCallStack.push(new CallStackElement(null, policy));
+			if (params != null && args != null && args.size() != params.size()) {  
+				capi.error("Number of arguments does not match the number of parameters.", pos, this);
+				return pos;
+			}
+			if (wCopy == null)
+				wCopy = copyTreeSub(policy.getBody(), params, args);
+			else
+				updateConstants(wCopy, extractConstants(args));
+			
+			workCopies.put(policy.getName(), wCopy);
+			wCopy.setParent(pos);
+			notifyOnPolicyCall(policy, injectEnvVars(args), pos, self);
+			
+			hideEnvVars();
+			return wCopy; // as new value of 'pos'
+		} else { // if there already is a work copy
+			Element value = wCopy.getValue();
+			if (value == null)	// make sure that the value of the node will not be set to null
+				value = Element.UNDEF;
+			pos.setNode(null, null, wCopy.getTriggers(), value);
+		
+			clearTree(wCopy);
+			
+			ruleCallStack.pop();
+			notifyOnPolicyExit(policy, args, pos, self);
 			
 			unhideEnvVars();
 			return pos;
@@ -1012,11 +1196,10 @@ public class InterpreterImp implements Interpreter {
 		}
 		return constants;
 	}
-	
 	/**
-	 * Notifies the listeners on rule call.
-	 * @param rule the rule that is being called
-	 * @param args the arguments being passed with the call
+	 * Notifies the listeners on rule exit.
+	 * @param rule the rule that is being exited
+	 * @param args the arguments that have been passed with the call
 	 * @param pos the node of the rule
 	 * @param agent the executing agent
 	 */
@@ -1026,9 +1209,22 @@ public class InterpreterImp implements Interpreter {
 	}
 	
 	/**
-	 * Notifies the listeners on rule exit.
-	 * @param rule the rule that is being exited
+	 * Notifies the listeners on policy exit.
+	 * @param policy the policy that is being exited
 	 * @param args the arguments that have been passed with the call
+	 * @param pos the node of the policy
+	 * @param agent the executing agent
+	 */
+	private void notifyOnPolicyExit(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent) {
+		for (InterpreterListener listener : capi.getInterpreterListeners())
+			listener.onPolicyExit(policy, args, pos, agent);
+	}
+	
+
+	/**
+	 * Notifies the listeners on rule call.
+	 * @param rule the rule that is being called
+	 * @param args the arguments being passed with the call
 	 * @param pos the node of the rule
 	 * @param agent the executing agent
 	 */
@@ -1036,6 +1232,19 @@ public class InterpreterImp implements Interpreter {
 		for (InterpreterListener listener : capi.getInterpreterListeners())
 			listener.onRuleCall(rule, args, pos, agent);
 	}
+	
+	/**
+	 * Notifies the listeners on policy call.
+	 * @param rule the rule that is being called
+	 * @param args the arguments being passed with the call
+	 * @param pos the node of the policy
+	 * @param agent the executing agent
+	 */
+	private void notifyOnPolicyCall(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent) {
+		for (InterpreterListener listener : capi.getInterpreterListeners())
+			listener.onPolicyCall(policy, args, pos, agent);
+	}
+	
 
 	/**
 	 * @see Interpreter#copyTreeSub(ASTNode, List, List)
@@ -1251,11 +1460,10 @@ public class InterpreterImp implements Interpreter {
 						capi.error("Scheduling policy '" + schedulingPolicyName + "' should not have parameters.", scheduleNode, this);
 						return;
 					}
-		
 		// creating the first agent to run the initial step
 		Element initAgent = new EnvironmentAgent();
         capi.getScheduler().setEnvironmentAgent(initAgent);
-        capi.getScheduler().setSchedulingPolicyName(schedulingPolicyName);
+        capi.getScheduler().setPolicy(schedulingPolicy);
 		Location l = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));
 		try {
 			// assigning the init rule as the program of the agent
@@ -1287,6 +1495,17 @@ public class InterpreterImp implements Interpreter {
 		notifyInitProgramExecution(self, (RuleElement)storage.getChosenProgram(self));
  	}
 
+	@Override
+	public void initPolicyExecution(PolicyElement policy) {
+		// clearing the program tree is not needed in the
+		// concurrent version of the Engine
+		// clearTree(pos);
+		// removing environment (temporary) values
+		envMap.clear();
+		notifyInitPolicyExecution(self, policy);
+
+	}
+
 	/**
 	 * Notifies the listeners of an initialization of program execution.
 	 * 
@@ -1296,6 +1515,17 @@ public class InterpreterImp implements Interpreter {
 	private void notifyInitProgramExecution(Element agent, RuleElement program) {
 		for (InterpreterListener listener : capi.getInterpreterListeners())
 			listener.initProgramExecution(agent, program);
+	}
+	
+	/**
+	 * Notifies the listeners of an initialization of policy execution.
+	 * 
+	 * @param agent the agent evaluating the policy
+	 * @param policy the policy that is being initialized
+	 */
+	private void notifyInitPolicyExecution(Element agent, PolicyElement policy) {
+		for (InterpreterListener listener : capi.getInterpreterListeners())
+			listener.initPolicyExecution(agent, policy);
 	}
 
     public synchronized void interpret(ASTNode node, Element agent) throws InterpreterException {

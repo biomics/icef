@@ -43,15 +43,8 @@ public class SchedulePrimitiveNode extends ASTNode {
 	/**
 	 * @return the LHS node of the assignment
 	 */
-	public Node getLHS() {
+	public Node getAgent() {
 		return this.getChildNode("alpha");
-	}
-
-	/**
-	 * @return the RHS node of the assignment
-	 */
-	public Node getRHS() {
-		return this.getChildNode("beta");
 	}
 
 }

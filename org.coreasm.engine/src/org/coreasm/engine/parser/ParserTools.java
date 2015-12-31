@@ -16,6 +16,7 @@ import org.codehaus.jparsec.functors.Map;
 import org.coreasm.engine.ControlAPI;
 import org.coreasm.engine.EngineError;
 import org.coreasm.engine.interpreter.ASTNode;
+import org.coreasm.engine.interpreter.FunctionPolicyTermNode;
 import org.coreasm.engine.interpreter.FunctionRuleTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.interpreter.ScannerInfo;
@@ -386,7 +387,7 @@ public class ParserTools
 		}
 		
 		public Node map(Object[] v) {
-			Node node = new FunctionRuleTermNode(((Node)v[0]).getScannerInfo());
+			Node node = new FunctionPolicyTermNode(((Node)v[0]).getScannerInfo());
 			node.addChild("alpha", (Node)v[0]); // ID
 			
 			for (int i=1; i < v.length; i++) {

@@ -1060,4 +1060,9 @@ public class HashStorage implements AbstractStorage {
 		return state.getPolicyElementFunction();
 	}
 
+	@Override
+	public boolean isPolicyName(String token) {
+		return getPolicy(token) != null;
+	}
+
 }

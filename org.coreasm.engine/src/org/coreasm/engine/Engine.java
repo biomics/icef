@@ -727,6 +727,10 @@ public class Engine implements ControlAPI {
 //		final EngineMode engineMode = getEngineMode();
 		return (lastError != null) || (engineMode == EngineMode.emError) ;
 	}
+	
+	public CoreASMError getError() {
+		return lastError;
+	}
 
 	@Override
 	@Deprecated
@@ -951,14 +955,18 @@ public class Engine implements ControlAPI {
 
 						case emStepSucceeded:
 							notifySuccess();
-							next(EngineMode.emIdle);
+							next(EngineMode.emResolvePolicy);
 							break;
 
 						case emStepFailed:
 							notifyFailure();
 							next(EngineMode.emIdle);
 							break;
-
+							
+						case emResolvePolicy:
+							scheduler.evaluatePolicy();
+							next(EngineMode.emIdle);
+							break;
 							/*
 						case emInitializingSelf:
 							storage.setChosenAgent(scheduler.getChosenAgent());

@@ -33,7 +33,7 @@ public class MacroCallPolicyNode extends ASTNode {
 	public MacroCallPolicyNode(ScannerInfo info) {
 		super(
 				Kernel.PLUGIN_NAME,
-				ASTNode.RULE_CLASS,
+				ASTNode.POLICY_CLASS,
 				"MacroCallPolicy",
 				null,
 				info);
