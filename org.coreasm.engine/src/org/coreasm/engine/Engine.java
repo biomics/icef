@@ -906,8 +906,10 @@ public class Engine implements ControlAPI {
 						case emSelectingAgents:
 							if (scheduler.selectAgents())
 								next(EngineMode.emRunningAgents);
-							else
-								next(EngineMode.emStepSucceeded);
+							else{
+								next(EngineMode.emTerminating);
+								logger.warn("Environment stopped.");
+							}
 							break;
 
 						case emRunningAgents:
@@ -939,7 +941,7 @@ public class Engine implements ControlAPI {
 								next(EngineMode.emStepFailed);
 							else {
 								scheduler.handleFailedUpdate();
-								if (scheduler.agentsCombinationExists())
+								if (scheduler.environmentPresent())
 									next(EngineMode.emSelectingAgents);
 								else
 									next(EngineMode.emStepFailed);

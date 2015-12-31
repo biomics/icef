@@ -98,9 +98,7 @@ public class InterpreterImp implements Interpreter {
 	
 	private final Map<String, Collection<String>> oprImpPluginsCache = new HashMap<String, Collection<String>>();
 	
-	private final Stack<CallStackElement> ruleCallStack = new Stack<CallStackElement>();
-
-	private final Stack<CallStackElement> policyCallStack = new Stack<CallStackElement>();
+	private final Stack<CallStackElement> callStack = new Stack<CallStackElement>();
 
 	/**
 	 * Creates a new interpreter with a link to the given
@@ -287,8 +285,20 @@ public class InterpreterImp implements Interpreter {
 //		if (capi.getEngineMode() == CoreASMEngine.EngineMode.emRunningAgents)
 //			throw new EngineError("Cannot set value of 'self' while a program is being evaluated.");
 		this.self = newSelf;
-		ruleCallStack.insertElementAt(
+		callStack.insertElementAt(
 				new CallStackElement((RuleElement)storage.getChosenProgram(newSelf), null), 0);
+	}
+	
+	/**
+	 * Sets the value of 'self' for this interpreter instance.
+	 * Also, inserts current program of agent self into callStack
+	 * 
+	 * @param newSelf
+	 *            reference to the self element of an agent
+	 */
+	public void setSelfForPolicy(Element newSelf, PolicyElement policy) {
+		this.self = newSelf;
+		callStack.insertElementAt(new CallStackElement(null, policy), 0);
 	}
 	
 	public Element getSelf() {
@@ -1048,7 +1058,7 @@ public class InterpreterImp implements Interpreter {
 	 */
 	public synchronized ASTNode ruleCall(RuleElement rule, List<String> params, List<ASTNode> args, ASTNode pos) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Interpreting rule call '" + rule.name + "' (agent: " + this.getSelf() + ", stack size: " + ruleCallStack.size() + ")");
+			logger.debug("Interpreting rule call '" + rule.name + "' (agent: " + this.getSelf() + ", stack size: " + callStack.size() + ")");
 		}
 		
 		if (args != null)
@@ -1064,7 +1074,7 @@ public class InterpreterImp implements Interpreter {
 		if (wCopy == null || !wCopy.isEvaluated()) {
 			// checking the parameters and the arguments
 			// as their number should match
-			ruleCallStack.push(new CallStackElement(rule, null));
+			callStack.push(new CallStackElement(rule, null));
 			if (params != null && args != null && args.size() != params.size()) {  
 				capi.error("Number of arguments does not match the number of parameters.", pos, this);
 				return pos;
@@ -1088,7 +1098,7 @@ public class InterpreterImp implements Interpreter {
 		
 			clearTree(wCopy);
 			
-			ruleCallStack.pop();
+			callStack.pop();
 			notifyOnRuleExit(rule, args, pos, self);
 			
 			unhideEnvVars();
@@ -1106,7 +1116,7 @@ public class InterpreterImp implements Interpreter {
 	 */
 	public synchronized ASTNode policyCall(PolicyElement policy, List<String> params, List<ASTNode> args, ASTNode pos) {
 		if (logger.isDebugEnabled()) {
-			logger.info("Interpreting policy call '" + policy.name + "' (agent: " + this.getSelf() + ", stack size: " + ruleCallStack.size() + ")");
+			logger.info("Interpreting policy call '" + policy.name + "' (agent: " + this.getSelf() + ", stack size: " + callStack.size() + ")");
 		}
 		
 		if (args != null)
@@ -1122,7 +1132,7 @@ public class InterpreterImp implements Interpreter {
 		if (wCopy == null || !wCopy.isEvaluated()) {
 			// checking the parameters and the arguments
 			// as their number should match
-			ruleCallStack.push(new CallStackElement(null, policy));
+			callStack.push(new CallStackElement(null, policy));
 			if (params != null && args != null && args.size() != params.size()) {  
 				capi.error("Number of arguments does not match the number of parameters.", pos, this);
 				return pos;
@@ -1146,7 +1156,7 @@ public class InterpreterImp implements Interpreter {
 		
 			clearTree(wCopy);
 			
-			ruleCallStack.pop();
+			callStack.pop();
 			notifyOnPolicyExit(policy, args, pos, self);
 			
 			unhideEnvVars();
@@ -1554,13 +1564,13 @@ public class InterpreterImp implements Interpreter {
 
 	@SuppressWarnings("unchecked")
 	public synchronized Stack<CallStackElement> getCurrentCallStack() {
-		return (Stack<CallStackElement>)ruleCallStack.clone();
+		return (Stack<CallStackElement>)callStack.clone();
 	}
 
 	public void cleanUp() {
 		interpreters.set(this);
 		envMap.clear();
-		ruleCallStack.clear();
+		callStack.clear();
 	}
 
 }

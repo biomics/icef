@@ -69,6 +69,13 @@ public interface Interpreter {
 	public void setSelf(Element newSelf);
 	
 	/**
+	 * Sets the value of 'self' for this interpreter instance for the evaluation of the policy
+	 * 
+	 * @param newSelf new value of 'self'
+	 */
+	public void setSelfForPolicy(Element environmentAgent, PolicyElement policy);
+	
+	/**
 	 * Returns the current value of self for this interpreter.
 	 * 
 	 */
@@ -266,5 +273,4 @@ public interface Interpreter {
 				return policy.hashCode();
 		}
 	}
-
 }

@@ -161,14 +161,25 @@ public class SchedulerImp implements Scheduler {
 		AbstractStorage storage = capi.getStorage();
 		Map<String, AbstractUniverse> universes = storage.getUniverses();
 		agentSet = new HashSet<Element>();
-		agentSet.add(environmentAgent);
+		Location loc = new Location(
+				AbstractStorage.PROGRAM_FUNCTION_NAME,
+				ElementList.create(environmentAgent));
+		try {
+			if (!storage.getValue(loc).equals(Element.UNDEF))
+				agentSet.add(environmentAgent);
+		} catch (InvalidLocationException e) {
+			capi.error("Cannot get the value of location " + loc
+					+ ".");
+			logger.error("Cannot get the value of location " + loc
+					+ ".");
+		}
 		for (String au: universes.keySet())
     	{
 			FunctionElement agentSetFlat = 	storage.getUniverse(au);
 			if (agentSetFlat instanceof Enumerable) {
 					// pick only those that have a non-null program
 				for (Element agent : ((Enumerable) agentSetFlat).enumerate()) {
-					Location loc = new Location(
+					loc = new Location(
 							AbstractStorage.PROGRAM_FUNCTION_NAME,
 							ElementList.create(agent));
 					try {
@@ -209,12 +220,12 @@ public class SchedulerImp implements Scheduler {
 			if (agentSet.contains(e))
 					selectedAgentSet.add(e);
 		}
-		if (agentsCombinationExists()) {
+		if (environmentPresent()) {
 			logger.debug("Selected Agent Set is '{}'.", selectedAgentSet);
 			lastSelectedAgents = Collections.unmodifiableSet(selectedAgentSet);
 			return true;
 		} else {
-			logger.debug("Selected Agent Set is empty!");
+			logger.debug("Environment is not present anymore!");
 			selectedAgentSet = Collections.emptySet();
 			lastSelectedAgents = selectedAgentSet;
 			return false;
@@ -246,7 +257,7 @@ public class SchedulerImp implements Scheduler {
 		ASTNode rootNode = null;
 		if (policy.equals(Element.UNDEF)) 
 			throw new EngineException("Policy " + policy.denotation() + " is undefined.");
-		inter.setSelf(environmentAgent);
+		inter.setSelfForPolicy(environmentAgent, policy);
 		
 		ASTNode policyNode = policy.getBody();
 		rootNode = context.nodeCopyCache.get(policyNode);
@@ -435,8 +446,8 @@ public class SchedulerImp implements Scheduler {
 		return result;
 	}
 
-	public boolean agentsCombinationExists() {
-		return selectedAgentSet.size()>0;
+	public boolean environmentPresent() {
+		return selectedAgentSet.contains(environmentAgent);
 	}
 
 	/*

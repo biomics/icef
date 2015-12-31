@@ -170,7 +170,7 @@ public interface Scheduler {
      * decide if a failure should be reported or there are other options available.
      * 
      */
-    public boolean agentsCombinationExists();
+    public boolean environmentPresent();
     
     /*
      * Removed from the concurrent version of the engine
