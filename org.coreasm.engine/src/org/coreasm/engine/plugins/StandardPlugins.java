@@ -58,7 +58,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		//names.add("ChoosePolicyPlugin");
 		//names.add("ConditionalPolicyPlugin");
 		//names.add("ExtendPolicyPlugin");
-		//names.add("ForallPolicyPlugin");
+		names.add("ForallPolicyPlugin");
 		//names.add("CasePolicyPlugin");
 		//names.add("LetPolicyPlugin");
 	}

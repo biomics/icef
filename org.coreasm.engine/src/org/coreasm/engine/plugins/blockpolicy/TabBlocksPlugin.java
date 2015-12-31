@@ -78,7 +78,7 @@ public class TabBlocksPlugin extends Plugin implements ExtensionPointPlugin {
     		SpecLine prevLine = null;
     		boolean presLNo = preserveLineNumbers();
     		for (SpecLine line: spec) {
-    			if (line.text.indexOf("rule ") == 0) 
+    			if (line.text.indexOf("policy ") == 0) 
     				ruleReached = true;
     			
     			if (ruleReached) {

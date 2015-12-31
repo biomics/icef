@@ -79,7 +79,7 @@ public class BlockPolicyPlugin extends Plugin
             	// TODO A decision needs to be made on the following pattern
             	//      Do we want to have this pattern in other plugins as well?
             	//TODO BSL fix this to hasTriggers
-            	if (!EngineTools.hasUpdates(interpreter, currentPolicy, capi, logger)) {
+            	if (!EngineTools.hasTriggers(interpreter, currentPolicy, capi, logger)) {
         			return pos;
             	} else {
             		triggers.addAll(currentPolicy.getTriggers());

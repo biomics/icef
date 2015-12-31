@@ -120,5 +120,30 @@ public class EngineTools {
 		} else
 			return true;
 	}
+	
+	/**
+	 * Checks if the given node has updates attached to it. 
+	 * If not, it calls <code>capi.error(String, Node)</code> with 
+	 * an error message. If logger is not <code>null</code>, this method
+	 * also logs an error.
+	 * 
+	 * @param node a node
+	 * @param capi the Control API of the plugin that calls this method
+	 * @param logger a logger instance ({@link Logger}).
+	 * @return <code>true</code> if the node has updates; <code>false</code> otherwise.
+	 * 
+	 * @see Node
+	 * @see Loggers
+	 */
+	public static boolean hasTriggers(Interpreter interpreter, ASTNode node, ControlAPI capi, Logger logger) {
+		if (node.getTriggers() == null) {
+			String msg = "Policy provides no updates.";
+			if (logger != null)
+				logger.error(msg + "[at " + node.getScannerInfo().getPos() + ")");
+			capi.error(msg, node, interpreter);
+			return false;
+		} else
+			return true;
+	}
 
 }
