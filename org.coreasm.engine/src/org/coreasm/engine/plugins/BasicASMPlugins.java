@@ -47,7 +47,7 @@ public class BasicASMPlugins extends Plugin implements PackagePlugin {
 		names.add("PredicateLogicPlugin");
 		names.add("BlockPolicyPlugin");
 		//names.add("ChoosePolicyPlugin");
-		//names.add("ConditionalPolicyPlugin");
+		names.add("ConditionalPolicyPlugin");
 		names.add("ForallPolicyPlugin");
 		//names.add("LetPolicyPlugin");
 	}
