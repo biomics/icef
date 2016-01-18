@@ -307,7 +307,7 @@ public class TestEngineDriver implements Runnable, EngineStepObserver, EngineErr
 		if (lastError != null)
 			message = lastError.showError();
 		else
-			message = "Enginemode should be " + EngineMode.emIdle + " but is " + engine.getEngineMode();
+			message = "Debug Error: Enginemode should be " + EngineMode.emIdle + " but is " + engine.getEngineMode();
 
 		showErrorDialog("CoreASM Engine Error", message);
 

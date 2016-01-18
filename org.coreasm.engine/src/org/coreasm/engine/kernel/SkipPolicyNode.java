@@ -24,7 +24,7 @@ import org.coreasm.engine.interpreter.ScannerInfo;
  * @author  Roozbeh Farahbod
  * 
  */
-public class NonePolicyNode extends ASTNode {
+public class SkipPolicyNode extends ASTNode {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,12 +34,12 @@ public class NonePolicyNode extends ASTNode {
 	 * 
 	 * @param info scanner information
 	 */
-	public NonePolicyNode(ScannerInfo info) {
+	public SkipPolicyNode(ScannerInfo info) {
 		super(
 				Kernel.PLUGIN_NAME,
 				ASTNode.POLICY_CLASS,
-				Kernel.GR_NONE,
-				Kernel.KW_NONE,
+				Kernel.GR_SKIP,
+				Kernel.KW_SKIP,
 				info,
 				Node.KEYWORD_NODE
 				);
@@ -48,7 +48,7 @@ public class NonePolicyNode extends ASTNode {
 	/**
 	 * @see ASTNode#ASTNode(ASTNode)
 	 */
-	public NonePolicyNode(NonePolicyNode node) {
+	public SkipPolicyNode(SkipPolicyNode node) {
 		super(node);
 	}
 	

@@ -268,8 +268,11 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 			engine.loadSpecification(abspathname);
 			engine.waitWhileBusy();
 			if (engine.getEngineMode()!=EngineMode.emIdle) {
-				handleError();
-				return;
+				if (engine.getEngineMode()!= EngineMode.emTerminated)
+				{	
+					handleError();
+					return;
+				}
 			}
 			
 			if (shouldStop)
@@ -329,7 +332,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 				prevupdates=updates;
 				
 			}
-			if (engine.getEngineMode()!=EngineMode.emIdle) 
+			if (engine.getEngineMode()!=EngineMode.emIdle && engine.getEngineMode()!= EngineMode.emTerminated)
 				handleError();
 		} catch (Exception e) {
 			exception = e;
@@ -732,7 +735,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 		if (lastError != null)
 			message = lastError.showError();
 		else
-			message = "Enginemode should be " + EngineMode.emIdle + " but is " + engine.getEngineMode();
+			message = "Error: Enginemode should be " + EngineMode.emIdle + " but is " + engine.getEngineMode();
         
 //		JOptionPane.showMessageDialog(null, message, "CoreASM Engine Error", JOptionPane.ERROR_MESSAGE);
         showErrorDialog("CoreASM Engine Error",message);

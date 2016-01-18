@@ -102,7 +102,7 @@ public class Kernel extends Plugin
 	public static final String GR_RULEDECLARATION_LIST = "RuleDeclarationList";
 	public static final String GR_BOOLEAN_TERM = "BooleanTerm";
 	public static final String GR_SKIP = "Skip";
-	public static final String GR_NONE = "None";
+	//public static final String GR_NONE = "None";
 	public static final String GR_FUNCTION_RULE_TERM = "FunctionRuleTerm";
 	public static final String GR_TUPLE_TERM = "TupleTerm";
 	public static final String GR_RULEELEMENT_TERM = "RuleElementTerm";
@@ -122,7 +122,7 @@ public class Kernel extends Plugin
 	public static final String KW_USE = "use";
 	public static final String KW_INIT = "init";
 	public static final String KW_SKIP = "skip";
-	public static final String KW_NONE = "none"; 
+	//public static final String KW_NONE = "none"; 
 	public static final String KW_TRUE = "true";
 	public static final String KW_FALSE = "false";
 	public static final String KW_UNDEF = "undef";
@@ -175,7 +175,7 @@ public class Kernel extends Plugin
 
     private final String[] keywords = {"CoreASM", "nosignature", "use", "init", "rule", 
     		"ruleelement", "skip", "import", "do", "undef", "true", "false", "self", 
-    		"scheduling", "policy", "policyelement", "schedule", "none"};
+    		"scheduling", "policy", "policyelement", "schedule"};
     private final String[] operators = {"=", "(", ")", ",", "@", ":=", "!!", "#"};
          
     private final Parser.Reference<Node> refTupleTermParser = Parser.newReference();
@@ -606,14 +606,14 @@ public class Kernel extends Plugin
     	parsers.put("Policy", 
     			new GrammarRule("Policy", "", refPolicyParser.lazy(), PLUGIN_NAME));
     	
-    	// Policy : 'none'
-    	Parser<Node> nonePolicyParser = parserTools.getKeywParser("none", PLUGIN_NAME).map(
+    	// Policy : 'skip'
+    	Parser<Node> skipPolicyParser = parserTools.getKeywParser("skip", PLUGIN_NAME).map(
     			new ParseMap<Node, Node>(PLUGIN_NAME) {
 					public Node map(Node v) {
-						return new NonePolicyNode(v.getScannerInfo());
+						return new SkipPolicyNode(v.getScannerInfo());
 					}});
-    	parsers.put("NonePolicy", new GrammarRule("NonePolicy", "'none'", nonePolicyParser, PLUGIN_NAME));
-    	policies.add(nonePolicyParser);
+    	parsers.put("SkipPolicy", new GrammarRule("SkipPolicy", "'skip'", skipPolicyParser, PLUGIN_NAME));
+    	policies.add(skipPolicyParser);
        	
      // SchedulePrimitive : schedule Term
        	Parser<Node> schedulePrimitiveParser = Parsers.array(

@@ -799,8 +799,8 @@ public class InterpreterImp implements Interpreter {
 						capi.error("Cannot compute policy!", pos, this);
 				}
 		}
-		//If the current node is an 'none'
-		else if (x != null && x.equals("none")) {
+		//If the current node is an 'skip'
+		else if (x != null && x.equals("skip")) {
 			pos.setNode(null, null,new TriggerMultiset(), null);
 		}
 		return pos;
