@@ -32,6 +32,7 @@ public class Trigger {
 	
 
 	public final Element agent;
+	public final String action;
 
 	/** originating nodes */
 	public final Set<ScannerInfo> sources;
@@ -46,10 +47,11 @@ public class Trigger {
 	 * one agent if this is an aggregation of other updates.
 	 * @param sources the set of sources (in the specification) that together generated this update.
 	 */
-	public Trigger(Element agent, Set<ScannerInfo> sources) {
-		if (agent == null)
-			throw new NullPointerException("Cannot create a trigger instruction with a null agent");
+	public Trigger(Element agent, String action, Set<ScannerInfo> sources) {
+		if (agent == null || action == null)
+			throw new NullPointerException("Cannot create a trigger instruction with a null agent or action");
 		this.agent = agent;
+		this.action = action;
 		if (sources == null)
 			this.sources = newSourceSet();
 		else
@@ -57,7 +59,7 @@ public class Trigger {
 	}
 	
 	/** 
-	 * Creates a new update instructions.
+	 * Creates a new trigger instructions.
 	 * 
 	 * @param loc location of the update
 	 * @param value new value
@@ -65,11 +67,12 @@ public class Trigger {
 	 * @param agent the agent providing this update.
 	 * @param source the location of the spec where this update is generated
 	 */
-	public Trigger(Element agent, ScannerInfo source) {
-		if (agent == null)
-			throw new NullPointerException("Cannot create an update instruction with a null location, value, or action.");
+	public Trigger(Element agent, String action, ScannerInfo source) {
+		if (agent == null|| action == null)
+			throw new NullPointerException("Cannot create an update instruction with a null agent or action.");
 			//throw new NullPointerException("Cannot create an update instruction with a null agent.");
 			this.agent = agent;
+			this.action = action;
 		if (source == null)
 			this.sources = newSourceSet();
 		else
@@ -88,7 +91,7 @@ public class Trigger {
 		boolean result = false;
 		if (obj instanceof Trigger) {
 			Trigger u = (Trigger)obj;
-			result = this.agent.equals(u.agent);
+			result = this.agent.equals(u.agent)&& this.action.equals(u.action);
 		}
 		return result;
 	}
@@ -100,17 +103,17 @@ public class Trigger {
 	 */
 	@Override
 	public int hashCode() {
-		return agent.hashCode(); 
+		return agent.hashCode()+ action.hashCode(); 
 	}
 	
 	/**
-	 * String view of udpates. Two equal updates should have the same string. 
+	 * String view of triggers. Two equal updates should have the same string. 
 	 *  
 	 * @see Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "(" + agent.toString()+ ")"; 
+		return "(" + agent.toString()+ ", " + action + ")"; 
 	}
 	
 	

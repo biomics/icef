@@ -790,7 +790,7 @@ public class InterpreterImp implements Interpreter {
 					Element agentName = agent.getValue();
 					if (agentName != null) {
 						{
-							Trigger trigger = new Trigger(agentName, pos.scannerInfo);
+							Trigger trigger = new Trigger(agentName, Trigger.TRIGGER_ACTION, pos.scannerInfo);
 							pos.setNode(null, null, new TriggerMultiset(trigger), null);
 							//capi.warning("Policy Interpretation", "Trigger obtained: " + trigger.toString());
 						}
