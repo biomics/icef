@@ -34,6 +34,7 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
 import org.coreasm.engine.plugins.collection.AbstractMapElement;
 import org.coreasm.engine.plugins.collection.ModifiableCollection;
 import org.coreasm.engine.plugins.list.ListElement;
+import org.coreasm.engine.plugins.number.NumberElement;
 
 /** 
  * Map elements
@@ -108,6 +109,45 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 	 */
 	public int intSize() {
 		return map.size();
+	}
+	
+	/**
+	 * decides whether the given map is a probability distribution or not.
+	 */
+	//TODO BSL it may make sense to add an exception that explains why it is not
+	//a probability distribution
+	public boolean isProbabilityDistribution() {
+		boolean result = true;
+		double number = 0;
+		for (Element k : map.keySet())
+		{
+			Element v = map.get(k);
+			if (! (v instanceof NumberElement))
+			{
+				result = false;
+				break;
+			}
+			NumberElement n = (NumberElement) v;
+			double theValue  = n.getValue();
+			if(theValue < 0)
+			{
+				result = false;
+				break;
+			}
+			number += theValue;
+			//FIXME Float comparisons are fun, yay!
+			if(number > 1.001)
+			{
+				result = false;
+				break;
+			}
+		}
+		//FIXME Float comparisons are fun, yay!
+		if(number < 0.999)
+		{
+			result = false;
+		}
+		return result;
 	}
 
 	@Override

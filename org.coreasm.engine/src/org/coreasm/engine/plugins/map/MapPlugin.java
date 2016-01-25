@@ -509,6 +509,7 @@ public class MapPlugin extends Plugin implements ParserPlugin, InterpreterPlugin
 			functions = new HashMap<String, FunctionElement>();
 			functions.put(ToMapFunctionElement.NAME, new ToMapFunctionElement());
 			functions.put(MapToPairsFunctionElement.NAME, new MapToPairsFunctionElement());
+			functions.put(IsProbabilityDistributionFunctionElement.NAME, new IsProbabilityDistributionFunctionElement());
 		}
 		return functions;
 	}
