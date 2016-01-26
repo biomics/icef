@@ -113,41 +113,38 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 	
 	/**
 	 * decides whether the given map is a probability distribution or not.
+	 * @throws Exception 
 	 */
 	//TODO BSL it may make sense to add an exception that explains why it is not
 	//a probability distribution
-	public boolean isProbabilityDistribution() {
-		boolean result = true;
+	public String isProbabilityDistribution() {
 		double number = 0;
 		for (Element k : map.keySet())
 		{
 			Element v = map.get(k);
 			if (! (v instanceof NumberElement))
 			{
-				result = false;
-				break;
+				return "The probability distribution has a non-number value.";
 			}
 			NumberElement n = (NumberElement) v;
 			double theValue  = n.getValue();
 			if(theValue < 0)
 			{
-				result = false;
-				break;
+				return "A probability value should not be negative.";
 			}
 			number += theValue;
 			//FIXME Float comparisons are fun, yay!
 			if(number > 1.001)
 			{
-				result = false;
-				break;
+				return "Probability values should not be greater than 1.";
 			}
 		}
 		//FIXME Float comparisons are fun, yay!
 		if(number < 0.999)
 		{
-			result = false;
+			return "The probabilities in the distribution do not add up to 1.";
 		}
-		return result;
+		return "";
 	}
 
 	@Override

@@ -17,6 +17,7 @@ package org.coreasm.engine.plugins.chooserule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,8 @@ import org.coreasm.engine.parser.ParserTools;
 import org.coreasm.engine.plugin.InterpreterPlugin;
 import org.coreasm.engine.plugin.ParserPlugin;
 import org.coreasm.engine.plugin.Plugin;
+import org.coreasm.engine.plugins.map.MapElement;
+import org.coreasm.engine.plugins.number.NumberElement;
 import org.coreasm.util.Tools;
 
 /** 
@@ -60,15 +63,17 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	public static final String PLUGIN_NAME = ChooseRulePlugin.class.getSimpleName();
 	
 	protected static final String GUARD_NAME = "guard";
+	protected static final String DISTRIBUTION_NAME = "distribution";
 	protected static final String DO_RULE_NAME = "dorule";
 	protected static final String IFNONE_RULE_NAME = "ifnonerule";
 
-	private final String[] keywords = {"choose", "pick", "with", "in", "do", "ifnone", "endchoose"};
+	private final String[] keywords = {"choose", "pick", "with", "in", "do", "ifnone", "endchoose", "using"};
 	private final String[] operators = {};
 	
     private ThreadLocal<Map<Node,List<Element>>> remained;
 
     private Map<String, GrammarRule> parsers;
+	private Set<String> dependencies = null;
     
     private final CompilerPlugin compilerPlugin = new CompilerChooseRulePlugin(this);
     
@@ -86,6 +91,15 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 			}
         };
     }
+    
+    @Override
+	public Set<String> getDependencyNames() {
+		if (dependencies == null) {
+			dependencies = new HashSet<String>();
+			dependencies.add("MapPlugin");
+		}
+		return dependencies;
+	}
 
     private Map<Node, List<Element>> getRemainedMap() {
     	return remained.get();
@@ -129,7 +143,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 			ParserTools npTools = ParserTools.getInstance(capi);
 			Parser<Node> idParser = npTools.getIdParser();
 			
-			// ChooseRule : 'choose' ID 'in' Term (',' ID 'in' Term)* ('with' Guard)? 'do' Rule ('ifnone' Rule)? ('endchoose')?
+			// ChooseRule : 'choose' ID 'in' Term (',' ID 'in' Term)* ('with' Guard)? ('using' Term)? 'do' Rule ('ifnone' Rule)? ('endchoose')?
 			Parser<Node> chooseRuleParser = Parsers.array(
 					npTools.getKeywParser("choose", PLUGIN_NAME),
 					npTools.csplus(Parsers.array(idParser,
@@ -138,6 +152,10 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 					npTools.seq(
 							npTools.getKeywParser("with", PLUGIN_NAME),
 							guardParser).optional(),
+					//TODO BSL Here is where we put the distribution
+					npTools.seq(
+							npTools.getKeywParser("using", PLUGIN_NAME),
+							termParser).optional(),
 					npTools.getKeywParser("do", PLUGIN_NAME),
 					ruleParser, 
 					npTools.seq(
@@ -147,7 +165,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 					new ChooseParseMap());
 			parsers.put("Rule", 
 					new GrammarRule("Rule",
-							"'choose' ID 'in' Term (',' ID 'in' Term)* ('with' Guard)? 'do' Rule ('ifnone' Rule)? ('endchoose')?", chooseRuleParser, this.getName()));
+							"'choose' ID 'in' Term (',' ID 'in' Term)* ('with' Guard)? ('using' Term)? 'do' Rule ('ifnone' Rule)? ('endchoose')?", chooseRuleParser, this.getName()));
 			
 
 			// PickExp: 'pick' ID 'in' Term 'with' Term
@@ -157,6 +175,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 						idParser,
 						npTools.getKeywParser("in", PLUGIN_NAME),
 						termParser,
+						//TODO BSL test first if works for choose rule then put it here
 						npTools.seq(
 								npTools.getKeywParser("with", PLUGIN_NAME),
 								termParser).optional()
@@ -187,22 +206,42 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             // Here, we follow the specification of the choose rule
             // and for a more readable code, we clearly distinguish between various
             // forms of choose
-            
-            // CASE 1. 'choose X in E do R'  
-            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() == null) 
-            	return interpretChooseRule_NoCondition_NoIfnone(interpreter, pos);
-   
-            // CASE 2. 'choose X in E do R1 ifnone R2'
-            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() != null)
-            	return interpretChooseRule_NoCondition_WithIfnone(interpreter, pos);
-     
-            // CASE 3. 'choose X in E with C do R'  
-            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() == null) 
-            	return interpretChooseRule_WithCondition_NoIfnone(interpreter, pos);
-   
-            // CASE 4. 'choose X in E with C do R1 ifnone R2'
-            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() != null)
-            	return interpretChooseRule_WithCondition_WithIfnone(interpreter, pos);
+            if (chooseNode.getDistribution() == null)
+            {
+	            // CASE 1. 'choose X in E do R'  
+	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() == null ) 
+	            	return interpretChooseRule_NoCondition_NoIfnone(interpreter, pos);
+	   
+	            // CASE 2. 'choose X in E do R1 ifnone R2'
+	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() != null)
+	            	return interpretChooseRule_NoCondition_WithIfnone(interpreter, pos);
+	     
+	            // CASE 3. 'choose X in E with C do R'  
+	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() == null) 
+	            	return interpretChooseRule_WithCondition_NoIfnone(interpreter, pos);
+	   
+	            // CASE 4. 'choose X in E with C do R1 ifnone R2'
+	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() != null)
+	            	return interpretChooseRule_WithCondition_WithIfnone(interpreter, pos);
+            }
+            else
+            {
+	            // CASE 1. 'choose X in E using D do R'  
+	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() == null ) 
+	            	return interpretChooseRule_NoCondition_NoIfnone_WithDistribution(interpreter, pos);
+	   
+	            // CASE 2. 'choose X in E do R1 ifnone R2'
+	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() != null)
+	            	return interpretChooseRule_NoCondition_WithIfnone(interpreter, pos);
+	     
+	            // CASE 3. 'choose X in E with C do R'  
+	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() == null) 
+	            	return interpretChooseRule_WithCondition_NoIfnone(interpreter, pos);
+	   
+	            // CASE 4. 'choose X in E with C do R1 ifnone R2'
+	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() != null)
+	            	return interpretChooseRule_WithCondition_WithIfnone(interpreter, pos);
+            }
         }
         else if (pos instanceof PickExpNode) {
         	PickExpNode node = (PickExpNode)pos;
@@ -339,6 +378,130 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         return node;
     }
     
+	/*
+     * Interpreting rule of the form: 'choose x in E do R'
+     */
+	private ASTNode interpretChooseRule_NoCondition_NoIfnone_WithDistribution(Interpreter interpreter, ASTNode pos) {
+        ChooseRuleNode chooseNode = (ChooseRuleNode) pos;
+        Map<String, ASTNode> variableMap = null;
+        
+        try {
+        	variableMap = chooseNode.getVariableMap();
+        }
+        catch (CoreASMError e) {
+        	capi.error(e);
+        	return pos;
+        }
+        
+        // evaluate all domains
+        for (ASTNode domain : variableMap.values()) {
+        	if (!domain.isEvaluated())
+        		return domain;
+        }
+        
+     // evaluate probability distribution
+        if (!chooseNode.getDistribution().isEvaluated())
+        		return chooseNode.getDistribution();
+
+        
+    	// if rule is not evaluated
+    	if (!chooseNode.getDoRule().isEvaluated()) {
+    		boolean none = false;
+    		for (Entry<String, ASTNode> variable : variableMap.entrySet()) {
+	    		if (variable.getValue().getValue() instanceof Enumerable) {
+	            	// s := enumerate(v)
+	    			Enumerable domain = (Enumerable) variable.getValue().getValue();
+	    			List<Element> s = null;
+	    			if (domain.supportsIndexedView())
+	    				s = domain.getIndexedView();
+	    			else 
+	    				s = new ArrayList<Element>(((Enumerable) variable.getValue().getValue()).enumerate());
+	                if (s.size() > 0) {
+	                	//TODO BSL here is where we have to modify the choice under a probability distribution
+	                	//TODO BSL first, we need to obtain the probability distribution
+	                	MapElement distribution = (MapElement) chooseNode.getDistribution().getValue();
+	                	String res = distribution.isProbabilityDistribution();
+	                	
+	                	if (!res.equals(""))
+	                	{
+	                		 capi.error("Cannot choose because the given map is not a probability distribution. " +
+	     	                		"Reason: "+ res, chooseNode.getDistribution(), interpreter);
+	     	                return pos;
+	                	}
+	                	//TODO BSL we now produce the commulative function of the distribution
+	                	Map<Element, Element> theMap = distribution.getMap();
+	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+	                	Double initialValue = new Double(0);
+	                	Double finalValue = new Double(0);
+	                	double total =0;
+	                	StringBuilder sb = new StringBuilder();
+	                	for(Element key : theMap.keySet())
+	                	{
+	                		initialValue = finalValue;
+	                		NumberElement n = (NumberElement)theMap.get(key);
+	                		finalValue = new Double(total+n.doubleValue());
+	                		total+=n.doubleValue();
+	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+	                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
+	                	}
+                		// choose a number greater than 0 and smaller than the total
+	                	double d = 2;
+	                	while(d==0 || d>total){
+	                		d = Tools.randDouble();
+	                	}
+                		//now, find the element that corresponds to that interval
+	                	Element chosen = null;
+	                	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+	                	{
+	                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
+	                		{
+	                			chosen = cummulativeFunction.get(key);
+	                			break;
+	                		}
+	                	}
+	                	if(chosen == null)
+                		{
+                			//This should not happen
+                			capi.error("There is an error in the implementation of the probability distribution. "
+                					+ "the chosen number was "+d+" the total is "+total+" and the map is "+sb.toString());
+        	                return pos;
+                		}                		
+	                	// AddEnv(x,t)s
+                		interpreter.addEnv(variable.getKey(), chosen);
+	                }
+	                else {
+	                	none = true;
+	                	interpreter.addEnv(variable.getKey(), Element.UNDEF);
+	                }
+	            }
+	            else {
+	                capi.error("Cannot choose from " + Tools.sizeLimit(variable.getValue().getValue().denotation()) + ". " +
+	                		"Choose domain should be an enumerable element.", variable.getValue(), interpreter);
+	                return pos;
+	            }
+    		}
+    		if (none) {
+    			for (String x : variableMap.keySet())
+        			interpreter.removeEnv(x);
+    			// [pos] := (undef,{},undef)
+                pos.setNode(null, new UpdateMultiset(), null, null);
+                return pos;
+    		}
+    		// pos := gamma
+            return chooseNode.getDoRule();
+    	}
+    	
+    	// if rule 'R' is evaluated as well
+    	else {
+            // RemoveEnv(x)
+    		for (String x : variableMap.keySet())
+    			interpreter.removeEnv(x);
+            // [pos] := (undef,u,undef)
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null, null);
+            return pos;
+    	}
+	}
+	
 	/*
      * Interpreting rule of the form: 'choose x in E do R'
      */
@@ -752,6 +915,8 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 				String token = child.getToken();
 		        if (token.equals("with"))
 		        	nextChildName = ChooseRulePlugin.GUARD_NAME;
+		        else if (token.equals("using"))
+		        	nextChildName = ChooseRulePlugin.DISTRIBUTION_NAME;
 		        else if (token.equals("do"))
 		        	nextChildName = ChooseRulePlugin.DO_RULE_NAME;
 		        else if (token.equals("ifnone"))
@@ -761,5 +926,18 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 			}
 		}
 
+	}
+	
+	public class Pair<L,R> {
+	    private L l;
+	    private R r;
+	    public Pair(L l, R r){
+	        this.l = l;
+	        this.r = r;
+	    }
+	    public L getL(){ return l; }
+	    public R getR(){ return r; }
+	    public void setL(L l){ this.l = l; }
+	    public void setR(R r){ this.r = r; }
 	}
 }

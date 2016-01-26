@@ -105,6 +105,13 @@ public class Tools {
 	}
 	
 	/**
+	 * Returns a random double number in [0 .. 1].
+	 */
+	public static double randDouble() {
+		return random.nextDouble();
+	}
+	
+	/**
 	 * Returns a String version of the given integer
 	 * in an ordered form; i.e., "1st", "32nd", "54th", etc.
 	 * 
