@@ -437,6 +437,12 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	StringBuilder sb = new StringBuilder();
 	                	for(Element key : theMap.keySet())
 	                	{
+	                		if (!domain.contains(key))
+	                		{
+	                			//TODO check if all elements in the keyset are elements of s
+	                			capi.error("The probability distribution is not defined over "+Tools.sizeLimit(variable.getValue().getValue().denotation()), variable.getValue(), interpreter);
+	        	                return pos;
+	                		}
 	                		initialValue = finalValue;
 	                		NumberElement n = (NumberElement)theMap.get(key);
 	                		finalValue = new Double(total+n.doubleValue());
