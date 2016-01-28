@@ -249,11 +249,11 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
              }
         	 else
         	 {
-        		 //TODO BSL pick cases with distribution
+        		 //BSL pick cases with distribution
         		 if (node.getCondition() == null) 
  	        		return interpretPickExpression_NoCondition_WithDistribution(interpreter, node);
  	        	else
- 	        		return interpretPickExpression_WithCondition(interpreter, node);
+ 	        		return interpretPickExpression_WithCondition_WithDistribution(interpreter, node);
         	 }
         }
 
@@ -332,7 +332,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             	}
             	// BSL we now produce the commulative function of the distribution
             	Map<Element, Element> theMap = distribution.getMap();
-            	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+            	HashMap<Pair<Double,Double>,Element> cumulativeeFunction = new HashMap<Pair<Double,Double>, Element>();
             	Double initialValue = new Double(0);
             	Double finalValue = new Double(0);
             	double total =0;
@@ -352,7 +352,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             		initialValue = finalValue;
             		finalValue = new Double(total+n.doubleValue());
             		total+=n.doubleValue();
-            		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+            		cumulativeeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
             		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
             	}
         		// choose a number greater than 0 and smaller than the total
@@ -362,11 +362,11 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             	}
         		//now, find the element that corresponds to that interval
             	Element chosen = null;
-            	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+            	for(Pair<Double,Double> key : cumulativeeFunction.keySet())
             	{
             		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
             		{
-            			chosen = cummulativeFunction.get(key);
+            			chosen = cumulativeeFunction.get(key);
             			break;
             		}
             	}
@@ -481,6 +481,168 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         return node;
     }
     
+    private ASTNode interpretPickExpression_WithCondition_WithDistribution(Interpreter interpreter, PickExpNode node) {
+        String x = node.getVariable().getToken();
+        
+        Map<Node, List<Element>> remained = getRemainedMap();
+        
+		// if domain 'E' is not evaluated
+        if (!node.getDomain().isEvaluated()) {
+            // considered(beta) := {}
+        	remained.remove(node.getDomain());
+            // pos := beta
+            return node.getDomain();
+        }
+        
+        // evaluate probability distribution
+        if (!node.getDistribution().isEvaluated())
+        		return node.getDistribution();
+
+    	// if domain 'E' is evaluated, but condition 'C' is not evaluated
+    	else if (!node.getCondition().isEvaluated()) {
+            if (node.getDomain().getValue() instanceof Enumerable) {
+            	// s := enumerate(v)
+                // s := enumerate(v)/considered(beta)
+            	List<Element> s = null;
+            	Enumerable domain = (Enumerable)node.getDomain().getValue();
+        		s = remained.get(node.getDomain());
+            	if (s == null) {
+            		if (domain.supportsIndexedView())
+            			s = new ArrayList<Element>(domain.getIndexedView());
+            		else 
+                    	s = new ArrayList<Element>(((Enumerable) node.getDomain().getValue()).enumerate());
+            		remained.put(node.getDomain(), s);
+            	}
+                if (s.size() > 0) {
+                	// BSL here is where we have to modify the choice under a probability distribution
+                	// BSL first, we need to obtain the probability distribution
+                	MapElement distribution = (MapElement) node.getDistribution().getValue();
+                	String res = distribution.isProbabilityDistribution();
+                	
+                	if (!res.equals(""))
+                	{
+                		 capi.error("Cannot choose because the given map is not a probability distribution. " +
+     	                		"Reason: "+ res, node.getDistribution(), interpreter);
+                		 node.setNode(null, null, null, Element.UNDEF);
+                     	return node;
+                	}
+                	// BSL we now produce the commulative function of the distribution
+                	Map<Element, Element> theMap = distribution.getMap();
+                	HashMap<Pair<Double,Double>,Element> cumulativeeFunction = new HashMap<Pair<Double,Double>, Element>();
+                	Double initialValue = new Double(0);
+                	Double finalValue = new Double(0);
+                	double total =0;
+                	StringBuilder sb = new StringBuilder();
+                	for(Element key : theMap.keySet())
+                	{
+                		if (!domain.contains(key))
+                		{
+                			//check if all elements in the keyset are elements of the domain
+                			capi.error("We are choosing "+key+" , but the probability distribution is not defined over "+Tools.sizeLimit(domain.toString()));
+                			node.setNode(null, null, null, Element.UNDEF);
+                        	return node;
+                		}
+                		if (!s.contains(key))
+                		{
+                			//This happens when we try to choose an element that does not satisfy the given condition
+                			//thus, we don't add it to the cumulativee function
+                			continue;
+                		}
+                		NumberElement n = (NumberElement)theMap.get(key);
+                		if(n.doubleValue()==0)
+                			continue;
+                		initialValue = finalValue;
+                		finalValue = new Double(total+n.doubleValue());
+                		total+=n.doubleValue();
+                		cumulativeeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
+                	}
+                	if (cumulativeeFunction.isEmpty())
+                	{
+                		//This happens when we could not find an element that satisfied the condition and had a probability greater than 0 to be chosen
+                		//Elements cannot be chosen because the ones that satisfy the condition have probability zero!
+                		node.setNode(null, null, null, Element.UNDEF);
+                    	return node;
+                	}
+            		// choose a number greater than 0 and smaller than the total
+                	double d = 2;
+                	while(d==0 || d>total){
+                		d = Tools.randDouble();
+                	}
+            		//now, find the element that corresponds to that interval
+                	Element chosen = null;
+                	for(Pair<Double,Double> key : cumulativeeFunction.keySet())
+                	{
+                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
+                		{
+                			chosen = cumulativeeFunction.get(key);
+                			s.remove(chosen);
+                			break;
+                		}
+                	}
+                	if(chosen == null)
+            		{
+            			//This should not happen
+            			capi.error("There is an error in the implementation of the probability distribution. "
+            					+ "the chosen number was "+d+" the total is "+total+" and the map is "+sb.toString());
+            			node.setNode(null, null, null, Element.UNDEF);
+                    	return node;
+            		}                		
+                    // AddEnv(x,t)s
+                    interpreter.addEnv(x, chosen);
+                    // considered := considered union {t}
+                	s.remove(chosen);
+                    //considered.get(chooseNode.getDomain()).add(chosen);
+                    // pos := gamma
+                    return node.getCondition();
+                }
+                else {
+                	remained.remove(node.getDomain());
+                	// [pos] := (undef,undef, uu)
+                	node.setNode(null, null, null, Element.UNDEF);
+                	return node;
+                }
+            }
+            else {
+                capi.error("Cannot pick from " + Tools.sizeLimit(node.getDomain().getValue().denotation()) + ". " +
+                		"Pick domain should be an enumerable element.", node.getDomain(), interpreter);
+            }
+    	}
+
+    	// if domain 'E' is evaluated and condition 'C' is evaluated
+    	else {
+            boolean value = false;            
+            if (node.getCondition().getValue() instanceof BooleanElement) {
+                value = ((BooleanElement) node.getCondition().getValue()).getValue();
+            }
+            else {
+                capi.error("Value of pick condition is not Boolean.", node.getCondition(), interpreter);
+                return node;
+            }
+            
+            if (value) {
+            	Element picked = interpreter.getEnv(x);
+                // RemoveEnv(x)
+                interpreter.removeEnv(x);
+                remained.remove(node.getDomain());
+                
+                // [pos] := (undef,undef, value)
+                node.setNode(null, null, null, picked);
+                return node;
+            }
+            else {
+                // ClearTree(gamma)
+                interpreter.clearTree(node.getCondition());
+                // RemoveEnv(x)
+                interpreter.removeEnv(x);
+                // pos := beta
+                return node.getDomain();
+            }
+    	}
+        
+        return node;
+    }
+    
 	/*
      * Interpreting rule of the form: 'choose x in E do R'
      */
@@ -534,7 +696,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	}
 	                	// BSL we now produce the commulative function of the distribution
 	                	Map<Element, Element> theMap = distribution.getMap();
-	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+	                	HashMap<Pair<Double,Double>,Element> cumulativeeFunction = new HashMap<Pair<Double,Double>, Element>();
 	                	Double initialValue = new Double(0);
 	                	Double finalValue = new Double(0);
 	                	double total =0;
@@ -553,7 +715,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                		initialValue = finalValue;
 	                		finalValue = new Double(total+n.doubleValue());
 	                		total+=n.doubleValue();
-	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+	                		cumulativeeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
 	                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
 	                	}
                 		// choose a number greater than 0 and smaller than the total
@@ -563,11 +725,11 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	}
                 		//now, find the element that corresponds to that interval
 	                	Element chosen = null;
-	                	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+	                	for(Pair<Double,Double> key : cumulativeeFunction.keySet())
 	                	{
 	                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
 	                		{
-	                			chosen = cummulativeFunction.get(key);
+	                			chosen = cumulativeeFunction.get(key);
 	                			break;
 	                		}
 	                	}
@@ -819,7 +981,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	}
 	                	// BSL we now produce the commulative function of the distribution
 	                	Map<Element, Element> theMap = distribution.getMap();
-	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+	                	HashMap<Pair<Double,Double>,Element> cumulativeeFunction = new HashMap<Pair<Double,Double>, Element>();
 	                	Double initialValue = new Double(0);
 	                	Double finalValue = new Double(0);
 	                	double total =0;
@@ -838,7 +1000,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                		initialValue = finalValue;
 	                		finalValue = new Double(total+n.doubleValue());
 	                		total+=n.doubleValue();
-	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+	                		cumulativeeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
 	                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
 	                	}
                 		// choose a number greater than 0 and smaller than the total
@@ -848,11 +1010,11 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	}
                 		//now, find the element that corresponds to that interval
 	                	Element chosen = null;
-	                	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+	                	for(Pair<Double,Double> key : cumulativeeFunction.keySet())
 	                	{
 	                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
 	                		{
-	                			chosen = cummulativeFunction.get(key);
+	                			chosen = cumulativeeFunction.get(key);
 	                			break;
 	                		}
 	                	}
@@ -1343,7 +1505,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	}
 	                	// BSL we now produce the commulative function of the distribution
 	                	Map<Element, Element> theMap = distribution.getMap();
-	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+	                	HashMap<Pair<Double,Double>,Element> cumulativeeFunction = new HashMap<Pair<Double,Double>, Element>();
 	                	Double initialValue = new Double(0);
 	                	Double finalValue = new Double(0);
 	                	double total =0;
@@ -1360,7 +1522,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                		if (!s.contains(key))
 	                		{
 	                			//This happens when we try to choose an element that does not satisfy the given condition
-	                			//thus, we don't add it to the cummulative function
+	                			//thus, we don't add it to the cumulativee function
 	                			continue;
 	                		}
 	                		NumberElement n = (NumberElement)theMap.get(key);
@@ -1369,10 +1531,10 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                		initialValue = finalValue;
 	                		finalValue = new Double(total+n.doubleValue());
 	                		total+=n.doubleValue();
-	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+	                		cumulativeeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
 	                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
 	                	}
-	                	if (cummulativeFunction.isEmpty())
+	                	if (cumulativeeFunction.isEmpty())
 	                	{
 	                		//This happens when we could not find an element that satisfied the condition and had a probability greater than 0 to be chosen
 	                		//Elements cannot be chosen because the ones that satisfy the condition have probability zero!
@@ -1389,11 +1551,11 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	}
                 		//now, find the element that corresponds to that interval
 	                	Element chosen = null;
-	                	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+	                	for(Pair<Double,Double> key : cumulativeeFunction.keySet())
 	                	{
 	                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
 	                		{
-	                			chosen = cummulativeFunction.get(key);
+	                			chosen = cumulativeeFunction.get(key);
 	                			s.remove(chosen);
 	                			break;
 	                		}
