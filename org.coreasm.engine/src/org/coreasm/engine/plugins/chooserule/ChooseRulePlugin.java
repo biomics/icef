@@ -152,7 +152,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 					npTools.seq(
 							npTools.getKeywParser("with", PLUGIN_NAME),
 							guardParser).optional(),
-					//TODO BSL Here is where we put the distribution
+					// BSL Here is where we put the distribution
 					npTools.seq(
 							npTools.getKeywParser("using", PLUGIN_NAME),
 							termParser).optional(),
@@ -226,21 +226,21 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             }
             else
             {
-	            // CASE 1. 'choose X in E using D do R'  
+	            // CASE 1.D 'choose X in E using D do R'  
 	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() == null ) 
 	            	return interpretChooseRule_NoCondition_NoIfnone_WithDistribution(interpreter, pos);
 	   
-	            // CASE 2. 'choose X in E do R1 ifnone R2'
+	            // CASE 2.D 'choose X in E using D do R1 ifnone R2'
 	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() != null)
-	            	return interpretChooseRule_NoCondition_WithIfnone(interpreter, pos);
-	     
-	            // CASE 3. 'choose X in E with C do R'  
+	            	return interpretChooseRule_NoCondition_WithIfnone_WithDistribution(interpreter, pos);
+	            //TODO BSL Complete these cases
+	            // CASE 3.D 'choose X in E with C using D do R'  
 	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() == null) 
-	            	return interpretChooseRule_WithCondition_NoIfnone(interpreter, pos);
+	            	return interpretChooseRule_WithCondition_NoIfnone_WithDistribution(interpreter, pos);
 	   
-	            // CASE 4. 'choose X in E with C do R1 ifnone R2'
+	            // CASE 4.D 'choose X in E with C using D do R1 ifnone R2'
 	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() != null)
-	            	return interpretChooseRule_WithCondition_WithIfnone(interpreter, pos);
+	            	return interpretChooseRule_WithCondition_WithIfnone_WithDistribution(interpreter, pos);
             }
         }
         else if (pos instanceof PickExpNode) {
@@ -416,9 +416,10 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	    				s = domain.getIndexedView();
 	    			else 
 	    				s = new ArrayList<Element>(((Enumerable) variable.getValue().getValue()).enumerate());
-	                if (s.size() > 0) {
-	                	//TODO BSL here is where we have to modify the choice under a probability distribution
-	                	//TODO BSL first, we need to obtain the probability distribution
+	                if (s.size() > 0) 
+	                {
+	                	// BSL here is where we have to modify the choice under a probability distribution
+	                	// BSL first, we need to obtain the probability distribution
 	                	MapElement distribution = (MapElement) chooseNode.getDistribution().getValue();
 	                	String res = distribution.isProbabilityDistribution();
 	                	
@@ -428,7 +429,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	     	                		"Reason: "+ res, chooseNode.getDistribution(), interpreter);
 	     	                return pos;
 	                	}
-	                	//TODO BSL we now produce the commulative function of the distribution
+	                	// BSL we now produce the commulative function of the distribution
 	                	Map<Element, Element> theMap = distribution.getMap();
 	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
 	                	Double initialValue = new Double(0);
@@ -439,12 +440,14 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                	{
 	                		if (!domain.contains(key))
 	                		{
-	                			//TODO check if all elements in the keyset are elements of s
-	                			capi.error("The probability distribution is not defined over "+Tools.sizeLimit(variable.getValue().getValue().denotation()), variable.getValue(), interpreter);
+	                			//check if all elements in the keyset are elements of s
+	                			capi.error("We are choosing "+key+" , but the probability distribution is not defined over "+Tools.sizeLimit(variable.getValue().getValue().denotation()), variable.getValue(), interpreter);
 	        	                return pos;
 	                		}
-	                		initialValue = finalValue;
 	                		NumberElement n = (NumberElement)theMap.get(key);
+	                		if(n.doubleValue()==0)
+	                			continue;
+	                		initialValue = finalValue;
 	                		finalValue = new Double(total+n.doubleValue());
 	                		total+=n.doubleValue();
 	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
@@ -661,6 +664,144 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             return pos;
     	}
 	}
+    
+    /*
+     * Interpreting rule of the form: 'choose x in E using D do R1 ifnone R2'
+     */
+    private ASTNode interpretChooseRule_NoCondition_WithIfnone_WithDistribution(Interpreter interpreter, ASTNode pos) {
+        ChooseRuleNode chooseNode = (ChooseRuleNode) pos;
+        Map<String, ASTNode> variableMap = null;
+        
+        try {
+        	variableMap = chooseNode.getVariableMap();
+        }
+        catch (CoreASMError e) {
+        	capi.error(e);
+        	return pos;
+        }
+        
+        // evaluate all domains
+        for (ASTNode domain : variableMap.values()) {
+        	if (!domain.isEvaluated())
+        		return domain;
+        }
+        
+        // evaluate probability distribution
+        if (!chooseNode.getDistribution().isEvaluated())
+        		return chooseNode.getDistribution();
+        
+    	// if neither of the rules 'R1' or 'R2' are evaluated
+    	if (!chooseNode.getDoRule().isEvaluated() && !chooseNode.getIfnoneRule().isEvaluated()) { 
+    		boolean none = false;
+    		for (Entry<String, ASTNode> variable : variableMap.entrySet()) {
+	    		if (variable.getValue().getValue() instanceof Enumerable) {
+	            	// s := enumerate(v)
+	    			Enumerable domain = (Enumerable) variable.getValue().getValue();
+	    			List<Element> s = null;
+	    			if (domain.supportsIndexedView())
+	    				s = domain.getIndexedView();
+	    			else 
+	    				s = new ArrayList<Element>(((Enumerable) variable.getValue().getValue()).enumerate());
+	                if (s.size() > 0) {
+	                	// BSL here is where we have to modify the choice under a probability distribution
+	                	// BSL first, we need to obtain the probability distribution
+	                	MapElement distribution = (MapElement) chooseNode.getDistribution().getValue();
+	                	String res = distribution.isProbabilityDistribution();
+	                	
+	                	if (!res.equals(""))
+	                	{
+	                		 capi.error("Cannot choose because the given map is not a probability distribution. " +
+	     	                		"Reason: "+ res, chooseNode.getDistribution(), interpreter);
+	     	                return pos;
+	                	}
+	                	// BSL we now produce the commulative function of the distribution
+	                	Map<Element, Element> theMap = distribution.getMap();
+	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+	                	Double initialValue = new Double(0);
+	                	Double finalValue = new Double(0);
+	                	double total =0;
+	                	StringBuilder sb = new StringBuilder();
+	                	for(Element key : theMap.keySet())
+	                	{
+	                		if (!domain.contains(key))
+	                		{
+	                			//check if all elements in the keyset are elements of s
+	                			capi.error("We are choosing "+key+" , but the probability distribution is not defined over "+Tools.sizeLimit(variable.getValue().getValue().denotation()), variable.getValue(), interpreter);
+	        	                return pos;
+	                		}
+	                		NumberElement n = (NumberElement)theMap.get(key);
+	                		if(n.doubleValue()==0)
+	                			continue;
+	                		initialValue = finalValue;
+	                		finalValue = new Double(total+n.doubleValue());
+	                		total+=n.doubleValue();
+	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+	                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
+	                	}
+                		// choose a number greater than 0 and smaller than the total
+	                	double d = 2;
+	                	while(d==0 || d>total){
+	                		d = Tools.randDouble();
+	                	}
+                		//now, find the element that corresponds to that interval
+	                	Element chosen = null;
+	                	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+	                	{
+	                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
+	                		{
+	                			chosen = cummulativeFunction.get(key);
+	                			break;
+	                		}
+	                	}
+	                	if(chosen == null)
+                		{
+                			//This should not happen
+                			capi.error("There is an error in the implementation of the probability distribution. "
+                					+ "the chosen number was "+d+" the total is "+total+" and the map is "+sb.toString());
+        	                return pos;
+                		}                		
+	                	// AddEnv(x,t)s
+                		interpreter.addEnv(variable.getKey(), chosen);
+	                }
+	                else {
+	                	none = true;
+	                	interpreter.addEnv(variable.getKey(), Element.UNDEF);
+	                }
+	            }
+	            else {
+	                capi.error("Cannot choose from " + Tools.sizeLimit(variable.getValue().getValue().denotation()) + ". " +
+	                		"Choose domain should be an enumerable element.", variable.getValue(), interpreter);
+	                return pos;
+	            }
+    		}
+    		if (none) {
+    			// RemoveEnv(x)
+        		for (String x : variableMap.keySet())
+        			interpreter.removeEnv(x);
+    			// pos := delta
+                return chooseNode.getIfnoneRule();
+    		}
+    		 // pos := gamma
+            return chooseNode.getDoRule();
+    	}
+
+    	// if rule 'R1' is evaluated 
+    	else if (chooseNode.getDoRule().isEvaluated()) {
+            // RemoveEnv(x)
+    		for (String x : variableMap.keySet())
+    			interpreter.removeEnv(x);
+            // [pos] := (undef,u,undef)
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null, null);
+            return pos;
+    	}
+    	
+    	// if rule 'R2' is evaluated
+    	else {
+            // [pos] := (undef,u,undef)
+            pos.setNode(null,chooseNode.getIfnoneRule().getUpdates(),null, null);
+            return pos;
+    	}
+	}
 
 
 	/*
@@ -692,6 +833,77 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
     	// if condition 'C' is not evaluated
     	if (!chooseNode.getCondition().isEvaluated())
     		return chooseVariableValues_WithCondition(chooseNode, remained, variableMap, interpreter);
+
+    	// if domain 'E' is evaluated, condition 'C' is evaluated, but rule 'R' is not evaluated
+    	else if (!chooseNode.getDoRule().isEvaluated()) {
+            boolean value = false;            
+            if (chooseNode.getCondition().getValue() instanceof BooleanElement) {
+                value = ((BooleanElement) chooseNode.getCondition().getValue()).getValue();
+            }
+            else {
+                capi.error("Value of choose condition is not Boolean.", chooseNode.getCondition(), interpreter);
+                return pos;
+            }
+            
+            if (value) {
+                // pos := delta
+                return chooseNode.getDoRule();
+            }
+            else {
+                // ClearTree(gamma)
+                interpreter.clearTree(chooseNode.getCondition());
+                
+                return chooseNode;
+            }
+    	}
+        
+    	// if domain 'E' is evaluated, condition 'C' is evaluated, and rule 'R' is evaluated
+    	else {
+            // RemoveEnv(x)
+    		for (Entry<String, ASTNode> variable : variableMap.entrySet()) {
+    			if (remained.remove(variable.getValue()) != null)
+    				interpreter.removeEnv(variable.getKey());
+    		}
+            
+            // [pos] := (undef,u,undef)
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null,null);
+            return pos;
+    	}
+	}
+	
+	/*
+     * Interpreting rule of the form: 'choose x in E with C using D do R'
+     */
+	private ASTNode interpretChooseRule_WithCondition_NoIfnone_WithDistribution(Interpreter interpreter, ASTNode pos) {
+        ChooseRuleNode chooseNode = (ChooseRuleNode) pos;
+        Map<Node, List<Element>> remained = getRemainedMap();
+        Map<String, ASTNode> variableMap = null;
+        
+        try {
+        	variableMap = chooseNode.getVariableMap();
+        }
+        catch (CoreASMError e) {
+        	capi.error(e);
+        	return pos;
+        }
+        
+        // evaluate all domains
+        for (ASTNode domain : variableMap.values()) {
+        	if (!domain.isEvaluated()) {
+        		// considered(beta) := {}
+        		remained.remove(domain);
+        		// pos := beta
+        		return domain;
+        	}
+        }
+        
+        // evaluate probability distribution
+        if (!chooseNode.getDistribution().isEvaluated())
+        		return chooseNode.getDistribution();
+        
+    	// if condition 'C' is not evaluated
+    	if (!chooseNode.getCondition().isEvaluated())
+    		return chooseVariableValues_WithCondition_WithDistribution(chooseNode, remained, variableMap, interpreter);
 
     	// if domain 'E' is evaluated, condition 'C' is evaluated, but rule 'R' is not evaluated
     	else if (!chooseNode.getDoRule().isEvaluated()) {
@@ -814,6 +1026,93 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         return pos;
 	}
     
+    /*
+     * Interpreting rule of the form: 'choose x in E with C do R1 ifnone R2'
+     */
+    private ASTNode interpretChooseRule_WithCondition_WithIfnone_WithDistribution(Interpreter interpreter, ASTNode pos) {
+        ChooseRuleNode chooseNode = (ChooseRuleNode) pos;
+        Map<Node, List<Element>> remained = getRemainedMap();
+        Map<String, ASTNode> variableMap = null;
+        
+        try {
+        	variableMap = chooseNode.getVariableMap();
+        }
+        catch (CoreASMError e) {
+        	capi.error(e);
+        	return pos;
+        }
+        
+        // evaluate all domains
+        for (ASTNode domain : variableMap.values()) {
+        	if (!domain.isEvaluated()) {
+        		// considered(beta) := {}
+        		remained.remove(domain);
+        		// pos := beta
+        		return domain;
+        	}
+        }
+        
+        // evaluate probability distribution
+        if (!chooseNode.getDistribution().isEvaluated())
+        		return chooseNode.getDistribution();
+
+    	// if condition 'C' is not evaluated
+    	if (!chooseNode.getCondition().isEvaluated() && !chooseNode.getIfnoneRule().isEvaluated())
+    		return chooseVariableValues_WithCondition_WithDistribution(chooseNode, remained, variableMap, interpreter);
+
+    	// if domain 'E' is evaluated, condition 'C' is evaluated, but neither of the rules 'R1' or 'R2' are evaluated
+    	else if (chooseNode.getCondition().isEvaluated() && !chooseNode.getDoRule().isEvaluated() && !chooseNode.getIfnoneRule().isEvaluated()) {
+            boolean value = false;            
+            if (chooseNode.getCondition().getValue() instanceof BooleanElement) {
+                value = ((BooleanElement) chooseNode.getCondition().getValue()).getValue();
+            }
+            else {
+                capi.error("Value of choose condition not Boolean", chooseNode.getCondition(), interpreter);
+                return pos;
+            }
+            
+            if (value) {
+                // pos := delta
+                return chooseNode.getDoRule();
+            }
+            else {
+                // ClearTree(gamma)
+                interpreter.clearTree(chooseNode.getCondition());
+                
+                return chooseNode;
+            }
+    	}
+        
+    	// if domain 'E' is evaluated, condition 'C' is evaluated, and rule 'R1' is evaluated
+    	else if (chooseNode.getCondition().isEvaluated() && chooseNode.getDoRule().isEvaluated()) {
+            // RemoveEnv(x)
+    		for (Entry<String, ASTNode> variable : variableMap.entrySet()) {
+    			if (remained.remove(variable.getValue()) != null)
+    				interpreter.removeEnv(variable.getKey());
+    		}
+            
+            // [pos] := (undef,u,undef)
+            pos.setNode(null,chooseNode.getDoRule().getUpdates(),null, null);
+            return pos;
+    	}
+
+    	// if domain 'E' is evaluated and rule 'R2' is evaluated
+    	else if (chooseNode.getIfnoneRule().isEvaluated()) {
+    		// RemoveEnv(x)
+    		for (Entry<String, ASTNode> variable : variableMap.entrySet()) {
+    			if (remained.remove(variable.getValue()) != null)
+    				interpreter.removeEnv(variable.getKey());
+    		}
+            
+            // [pos] := (undef,u,undef)
+            pos.setNode(null,chooseNode.getIfnoneRule().getUpdates(),null,null);
+            return pos;
+    	}
+        
+        // in case of error
+        return pos;
+	}
+    
     private ASTNode chooseVariableValues_WithCondition(ChooseRuleNode chooseNode, Map<Node, List<Element>> remained, Map<String, ASTNode> variableMap, Interpreter interpreter) {
     	// pos := gamma
     	ASTNode pos = chooseNode.getCondition();
@@ -854,6 +1153,164 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	                    // AddEnv(x,t)s
 	                    interpreter.addEnv(variable.getKey(), chosen);
 	            	}
+	            	else {
+	            		remained.remove(variable.getValue());
+	            		if (pos != chooseNode.getIfnoneRule())
+	            			pos = chooseNode;
+	            		shouldChoose = true;
+	            		continue;
+	            	}
+                }
+            }
+            else {
+                capi.error("Cannot choose from " + Tools.sizeLimit(variable.getValue().getValue().denotation()) + ". " +
+                		"Choose domain should be an enumerable element.", variable.getValue(), interpreter);
+                return pos;
+            }
+    		shouldChoose = false;
+		}
+		if (shouldChoose) {
+			if (chooseNode.getIfnoneRule() == null) {
+				// [pos] := (undef,{},undef)
+				chooseNode.setNode(null, new UpdateMultiset(),null, null);
+	            return chooseNode;
+			}
+			// pos := delta
+            pos = chooseNode.getIfnoneRule();
+		}
+		if (pos == chooseNode.getIfnoneRule()) {
+			// RemoveEnv(x)
+			for (Entry<String, ASTNode> var : variableMap.entrySet()) {
+    			if (remained.remove(var.getValue()) != null)
+    				interpreter.removeEnv(var.getKey());
+    		}
+		}
+        return pos;
+    }
+    
+    private ASTNode chooseVariableValues_WithCondition_WithDistribution(ChooseRuleNode chooseNode, Map<Node, List<Element>> remained, Map<String, ASTNode> variableMap, Interpreter interpreter) {
+    	// pos := gamma
+    	ASTNode pos = chooseNode.getCondition();
+    	boolean shouldChoose = true;
+		for (Entry<String, ASTNode> variable : variableMap.entrySet()) {
+    		if (variable.getValue().getValue() instanceof Enumerable) {
+                // s := enumerate(v)/considered(beta)
+            	List<Element> s = remained.get(variable.getValue());
+            	 //This code checks whether the domains are non empty.
+                if (s == null) {
+        			Enumerable domain = (Enumerable) variable.getValue().getValue();
+        			if (domain.supportsIndexedView())
+        				s = new ArrayList<Element>(domain.getIndexedView());
+        			else 
+        				s = new ArrayList<Element>(((Enumerable) variable.getValue().getValue()).enumerate());
+                	if (s.isEmpty()) {
+                		if (chooseNode.getIfnoneRule() == null) {
+                			for (Entry<String, ASTNode> var : variableMap.entrySet()) {
+            	    			if (remained.remove(var.getValue()) != null)
+            	    				interpreter.removeEnv(var.getKey());
+            	    		}
+            				// [pos] := (undef,{},undef)
+                			chooseNode.setNode(null, new UpdateMultiset(), null, null);
+            	            return chooseNode;
+            			}
+                		// pos := delta
+                        pos = chooseNode.getIfnoneRule();
+                        interpreter.addEnv(variable.getKey(), Element.UNDEF);
+                	}
+                	remained.put(variable.getValue(), s);
+                	shouldChoose = true;
+                }
+               //This verifies if there are still domains where we can choose from
+                else if (shouldChoose)
+                	interpreter.removeEnv(variable.getKey());
+                if (shouldChoose) {
+                	//If the domain is not empty...
+	                if (!s.isEmpty())
+	                {
+	                	// BSL here is where we have to modify the choice under a probability distribution
+	                	// BSL first, we need to obtain the probability distribution
+	                	MapElement distribution = (MapElement) chooseNode.getDistribution().getValue();
+	                	String res = distribution.isProbabilityDistribution();
+	                	
+	                	if (!res.equals(""))
+	                	{
+	                		 capi.error("Cannot choose because the given map is not a probability distribution. " +
+	     	                		"Reason: "+ res, chooseNode.getDistribution(), interpreter);
+	     	                return pos;
+	                	}
+	                	// BSL we now produce the commulative function of the distribution
+	                	Map<Element, Element> theMap = distribution.getMap();
+	                	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+	                	Double initialValue = new Double(0);
+	                	Double finalValue = new Double(0);
+	                	double total =0;
+	                	StringBuilder sb = new StringBuilder();
+	                	Enumerable domain = (Enumerable) variable.getValue().getValue();
+	                	for(Element key : theMap.keySet())
+	                	{
+	                		if (!domain.contains(key))
+	                		{
+	                			//check if all elements in the keyset are elements of the domain
+	                			capi.error("We are choosing "+key+" , but the probability distribution is not defined over "+Tools.sizeLimit(variable.getValue().getValue().denotation()), variable.getValue(), interpreter);
+	        	                return pos;
+	                		}
+	                		if (!s.contains(key))
+	                		{
+	                			//This happens when we try to choose an element that does not satisfy the given condition
+	                			//thus, we don't add it to the cummulative function
+	                			continue;
+	                		}
+	                		NumberElement n = (NumberElement)theMap.get(key);
+	                		if(n.doubleValue()==0)
+	                			continue;
+	                		initialValue = finalValue;
+	                		finalValue = new Double(total+n.doubleValue());
+	                		total+=n.doubleValue();
+	                		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+	                		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
+	                	}
+	                	if (cummulativeFunction.isEmpty())
+	                	{
+	                		//This happens when we could not find an element that satisfied the condition and had a probability greater than 0 to be chosen
+	                		//Elements cannot be chosen because the ones that satisfy the condition have probability zero!
+	                		remained.remove(variable.getValue());
+		            		if (pos != chooseNode.getIfnoneRule())
+		            			pos = chooseNode;
+		            		shouldChoose = true;
+		            		continue;
+	                	}
+                		// choose a number greater than 0 and smaller than the total
+	                	double d = 2;
+	                	while(d==0 || d>total){
+	                		d = Tools.randDouble();
+	                	}
+                		//now, find the element that corresponds to that interval
+	                	Element chosen = null;
+	                	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+	                	{
+	                		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
+	                		{
+	                			chosen = cummulativeFunction.get(key);
+	                			s.remove(chosen);
+	                			break;
+	                		}
+	                	}
+	                	if(chosen == null)
+                		{
+                			//This should not happen
+                			capi.error("There is an error in the implementation of the probability distribution. "
+                					+ "the chosen number was "+d+" the total is "+total+" and the map is "+sb.toString());
+        	                return pos;
+                		}                		
+	                	// AddEnv(x,t)s
+                		interpreter.addEnv(variable.getKey(), chosen);
+	                }
+//	                {
+//	                    // choose t in s
+//	                    Element chosen = s.remove(Tools.randInt(s.size()));
+//	                    // AddEnv(x,t)s
+//	                    interpreter.addEnv(variable.getKey(), chosen);
+//	            	}
 	            	else {
 	            		remained.remove(variable.getValue());
 	            		if (pos != chooseNode.getIfnoneRule())

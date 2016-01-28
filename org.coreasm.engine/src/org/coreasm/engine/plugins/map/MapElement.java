@@ -136,7 +136,7 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 			//FIXME Float comparisons are fun, yay!
 			if(number > 1.001)
 			{
-				return "Probability values should not be greater than 1.";
+				return "The sum of probability values should not be greater than 1.";
 			}
 		}
 		//FIXME Float comparisons are fun, yay!
