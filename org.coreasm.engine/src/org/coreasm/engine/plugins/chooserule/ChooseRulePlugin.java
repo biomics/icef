@@ -162,7 +162,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 							npTools.getKeywParser("ifnone", PLUGIN_NAME),
 							ruleParser).optional(),
 					npTools.getKeywParser("endchoose", PLUGIN_NAME).optional()).map(
-					new ChooseParseMap());
+					new ChooseParseMap()); 
 			parsers.put("Rule", 
 					new GrammarRule("Rule",
 							"'choose' ID 'in' Term (',' ID 'in' Term)* ('with' Guard)? ('using' Term)? 'do' Rule ('ifnone' Rule)? ('endchoose')?", chooseRuleParser, this.getName()));
@@ -175,21 +175,17 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 						idParser,
 						npTools.getKeywParser("in", PLUGIN_NAME),
 						termParser,
-						//TODO BSL test first if works for choose rule then put it here
 						npTools.seq(
 								npTools.getKeywParser("with", PLUGIN_NAME),
+								termParser).optional(),
+						npTools.seq(
+								npTools.getKeywParser("using", PLUGIN_NAME),
 								termParser).optional()
 					}).map(
-					new ParserTools.ArrayParseMap(PLUGIN_NAME) {
-						public Node map(Object[] vals) {
-							Node node = new PickExpNode(((Node)vals[0]).getScannerInfo());
-							addChildren(node, vals);
-							return node;
-						}
-			} );
+					new PickParseMap());
 			parsers.put("PickExp",
 					new GrammarRule("PickExp", 
-							"'pick' ID 'in' Term 'with' Term", pickExpParser, PLUGIN_NAME));
+							"'pick' ID 'in' Term ('with' Term)? ('using' Term)?", pickExpParser, PLUGIN_NAME));
 			
 			// ChooseRuleBasicTerm : PickExp
 			parsers.put("BasicTerm", 
@@ -233,7 +229,6 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 	            // CASE 2.D 'choose X in E using D do R1 ifnone R2'
 	            if (chooseNode.getCondition() == null && chooseNode.getIfnoneRule() != null)
 	            	return interpretChooseRule_NoCondition_WithIfnone_WithDistribution(interpreter, pos);
-	            //TODO BSL Complete these cases
 	            // CASE 3.D 'choose X in E with C using D do R'  
 	            if (chooseNode.getCondition() != null && chooseNode.getIfnoneRule() == null) 
 	            	return interpretChooseRule_WithCondition_NoIfnone_WithDistribution(interpreter, pos);
@@ -245,11 +240,21 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         }
         else if (pos instanceof PickExpNode) {
         	PickExpNode node = (PickExpNode)pos;
-        	
-        	if (node.getCondition() == null) 
-        		return interpretPickExpression_NoCondition(interpreter, node);
-        	else
-        		return interpretPickExpression_WithCondition(interpreter, node);
+        	 if (node.getDistribution() == null)
+             {
+	        	if (node.getCondition() == null) 
+	        		return interpretPickExpression_NoCondition(interpreter, node);
+	        	else
+	        		return interpretPickExpression_WithCondition(interpreter, node);
+             }
+        	 else
+        	 {
+        		 //TODO BSL pick cases with distribution
+        		 if (node.getCondition() == null) 
+ 	        		return interpretPickExpression_NoCondition_WithDistribution(interpreter, node);
+ 	        	else
+ 	        		return interpretPickExpression_WithCondition(interpreter, node);
+        	 }
         }
 
         // in case of error
@@ -277,6 +282,104 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
             	int i = Tools.randInt(elements.size());
                 Element picked = elements.get(i);
                 node.setNode(null, null, null, picked);
+            }
+            else {
+                // [pos] := (undef,undef,uu)
+                node.setNode(null, null, null, Element.UNDEF);
+            }
+        }
+        else {
+            capi.error("Cannot pick from " + Tools.sizeLimit(node.getDomain().getValue().denotation()) + ". " +
+            		"Pick domain should be an enumerable element.", node.getDomain(), interpreter);
+        }
+    	
+    	return node;
+    }
+    
+    private ASTNode interpretPickExpression_NoCondition_WithDistribution(Interpreter interpreter, PickExpNode node) {
+		// if domain 'E' is not evaluated
+    	if (!node.getDomain().isEvaluated()) {
+            // pos := beta
+            return node.getDomain();
+        }
+    	
+    	// evaluate probability distribution
+        if (!node.getDistribution().isEvaluated())
+        		return node.getDistribution();
+
+        
+    	// if domain 'E' is evaluated, but rule 'R' is not evaluated
+    	else if (node.getDomain().getValue() instanceof Enumerable) {
+        	// s := enumerate(v)
+			Enumerable domain = (Enumerable)node.getDomain().getValue();
+			List<Element> elements = null;
+			if (domain.supportsIndexedView())
+				elements = domain.getIndexedView();
+			else
+				elements = new ArrayList<Element>(((Enumerable) node.getDomain().getValue()).enumerate());
+            if (elements.size() > 0) {
+            	// BSL here is where we have to modify the choice under a probability distribution
+            	// BSL first, we need to obtain the probability distribution
+            	MapElement distribution = (MapElement) node.getDistribution().getValue();
+            	String res = distribution.isProbabilityDistribution();
+            	
+            	if (!res.equals(""))
+            	{
+            		 capi.error("Cannot choose because the given map is not a probability distribution. " +
+ 	                		"Reason: "+ res, node.getDistribution(), interpreter);
+            		node.setNode(null, null, null, Element.UNDEF);
+ 	                return node;
+            	}
+            	// BSL we now produce the commulative function of the distribution
+            	Map<Element, Element> theMap = distribution.getMap();
+            	HashMap<Pair<Double,Double>,Element> cummulativeFunction = new HashMap<Pair<Double,Double>, Element>();
+            	Double initialValue = new Double(0);
+            	Double finalValue = new Double(0);
+            	double total =0;
+            	StringBuilder sb = new StringBuilder();
+            	for(Element key : theMap.keySet())
+            	{
+            		if (!domain.contains(key))
+            		{
+            			//check if all elements in the keyset are elements of s
+            			capi.error("We are choosing "+key+" , but the probability distribution is not defined over "+Tools.sizeLimit(domain.toString()));
+            			node.setNode(null, null, null, Element.UNDEF);
+    	                return node;
+            		}
+            		NumberElement n = (NumberElement)theMap.get(key);
+            		if(n.doubleValue()==0)
+            			continue;
+            		initialValue = finalValue;
+            		finalValue = new Double(total+n.doubleValue());
+            		total+=n.doubleValue();
+            		cummulativeFunction.put(new Pair<Double, Double>(initialValue,finalValue), key);
+            		sb.append("("+initialValue.toString()+","+finalValue.toString()+")->"+key.toString());
+            	}
+        		// choose a number greater than 0 and smaller than the total
+            	double d = 2;
+            	while(d==0 || d>total){
+            		d = Tools.randDouble();
+            	}
+        		//now, find the element that corresponds to that interval
+            	Element chosen = null;
+            	for(Pair<Double,Double> key : cummulativeFunction.keySet())
+            	{
+            		if (key.l.doubleValue() < d && key.r.doubleValue() >= d)
+            		{
+            			chosen = cummulativeFunction.get(key);
+            			break;
+            		}
+            	}
+            	if(chosen == null)
+        		{
+        			//This should not happen
+        			capi.error("There is an error in the implementation of the probability distribution. "
+        					+ "the chosen number was "+d+" the total is "+total+" and the map is "+sb.toString());
+        			 node.setNode(null, null, null, Element.UNDEF);
+	                return node;
+        		}                
+                // choose t in s
+                node.setNode(null, null, null, chosen);
             }
             else {
                 // [pos] := (undef,undef,uu)
@@ -1384,6 +1487,43 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
 		        	nextChildName = ChooseRulePlugin.DO_RULE_NAME;
 		        else if (token.equals("ifnone"))
 		        	nextChildName = ChooseRulePlugin.IFNONE_RULE_NAME;
+				parent.addChild(child);
+		        //super.addChild(parent, child);
+			}
+		}
+
+	}
+	
+	/**
+	 * Mapping of node elements into the the choose rule node.
+	 *   
+	 * @author Roozbeh Farahbod
+	 */
+	public static class PickParseMap extends ParserTools.ArrayParseMap {
+
+	    String nextChildName = "alpha";
+
+	    public PickParseMap() {
+			super(PLUGIN_NAME);
+		}
+		
+		public Node map(Object[] v) {
+			nextChildName = "alpha";
+			ASTNode node = new PickExpNode(((Node)v[0]).getScannerInfo());
+
+			addChildren(node, v);
+			return node;
+		}
+		
+		public void addChild(Node parent, Node child) {
+			if (child instanceof ASTNode)
+				parent.addChild(nextChildName, child);
+			else {
+				String token = child.getToken();
+		        if (token.equals("with"))
+		        	nextChildName = ChooseRulePlugin.GUARD_NAME;
+		        else if (token.equals("using"))
+		        	nextChildName = ChooseRulePlugin.DISTRIBUTION_NAME;
 				parent.addChild(child);
 		        //super.addChild(parent, child);
 			}

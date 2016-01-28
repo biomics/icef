@@ -14,6 +14,10 @@
  
 package org.coreasm.engine.plugins.chooserule;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.coreasm.engine.CoreASMError;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.ScannerInfo;
 
@@ -58,9 +62,14 @@ public class PickExpNode extends ASTNode {
     }
     
     /**
-     * Returns the node representing the condition of the 'pick' expression.
+     * Returns the node representing the condition ('with' part) of the choose rule.
+     * null is returned if the choose rule has no condition.
      */
     public ASTNode getCondition() {
-        return getDomain().getNext();
+    	return (ASTNode)getChildNode(ChooseRulePlugin.GUARD_NAME);
     }
+
+	public ASTNode getDistribution() {
+		 return (ASTNode)getChildNode(ChooseRulePlugin.DISTRIBUTION_NAME);
+	}
 }
