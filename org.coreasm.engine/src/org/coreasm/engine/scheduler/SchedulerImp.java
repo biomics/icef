@@ -225,7 +225,7 @@ public class SchedulerImp implements Scheduler {
 			lastSelectedAgents = Collections.unmodifiableSet(selectedAgentSet);
 			return true;
 		} else {
-			logger.debug("Environment is not present anymore!");
+			logger.debug("Environment no longer has a program. Stopping execution.");
 			selectedAgentSet = Collections.emptySet();
 			lastSelectedAgents = selectedAgentSet;
 			return false;

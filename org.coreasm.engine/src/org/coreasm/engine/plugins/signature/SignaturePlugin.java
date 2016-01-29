@@ -270,13 +270,14 @@ public class SignaturePlugin extends Plugin
 			// FunctionSignature : 'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm ('initially' Term | 'initialized by' Term)?
 			Parser<Node> funcSigParser = Parsers.array(
 					new Parser[] {
-						pTools.getKeywParser("function", PLUGIN_NAME),
-						funcClassParser.optional(),
+						funcClassParser,
+						pTools.getKeywParser("function", PLUGIN_NAME).optional(),
 						idParser,
 						pTools.getOprParser(":"),
-						univTupleParser.optional(),
-						pTools.getOprParser("->"),
-						univTermParser,
+						//Try domain + range or range only
+						Parsers.or(
+						pTools.seq(univTupleParser,	pTools.getKeywParser("->", PLUGIN_NAME),univTermParser).atomic(),
+						univTermParser),
 						Parsers.or(
 							pTools.seq(
 								pTools.getKeywParser("initially", PLUGIN_NAME),
@@ -294,7 +295,7 @@ public class SignaturePlugin extends Plugin
 							return node;
 						}});
 			parsers.put("FunctionSignature", new GrammarRule("FunctionSignature", 
-					"'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm (('initially' Term) | ('initialized by' Term))?", funcSigParser, PLUGIN_NAME));
+					"'function' (FunctionClass)? ID ':' (UniverseTuple '->')? UniverseTerm (('initially' Term) | ('initialized by' Term))?", funcSigParser, PLUGIN_NAME));
 			
 			// DerivedFunctionDeclaration : 'function'? 'derived' RuleSignature '=' Term
 			Parser<Node> derivedFuncParser = Parsers.array(

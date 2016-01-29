@@ -164,6 +164,7 @@ public class JParsecParser implements Parser {
 		if (headerParsed) {
 			Plugin kernel = capi.getPlugin("Kernel");
 			if (kernel != null) {
+				//FIXME Is this what determines the COREASM keyword in scripts?
 				this.rootGrammarRule = ((ParserPlugin)kernel).getParsers().get("CoreASM");
 				this.parser = rootGrammarRule.parser;
 				try {
