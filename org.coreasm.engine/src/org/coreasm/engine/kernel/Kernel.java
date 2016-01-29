@@ -173,7 +173,7 @@ public class Kernel extends Plugin
     //private final Parser<Node>[] ruleSignatureParserArray = new Parser[1];
     //private final Parser<Node> ruleSignatureParser = ParserTools.lazy("RuleSignature", ruleSignatureParserArray);
 
-    private final String[] keywords = {"CoreASM", "nosignature", "use", "init", "rule", 
+    private final String[] keywords = {"BSL", "nosignature", "use", "init", "rule", 
     		"ruleelement", "skip", "import", "do", "undef", "true", "false", "self", 
     		"scheduling", "policy", "policyelement", "schedule"};
     private final String[] operators = {"=", "(", ")", ",", "@", ":=", "!!", "#"};
@@ -462,7 +462,7 @@ public class Kernel extends Plugin
 	
 	    	// CoreASM : 'CoreASM' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration)*
 	    	Parser<Node> coreASMParser = Parsers.array(new Parser[] {
-	    			parserTools.getKeywParser("CoreASM", this.getName()),
+	    			parserTools.getKeywParser("BSL", this.getName()),
 	    			idParser,
 	    			parserTools.star(
 	    					Parsers.or(
@@ -477,7 +477,7 @@ public class Kernel extends Plugin
 	    			}).map(new ParserTools.CoreASMParseMap())
 	    			.followedBy(Parsers.EOF);
 	    	parsers.put("CoreASM", new GrammarRule("CoreASM", 
-	    			"'CoreASM' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration )*", 
+	    			"'BSL' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration )*", 
 	    			coreASMParser, this.getName()));
 		}
     	

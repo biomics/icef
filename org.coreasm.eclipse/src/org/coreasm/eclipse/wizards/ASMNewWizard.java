@@ -153,12 +153,14 @@ public class ASMNewWizard extends Wizard implements INewWizard {
 				specification = fileName.substring(0, fileName.indexOf("."));
 			else
 				specification = fileName;
-		String contents = "CoreASM " + specification + "\n\n"
+		String contents = "BSL " + specification + "\n\n"
 				+ "//use standard plugins\n"
 				+ "use Standard\n\n"
-				+ "//set program for the executing agent\n"
-				+ "init Start\n\n"
-				+ "rule Start = skip";
+				+ "//set the initialisation rule and policy\n"
+				+ "init Start\n"
+				+ "scheduling Scheduling\n\n"
+				+ "rule Start = skip\n\n"
+				+ "policy Scheduling = skip";
 		return new ByteArrayInputStream(contents.getBytes());
 	}
 
