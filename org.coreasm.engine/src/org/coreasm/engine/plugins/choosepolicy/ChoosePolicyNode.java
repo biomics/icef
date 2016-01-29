@@ -20,6 +20,7 @@ import java.util.Map;
 import org.coreasm.engine.CoreASMError;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasm.engine.plugins.chooserule.ChooseRulePlugin;
 
 /** 
  *	ChoosepolicyNode is a Node for choose policy nodes.
@@ -81,5 +82,9 @@ public class ChoosePolicyNode extends ASTNode {
     public ASTNode getCondition() {
     	return (ASTNode)getChildNode(ChoosePolicyPlugin.GUARD_NAME);
     }
+    
+    public ASTNode getDistribution() {
+		 return (ASTNode)getChildNode(ChoosePolicyPlugin.DISTRIBUTION_NAME);
+	}
     
 }
