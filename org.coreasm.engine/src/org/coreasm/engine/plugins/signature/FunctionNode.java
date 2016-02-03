@@ -21,6 +21,7 @@ import org.coreasm.engine.absstorage.FunctionElement.FunctionClass;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.FunctionRuleTermNode;
 import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasm.engine.plugins.chooserule.ChooseRulePlugin;
 import org.coreasm.engine.plugins.number.NumberRangeNode;
 
 // TODO There is a lot of dirt in this class! :)
@@ -68,12 +69,17 @@ public class FunctionNode extends ASTNode {
      * @return the node containing the name of the function
      */
     private ASTNode getNameNode() {
-        if (getFunctionClassHelper() != null) {
-            return getFirst().getNext();
-        }
-        
-        return getFirst();
+    //	System.out.println("Get Name Node: "+((ASTNode)getChildNode(SignaturePlugin.FUNCTION_CLASS)).getToken());
+  		   return (ASTNode)getChildNode(SignaturePlugin.FUNCTION_ID);
     }
+    
+//    private ASTNode getNameNode() {
+//        if (getFunctionClassHelper() != null) {
+//            return getFirst().getNext();
+//        }
+//        
+//        return getFirst();
+//    }
         
     /**
      * Returns the class of the function
@@ -113,20 +119,41 @@ public class FunctionNode extends ASTNode {
         
         return null;
     }
-        
+         
+//    /**
+//     * Returns the node representing the domain
+//     */
+//    public ASTNode getDomainNode() {
+//        return (ASTNode)getChildNode(SignaturePlugin.DOMAIN);
+//    }
+    
     /**
      * Returns the node representing the function domain.
      * Returns null if the function has no domain.
      */
-    public ASTNode getDomainNode() {
-        
-        if ((getNameNode().getNext().getGrammarClass() != null) && 
-            (getNameNode().getNext().getGrammarClass().equals(ASTNode.ID_CLASS)||getNameNode().getNext().getGrammarClass().equals(ASTNode.EXPRESSION_CLASS))) {
-            return null;
-        }
-        
-        return getNameNode().getNext();
+    
+    	public ASTNode getDomainNode() {
+    	if (getChildNode(SignaturePlugin.FUNCTION_RANGE)!=null)
+    	{
+    		//System.out.println("Get Domain Node with domain "+((ASTNode)getChildNode(SignaturePlugin.FUNCTION_DOMAIN)).getToken());
+    		return (ASTNode)getChildNode(SignaturePlugin.FUNCTION_DOMAIN);
+    	}
+    	else{
+    		//System.out.println("Get Domain Node with no domain "+((ASTNode)getChildNode(SignaturePlugin.FUNCTION_RANGE)).getToken());
+    		return null;
+    	}
+    		
     }
+	//public ASTNode getDomainNode() {
+	//    
+	//    if ((getNameNode().getNext().getGrammarClass() != null) && 
+	//        (getNameNode().getNext().getGrammarClass().equals(ASTNode.ID_CLASS)||getNameNode().getNext().getGrammarClass().equals(ASTNode.EXPRESSION_CLASS))) {
+	//        return null;
+	//    }
+	//    
+	//    return getNameNode().getNext();
+	//}
+    
     
     /**
      * Returns the domain of the function as a list of strings.
@@ -161,24 +188,51 @@ public class FunctionNode extends ASTNode {
         return getTypeString(getNameNode().getNext());
     }
     
+    
+    /**
+     * Returns the node representing the condition ('with' part) of the choose rule.
+     * null is returned if the choose rule has no condition.
+     */
+
+    
     /**
     * Returns the range of the function (as a string).
     * @return the range of the function
     */
    public ASTNode getRangeNode() {
-       if (getDomainNode() != null) {
-           return getDomainNode().getNext();
-       }
-       
-       return getNameNode().getNext();
+	   if (getChildNode(SignaturePlugin.FUNCTION_RANGE)!=null)
+	   {
+		   //System.out.println("Get Range Node with domain "+((ASTNode)getChildNode(SignaturePlugin.FUNCTION_RANGE)).getToken());
+		   
+		   return (ASTNode)getChildNode(SignaturePlugin.FUNCTION_RANGE);
+	   }
+	   else
+	   {
+		   //System.out.println("Get Range Node without domain "+((ASTNode)getChildNode(SignaturePlugin.FUNCTION_DOMAIN)).getToken());
+		   
+		   return (ASTNode)getChildNode(SignaturePlugin.FUNCTION_DOMAIN);
+	   }
    }
+   
+//   public ASTNode getRangeNode() {
+//       if (getDomainNode() != null) {
+//           return getDomainNode().getNext();
+//       }
+//       
+//       return getNameNode().getNext();
+//   }
    
    public ASTNode getInitNode() {
        return getRangeNode().getNext();
    }
    
    public boolean hasInitializer() {
-	   return getRangeNode().getNextCSTNode() != null && !"initially".equals(getRangeNode().getNextCSTNode().getToken());
+	   return getRangeNode().
+			   getNextCSTNode() != null 
+			   && !"initially".
+			   equals(getRangeNode().
+					   getNextCSTNode().
+					   getToken());
    }
    
    public List<String> getInitializerParams() {
@@ -199,7 +253,9 @@ public class FunctionNode extends ASTNode {
    
    private String getTypeString(ASTNode n) {
        String ret = null;
-       if (n.getGrammarClass().equals(ASTNode.ID_CLASS)) {
+       if (n.
+    		   getGrammarClass().
+    		   equals(ASTNode.ID_CLASS)) {
            ret = n.getToken();
        }
        else if (n.getGrammarClass().equals(ASTNode.EXPRESSION_CLASS)) {

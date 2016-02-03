@@ -62,6 +62,8 @@ import org.coreasm.engine.plugin.ParserPlugin;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.UndefinedIdentifierHandler;
 import org.coreasm.engine.plugin.VocabularyExtender;
+import org.coreasm.engine.plugins.chooserule.ChooseRuleNode;
+import org.coreasm.engine.plugins.chooserule.ChooseRulePlugin;
 import org.coreasm.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +94,18 @@ public class SignaturePlugin extends Plugin
 	 * "on" and "strict" are equivalent. 
 	 */
 	public static final String TYPE_CHECKING_PROPERTY = "Signature.TypeChecking";
+
+	public static final String FUNCTION_CLASS = "FunctionClass";
+
+	public static final String FUNCTION_DOMAIN = "FunctionDomain";
+
+	public static final String FUNCTION_RANGE = "FunctionWithDomain";
+
+	public static final String FUNCTION_WITH_INITIALISATION = "FunctionWithInitialisation";
+
+	public static final String FUNCTION_KEYWORD = "Function";
+
+	public static final String FUNCTION_ID = "FunctionID";
 	
     private HashMap<String,FunctionElement> functions;
     private HashMap<String,UniverseElement> universes;
@@ -266,45 +280,39 @@ public class SignaturePlugin extends Plugin
 					});
 			parsers.put("FunctionClass", new GrammarRule("FunctionClass", 
 					"'controlled'|'static'|'monitored'", funcClassParser, PLUGIN_NAME));
-			
-			// FunctionSignature : 'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm ('initially' Term | 'initialized by' Term)?
-			Parser<Node> funcSigParser = Parsers.array(
-					new Parser[] {
-						funcClassParser,
-						pTools.getKeywParser("function", PLUGIN_NAME).optional(),
-						idParser,
-						pTools.getOprParser(":"),
-						//Try domain + range or range only
-						Parsers.or(
-						pTools.seq(univTupleParser,	pTools.getKeywParser("->", PLUGIN_NAME),univTermParser).atomic(),
-						univTermParser),
-						Parsers.or(
-							pTools.seq(
-								pTools.getKeywParser("initially", PLUGIN_NAME),
-								termParser).atomic(),
-							pTools.seq(
-								pTools.getKeywParser("initialized", PLUGIN_NAME),
-								pTools.getKeywParser("by", PLUGIN_NAME),
-								termParser).atomic()
-						).optional()
-					}).map(new ParserTools.ArrayParseMap(PLUGIN_NAME) {
 
-						public Node map(Object[] vals) {
-							Node node = new FunctionNode(((Node)vals[0]).getScannerInfo());
-							addChildren(node, vals);
-							return node;
-						}});
-			parsers.put("FunctionSignature", new GrammarRule("FunctionSignature", 
-					"'function' (FunctionClass)? ID ':' (UniverseTuple '->')? UniverseTerm (('initially' Term) | ('initialized by' Term))?", funcSigParser, PLUGIN_NAME));
-			
+			// FunctionSignature : 'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm ('initially' Term | 'initialized by' Term)?
+						Parser<Node> funcSigParser = Parsers.array(
+								new Parser[] {
+									funcClassParser,
+									pTools.getKeywParser("function", PLUGIN_NAME).optional(),
+									idParser,
+									pTools.getOprParser(":"),
+									Parsers.or(pTools.seq(
+											univTupleParser,
+											pTools.getOprParser("->"),
+											univTupleParser).atomic(),
+											univTupleParser)
+									,//univTermParser,
+									Parsers.or(
+										pTools.seq(
+											pTools.getKeywParser("initially", PLUGIN_NAME),
+											termParser).atomic(),
+										pTools.seq(
+											pTools.getKeywParser("initialized", PLUGIN_NAME),
+											pTools.getKeywParser("by", PLUGIN_NAME),
+											termParser).atomic()
+									).optional()
+								}).map(new FunctionSignatureParseMap());
+						parsers.put("FunctionSignature", new GrammarRule("FunctionSignature", 
+								"'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm (('initially' Term) | ('initialized by' Term))?", funcSigParser, PLUGIN_NAME));
 			// DerivedFunctionDeclaration : 'function'? 'derived' RuleSignature '=' Term
 			Parser<Node> derivedFuncParser = Parsers.array(
-					new Parser[] {
-						pTools.seq(
-								pTools.getKeywParser("function", PLUGIN_NAME)).optional(),
+					new Parser[] {pTools.seq(
 						pTools.getKeywParser("derived", PLUGIN_NAME),
+						pTools.getKeywParser("function", PLUGIN_NAME).optional(),
 						ruleSignatureParser,
-						pTools.getOprParser("="),
+						pTools.getOprParser("=")).atomic(),
 						Parsers.or(termParser, ruleParser),
 					}).map(
 					new ParserTools.ArrayParseMap(PLUGIN_NAME) {
@@ -320,7 +328,7 @@ public class SignaturePlugin extends Plugin
 							return node;
 						}});
 			parsers.put("DerivedFunctionDeclaration", new GrammarRule("DerivedFunctionDeclaration", 
-					"'function'? 'derived' RuleSignature '=' Term", derivedFuncParser, PLUGIN_NAME));
+					"'derived' ('function')? RuleSignature '=' Term", derivedFuncParser, PLUGIN_NAME));
 			
 			
 			// Signature : (EnumerationDefinition|FunctionSignature|UniverseDefinition)*
@@ -1067,4 +1075,49 @@ public class SignaturePlugin extends Plugin
 		return policies.keySet();
 	}
     
+	public static class FunctionSignatureParseMap extends ParserTools.ArrayParseMap {
+
+	    String nextChildName = "alpha";
+
+	    public FunctionSignatureParseMap() {
+			super(PLUGIN_NAME);
+		}
+	    
+	    public Node map(Object[] vals) {
+	    	nextChildName = SignaturePlugin.FUNCTION_CLASS;
+	    	//System.out.println("Vals has "+ vals.length);
+	    	Node node = new FunctionNode(((Node)vals[0])
+	    			.getScannerInfo());
+			addChildren(node, vals);
+			return node;
+	    }
+		
+		
+		public void addChild(Node parent, Node child) {
+			//System.out.println("The token of the child: "+child.getToken());
+			String token = child.getToken();
+			if (child instanceof ASTNode)
+			{
+				//System.out.println("Child is ASTNode, and contreteNodeType: "+child.getConcreteNodeType());					
+				parent.addChild(nextChildName, child);
+				if (token!=null &&(token.equals("static") || token.equals("controlled")|| token.equals("monitored")))
+		        	nextChildName = SignaturePlugin.FUNCTION_ID;
+			}
+			else {
+				//System.out.println("Child is NOT ASTNode");
+		        if (token.equals("function"))
+		        	nextChildName = SignaturePlugin.FUNCTION_KEYWORD;
+		        else if (token.equals(":"))
+		        	nextChildName = SignaturePlugin.FUNCTION_DOMAIN;
+		        else if (token.equals("->"))
+		        	nextChildName = SignaturePlugin.FUNCTION_RANGE;
+		        else if (token.equals("initially"))
+		        	nextChildName = SignaturePlugin.FUNCTION_WITH_INITIALISATION;
+				parent.addChild(child);
+		        
+			}
+		}
+
+	}
+	
 }

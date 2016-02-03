@@ -108,7 +108,7 @@ public class SchedulerImp implements Scheduler {
 		// prepare the initial agent. This also loads the scheduling policy
 		interpreter.prepareInitialState();
 		
-		logger.debug("Scheduling policy '" + policy.getName() + " was loaded");
+		logger.debug("Scheduling policy '" + policy.getName() + "' was loaded");
 		logger.debug("Done preparing the initial state.");
 		//FIXME BSL changed this
 		loadSchedulingPolicy();

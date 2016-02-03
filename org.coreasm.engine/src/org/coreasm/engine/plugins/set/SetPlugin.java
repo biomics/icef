@@ -651,11 +651,11 @@ public class SetPlugin extends Plugin
 				} 
 				return result;
 			} 
-
+			//System.out.println("The instance of l is"+l.getClass().getName());
 			//for other operators
-			if ((l instanceof AbstractSetElement || l.equals(Element.UNDEF))
-					&& (r instanceof AbstractSetElement || r.equals(Element.UNDEF))) {
-				if (l instanceof AbstractSetElement && r instanceof AbstractSetElement) {
+			if ((l instanceof AbstractSetElement || (l instanceof UniverseElement) || l.equals(Element.UNDEF))
+					&& (r instanceof AbstractSetElement || (r instanceof UniverseElement) || r.equals(Element.UNDEF))) {
+				if ((l instanceof AbstractSetElement|| (l instanceof UniverseElement)) && (r instanceof AbstractSetElement|| (r instanceof UniverseElement))) {
 					// get enumerable interface to operands
 					Enumerable eL = (Enumerable)l;
 					Enumerable eR = (Enumerable)r;
