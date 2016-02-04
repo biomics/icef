@@ -49,6 +49,8 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names.add("TurboASMPlugin");
 		names.add("CollectionPlugin");
 		names.add("ListPlugin");
+		names.add("StackPlugin");
+		names.add("QueuePlugin");
 		names.add("MapPlugin");
 		names.add("AbstractionPlugin");
 		names.add("CaseRulePlugin");
