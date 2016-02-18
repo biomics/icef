@@ -225,9 +225,32 @@ public class HashStorage implements AbstractStorage {
 		// Doing this check will allow us to bypass calling setValue(...)
 		if (isStateStacked()) 
 			throw new EngineError("Cannot fire updates when the state stack is not empty.");
-
+		AbstractUniverse agents = this.getUniverse(AbstractStorage.AGENTS_UNIVERSE_NAME);
 		//TODO this should be done in a transactional fashion
 		for (Update u: updateSet) {
+			//TODO BSL Here is where we have to updat
+			//for(Location l: u.getLocations(name))
+			if 	(u.loc.name==AbstractStorage.PROGRAM_FUNCTION_NAME)
+			{
+				try {	
+					if(u.value == Element.UNDEF)
+						agents.setValue(u.loc.args, BooleanElement.FALSE);
+					else
+						agents.setValue(u.loc.args, BooleanElement.TRUE);
+				} 
+				catch (UnmodifiableFunctionException e) {
+					// this should not happen 
+					String msg = "Agents universe appears to be not modifiable!";
+					logger.error(msg);
+					throw new EngineError(msg);
+				}
+			}
+			else if(u.loc.name==AbstractStorage.AGENTS_UNIVERSE_NAME)
+			{
+				String msg = "Agents universe is derived. It should not be manually updated.";
+				logger.error(msg);
+				throw new EngineError(msg);
+			}
 			state.setValue(u.loc, u.value);
 		}
 		monitoredCache.clear();

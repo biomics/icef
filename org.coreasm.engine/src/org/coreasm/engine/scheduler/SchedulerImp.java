@@ -159,7 +159,6 @@ public class SchedulerImp implements Scheduler {
 	public synchronized void retrieveAgents() {
 		// debugged by Roozbeh Farahbod, 17-Jan-2006
 		AbstractStorage storage = capi.getStorage();
-		Map<String, AbstractUniverse> universes = storage.getUniverses();
 		agentSet = new HashSet<Element>();
 		Location loc = new Location(
 				AbstractStorage.PROGRAM_FUNCTION_NAME,
@@ -173,44 +172,79 @@ public class SchedulerImp implements Scheduler {
 			logger.error("Cannot get the value of location " + loc
 					+ ".");
 		}
-		for (String au: universes.keySet())
-    	{
-			FunctionElement agentSetFlat = 	storage.getUniverse(au);
-			if (agentSetFlat instanceof Enumerable) {
-					// pick only those that have a non-null program
-				for (Element agent : ((Enumerable) agentSetFlat).enumerate()) {
-					loc = new Location(
-							AbstractStorage.PROGRAM_FUNCTION_NAME,
-							ElementList.create(agent));
-					try {
-						if (!storage.getValue(loc).equals(Element.UNDEF))
-							agentSet.add(agent);
-					} catch (InvalidLocationException e) {
-						capi.error("Cannot get the value of location " + loc
-								+ ".");
-						logger.error("Cannot get the value of location " + loc
-								+ ".");
-					}
-				}
-			} 
-			/*else {
-				String msg = "Value of \"Agents\" is not enumerable. Cannot determine the agent set.";
-				logger.error(msg);
-				throw new EngineError(msg);
-			}*/
-    	}
-		/*
-		 * We want to group the schedules for the whole run, so we set the group
-		 * handle to be this instance of scheduling policy that we are using in
-		 * this run.
-		 */
-		/* TODO BSL we now have agentSet as the set of all elements in the superuniverse 
-		 * that have a program. Nevertheless, the idea is to not choose from these, but 
-		 * to resolve the scheduling policy and then check on the universes which
-		 * are the agents that have to be scheduled (put in the schedule)
-		 */
-		//schedule = schedulingPolicy.getNewSchedule(schedulingPolicy, agentSet);
+		FunctionElement agentSetFlat = 	storage.getUniverse(AbstractStorage.AGENTS_UNIVERSE_NAME);
+		if (agentSetFlat instanceof Enumerable) {
+			// pick only those that have a non-null program
+			for (Element agent : ((Enumerable) agentSetFlat).enumerate()) {
+//				loc = new Location(
+//						AbstractStorage.PROGRAM_FUNCTION_NAME,
+//						ElementList.create(agent));
+//				try {
+//					if (!storage.getValue(loc).equals(Element.UNDEF))
+//						agentSet.add(agent);
+//				} catch (InvalidLocationException e) {
+//					capi.error("Cannot get the value of location " + loc
+//							+ ".");
+//					logger.error("Cannot get the value of location " + loc
+//							+ ".");
+//				}
+				
+				agentSet.add(agent);
+			}
 		}
+		else {
+			String msg = "Value of \"Agents\" is not enumerable. Cannot determine the agent set.";
+			logger.error(msg);
+			throw new EngineError(msg);
+		}
+	}
+	
+	/*FIXME BSL this method is going over all elements of the abstract storage
+	 * and checking whether they have an associated program. Now, we want just to
+	 * obtain the set of agents.
+	 *  (non-Javadoc)
+	 * @see org.coreasm.engine.scheduler.Scheduler#retrieveAgents()
+	 */
+//	public synchronized void retrieveAgents() {
+//		// debugged by Roozbeh Farahbod, 17-Jan-2006
+//		AbstractStorage storage = capi.getStorage();
+//		Map<String, AbstractUniverse> universes = storage.getUniverses();
+//		agentSet = new HashSet<Element>();
+//		Location loc = new Location(
+//				AbstractStorage.PROGRAM_FUNCTION_NAME,
+//				ElementList.create(environmentAgent));
+//		try {
+//			if (!storage.getValue(loc).equals(Element.UNDEF))
+//				agentSet.add(environmentAgent);
+//		} catch (InvalidLocationException e) {
+//			capi.error("Cannot get the value of location " + loc
+//					+ ".");
+//			logger.error("Cannot get the value of location " + loc
+//					+ ".");
+//		}
+//		for (String au: universes.keySet())
+//    	{
+//			FunctionElement agentSetFlat = 	storage.getUniverse(au);
+//			if (agentSetFlat instanceof Enumerable) {
+//					// pick only those that have a non-null program
+//				for (Element agent : ((Enumerable) agentSetFlat).enumerate()) {
+//					loc = new Location(
+//							AbstractStorage.PROGRAM_FUNCTION_NAME,
+//							ElementList.create(agent));
+//					try {
+//						if (!storage.getValue(loc).equals(Element.UNDEF))
+//							agentSet.add(agent);
+//					} catch (InvalidLocationException e) {
+//						capi.error("Cannot get the value of location " + loc
+//								+ ".");
+//						logger.error("Cannot get the value of location " + loc
+//								+ ".");
+//					}
+//				}
+//			} 
+//    	}
+//}
+
 
 	public boolean selectAgents() {
 		schedule.add(environmentAgent);
