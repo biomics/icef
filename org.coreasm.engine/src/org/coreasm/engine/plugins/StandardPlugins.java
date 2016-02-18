@@ -50,6 +50,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names.add("CollectionPlugin");
 		names.add("ListPlugin");
 		names.add("StackPlugin");
+		names.add("MathPlugin");
 		names.add("QueuePlugin");
 		names.add("MapPlugin");
 		names.add("AbstractionPlugin");
