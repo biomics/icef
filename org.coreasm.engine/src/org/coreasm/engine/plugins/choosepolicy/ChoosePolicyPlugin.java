@@ -492,14 +492,14 @@ public class ChoosePolicyPlugin extends Plugin implements ParserPlugin,
     		for (String x : variableMap.keySet())
     			interpreter.removeEnv(x);
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoPolicy().getUpdates(),null, null);
+            pos.setNode(null,null,chooseNode.getDoPolicy().getTriggers(), null);
             return pos;
     	}
     	
     	// if policy 'P2' is evaluated
     	else {
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getIfnonePolicy().getUpdates(),null, null);
+            pos.setNode(null,null, chooseNode.getIfnonePolicy().getTriggers(), null);
             return pos;
     	}
 	}
@@ -630,14 +630,14 @@ public class ChoosePolicyPlugin extends Plugin implements ParserPlugin,
     		for (String x : variableMap.keySet())
     			interpreter.removeEnv(x);
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoPolicy().getUpdates(),null, null);
+            pos.setNode(null,null,chooseNode.getDoPolicy().getTriggers(), null);
             return pos;
     	}
     	
     	// if policy 'P2' is evaluated
     	else {
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getIfnonePolicy().getUpdates(),null, null);
+            pos.setNode(null,null, chooseNode.getIfnonePolicy().getTriggers(), null);
             return pos;
     	}
 	}
@@ -705,7 +705,7 @@ public class ChoosePolicyPlugin extends Plugin implements ParserPlugin,
     		}
             
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoPolicy().getUpdates(),null,null);
+            pos.setNode(null,null,chooseNode.getDoPolicy().getTriggers(),null);
             return pos;
     	}
 	}
@@ -776,7 +776,7 @@ public class ChoosePolicyPlugin extends Plugin implements ParserPlugin,
     		}
             
             // [pos] := (undef,u,undef)
-            pos.setNode(null,chooseNode.getDoPolicy().getUpdates(),null,null);
+            pos.setNode(null,null,chooseNode.getDoPolicy().getTriggers(),null);
             return pos;
     	}
 	}
