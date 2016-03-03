@@ -228,4 +228,6 @@ public interface Scheduler {
 	public void setPolicy(PolicyElement schedulingPolicy);
 
 	public void evaluatePolicy() throws EngineException;
+	
+	public void dispose();
 }

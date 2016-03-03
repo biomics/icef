@@ -35,6 +35,11 @@ public class ParserTools
 		return instances.get(capi);
 	}
 	
+	public static void removeInstance(ControlAPI capi) {
+		if (instances != null)
+			instances.remove(capi);
+	}
+	
 	// TERMINALS
 	private Terminals terminals_keyw = null;
 	

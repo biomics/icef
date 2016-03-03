@@ -26,8 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.coreasm.engine.absstorage.AbstractStorage;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.HashStorage;
@@ -42,9 +41,11 @@ import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.loader.PluginManager;
 import org.coreasm.engine.parser.GrammarRule;
 import org.coreasm.engine.parser.JParsecParser;
+import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.parser.OperatorRule;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.parser.ParserException;
+import org.coreasm.engine.parser.ParserTools;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.PackagePlugin;
 import org.coreasm.engine.plugin.Plugin;
@@ -54,6 +55,8 @@ import org.coreasm.engine.plugin.ServiceRequest;
 import org.coreasm.engine.scheduler.Scheduler;
 import org.coreasm.engine.scheduler.SchedulerImp;
 import org.coreasm.util.Tools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides the actual implementation of a CoreASM engine. It
@@ -64,8 +67,8 @@ import org.coreasm.util.Tools;
  * @author Roozbeh Farahbod, Michael Stegmaier, Marcel Dausend
  * 
  */
-public class Engine implements ControlAPI {	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 6, 5, "beta");
+public class Engine implements ControlAPI {
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 7, 3, "SNAPSHOT");
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine.class);
 
@@ -82,7 +85,7 @@ public class Engine implements ControlAPI {
 	private final Interpreter interpreter;
 	
 	/** Loader used to obtain plugin classes */
-	private PluginManager pluginLoader;
+	private final PluginManager pluginLoader;
 
 	/** List of grammar rules gathered from plugins */
 	private ArrayList<GrammarRule> grammarRules = null;
@@ -103,23 +106,23 @@ public class Engine implements ControlAPI {
 	private volatile boolean engineBusy = false;
 
 	/** Cache of EngineMode events */
-	private Map<EngineMode, Map<EngineMode, EngineModeEvent>> modeEventCache;
+	private final Map<EngineMode, Map<EngineMode, EngineModeEvent>> modeEventCache;
 
 	/** CoreASM Plugin Service Registry */
 	private Map<String, Set<ServiceProvider>> serviceRegistry;
 
 	/** User command queue */
 //	private Queue<EngineCommand> commandQueue;
-	private CommandQueue commandQueue;
+	private final CommandQueue commandQueue;
 
 	/** Properties of the engine */
 	private EngineProperties properties;
 
 	/** Collection of registered observers */
-	private Collection<EngineObserver> observers;
+	private final Collection<EngineObserver> observers;
 
 	/** List of interpreter listeners */
-	private LinkedList<InterpreterListener> interpreterListeners;
+	private final LinkedList<InterpreterListener> interpreterListeners;
 
 	/** Remaining steps of the current run */
 	private int remainingRunCount = 0;
@@ -135,7 +138,7 @@ public class Engine implements ControlAPI {
 
 	private boolean isStateInitialized = false;
 
-	private List<CoreASMWarning> warnings;
+	private final List<CoreASMWarning> warnings;
 
 	/**
 	 * Constructs a new CoreASM engine with the specified properties. This is
@@ -742,7 +745,7 @@ public class Engine implements ControlAPI {
 	public void waitWhileBusy() {
 		while (isBusy()) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -806,11 +809,11 @@ public class Engine implements ControlAPI {
 						}
 
 						// if engine mode is idle and there is no user command,
-						// sleep for a short time (100ms)
+						// sleep for a short time
 						if ((engineMode == EngineMode.emIdle && commandQueue.isEmpty())
 									|| engineMode == EngineMode.emError) {
 							try {
-								Thread.sleep(100);
+								Thread.sleep(1);
 							} catch (InterruptedException e) {
 								logger.debug( "Engine is forced to stop.");
 							}
@@ -1037,6 +1040,11 @@ public class Engine implements ControlAPI {
 						//   logger.error( ste.toString());
 					}
 				}
+				
+				storage.clearState();
+				scheduler.dispose();
+				ParserTools.removeInstance(Engine.this);
+				OperatorRegistry.removeInstance(Engine.this);
 
 				// Terminating plugins
 				for (Plugin p: pluginLoader.getPlugins())
@@ -1051,6 +1059,7 @@ public class Engine implements ControlAPI {
 			}
 
 			engineBusy = false;
+			System.gc();
 		}
 
 		/**

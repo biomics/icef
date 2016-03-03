@@ -585,6 +585,10 @@ public class SchedulerImp implements Scheduler {
 		this.policy = schedulingPolicy;
 		
 	}
-
+	
+	@Override
+	public void dispose() {
+		agentContextMap.clear();
+	}
 
 }

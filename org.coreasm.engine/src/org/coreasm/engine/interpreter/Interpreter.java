@@ -227,6 +227,8 @@ public interface Interpreter {
      */
     public void cleanUp();
     
+    public void dispose();
+    
 	/**
 	 * 
 	 * Holds the information about an entry in the rule call stack.

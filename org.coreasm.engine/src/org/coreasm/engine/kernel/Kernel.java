@@ -1177,27 +1177,21 @@ public class Kernel extends Plugin
 		UpdateMultiset updateSet2 = compAPI.getAllUpdates(2);
 		
 		for (Update ui1: updateSet1) {
-			if (!locUpdated(updateSet2, ui1.loc) && isBasicUpdate(updateSet1, ui1))
+			if (!compAPI.isLocationUpdated(2, ui1.loc) && isBasicUpdate(compAPI, 1, ui1))
 				compAPI.addComposedUpdate(ui1, this);
 		}
 		
 		for (Update ui2: updateSet2) {
-			if (isBasicUpdate(updateSet2, ui2))
+			if (isBasicUpdate(compAPI, 2, ui2))
 				compAPI.addComposedUpdate(ui2, this);
 		}
 	}
 	
-	private boolean locUpdated(UpdateMultiset uMset, Location l) {
-		for (Update u: uMset) 
-			if (u.loc.equals(l))
-				return true;
-		return false;
-	}
-
-	private boolean isBasicUpdate(UpdateMultiset uMset, Update u) {
-		for (Update update: uMset) 
-			if (update.loc.equals(u.loc) && !update.action.equals(Update.UPDATE_ACTION))
+	private boolean isBasicUpdate(PluginCompositionAPI compAPI, int setIndex, Update u) {
+		for (Update update : compAPI.getLocUpdates(setIndex, u.loc)) {
+			if (!update.action.equals(Update.UPDATE_ACTION))
 				return false;
+		}
 		return true;
 	}
 	
