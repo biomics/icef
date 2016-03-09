@@ -704,9 +704,4 @@ public class SlimEngine implements ControlAPI {
 		
 	}
 
-	@Override
-	public CoreASMError getError() {
-		return errors.get(errors.size()-1);
-	}
-
 }

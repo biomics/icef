@@ -44,14 +44,14 @@ public class ASMWizardPage extends WizardPage {
 	 */
 	public ASMWizardPage(ISelection selection) {
 		super("wizardPage");
-		setTitle("BSL Editor File");
+		setTitle("CoreASM Editor File");
 //		ImageDescriptor id=ImageDescriptor.createFromFile(CoreASMPlugin.class,"../../icons/CoreASM-logo48.gif");
 		ImageDescriptor id=CoreASMPlugin.getImageDescriptor("icons/logo-96x.png");
 		setImageDescriptor(id);
 		setDescription("This wizard creates a new file with *." 
 				+ CoreASMPlugin.COREASM_FILE_EXT_1 + " or *." 
 				+ CoreASMPlugin.COREASM_FILE_EXT_2 
-				+ " extension containing a standard (almost empty) BSL specification.");
+				+ " extension containing a standard (almost empty) CoreASM specification.");
 		this.selection = selection;
 	}
 

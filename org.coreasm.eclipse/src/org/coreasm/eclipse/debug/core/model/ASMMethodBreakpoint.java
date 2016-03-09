@@ -30,7 +30,6 @@ public class ASMMethodBreakpoint extends ASMLineBreakpoint {
 				marker.setAttribute(IBreakpoint.ID, getModelIdentifier());
 				marker.setAttribute(IMarker.MESSAGE, "Method Breakpoint: " + resource.getName() + " [line: " + lineNumber + "]");
 				marker.setAttribute("RULE_NAME", ruleName);
-				marker.setAttribute("POLICY_NAME", ruleName);
 			}
 		};
 		run(getMarkerRule(resource), runnable);
@@ -42,12 +41,5 @@ public class ASMMethodBreakpoint extends ASMLineBreakpoint {
 	 */
 	public String getRuleName() {
 		return getMarker().getAttribute("RULE_NAME", (String)null);
-	}
-	/**
-	 * Returns the name of the rule assigned to this method breakpoint.
-	 * @return the name of the rule assigned to this method breakpoint
-	 */
-	public String getPolicyName() {
-		return getMarker().getAttribute("POLICY_NAME", (String)null);
 	}
 }
