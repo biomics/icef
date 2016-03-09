@@ -34,12 +34,12 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 
 	public StandardPlugins() {
 		names = new HashSet<String>();
+		names.add("IOPlugin");
 		names.add("BlockRulePlugin");
 		names.add("ChooseRulePlugin");
 		names.add("ConditionalRulePlugin");
 		names.add("ExtendRulePlugin");
 		names.add("ForallRulePlugin");
-		names.add("IOPlugin");
 		names.add("LetRulePlugin");
 		names.add("NumberPlugin");
 		names.add("PredicateLogicPlugin");
@@ -53,7 +53,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names.add("MathPlugin");
 		names.add("QueuePlugin");
 		names.add("MapPlugin");
-		names.add("AbstractionPlugin");
+		//names.add("AbstractionPlugin");
 		names.add("CaseRulePlugin");
 		names.add("OptionsPlugin");
 		names.add("KernelExtensionsPlugin");

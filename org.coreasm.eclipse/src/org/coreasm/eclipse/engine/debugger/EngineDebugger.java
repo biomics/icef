@@ -31,6 +31,7 @@ import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
 import org.coreasm.engine.absstorage.Update;
@@ -78,6 +79,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	private ASTNode stepReturnPos;
 	private ASTNode prevPos;
 	private Stack<Map<ASTNode, String>> ruleArgs = new Stack<Map<ASTNode, String>>();
+	private Stack<Map<ASTNode, String>> policyArgs = new Stack<Map<ASTNode, String>>();
 	private Set<ASMUpdate> updates = new HashSet<ASMUpdate>();
 	private IBreakpoint prevWatchpoint;
 	private boolean stepSucceeded = false;
@@ -715,5 +717,59 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	@Override
 	public void initProgramExecution(Element agent, RuleElement program) {
 		onRuleCall(program, null, program.getDeclarationNode(), agent);
+	}
+
+	@Override
+	public void initPolicyExecution(Element agent, PolicyElement policy) {
+		onPolicyCall(policy, null, policy.getDeclarationNode(), agent);
+		
+	}
+
+	@Override
+	public void onPolicyCall(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent) {
+		currentAgent = agent;
+		if (DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
+			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+				try {
+					if (!breakpoint.isEnabled())
+						continue;
+					if (breakpoint instanceof ASMMethodBreakpoint && ((ASMMethodBreakpoint) breakpoint).getPolicyName().equals(policy.getName())) {
+						try {
+							String policySourceName = ASMDebugUtils.getFileName(pos, capi);
+							
+							if (!policySourceName.equals(((ASMLineBreakpoint)breakpoint).getSpecName()))
+								continue;
+							
+							sourceName = policySourceName;
+							lineNumber = ASMDebugUtils.getLineNumber(pos, capi);
+							if (sourceName == null || lineNumber < 0) {
+								sourceName = ((ASMLineBreakpoint)breakpoint).getSpecName();
+								lineNumber = ((ASMLineBreakpoint)breakpoint).getLineNumber();
+							}
+							onBreakpointHit(pos);
+							break;
+						} catch (CoreException e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (CoreException e) {
+				}
+			}
+		}
+		Map<ASTNode, String> policyArgs = new IdentityHashMap<ASTNode, String>();
+		this.policyArgs.push(policyArgs);
+		if (policy.getParam() != null) {
+			int i = 0;
+			for (String param : policy.getParam())
+				policyArgs.put(args.get(i++), param);
+		}
+		
+	}
+
+	@Override
+	public void onPolicyExit(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent){
+		currentAgent = agent;
+	if (!policyArgs.isEmpty())
+		policyArgs.pop();
 	}
 }

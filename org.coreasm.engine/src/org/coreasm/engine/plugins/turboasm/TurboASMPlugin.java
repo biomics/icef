@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.codehaus.jparsec.Parser;
@@ -33,7 +35,9 @@ import org.coreasm.engine.absstorage.AbstractStorage;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.BooleanElement;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MapFunction;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
@@ -91,13 +95,14 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 	public static final String SEQ_KEYWORD = "seq";
 	public static final String RETURN_KEYWORD = "return";
 	public static final String LOCAL_KEYWORD = "local";
+	public static final String LOCAL_INIT_OPERATOR = ":=";
 
 	private Map<String, FunctionElement> functions;
 	private FunctionElement resultFunction;
 
 	private final String[] keywords = {"seq", "next", "endseq", "seqblock", "endseqblock", "iterate", "while", 
 			"local", "in", "return", "result"};
-	private final String[] operators = {",", "<-", "[", "]"};
+	private final String[] operators = {",", "<-", "[", "]", LOCAL_INIT_OPERATOR};
 	
 	private final CompilerPlugin compilerPlugin = new CompilerTurboASMPlugin(this);
 	
@@ -239,31 +244,35 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 					new GrammarRule("ReturnResultRule", "FunctionRuleTerm '<-' FunctionRuleTerm", 
 							retResRuleParser, PLUGIN_NAME));
 			
-			// ReturnRule : 'return' Term 'in' Rule
-			Parser<Node> returnRuleParser = Parsers.array(
+			// ReturnTerm : 'return' Term 'in' Rule
+			Parser<Node> returnTermParser = Parsers.array(
 					new Parser[] {
 						pTools.getKeywParser("return", PLUGIN_NAME),
 						termParser,
 						pTools.getKeywParser("in", PLUGIN_NAME),
 						ruleParser
 					}).map(
-					new ReturnRuleParseMap()
+					new ReturnTermParseMap()
 			);
-			parsers.put("ReturnRule",
-					new GrammarRule("ReturnRule", "'return' Term 'in' Rule", 
-							returnRuleParser, PLUGIN_NAME));
+			parsers.put("ReturnTerm",
+					new GrammarRule("ReturnTerm", "'return' Term 'in' Rule", 
+							returnTermParser, PLUGIN_NAME));
 
-			// LocalRule : 'local' ID (',' ID)* 'in' Rule
+			// LocalRule : 'local' ID (':=' Term)? (',' ID (':=' Term)?)* 'in' Rule
 			Parser<Node> localRuleParser = Parsers.array(
 					new Parser[] {
 						pTools.getKeywParser("local", PLUGIN_NAME),
-						pTools.csplus(idParser),
+						Parsers.array(	pTools.getOprParser(LOCAL_INIT_OPERATOR),
+										termParser).optional(),
+						pTools.csplus(	Parsers.array(	idParser,
+														Parsers.array(	pTools.getOprParser(LOCAL_INIT_OPERATOR),
+																		termParser).optional())),
 						pTools.getKeywParser("in", PLUGIN_NAME),
 						ruleParser
 					}).map(
 					new LocalRuleParseMap());
 			parsers.put("LocalRule",
-					new GrammarRule("LocalRule", "'local' ID (',' ID)* 'in' Rule", 
+					new GrammarRule("LocalRule", "'local' ID (':=' Term)? (',' ID (':=' Term)?)* 'in' Rule", 
 							localRuleParser, PLUGIN_NAME));
 			
 			// TurboASMRules : SeqRule | IterateRule | WhileRule | ReturnResultRule | LocalRule
@@ -274,8 +283,8 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 							localRuleParser), PLUGIN_NAME));
 			
 			parsers.put("BasicTerm", 
-					new GrammarRule("TurboASMRules", "ReturnRule",
-							returnRuleParser, PLUGIN_NAME));
+					new GrammarRule("TurboASMTerms", "ReturnTerm",
+							returnTermParser, PLUGIN_NAME));
 			
 			// ResultLocation : 'result'
 			Parser<Node> resultLocationParser = //Parsers.map("ResultLocation",
@@ -344,16 +353,14 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 						storage.pushState();
 						storage.apply(aggregatedUpdate);
 						return secondRule; 
-					} else
-						// this will be catched in the 'catch' phrase 
-						throw new EngineError();
+					}
 				} catch (EngineError e) {
-					// inconsistent aggregation or inconsistent updateset
-					capi.warning(PLUGIN_NAME, "TurboASM Plugin: Inconsistent updates computed in sequence. Leaving the sequence", 
-							secondRule, interpreter);
-					//TODO better logging (tell where was it)
-					pos.setNode(null, firstRule.getUpdates(), null, null);
 				}
+				// inconsistent aggregation or inconsistent updateset
+				capi.warning(PLUGIN_NAME, "TurboASM Plugin: Inconsistent updates computed in sequence. Leaving the sequence", 
+						secondRule, interpreter);
+				//TODO better logging (tell where was it)
+				pos.setNode(null, firstRule.getUpdates(), null, null);
 			} else {
 				// second rule is evaluated...
 				
@@ -385,20 +392,14 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 								storage.apply(uSet);
 								interpreter.clearTree(childRule);
 								return childRule;
-							} else
-								// this will be catched by the 'catch' clause below
-								throw new EngineError();
+							}
 						} catch (EngineError e) {
-							storage.popState();
 							// inconsistent aggregation or updateset
-							pos.setNode(null, composedUpdates.get(pos), null, null);
-							composedUpdates.remove(pos);
 						}
-					} else {
-						storage.popState();
-						pos.setNode(null, composedUpdates.get(pos), null, null);
-						composedUpdates.remove(pos);
 					}
+					pos.setNode(null, composedUpdates.get(pos), null, null);
+					composedUpdates.remove(pos);
+					storage.popState();
 				}
 			} else
 				if (pos instanceof WhileRuleNode) {
@@ -419,38 +420,26 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 					if (whileCond.getValue().equals(BooleanElement.TRUE)) {
 						if (!childRule.isEvaluated()) 
 							return childRule;
-						else {
-							UpdateMultiset u = childRule.getUpdates();
-							if (!u.isEmpty()) {
-								Set<Update> uSet = null;
-								try {
-									uSet = storage.performAggregation(u);
-									composedUpdates.put(pos, storage.compose(composedUpdates.get(pos), u));
-									if (storage.isConsistent(uSet)) {
-										storage.apply(uSet);
-										interpreter.clearTree(childRule);
-										interpreter.clearTree(whileCond);
-										return whileCond;
-									} else
-										// this will be catched by the 'catch' clause below
-										throw new EngineError();
-								} catch (EngineError e) {
-									storage.popState();
-									// inconsistent aggregation or updateset
-									pos.setNode(null, composedUpdates.get(pos), null, null);
-									composedUpdates.remove(pos);
+						UpdateMultiset u = childRule.getUpdates();
+						if (!u.isEmpty()) {
+							Set<Update> uSet = null;
+							try {
+								uSet = storage.performAggregation(u);
+								composedUpdates.put(pos, storage.compose(composedUpdates.get(pos), u));
+								if (storage.isConsistent(uSet)) {
+									storage.apply(uSet);
+									interpreter.clearTree(childRule);
+									interpreter.clearTree(whileCond);
+									return whileCond;
 								}
-							} else {
-								storage.popState();
-								pos.setNode(null, composedUpdates.get(pos), null, null);
-								composedUpdates.remove(pos);
+							} catch (EngineError e) {
+								// inconsistent aggregation or updateset
 							}
 						}
-					} else {
-						storage.popState();
-						pos.setNode(null, composedUpdates.get(pos), null, null);
-						composedUpdates.remove(pos);
 					}
+					storage.popState();
+					pos.setNode(null, composedUpdates.get(pos), null, null);
+					composedUpdates.remove(pos);
 				} else
 					if (pos instanceof ReturnResultNode) {
 						ReturnResultNode node = (ReturnResultNode)pos;
@@ -490,8 +479,8 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 	
 						
 					} else 
-						if (pos instanceof ReturnRuleNode) {
-							ReturnRuleNode node = (ReturnRuleNode)pos;
+						if (pos instanceof ReturnTermNode) {
+							ReturnTermNode node = (ReturnTermNode)pos;
 							ASTNode exp = node.getExpressionNode();
 							ASTNode rule = node.getRuleNode();
 							
@@ -509,11 +498,10 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 										storage.pushState();
 										storage.apply(aggregatedUpdate);
 										return exp; 
-									} else
-										throw new EngineError("You should not see this error (TurboASMPlugin:return rule)");
+									}
 								} catch (EngineError e) {
-									pos.setNode(null, new UpdateMultiset(), null, Element.UNDEF);
 								}
+								pos.setNode(null, new UpdateMultiset(), null, Element.UNDEF);
 							} else {
 								// expression is evaluated...
 								storage.popState();
@@ -523,11 +511,35 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 							if (pos instanceof LocalRuleNode) {
 								LocalRuleNode node = (LocalRuleNode)pos;
 								ASTNode rule = node.getRuleNode();
+								Map<String, ASTNode> variableMap = node.getFunctionMap();
+					
+								// evaluate all the terms that will be aliased
+								for (ASTNode n : variableMap.values()) {
+									if (n != null && !n.isEvaluated())
+										return n;
+								}
 								
 								// Evaluate the rule
-								if (!rule.isEvaluated()) 
+								if (!rule.isEvaluated()) {
+									Set<Update> updates = new HashSet<Update>();
+									for (Entry<String, ASTNode> entry : variableMap.entrySet()) {
+										ASTNode n = entry.getValue();
+										if (n != null)
+											updates.add(new Update(new Location(entry.getKey(), ElementList.NO_ARGUMENT), n.getValue(), Update.UPDATE_ACTION, interpreter.getSelf(), node.getScannerInfo()));
+									}
+									if (!updates.isEmpty()) {
+										storage.pushState();
+										storage.apply(updates);
+									}
 									return rule;
+								}
 								else {
+									for (ASTNode n : variableMap.values()) {
+										if (n != null) {
+											storage.popState();
+											break;
+										}
+									}
 									// Remove updates of local functions
 									UpdateMultiset updates = rule.getUpdates();
 									UpdateMultiset newUpdates = new UpdateMultiset();
@@ -623,17 +635,17 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 		
 	}
 
-	public static class ReturnRuleParseMap extends ArrayParseMap {
+	public static class ReturnTermParseMap extends ArrayParseMap {
 
 		String nextChildName;
 
-		public ReturnRuleParseMap() {
+		public ReturnTermParseMap() {
 			super(PLUGIN_NAME);
 		}
 
 		public Node map(Object[] vals) {
 			nextChildName = "alpha";
-			Node node = new ReturnRuleNode(((Node)vals[0]).getScannerInfo());
+			Node node = new ReturnTermNode(((Node)vals[0]).getScannerInfo());
 			addChildren(node, vals);
 			return node;
 		}
@@ -764,6 +776,7 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 
 	@Override
 	public Set<String> getPolicyNames() {
+
 		return Collections.emptySet();
 	}
 }

@@ -1437,6 +1437,7 @@ public class InterpreterImp implements Interpreter {
 			return;
 		}
 		
+		
 		// node is pointing to the 'init' node, so we get
 		// its first child which holds the name of the init rule
 		String initRuleName = initNode.getFirst().getToken();
@@ -1444,6 +1445,7 @@ public class InterpreterImp implements Interpreter {
 		// node is pointing to the 'scheduling' node, so we get
 		// its first child which holds the name of the init rule
 		String schedulingPolicyName = scheduleNode.getFirst().getToken();
+		
 		
 		// fetching the rule with the given name from the state
 		RuleElement initRule = ruleValue(initRuleName);

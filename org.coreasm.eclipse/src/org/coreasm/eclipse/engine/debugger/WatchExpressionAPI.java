@@ -488,4 +488,9 @@ public class WatchExpressionAPI implements ControlAPI {
 		return lastError != null;
 	}
 
+	@Override
+	public CoreASMError getError() {
+		return lastError;
+	}
+
 }
