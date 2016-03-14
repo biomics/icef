@@ -34,6 +34,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 
 	public StandardPlugins() {
 		names = new HashSet<String>();
+		names.add("StringPlugin");
 		names.add("IOPlugin");
 		names.add("BlockRulePlugin");
 		names.add("ChooseRulePlugin");
@@ -45,7 +46,6 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names.add("PredicateLogicPlugin");
 		names.add("SetPlugin");
 		names.add("SignaturePlugin");
-		names.add("StringPlugin");
 		names.add("TurboASMPlugin");
 		names.add("CollectionPlugin");
 		names.add("ListPlugin");
@@ -53,7 +53,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names.add("MathPlugin");
 		names.add("QueuePlugin");
 		names.add("MapPlugin");
-		//names.add("AbstractionPlugin");
+		names.add("AbstractionPlugin");
 		names.add("CaseRulePlugin");
 		names.add("OptionsPlugin");
 		names.add("KernelExtensionsPlugin");
@@ -63,6 +63,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names.add("ForallPolicyPlugin");
 		names.add("CasePolicyPlugin");
 		names.add("LetPolicyPlugin");
+		names.add("CommunicationPlugin");
 	}
 	
 	/**
