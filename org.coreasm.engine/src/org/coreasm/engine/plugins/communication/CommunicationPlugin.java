@@ -648,5 +648,10 @@ public class CommunicationPlugin extends Plugin implements
 		// TODO Auto-generated method stub
 		
 	}
+	/*
+	 * TODO BSL: 
+	 * 1) Describe functions get sender, get receiver, get message
+	 * 2) Enrich message format? What can we send over the communication plugin?
+	 */
 
 }

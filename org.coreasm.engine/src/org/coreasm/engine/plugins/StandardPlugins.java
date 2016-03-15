@@ -36,6 +36,7 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 		names = new HashSet<String>();
 		names.add("StringPlugin");
 		names.add("IOPlugin");
+		names.add("TimePlugin");
 		names.add("BlockRulePlugin");
 		names.add("ChooseRulePlugin");
 		names.add("ConditionalRulePlugin");

@@ -569,6 +569,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 
 	@Override
 	public void beforeNodeEvaluation(ASTNode pos) {
+		System.out.println("before: " + pos + ": " + pos.getValue() + " " + pos.getUpdates() + " " + pos.getLocation());
 		if (isUnvisited(pos)) {
 			sourceName = ASMDebugUtils.getFileName(pos, capi);
 			lineNumber = ASMDebugUtils.getLineNumber(pos, capi);
@@ -620,6 +621,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 
 	@Override
 	public void afterNodeEvaluation(ASTNode pos) {
+		System.out.println("after: " + pos + ": " + pos.getValue() + " " + pos.getUpdates() + " " + pos.getLocation());
 		if (pos == stepReturnPos) {
 			shouldStepReturn = false;
 			stepReturnPos = null;

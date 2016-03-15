@@ -35,7 +35,7 @@ public class CoreASMParseMap extends ParseMapN<Node> {
 		
 		// consider the possiblity of starting with a 
 		// comment or whitespace
-		if (vals[0] != null && ((Node)vals[0]).getToken().equals("BSL"))
+		if (vals[0] != null && ((Node)vals[0]).getToken().equals("CoreASM"))
 			info = ((Node)vals[0]).getScannerInfo();
 		else
 			info = ((Node)vals[1]).getScannerInfo();
