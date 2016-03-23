@@ -26,6 +26,10 @@ import org.coreasm.engine.absstorage.FunctionElement;
  */
 public abstract class ListFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -287209693869003850L;
 	protected final ControlAPI capi;
 	protected final AbstractStorage storage;
 	

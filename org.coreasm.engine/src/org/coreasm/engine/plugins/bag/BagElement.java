@@ -41,6 +41,11 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class BagElement extends AbstractBagElement implements ModifiableCollection {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3765384284307022488L;
+
 	protected final Map<Element,Integer> members;
 	
 	// It is a list to improve performance

@@ -30,6 +30,11 @@ import org.coreasm.engine.absstorage.Signature;
  */
 public class ToSetFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6275831422286421359L;
+
 	public static final String NAME = "toSet";
 	
 	protected Signature signature = null;

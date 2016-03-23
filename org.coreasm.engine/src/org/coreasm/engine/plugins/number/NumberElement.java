@@ -22,6 +22,10 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class NumberElement extends Element implements Comparable<NumberElement> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2118919353842803827L;
 	public static final NumberElement POSITIVE_INFINITY = new NumberElement(Double.POSITIVE_INFINITY);
 	public static final NumberElement NEGATIVE_INFINITY = new NumberElement(Double.NEGATIVE_INFINITY);
 	public static final NumberElement MAX_VALUE = new NumberElement(Double.MAX_VALUE);

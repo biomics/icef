@@ -31,6 +31,11 @@ public class UniverseElement extends AbstractUniverse implements Enumerable {
 	protected MapFunction universeFunction;
 	*/
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8814063351305396539L;
+
 	protected final Set<Element> elements;
 	
 	protected List<Element> enumerationCache = null; 

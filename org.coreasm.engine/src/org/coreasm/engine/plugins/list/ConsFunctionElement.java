@@ -31,6 +31,10 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
  */
 public class ConsFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7382940992293145227L;
 	public static final String NAME = "cons";
 
 	public ConsFunctionElement() {

@@ -34,6 +34,10 @@ import org.coreasm.engine.plugins.collection.CollectionFunctionElement;
  */
 public class FoldrFunctionElement extends CollectionFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5709643984434259934L;
 	/** suggested names for this function */
 	/**
 	 * Name for the fold function

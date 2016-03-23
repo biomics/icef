@@ -31,6 +31,10 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
  */
 public class IndexesFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4680441766343263950L;
 	public static final String NAME = "indexes";
 	public static final String NAME_ALTERNATIVE = "indices";
 	

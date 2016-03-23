@@ -30,6 +30,10 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
  */
 public class HeadLastFunctionElement extends ListFunctionElement {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1855644832297346478L;
 	public static final String HEAD_FUNC_NAME = "head";
 	public static final String LAST_FUNC_NAME = "last";
 	

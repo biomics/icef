@@ -24,6 +24,10 @@ package org.coreasm.engine.absstorage;
 public class RuleBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2418684355552459853L;
+	/**
 	 * Name of the Rule background
 	 */
 	public static final String RULE_BACKGROUND_NAME = "RULE";

@@ -25,6 +25,11 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class MapBackgroundElement extends BackgroundElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6332067996609962004L;
+
 	public static final String NAME = "MAP";
 	
 	protected static final MapElement NEW_INSTANCE = new MapElement();

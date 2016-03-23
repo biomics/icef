@@ -23,6 +23,11 @@ package org.coreasm.engine.absstorage;
 public class BooleanElement extends Element {
 
   	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1024552280543337148L;
+
+	/**
  	 * Name of the 'true' value.
  	 */
  	public static final String TRUE_NAME = "true";

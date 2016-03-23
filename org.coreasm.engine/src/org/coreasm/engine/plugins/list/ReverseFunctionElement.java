@@ -32,6 +32,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class ReverseFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6778887027026443337L;
 	public static final String NAME = "reverse";
 	protected final ControlAPI capi;
 	protected final AbstractStorage storage;

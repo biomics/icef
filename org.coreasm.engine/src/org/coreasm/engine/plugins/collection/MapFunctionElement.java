@@ -33,6 +33,11 @@ import org.coreasm.engine.absstorage.Signature;
  */
 public class MapFunctionElement extends CollectionFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7133491239825083204L;
+
 	/** suggested name for this function */
 	public static final String NAME = "map";
 

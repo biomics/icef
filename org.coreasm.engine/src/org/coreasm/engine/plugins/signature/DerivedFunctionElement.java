@@ -35,6 +35,10 @@ import org.coreasm.engine.interpreter.InterpreterException;
  */
 public class DerivedFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5733580433068402147L;
 	protected final ControlAPI capi;
 	protected final List<String> params;
 	protected final ASTNode expr;

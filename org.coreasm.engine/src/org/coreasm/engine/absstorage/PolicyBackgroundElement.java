@@ -24,6 +24,10 @@ package org.coreasm.engine.absstorage;
 public class PolicyBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1102975977060511238L;
+	/**
 	 * Name of the Policy background
 	 */
 	public static final String POLICY_BACKGROUND_NAME = "POLICY";

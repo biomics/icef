@@ -232,13 +232,13 @@ public class CommunicationPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									OUTBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf(), pos.getMessage().getValue().toString(), pos.getAddress().getValue()),
+									new MessageElement(interpreter.getSelf(), pos.getMessage().getValue(), pos.getAddress().getValue()),
 									MAIL_TO_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()
 									),
 							new Update(INBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf(), pos.getMessage().getValue().toString(), pos.getAddress().getValue()),
+									new MessageElement(interpreter.getSelf(), pos.getMessage().getValue(), pos.getAddress().getValue()),
 									MAIL_FROM_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo())), 

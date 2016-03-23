@@ -30,7 +30,17 @@ import org.coreasm.engine.plugins.choosepolicy.ChoosePolicyPlugin.Pair;
 public class MessageElement extends Element {
 
 	
-	public String getMessage() {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 926274521917609653L;
+
+	/**
+	 * 
+	 */
+	//private static final long serialVersionUID = -591399592312895369L;
+
+	public Element getMessage() {
 		return message;
 	}
 
@@ -42,11 +52,11 @@ public class MessageElement extends Element {
 		return fromAgent;
 	}
 
-	private String message;
+	private Element message;
 	private Element toAgent;
 	private Element fromAgent;
 
-	public MessageElement(Element fromAgent, String message, Element toAgent) {
+	public MessageElement(Element fromAgent, Element message, Element toAgent) {
 		if (fromAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null sender");
 		if (message == null)

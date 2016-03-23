@@ -34,6 +34,11 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class NthFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4195266884625834829L;
+
 	public static final String NAME = "nth";
 	
 	protected Signature signature;

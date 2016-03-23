@@ -23,6 +23,11 @@ package org.coreasm.engine.absstorage;
 public abstract class BackgroundElement extends AbstractUniverse {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9140537629799958095L;
+
+	/**
 	 * Creates a new background element. The function class of this
 	 * background is set to <code>FunctionClass.fcStatic</code>.
 	 * 

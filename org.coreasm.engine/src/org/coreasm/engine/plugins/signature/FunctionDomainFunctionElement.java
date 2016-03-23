@@ -33,6 +33,10 @@ import org.coreasm.engine.plugins.set.SetElement;
 public class FunctionDomainFunctionElement extends FunctionElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1159159777741408699L;
+	/**
 	 * Suggested name of this function
 	 */
 	public static final String FUNCTION_NAME = "domain";

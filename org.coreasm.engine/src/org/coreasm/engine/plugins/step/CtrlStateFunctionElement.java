@@ -26,6 +26,10 @@ import org.coreasm.engine.absstorage.FunctionElement;
  */
 public class CtrlStateFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8008961054867509755L;
 	private final StepPlugin plugin;
 	
 	public CtrlStateFunctionElement(StepPlugin plugin) {

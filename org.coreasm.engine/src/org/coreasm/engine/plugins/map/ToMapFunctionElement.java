@@ -33,6 +33,11 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
  */
 public class ToMapFunctionElement extends FunctionElement {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4856037692889322574L;
+
 	public static final String NAME = "toMap";
 	
 	protected Signature signature = null;

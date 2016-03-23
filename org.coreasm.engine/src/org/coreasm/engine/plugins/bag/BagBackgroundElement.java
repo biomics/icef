@@ -26,6 +26,10 @@ import org.coreasm.engine.absstorage.Element;
 public class BagBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 446152692672546264L;
+	/**
 	 * Name of the bag background
 	 */
 	public static final String BAG_BACKGROUND_NAME = "BAG";

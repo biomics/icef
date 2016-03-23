@@ -33,6 +33,10 @@ import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
 public abstract class BasicMapElement extends AbstractMapElement {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3451258201228783628L;
+	/**
      * Location-value table of this map.
      * 
      */

@@ -38,7 +38,11 @@ import org.coreasm.engine.plugins.collection.AbstractSetElement;
 public class EnumerationBackgroundElement extends BackgroundElement
     implements Enumerable {
 
-    private final List<EnumerationElement> members;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -554599495674927156L;
+	private final List<EnumerationElement> members;
     private List<Element> enumCache = null;
     
     public EnumerationBackgroundElement(List<EnumerationElement> members) {

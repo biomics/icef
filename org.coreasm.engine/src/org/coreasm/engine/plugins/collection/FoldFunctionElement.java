@@ -33,6 +33,10 @@ import org.coreasm.engine.absstorage.Signature;
  */
 public class FoldFunctionElement extends CollectionFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8062458098713101492L;
 	/** suggested names for this function */
 	public static final String FOLD_NAME = "fold";
 	public static final String FOLDR_NAME = "foldr";

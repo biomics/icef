@@ -30,6 +30,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class DropFunctionElement extends TakeFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8346041741484315624L;
 	public static final String NAME = "drop";
 	
 	public DropFunctionElement(ControlAPI capi) {

@@ -25,6 +25,11 @@ import java.util.List;
 @Deprecated
 public class SelfFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1340097235091309744L;
+
 	/** name of the self function */
 	public final static String NAME = "self";
 	

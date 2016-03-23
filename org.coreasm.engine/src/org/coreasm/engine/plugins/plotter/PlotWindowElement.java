@@ -26,6 +26,10 @@ import org.coreasm.engine.absstorage.FunctionElement;
  */
 public class PlotWindowElement extends Element {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8303895329792360725L;
 	/* reference to a Plot Window frame */
 	private final PlotWindow window;
 	

@@ -13,6 +13,12 @@
  
 package org.coreasm.engine.plugins.map;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +31,7 @@ import java.util.Set;
 
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Enumerable;
+import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
@@ -44,6 +51,11 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class MapElement extends AbstractMapElement implements ModifiableCollection {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 444310923199263581L;
+	
 	protected final Map<Element, Element> map;
 	protected Set<Element> keySet = null;
 	protected Set<Element> valueSet = null;
@@ -238,6 +250,7 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 
 	@Override
 	public Map<Element, Element> getMap() {
+		System.out.println("Serialisation Test: "+isSerializable(this));
 		return Collections.unmodifiableMap(map);
 	}
 
@@ -306,7 +319,72 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 		
 		MapElement newMap = new MapElement(tempMap);
 		Update u = new Update(loc, newMap, Update.UPDATE_ACTION, agent, node.getScannerInfo());
+		System.out.println("Serialisation Test: "+isSerializable(newMap));
 		return new UpdateMultiset(u);
 	}
+	public static void main(String[] args)
+    {
+        System.out.println("Is Serializable? "+isSerializable(new MapElement()));
+    }
 
+    public static boolean isSerializable(final Object o)
+    {
+        final boolean retVal;
+
+        if(implementsInterface(o))
+        {
+            retVal = attemptToSerialize(o);
+        }
+        else
+        {
+            retVal = false;
+        }
+
+        return (retVal);
+    }
+
+    private static boolean implementsInterface(final Object o)
+    {
+        final boolean retVal;
+
+        retVal = ((o instanceof Serializable) || (o instanceof Externalizable));
+
+        return (retVal);
+    }
+
+    private static boolean attemptToSerialize(final Object o)
+    {
+        final OutputStream sink;
+        ObjectOutputStream stream;
+
+        stream = null;
+
+        try
+        {
+            sink   = new ByteArrayOutputStream();
+            stream = new ObjectOutputStream(sink);
+            stream.writeObject(o);
+            // could also re-serilalize at this point too
+        }
+        catch(final IOException ex)
+        {
+            return (false);
+        }
+        finally
+        {
+            if(stream != null)
+            {
+                try
+                {
+                    stream.close();
+                }
+                catch(final IOException ex)
+                {
+                    // should not be able to happen
+                }
+            }
+        }
+
+        return (true);
+    }
 }

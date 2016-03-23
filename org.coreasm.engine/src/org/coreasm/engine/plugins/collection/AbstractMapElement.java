@@ -36,6 +36,11 @@ import org.coreasm.engine.absstorage.Location;
 public abstract class AbstractMapElement extends FunctionElement implements Enumerable {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6577553481432631091L;
+
+	/**
 	 * Creates a new abstract map element. 
 	 */
 	public AbstractMapElement() {

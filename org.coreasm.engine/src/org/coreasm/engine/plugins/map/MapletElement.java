@@ -23,6 +23,10 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class MapletElement extends Element {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2673833047675702607L;
 	protected final Element key;
 	protected final Element value;
 	

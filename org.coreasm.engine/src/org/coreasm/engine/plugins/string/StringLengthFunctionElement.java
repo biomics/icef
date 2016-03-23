@@ -27,6 +27,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class StringLengthFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7903213564062655390L;
 	/** name of the 'strlen' function */
 	public static final String STRLENGTH_FUNC_NAME = "strlen";
 	

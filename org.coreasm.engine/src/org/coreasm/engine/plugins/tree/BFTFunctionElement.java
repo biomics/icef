@@ -28,6 +28,10 @@ import org.coreasm.engine.plugins.list.ListElement;
  */
 public class BFTFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 829199526627237807L;
 	public static final String BFT_FUNC_NAME = TreePlugin.TREE_PREFIX + "BFT";
 	public static final String BFT_NODES_FUNC_NAME = TreePlugin.TREE_PREFIX + "BFTN";
 

@@ -21,6 +21,11 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class SignalElement extends Element {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3508978486194407950L;
+
 	/** type of this signal */
 	public final Element type;
 	

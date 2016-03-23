@@ -32,6 +32,10 @@ import org.coreasm.engine.plugins.set.SetElement;
  */
 public class OutboxFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 936788345941442793L;
 	private Set<Location> locations;
 	private SetElement messages;
 	

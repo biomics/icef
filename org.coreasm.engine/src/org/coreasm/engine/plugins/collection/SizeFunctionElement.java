@@ -31,6 +31,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class SizeFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1129906615753049345L;
 	public static final String NAME = "size";
 	
 	public SizeFunctionElement() {

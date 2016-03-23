@@ -29,6 +29,11 @@ import org.coreasm.engine.interpreter.ASTNode;
 public class PolicyElement extends Element {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3597578052999058488L;
+
+	/**
 	 * Declaration node in the parse tree.
 	 */
 	public final ASTNode node;

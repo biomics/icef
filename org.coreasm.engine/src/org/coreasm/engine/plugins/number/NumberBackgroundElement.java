@@ -25,6 +25,10 @@ import org.coreasm.engine.absstorage.Element;
 public class NumberBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 830182770161221678L;
+	/**
 	 * Name of the Number background
 	 */
 	public static final String NUMBER_BACKGROUND_NAME = "NUMBER";

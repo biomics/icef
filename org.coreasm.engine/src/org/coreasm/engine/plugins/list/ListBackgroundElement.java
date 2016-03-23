@@ -27,6 +27,10 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class ListBackgroundElement extends BackgroundElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -738886299970121242L;
 	public static final String LIST_BACKGROUND_NAME = "LIST";
 	
 	public ListBackgroundElement() {

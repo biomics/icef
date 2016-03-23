@@ -15,6 +15,13 @@
  
 package org.coreasm.engine.absstorage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+
 import org.coreasm.engine.ControlAPI;
 
 /** 
@@ -24,9 +31,14 @@ import org.coreasm.engine.ControlAPI;
  *  @author  Roozbeh Farahbod
  *  
  */
- public class Element {
+ public class Element implements Serializable {
 
- 	/**
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -123884716277937711L;
+
+	/**
  	 * This value is used to automatically generate
  	 * general Element names. 
  	 */
@@ -145,5 +157,71 @@ import org.coreasm.engine.ControlAPI;
 			return getClass().getSimpleName() + id;
 	}
 
- }
+	    public static void main(String[] args)
+	    {
+	        System.out.println("Is Serializable? "+isSerializable(new Element()));
+	    }
+
+	    public static boolean isSerializable(final Object o)
+	    {
+	        final boolean retVal;
+
+	        if(implementsInterface(o))
+	        {
+	            retVal = attemptToSerialize(o);
+	        }
+	        else
+	        {
+	            retVal = false;
+	        }
+
+	        return (retVal);
+	    }
+
+	    private static boolean implementsInterface(final Object o)
+	    {
+	        final boolean retVal;
+
+	        retVal = ((o instanceof Serializable) || (o instanceof Externalizable));
+
+	        return (retVal);
+	    }
+
+	    private static boolean attemptToSerialize(final Object o)
+	    {
+	        final OutputStream sink;
+	        ObjectOutputStream stream;
+
+	        stream = null;
+
+	        try
+	        {
+	            sink   = new ByteArrayOutputStream();
+	            stream = new ObjectOutputStream(sink);
+	            stream.writeObject(o);
+	            // could also re-serilalize at this point too
+	        }
+	        catch(final IOException ex)
+	        {
+	            return (false);
+	        }
+	        finally
+	        {
+	            if(stream != null)
+	            {
+	                try
+	                {
+	                    stream.close();
+	                }
+	                catch(final IOException ex)
+	                {
+	                    // should not be able to happen
+	                }
+	            }
+	        }
+
+	        return (true);
+	    }
+	}
+
  

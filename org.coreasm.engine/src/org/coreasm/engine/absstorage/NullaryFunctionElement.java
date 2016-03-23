@@ -25,6 +25,10 @@ import java.util.Set;
  */
 public class NullaryFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8623645691779618736L;
 	private Element value; 
 	
 	public NullaryFunctionElement() {

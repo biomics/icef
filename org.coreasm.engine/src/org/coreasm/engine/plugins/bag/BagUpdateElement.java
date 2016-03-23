@@ -25,6 +25,11 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class BagUpdateElement extends BagAbstractUpdateElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1972958637912659343L;
+
 	public enum BagUpdateType {ADD, REMOVE};
 	
 	public final BagUpdateType type;

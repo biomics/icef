@@ -34,6 +34,11 @@ import org.coreasm.engine.plugins.set.SetElement;
  */
 public class MapToPairsFunctionElement extends FunctionElement {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 525243095269796457L;
+
 	public static final String NAME = "mapToPairs";
 	
 	protected Signature signature = null;
