@@ -13,6 +13,11 @@
  
 package org.coreasm.engine.interpreter;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +27,7 @@ import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasm.engine.plugins.map.MapElement;
 
 /** 
  * Represents nodes of the abstract syntax tree.
@@ -247,7 +253,11 @@ public class ASTNode extends Node implements Serializable {
 		if (first == null)
 			return null;
 		else
+		{
+		//	System.out.println("Is first ASTNode Serializable? "+isSerializable((ASTNode)first));    
 			return (ASTNode)first;
+		}
+			
 	}
 
 	/**
@@ -403,4 +413,5 @@ public class ASTNode extends Node implements Serializable {
 		}
 		
 	}
+	
 }

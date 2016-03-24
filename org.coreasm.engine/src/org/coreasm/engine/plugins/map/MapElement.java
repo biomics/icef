@@ -250,7 +250,7 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 
 	@Override
 	public Map<Element, Element> getMap() {
-		System.out.println("Serialisation Test: "+isSerializable(this));
+		System.out.println("Copy of map Serialisation Test: "+isSerializable(new MapElement(this)));
 		return Collections.unmodifiableMap(map);
 	}
 
@@ -368,6 +368,7 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
         }
         catch(final IOException ex)
         {
+        	ex.printStackTrace();
             return (false);
         }
         finally
