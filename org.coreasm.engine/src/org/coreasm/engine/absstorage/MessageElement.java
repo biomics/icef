@@ -35,42 +35,82 @@ public class MessageElement extends Element {
 	 */
 	private static final long serialVersionUID = 926274521917609653L;
 
-	/**
-	 * 
-	 */
-	//private static final long serialVersionUID = -591399592312895369L;
-
 	public Element getMessage() {
 		return message;
 	}
 
-	public Element getToAgent() {
+	public String getToAgent() {
 		return toAgent;
 	}
 
-	public Element getFromAgent() {
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setMessage(Element message) {
+		this.message = message;
+	}
+
+	public void setToAgent(String toAgent) {
+		this.toAgent = toAgent;
+	}
+
+	public void setFromAgent(String fromAgent) {
+		this.fromAgent = fromAgent;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+
+	public void setStepcount(int stepcount) {
+		this.stepcount = stepcount;
+	}
+
+	public int getStepcount() {
+		return stepcount;
+	}
+
+	public String getFromAgent() {
 		return fromAgent;
 	}
 
 	private Element message;
-	private Element toAgent;
-	private Element fromAgent;
+	private String toAgent;
+	private String fromAgent;
+	private String subject;
+	private int stepcount;
+	
+	public MessageElement()
+	{
+		this.fromAgent = "";
+		this.message = Element.UNDEF;
+		this.toAgent = "";
+		this.subject = "";
+		this.stepcount = -1;
+	}
 
-	public MessageElement(Element fromAgent, Element message, Element toAgent) {
+	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount) {
 		if (fromAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null sender");
 		if (message == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null message");
+		if (subject == null)
+			throw new NullPointerException("Cannot create a MessageElement with a null subject");
 		if (toAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null receiver");
 		this.fromAgent = fromAgent;
 		this.message = message;
 		this.toAgent = toAgent;
+		this.subject = subject;
+		this.stepcount = stepcount;
 	}
 
 	public String toString() {
-		String result = "from "+fromAgent.toString();
-		result +=" to "+toAgent.toString();
+		String result = "from "+fromAgent;
+		result +=" to "+toAgent;
+		result +=" with subject '"+subject+"'";
+		result +=" at step "+stepcount;
 		result +=": "+message;
 		return result;
 	}

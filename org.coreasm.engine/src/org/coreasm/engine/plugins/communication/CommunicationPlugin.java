@@ -72,6 +72,8 @@ public class CommunicationPlugin extends Plugin implements
 
 	/** The send rule */
 	public static final String SEND_KEYWORD = "send";
+	public static final String WITH_KEYWORD = "with";
+	public static final String SUBJECT_KEYWORD = "subject";
 	public static final String TO_KEYWORD = "to";
 	public static final String MAIL_TO_ACTION = "mailToAction";
 	public static final String MAIL_FROM_ACTION = "mailFromAction";
@@ -109,7 +111,7 @@ public class CommunicationPlugin extends Plugin implements
 	protected InputProvider inputProvider;
 	protected PrintStream outputStream;
 
-	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD };
+	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD};
 	private final String[] operators = { };
 	
 	/**
@@ -179,27 +181,37 @@ public class CommunicationPlugin extends Plugin implements
 							termParser,
 							npTools.getKeywParser(TO_KEYWORD, PLUGIN_NAME),
 							termParser,
+							npTools.getKeywParser(WITH_KEYWORD, PLUGIN_NAME),
+							npTools.getKeywParser(SUBJECT_KEYWORD, PLUGIN_NAME),
+							termParser
 					}).map(
 							//This should be the parser of the SendTo rule
 							new org.codehaus.jparsec.functors.Map<Object[], Node>() {
 						public Node map(Object[] vals) {	
 							
 							Node node = new SendToRuleNode(((Node) vals[0]).getScannerInfo());
-							node.addChild((Node) vals[0]);
+							
 							System.out.println("vals[0]: "+vals[0]);
-							node.addChild("alpha", (Node) vals[1]);
 							System.out.println("vals[1]: "+vals[1]);
-							node.addChild((Node) vals[2]);
 							System.out.println("vals[2]: "+vals[2]);
-							node.addChild("beta", (Node) vals[3]);
 							System.out.println("vals[3]: "+vals[3]);
+							System.out.println("vals[2]: "+vals[4]);
+							System.out.println("vals[3]: "+vals[5]);
+							System.out.println("vals[2]: "+vals[6]);
+							node.addChild((Node) vals[0]);
+							node.addChild("alpha", (Node) vals[1]);
+							node.addChild((Node) vals[2]);
+							node.addChild("beta", (Node) vals[3]);	
+							node.addChild((Node) vals[4]);
+							node.addChild((Node) vals[5]);
+							node.addChild("gamma", (Node) vals[6]);	
 							return node;
 						}
 					});
 
 
 			parsers.put("Rule",
-					new GrammarRule("sendToRule", "'send' Term 'to' Term", sendToParser, PLUGIN_NAME));
+					new GrammarRule("sendToRule", "'send' Term 'to' Term 'with' 'subject' Term", sendToParser, PLUGIN_NAME));
 
 		}
 
@@ -224,6 +236,9 @@ public class CommunicationPlugin extends Plugin implements
 		else if (!pos.getAddress().isEvaluated()) {
 			return pos.getAddress();
 		} 
+		else if (!pos.getSubject().isEvaluated()) {
+			return pos.getSubject();
+		} 
 		else {
 			//This thing is creating two updates: one for the outbox and one for the inbox. It is not 
 			// pretty, but it should work.
@@ -232,13 +247,13 @@ public class CommunicationPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									OUTBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf(), pos.getMessage().getValue(), pos.getAddress().getValue()),
+									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(), pos.getSubject().getValue().toString(),capi.getStepCount()),
 									MAIL_TO_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()
 									),
 							new Update(INBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf(), pos.getMessage().getValue(), pos.getAddress().getValue()),
+									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(),pos.getSubject().getValue().toString(),capi.getStepCount()),
 									MAIL_FROM_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo())), 

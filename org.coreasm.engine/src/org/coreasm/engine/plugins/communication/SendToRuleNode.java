@@ -52,4 +52,8 @@ public class SendToRuleNode extends ASTNode {
 	public ASTNode getAddress() {
 		return this.getMessage().getNext();
 	}
+	
+	public ASTNode getSubject() {
+		return this.getAddress().getNext();
+	}
 }

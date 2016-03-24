@@ -21,10 +21,10 @@ import org.coreasm.engine.absstorage.MessageElement;
  *  
  */
 public interface Mailbox {
-
+	
     /**
      * Returns a the message elements in the outbox,
-     * which wait for beeing sent. After the execution
+     * which wait for being sent. After the execution
      * of this instruction, the outbox is empty.
      *
      * @return Set of MessageElements in the outbox
@@ -41,27 +41,19 @@ public interface Mailbox {
     public Set<MessageElement> fillInbox(Set<MessageElement> msgs);
     
     /**
-     * Returns a the message elements in the inbox
+     * Returns all the message elements in the inbox
      * @return the message elements in the inbox
      */
     public Set<MessageElement> getInbox();
-    
+    	
     /**
-     * Returns a the message elements in the inbox
-     * @return the message elements in the inbox
+     * Puts the message into the outbox
+     * @param message The MessageElement to be put into the outbox
      */
-    public void sendMessage(MessageElement message);
+    public void putOnOutbox(MessageElement message); 
     
     /**
-     * Returns an instance of this mailbox registered
-     * for the running thread.
-     */
-    public Mailbox getMailboxInstance();
-    
-    
-    /**
-     * Cleans up any cached data in the mailbox.
-     * 
+     * Cleans up any cached data in the mailbox to run a new specification
      */
     public void cleanUp();
     

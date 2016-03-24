@@ -63,8 +63,8 @@ public class InboxFunctionElement extends FunctionElement {
 				if (m instanceof MessageElement)
 				{
 					MessageElement theMessage = (MessageElement) m;
-					 Element toAgent = theMessage.getToAgent();
-					if(toAgent.equals(args.get(0)))
+					 String toAgent = theMessage.getToAgent();
+					if(toAgent.equals(args.get(0).toString()))
 						filteredSet.add(theMessage);	
 				}else
 				{

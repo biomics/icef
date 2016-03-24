@@ -63,8 +63,8 @@ public class OutboxFunctionElement extends FunctionElement {
 				if (m instanceof MessageElement)
 				{
 					MessageElement theMessage = (MessageElement) m;
-					 Element fromAgent = theMessage.getFromAgent();
-					if(fromAgent.equals(args.get(0)))
+					 String fromAgent = theMessage.getFromAgent();
+					if(fromAgent.equals(args.get(0).toString()))
 						filteredSet.add(theMessage);	
 				}else
 				{
