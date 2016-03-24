@@ -1,11 +1,6 @@
 /*	
- * Mailbox.java 	1.0 	$Revision: 243 $
+ * Copyright (C) 2016 BIOMICS project (Eric Rothstein, Daniel Schreckling)
  * 
- *
- * Copyright (C) 2005 Roozbeh Farahbod 
- * 
- * Last modified by $Author: erothst $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
- *
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
@@ -22,11 +17,29 @@ import org.coreasm.engine.absstorage.MessageElement;
  *	Defines the interface of the mailbox
  *   
  *  @author Eric Rothstein
+ *  @author Daniel Schreckling
  *  
  */
 public interface Mailbox {
 
-	
+    /**
+	 * Returns a the message elements in the outbox,
+     * which wait for beeing sent. After the execution
+     * of this instruction, the outbox is empty.
+     *
+	 * @return Set of MessageElements in the outbox
+	 */
+	public Set<MessageElement> emptyOutbox();
+
+    /**
+	 * Puts the Set of MessageElements into the Inbox
+     * of this coreASM
+     *
+     * @param msgs The message arriving at the mailbox which need to be stored in the Inbox
+	 * @return Set of MessageElements which already existed in the Inbox
+	 */
+	public Set<MessageElement> fillInbox(Set<MessageElement> msgs);
+
 	/**
 	 * Returns a the message elements in the inbox
 	 * @return the message elements in the inbox
