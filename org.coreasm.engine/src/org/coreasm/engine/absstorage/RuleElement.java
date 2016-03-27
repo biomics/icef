@@ -131,6 +131,7 @@ public class RuleElement extends Element {
 	}
 
 	public String toString() {
-		return "@" + this.getName();
+		//return "@" + this.getName();
+		return "rule "+this.getName()+" = "+this.getBody().unparseTree()+"\n";
 	}
 }

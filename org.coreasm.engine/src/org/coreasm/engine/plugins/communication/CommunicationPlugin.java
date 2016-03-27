@@ -84,9 +84,12 @@ public class CommunicationPlugin extends Plugin implements
 	
 	/** The input function */
 	public static final String INBOX_FUNC_NAME = "inbox";
-	//FIXME BSL if you have problems with the modification of the mailbox, change the flag from false to true here
 	public static final Location INBOX_FUNC_LOC = new Location(CommunicationPlugin.INBOX_FUNC_NAME, ElementList.NO_ARGUMENT);
 	
+	/** The getMessageValue functions */
+	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "getMessageContent";
+	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "getMessageSubject";
+	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "getMessageSender";
 	private final Set<String> dependencyList;
 	
 	/** 
@@ -127,6 +130,9 @@ public class CommunicationPlugin extends Plugin implements
 		functionNames = new HashSet<String>();
 		functionNames.add(INBOX_FUNC_NAME);
 		functionNames.add(OUTBOX_FUNC_NAME);
+		functionNames.add(GET_MESSAGE_CONTENT_FUNC_NAME);
+		functionNames.add(GET_MESSAGE_SENDER_FUNC_NAME);
+		functionNames.add(GET_MESSAGE_SUBJECT_FUNC_NAME);
 	}
 
 
@@ -191,13 +197,13 @@ public class CommunicationPlugin extends Plugin implements
 							
 							Node node = new SendToRuleNode(((Node) vals[0]).getScannerInfo());
 							
-							System.out.println("vals[0]: "+vals[0]);
-							System.out.println("vals[1]: "+vals[1]);
-							System.out.println("vals[2]: "+vals[2]);
-							System.out.println("vals[3]: "+vals[3]);
-							System.out.println("vals[2]: "+vals[4]);
-							System.out.println("vals[3]: "+vals[5]);
-							System.out.println("vals[2]: "+vals[6]);
+//							System.out.println("vals[0]: "+vals[0]);
+//							System.out.println("vals[1]: "+vals[1]);
+//							System.out.println("vals[2]: "+vals[2]);
+//							System.out.println("vals[3]: "+vals[3]);
+//							System.out.println("vals[2]: "+vals[4]);
+//							System.out.println("vals[3]: "+vals[5]);
+//							System.out.println("vals[2]: "+vals[6]);
 							node.addChild((Node) vals[0]);
 							node.addChild("alpha", (Node) vals[1]);
 							node.addChild((Node) vals[2]);
@@ -274,6 +280,9 @@ public class CommunicationPlugin extends Plugin implements
 			functions = new HashMap<String,FunctionElement>();
 			functions.put(OUTBOX_FUNC_NAME, outboxFunction);
 			functions.put(INBOX_FUNC_NAME, inboxFunction);
+			functions.put(GET_MESSAGE_CONTENT_FUNC_NAME, new GetMessageContentFunctionElement());
+			functions.put(GET_MESSAGE_SUBJECT_FUNC_NAME, new GetMessageSubjectFunctionElement());
+			functions.put(GET_MESSAGE_SENDER_FUNC_NAME, new GetMessageSenderFunctionElement());
 		}
 		return functions;
 	}
