@@ -319,7 +319,7 @@ public class MapElement extends AbstractMapElement implements ModifiableCollecti
 		
 		MapElement newMap = new MapElement(tempMap);
 		Update u = new Update(loc, newMap, Update.UPDATE_ACTION, agent, node.getScannerInfo());
-		System.out.println("Serialisation Test: "+isSerializable(newMap));
+		//System.out.println("Serialisation Test: "+isSerializable(newMap));
 		return new UpdateMultiset(u);
 	}
 	public static void main(String[] args)

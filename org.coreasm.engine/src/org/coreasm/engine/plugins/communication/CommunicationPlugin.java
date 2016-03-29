@@ -104,9 +104,9 @@ public class CommunicationPlugin extends Plugin implements
 	private Map<String,FunctionElement> functions = null;
 	
 	protected Map<String, GrammarRule> parsers = null;
-	protected CommunicationPluginPSI pluginPSI;
-	protected FunctionElement inboxFunction;
-	protected FunctionElement outboxFunction;
+	protected CommunicationPSI pluginPSI;
+	protected InboxFunctionElement inboxFunction;
+	protected OutboxFunctionElement outboxFunction;
 //	protected FunctionElement filterInboxFunction;
 //	protected FunctionElement filterOutboxFunction;
 //	protected FunctionElement inputFunction;
@@ -125,7 +125,7 @@ public class CommunicationPlugin extends Plugin implements
 		dependencyList = new HashSet<String>();
 		dependencyList.add("StringPlugin");
 		dependencyList.add("IOPlugin");
-		pluginPSI = new CommunicationPluginPSI();
+		pluginPSI = new CommunicationPSI();
 
 		functionNames = new HashSet<String>();
 		functionNames.add(INBOX_FUNC_NAME);
@@ -152,7 +152,7 @@ public class CommunicationPlugin extends Plugin implements
 		inboxFunction = new InboxFunctionElement();
 		outboxFunction = new OutboxFunctionElement();
 		allMessages = new ArrayList<MessageElement>();
-		pluginPSI = new CommunicationPluginPSI();
+		pluginPSI = new CommunicationPSI();
 		sourceModes = new HashMap<EngineMode, Integer>();
 		sourceModes.put(EngineMode.emAggregation, ExtensionPointPlugin.DEFAULT_PRIORITY);
 		targetModes = new HashMap<EngineMode, Integer>();
@@ -256,12 +256,7 @@ public class CommunicationPlugin extends Plugin implements
 									MAIL_TO_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()
-									),
-							new Update(INBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(),pos.getSubject().getValue().toString(),capi.getStepCount()),
-									MAIL_FROM_ACTION,
-									interpreter.getSelf(),
-									pos.getScannerInfo())), 
+									)), 
 					null,
 					null);
 		}
@@ -312,47 +307,6 @@ public class CommunicationPlugin extends Plugin implements
 	@Override
 	public Set<String> getDependencyNames() {
 		return this.dependencyList;
-	}
-	
-	/**
-	 * Interface of the IOPlugin to engine environment
-	 * 
-	 * @author Roozbeh Farahbod
-	 * 
-	 */
-	public class CommunicationPluginPSI implements PluginServiceInterface {
-
-		/**
-		 * @return output messages as an array of <code>Element</code>
-		 * @see Element
-		 */
-		public String[] getOutputHistory() {
-			synchronized (pluginPSI) {
-				String[] elements = new String[allMessages.size()];
-				return allMessages.toArray(elements);
-			}
-		}
-
-		/**
-		 * Sets the input provider of this plugin.
-		 * @param ip an input provider
-		 */
-		public void setInputProvider(InputProvider ip) {
-			synchronized (pluginPSI) {
-				inputProvider = ip;
-			}
-		}
-
-		/**
-		 * Sets the output stream for 'send to'  rules.
-		 * @param output a <code>PrintStream</code> object
-		 */	
-		public void setOutputStream(PrintStream output) {
-			synchronized (pluginPSI) {
-				outputStream = output;
-				//FIXME BSL Connect to the CommLib here?
-			}
-		}
 	}
 
 	/**
@@ -502,9 +456,6 @@ public class CommunicationPlugin extends Plugin implements
 	public void aggregateUpdates(PluginAggregationAPI pluginAgg) {
 		synchronized (this) {
 			aggregateOutbox(pluginAgg);
-			aggregateInbox(pluginAgg);
-			//aggregateWrite(pluginAgg);
-			//aggregateAppend(pluginAgg);
 		}
 	}
 
@@ -590,11 +541,7 @@ public class CommunicationPlugin extends Plugin implements
 						}
 					}
 				}
-				try {
-					outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement(aggregatedOutbox));
-				} catch (UnmodifiableFunctionException e) {	
-					e.printStackTrace();
-				}
+				outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement(aggregatedOutbox));
 			}
 		}
 	}
@@ -629,19 +576,7 @@ public class CommunicationPlugin extends Plugin implements
 						}
 					}
 				}
-				try {
-					inboxFunction.setValue(INBOX_FUNC_LOC.args, new SetElement(aggregatedInbox));
-				} catch (UnmodifiableFunctionException e) {	
-					e.printStackTrace();
-				}
-//				pluginAgg.addResultantUpdate(
-//						new Update(
-//								INBOX_FUNC_LOC,
-//								new SetElement(aggregatedInbox),
-//								Update.UPDATE_ACTION,
-//								contributingAgents,
-//								contributingNodes),
-//						this);
+				inboxFunction.setValue(INBOX_FUNC_LOC.args, new SetElement(aggregatedInbox));
 			}
 		}
 	}
@@ -673,6 +608,27 @@ public class CommunicationPlugin extends Plugin implements
 	@Override
 	public void compose(PluginCompositionAPI compAPI) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	public class CommunicationPSI implements PluginServiceInterface {
+		
+		public void updateInboxLocation(Set<MessageElement> inbox)
+		{
+			synchronized(pluginPSI){
+				
+				inboxFunction.setValue(INBOX_FUNC_LOC.args, new SetElement(inbox));
+			}
+		}
+		
+		public Set<MessageElement> collectOutgoingMessages() 
+		{
+			synchronized(pluginPSI){
+				
+				 return outboxFunction.getMessages(); 
+			}
+			
+		}
 		
 	}
 	/*

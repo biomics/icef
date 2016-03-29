@@ -32,6 +32,7 @@ import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.plugin.Plugin;
@@ -491,6 +492,11 @@ public class WatchExpressionAPI implements ControlAPI {
 	@Override
 	public CoreASMError getError() {
 		return lastError;
+	}
+
+	@Override
+	public Mailbox getMailbox() {
+		throw new UnsupportedOperationException();
 	}
 
 }

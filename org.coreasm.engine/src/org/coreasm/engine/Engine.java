@@ -39,6 +39,8 @@ import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.loader.PluginManager;
+import org.coreasm.engine.mailbox.Mailbox;
+import org.coreasm.engine.mailbox.MailboxImp;
 import org.coreasm.engine.parser.GrammarRule;
 import org.coreasm.engine.parser.JParsecParser;
 import org.coreasm.engine.parser.OperatorRegistry;
@@ -83,6 +85,8 @@ public class Engine implements ControlAPI {
 	private final Scheduler scheduler;
 
 	private final Interpreter interpreter;
+	
+	private final Mailbox mailbox;
 	
 	/** Loader used to obtain plugin classes */
 	private final PluginManager pluginLoader;
@@ -157,6 +161,7 @@ public class Engine implements ControlAPI {
 
 		storage = new HashStorage(this);
 		scheduler = new SchedulerImp(this);
+		mailbox = new MailboxImp(this);
 		parser = new JParsecParser(this);
 		interpreter = new InterpreterImp(this);
 		engineThread = new EngineThread(name);
@@ -885,6 +890,7 @@ public class Engine implements ControlAPI {
 
 						case emPreparingInitialState:
 							scheduler.prepareInitialState();
+							mailbox.prepareInitialState();
 							isStateInitialized = true;
 							next(EngineMode.emIdle);
 							break;
@@ -903,6 +909,9 @@ public class Engine implements ControlAPI {
 							warnings.clear();
 							scheduler.startStep();
 							scheduler.retrieveAgents();
+							//FIXME BSL remove the loopback method!!!
+							mailbox.loopback();
+							mailbox.startStep();
 							next(EngineMode.emSelectingAgents);
 							break;
 
@@ -943,7 +952,7 @@ public class Engine implements ControlAPI {
 //							if (scheduler.isSingleAgentInconsistent())
 //								next(EngineMode.emStepFailed);
 //							else {
-//								scheduler.handleFailedUpdate();
+								scheduler.handleFailedUpdate();
 //								if (scheduler.environmentPresent())
 //									next(EngineMode.emSelectingAgents);
 //								else
@@ -984,6 +993,7 @@ public class Engine implements ControlAPI {
 							storage.aggregateUpdates();
 							if (storage.isConsistent(scheduler.getUpdateSet())) {
 								storage.fireUpdateSet(scheduler.getUpdateSet());
+								mailbox.endStep();
 								next(EngineMode.emStepSucceeded);
 							} else
 								next(EngineMode.emUpdateFailed);
@@ -1320,6 +1330,11 @@ public class Engine implements ControlAPI {
 	@Override
 	public List<InterpreterListener> getInterpreterListeners() {
 		return interpreterListeners;
+	}
+
+	@Override
+	public Mailbox getMailbox() {
+		return mailbox;
 	}
 }
 

@@ -29,6 +29,7 @@ import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.PackagePlugin;
@@ -707,6 +708,11 @@ public class SlimEngine implements ControlAPI {
 	@Override
 	public CoreASMError getError() {
 		return errors.get(errors.size()-1);
+	}
+
+	@Override
+	public Mailbox getMailbox() {
+		throw new UnsupportedOperationException();
 	}
 
 }

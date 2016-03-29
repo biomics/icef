@@ -36,9 +36,8 @@ public interface Mailbox {
      * of this coreASM
      *
      * @param msgs The message arriving at the mailbox which need to be stored in the Inbox
-     * @return Set of MessageElements which already existed in the Inbox
      */
-    public Set<MessageElement> fillInbox(Set<MessageElement> msgs);
+    public void fillInbox(Set<MessageElement> msgs);
     
     /**
      * Returns all the message elements in the inbox
@@ -55,7 +54,26 @@ public interface Mailbox {
     /**
      * Cleans up any cached data in the mailbox to run a new specification
      */
-    public void cleanUp();
-    
-    public void dispose();
+	public void prepareInitialState();
+
+	/**
+     * Checks if the mailbox is ready to start a step. More precisely, we
+     * make sure that the outbox of the mailbox is empty, and that the inbox location
+     * used by the communication plugin has the set of incoming MessageElements
+     */
+	public void startStep();
+	
+	/**
+     * Checks if the mailbox is ready to end a step. More precisely, we
+     * make sure that the inbox of the mailbox is empty, and that the we get the 
+     * MessageElements from the outbox location used by the communication plugin.
+     */
+	public void endStep();
+	
+	/**
+	 * This method is for testing purposes only. It assigns the content of the outbox
+	 * to the inbox, and empties the outbox
+	 */
+	public void loopback();
 }
+

@@ -37,11 +37,11 @@ public class OutboxFunctionElement extends FunctionElement {
 	 */
 	private static final long serialVersionUID = 936788345941442793L;
 	private Set<Location> locations;
-	private SetElement messages;
+	private Set<MessageElement> messages;
 	
 	public OutboxFunctionElement() {
 		setFClass(FunctionClass.fcDerived);
-		messages = new SetElement();
+		messages = new HashSet<MessageElement>();
 		locations = new HashSet<Location>();
 		locations.add(CommunicationPlugin.OUTBOX_FUNC_LOC);//THIS IS A GLOBAL OUTBOX
 	}
@@ -56,20 +56,13 @@ public class OutboxFunctionElement extends FunctionElement {
 		else if (args.size() == 1) //The owner of the outbox. 
 		{
 			//FIXME BSL this implementation is very inefficient, consider filtering during value setting?
-			Set<Element> theSet = messages.getSet();
 			Set<MessageElement> filteredSet = new HashSet<>(); 
-			for (Element m : theSet)
+			for (MessageElement theMessage : messages)
 			{
-				if (m instanceof MessageElement)
-				{
-					MessageElement theMessage = (MessageElement) m;
-					 String fromAgent = theMessage.getFromAgent();
-					if(fromAgent.equals(args.get(0).toString()))
-						filteredSet.add(theMessage);	
-				}else
-				{
-					System.out.println("OutboxFunctionElement is storing non MessageElements! Search for ERROR#2OutboxFunctionElement to find me.");
-				}
+				String fromAgent = theMessage.getFromAgent();
+				if(fromAgent.equals(args.get(0).toString()))
+					filteredSet.add(theMessage);	
+			
 			}
 			return new SetElement(filteredSet) ;
 		}
@@ -85,7 +78,23 @@ public class OutboxFunctionElement extends FunctionElement {
 	public void setValue(List<? extends Element> args, Element value) {
 		if (args.size() == 0) {
 			if (value instanceof SetElement) 
-				messages = (SetElement)value;
+				{
+					messages.clear();
+					SetElement theSet = (SetElement) value;
+					Set<Element> iterableSet = theSet.getSet();
+					for(Element e : iterableSet)
+					{
+						if(e instanceof MessageElement)
+						{
+							messages.add((MessageElement) e);
+						}
+						else
+						{
+							System.out.println("You are trying to set values that are not Message Elements to the outbox location");
+						}
+					}
+					
+				}
 			else
 			{
 				System.out.println("whoops! Something you thought would never happen in OutboxFunctionElement just happened! Search for ERROR#1OutboxFunctionElement to find me.");
@@ -102,6 +111,10 @@ public class OutboxFunctionElement extends FunctionElement {
 	 */
 	public Set<Location> getLocations(String name) {
 		return locations;
+	}
+
+	public Set<MessageElement> getMessages() {
+		return messages;
 	}
 
 }
