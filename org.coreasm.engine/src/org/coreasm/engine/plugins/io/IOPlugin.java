@@ -337,6 +337,8 @@ public class IOPlugin extends Plugin implements
 	public Map<String,FunctionElement> getFunctions() {
 		if (functions == null) {
 			functions = new HashMap<String,FunctionElement>();
+			if(inputFunction==null)
+				inputFunction = new InputFunctionElement(this);
 			functions.put(INPUT_FUNC_NAME, inputFunction);
 			functions.put(PRINT_OUTPUT_FUNC_NAME, outputFunction);
 			functions.put(READ_FUNC_NAME, filereadFunction);

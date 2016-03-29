@@ -77,19 +77,19 @@ public class CommunicationPlugin extends Plugin implements
 	public static final String TO_KEYWORD = "to";
 	public static final String MAIL_TO_ACTION = "mailToAction";
 	public static final String MAIL_FROM_ACTION = "mailFromAction";
-	public static final String OUTBOX_FUNC_NAME = "outbox";
+	public static final String OUTBOX_FUNC_NAME = "outboxOf";
 	public static final Location OUTBOX_FUNC_LOC = new Location(CommunicationPlugin.OUTBOX_FUNC_NAME,
 			ElementList.NO_ARGUMENT);
 	public static final String[] UPDATE_ACTIONS = { MAIL_TO_ACTION, MAIL_FROM_ACTION};
 	
 	/** The input function */
-	public static final String INBOX_FUNC_NAME = "inbox";
+	public static final String INBOX_FUNC_NAME = "inboxOf";
 	public static final Location INBOX_FUNC_LOC = new Location(CommunicationPlugin.INBOX_FUNC_NAME, ElementList.NO_ARGUMENT);
 	
 	/** The getMessageValue functions */
-	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "getMessageContent";
-	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "getMessageSubject";
-	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "getMessageSender";
+	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "messageContent";
+	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "messageSubject";
+	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "messageSender";
 	private final Set<String> dependencyList;
 	
 	/** 
@@ -149,7 +149,6 @@ public class CommunicationPlugin extends Plugin implements
 	 */
 	@Override
 	public void initialize() {
-		//TODO Complete the inboxFunction
 		inboxFunction = new InboxFunctionElement();
 		outboxFunction = new OutboxFunctionElement();
 		allMessages = new ArrayList<MessageElement>();
@@ -278,6 +277,10 @@ public class CommunicationPlugin extends Plugin implements
 	public Map<String,FunctionElement> getFunctions() {
 		if (functions == null) {
 			functions = new HashMap<String,FunctionElement>();
+			if(inboxFunction == null)
+				inboxFunction = new InboxFunctionElement();
+			if(outboxFunction == null)
+				outboxFunction = new OutboxFunctionElement();
 			functions.put(OUTBOX_FUNC_NAME, outboxFunction);
 			functions.put(INBOX_FUNC_NAME, inboxFunction);
 			functions.put(GET_MESSAGE_CONTENT_FUNC_NAME, new GetMessageContentFunctionElement());
