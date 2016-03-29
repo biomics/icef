@@ -910,7 +910,7 @@ public class Engine implements ControlAPI {
 							scheduler.startStep();
 							scheduler.retrieveAgents();
 							//FIXME BSL remove the loopback method!!!
-							mailbox.loopback();
+							//mailbox.loopback();
 							mailbox.startStep();
 							next(EngineMode.emSelectingAgents);
 							break;
