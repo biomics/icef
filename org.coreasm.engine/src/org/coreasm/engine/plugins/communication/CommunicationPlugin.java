@@ -11,7 +11,6 @@
  
 package org.coreasm.engine.plugins.communication;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,6 +89,7 @@ public class CommunicationPlugin extends Plugin implements
 	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "messageContent";
 	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "messageSubject";
 	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "messageSender";
+	public static final String GET_MESSAGE_STEP_FUNC_NAME = "messageStep";
 	private final Set<String> dependencyList;
 	
 	/** 
@@ -107,12 +107,8 @@ public class CommunicationPlugin extends Plugin implements
 	protected CommunicationPSI pluginPSI;
 	protected InboxFunctionElement inboxFunction;
 	protected OutboxFunctionElement outboxFunction;
-//	protected FunctionElement filterInboxFunction;
-//	protected FunctionElement filterOutboxFunction;
-//	protected FunctionElement inputFunction;
-//	protected FunctionElement fileInputFunction;
-	protected InputProvider inputProvider;
-	protected PrintStream outputStream;
+
+
 
 	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD};
 	private final String[] operators = { };
@@ -133,6 +129,7 @@ public class CommunicationPlugin extends Plugin implements
 		functionNames.add(GET_MESSAGE_CONTENT_FUNC_NAME);
 		functionNames.add(GET_MESSAGE_SENDER_FUNC_NAME);
 		functionNames.add(GET_MESSAGE_SUBJECT_FUNC_NAME);
+		functionNames.add(GET_MESSAGE_STEP_FUNC_NAME);
 	}
 
 
@@ -195,14 +192,6 @@ public class CommunicationPlugin extends Plugin implements
 						public Node map(Object[] vals) {	
 							
 							Node node = new SendToRuleNode(((Node) vals[0]).getScannerInfo());
-							
-//							System.out.println("vals[0]: "+vals[0]);
-//							System.out.println("vals[1]: "+vals[1]);
-//							System.out.println("vals[2]: "+vals[2]);
-//							System.out.println("vals[3]: "+vals[3]);
-//							System.out.println("vals[2]: "+vals[4]);
-//							System.out.println("vals[3]: "+vals[5]);
-//							System.out.println("vals[2]: "+vals[6]);
 							node.addChild((Node) vals[0]);
 							node.addChild("alpha", (Node) vals[1]);
 							node.addChild((Node) vals[2]);
@@ -281,6 +270,7 @@ public class CommunicationPlugin extends Plugin implements
 			functions.put(GET_MESSAGE_CONTENT_FUNC_NAME, new GetMessageContentFunctionElement());
 			functions.put(GET_MESSAGE_SUBJECT_FUNC_NAME, new GetMessageSubjectFunctionElement());
 			functions.put(GET_MESSAGE_SENDER_FUNC_NAME, new GetMessageSenderFunctionElement());
+			functions.put(GET_MESSAGE_STEP_FUNC_NAME, new GetMessageStepFunctionElement());
 		}
 		return functions;
 	}
@@ -327,49 +317,6 @@ public class CommunicationPlugin extends Plugin implements
 			//FIXME Hook left here because we may want to do things inbetween steps
 		}
 	}
-//TODO BSL this transforms updates to text to be stored on a file. This method may serve as good inspiration to write on a socket.
-//	/**
-//	 * Writes all updates into files taking into account weather they should be appended to the file or not. Existing files are overwritten without any further warnings.
-//	 * 
-//	 * @throws UnmodifiableFunctionException
-//	 */
-//	private void writePrintInToFileUpdates() throws UnmodifiableFunctionException {
-//		FunctionElement fileOutputFunction = capi.getStorage().getFunction(CommunicationPlugin.FILE_OUTPUT_FUNC_NAME);
-//		for (Update u : capi.getScheduler().getUpdateSet()) {
-//			if (APPEND_ACTION.equals(u.action) || WRITE_ACTION.equals(u.action)) {
-//				ListElement outputList = (ListElement) u.value;
-//				if (outputList != Element.UNDEF) {
-//					//set location to undef to prevent unnecessary output to file
-//					fileOutputFunction.setValue(u.loc.args, Element.UNDEF);
-//					List<? extends Element> lines = outputList.getList();
-//					//if the path is relative to the MAIN specification file, make it absolute.
-//					String path2spec = "";
-//					String fileName = u.loc.args.get(0).toString();
-//					if (!new File(fileName).isAbsolute())
-//						path2spec = capi.getSpec().getFileDir();
-//					String outputFile = Tools.concatFileName(path2spec, fileName);
-//					FileWriter fw = null;
-//					try {
-//						fw = new FileWriter(outputFile, APPEND_ACTION.equals(u.action));
-//						for (Element line : lines)
-//							fw.append(line + System.lineSeparator());
-//					}
-//					catch (IOException e) {
-//						throw new CoreASMError("File " + outputFile + " could not be created.");
-//					}
-//					finally {
-//						if (fw != null)
-//							try {
-//								fw.close();
-//							}
-//						catch (IOException e) {
-//								e.printStackTrace();
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
 
 	/**
 	 * Print the value of the print location to the outputSteam which depends on the user interface of CoreASM, i.e. EngineDriver
@@ -388,15 +335,6 @@ public class CommunicationPlugin extends Plugin implements
 				}
 				outboxFunction.setValue(OUTBOX_FUNC_LOC.args, msgs);
 			}
-			//TODO BSL here is where we might plug some communication to the Comm Library
-			/*if (outputStream == null)
-				for(Element e: msgs.getSet())
-					if(e instanceof MessageElement)
-						allMessages.add((MessageElement) e);
-			 * outputStream.print(msgs);
-			 */
-			//TODO BSL Here is where we determine whether we want to reset the outbox or not, or if we want to distribute 
-			//the outbox the different agents.... maybe it is better than filtering the global outbox 
 			
 		}
 		catch (UnmodifiableFunctionException e) {
@@ -459,57 +397,7 @@ public class CommunicationPlugin extends Plugin implements
 		}
 	}
 
-//	/**
-//	 * Aggregate updates for each write locations. Whenever write as well as append updates for the same location exists, the updates are not consistent.
-//	 * @param pluginAgg
-//	 */
-//	public void aggregateWrite(PluginAggregationAPI pluginAgg) {
-//		Set<Location> writeLocsToAggregate = pluginAgg.getLocsWithAnyAction(WRITE_ACTION);
-//		Set<Location> appendLocsToAggregate = pluginAgg.getLocsWithAnyAction(APPEND_ACTION);
-//
-//		for (Location writeLoc : writeLocsToAggregate) {
-//			// if regular update affects this location
-//			if (pluginAgg.regularUpdatesAffectsLoc(writeLoc)) {
-//				pluginAgg.handleInconsistentAggregationOnLocation(writeLoc, this);
-//			}
-//			else {
-//				Element locValue = null;
-//				//mark at least one inconsistent update
-//				for (Update update : pluginAgg.getLocUpdates(writeLoc)) {
-//					if (WRITE_ACTION.equals(update.action)) {
-//						//different values for the same location
-//						if (locValue != null && locValue.equals(update.value))
-//							pluginAgg.flagUpdate(update, Flag.FAILED, this);
-//						else {
-//							locValue = update.value;
-//							//append and write within the same step for the same location
-//							if (appendLocsToAggregate.contains(writeLoc)) {
-//								pluginAgg.flagUpdate(update, Flag.FAILED, this);
-//							}
-//							else {
-//								pluginAgg.flagUpdate(update, Flag.SUCCESSFUL, this);
-//							}
-//						}
-//						if (!(update.value instanceof ListElement)) {
-//							pluginAgg.addResultantUpdate(
-//									new Update(
-//											writeLoc,
-//											new ListElement(Arrays.asList(new Element[] { update.value })),
-//											update.action,
-//											update.agents,
-//											update.sources),
-//									this);
-//						}
-//						else {
-//							pluginAgg.addResultantUpdate(
-//									update,
-//									this);
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
+
 
 	/**
 	 * Aggregate updates for the outbox location.
