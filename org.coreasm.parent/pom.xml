@@ -11,7 +11,8 @@
 	<modules>
 		<module>../org.coreasm.util</module>
 		<module>../org.coreasm.config</module>
-		<module>../org.coreasm.engine</module>
+		<module>../org.coreasm.engine</module>        
+		<module>../org.coreasm.biomics.wrapper</module>
 	</modules>
 
 	<properties>
