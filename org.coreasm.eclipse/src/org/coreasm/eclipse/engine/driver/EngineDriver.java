@@ -315,14 +315,14 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 				
 				updates = engine.getUpdateSet(0);
 				if (markSteps)
-					stddump.println("#--- end of step " + step);
+					stddump.println("#--- end of step " + (step-1));
 				if (dumpUpdates)
-					stddump.println("Updates at step "+step+": "+updates);
+					stddump.println("Updates at step "+(step-1)+": "+updates);
 				if (dumpState)
-					stddump.println("State at step "+step+":\n"+engine.getState());
+					stddump.println("State at step "+(step-1)+":\n"+engine.getState());
 				if (printAgents)
 					stddump.println("Last selected agents: " + engine.getLastSelectedAgents());
-				if (terminated(step,updates,prevupdates))
+				if (terminated((step-1),updates,prevupdates))
 					break;
 				prevupdates=updates;
 				

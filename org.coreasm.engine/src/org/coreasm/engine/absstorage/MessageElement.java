@@ -34,6 +34,8 @@ public class MessageElement extends Element {
 	 * 
 	 */
 	private static final long serialVersionUID = 926274521917609653L;
+	public static final String NORMAL_TYPE = "normal";
+	public static final String CREATION_TYPE = "creation";
 
 	public Element getMessage() {
 		return message;
@@ -90,7 +92,7 @@ public class MessageElement extends Element {
 		this.stepcount = -1;
 	}
 
-	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount) {
+	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount, String type) {
 		if (fromAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null sender");
 		if (message == null)

@@ -24,6 +24,6 @@ import org.coreasm.engine.absstorage.Element;
 public class EnvironmentAgent extends Element {
 
 	public String toString() {
-		return "Environment";
+		return "self";
 	}
 }
