@@ -22,45 +22,40 @@ import org.coreasm.engine.interpreter.ScannerInfo;
  * @author  Eric Rothstein
  * 
  */
-public class SendToRuleNode extends ASTNode {
+public class CreateAgentRuleNode extends ASTNode {
 
 
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -5219646772050332413L;
 
-	/**
-	 * 
-	 */
-//	private static final long serialVersionUID = -5219646772050332413L;
-
-	public SendToRuleNode(ScannerInfo info) {
+	public CreateAgentRuleNode(ScannerInfo info) {
 		super(
 				CommunicationPlugin.PLUGIN_NAME,
 				ASTNode.RULE_CLASS,
-				"SendToRule",
+				"CreateAgentRule",
 				null,
 				info);
 	}
 	
-	public SendToRuleNode(SendToRuleNode node) {
+	public CreateAgentRuleNode(CreateAgentRuleNode node) {
 		super(node);
 	}
 
 	/**
 	 * @return the message part of this node
 	 */
-	public ASTNode getMessage() {
+	public ASTNode getAgentName() {
 		return this.getFirst();
 	}
 
-	public ASTNode getAddress() {
-		return this.getMessage().getNext();
+	public ASTNode getAgentInit() {
+		return this.getAgentName().getNext();
 	}
 	
-	public ASTNode getSubject() {
-		return this.getAddress().getNext();
+	public ASTNode getAgentProgram() {
+		return this.getAgentInit().getNext();
 	}
 }

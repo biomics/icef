@@ -23,19 +23,20 @@ public class MailboxImp implements Mailbox {
 
 	@Override
 	public Set<MessageElement> emptyOutbox() {
-		Set<MessageElement> oldOutbox = Collections.unmodifiableSet(outbox);
+		Set<MessageElement> oldOutbox = new HashSet<MessageElement>(outbox);
 		outbox.clear();
 		return oldOutbox;
 	}
 
 	@Override
 	public void fillInbox(Set<MessageElement> msgs) {
+		//Does the inbox have to be empty as precondition?
 		inbox.addAll(msgs);
 	}
 
 	@Override
 	public Set<MessageElement> getInbox() {
-		return Collections.unmodifiableSet(inbox);
+		return inbox;
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class MailboxImp implements Mailbox {
 	public void loopback() {
 		inbox.clear();
 		inbox.addAll(outbox);
-		outbox.clear();
+		emptyOutbox();//outbox.clear();
 	}
 
 }

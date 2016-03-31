@@ -24,12 +24,14 @@ import org.codehaus.jparsec.Parsers;
 import org.coreasm.engine.CoreASMEngine.EngineMode;
 import org.coreasm.engine.CoreASMError;
 import org.coreasm.engine.VersionInfo;
+import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MessageElement;
+import org.coreasm.engine.absstorage.NameConflictException;
 import org.coreasm.engine.absstorage.PluginAggregationAPI;
 import org.coreasm.engine.absstorage.PluginAggregationAPI.Flag;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
@@ -76,6 +78,15 @@ public class CommunicationPlugin extends Plugin implements
 	public static final String TO_KEYWORD = "to";
 	public static final String MAIL_TO_ACTION = "mailToAction";
 	public static final String MAIL_FROM_ACTION = "mailFromAction";
+	
+	/**Create agent**/
+	public static final String CREATE_KEYWORD = "create";
+	public static final String AGENT_KEYWORD = "agent";
+	public static final String INITIALIZED_KEYWORD = "initialized";
+	public static final String BY_KEYWORD = "by";
+	public static final String USING_KEYWORD = "using";
+	
+	/**Inbox and outbox**/
 	public static final String OUTBOX_FUNC_NAME = "outboxOf";
 	public static final Location OUTBOX_FUNC_LOC = new Location(CommunicationPlugin.OUTBOX_FUNC_NAME,
 			ElementList.NO_ARGUMENT);
@@ -110,7 +121,7 @@ public class CommunicationPlugin extends Plugin implements
 
 
 
-	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD};
+	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD, CREATE_KEYWORD, AGENT_KEYWORD, INITIALIZED_KEYWORD, BY_KEYWORD, USING_KEYWORD};
 	private final String[] operators = { };
 	
 	/**
@@ -175,16 +186,17 @@ public class CommunicationPlugin extends Plugin implements
 			
 			Parser<Node> termParser = kernel.getTermParser();
 			
-			ParserTools npTools = ParserTools.getInstance(capi);
+			ParserTools parserTools = ParserTools.getInstance(capi);
+			Parser<Node> idParser = parserTools.getIdParser();
 
 			Parser<Node> sendToParser = Parsers.array(
 					new Parser[] {
-							npTools.getKeywParser(SEND_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(SEND_KEYWORD, PLUGIN_NAME),
 							termParser,
-							npTools.getKeywParser(TO_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(TO_KEYWORD, PLUGIN_NAME),
 							termParser,
-							npTools.getKeywParser(WITH_KEYWORD, PLUGIN_NAME),
-							npTools.getKeywParser(SUBJECT_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(WITH_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(SUBJECT_KEYWORD, PLUGIN_NAME),
 							termParser
 					}).map(
 							//This should be the parser of the SendTo rule
@@ -204,9 +216,43 @@ public class CommunicationPlugin extends Plugin implements
 					});
 
 
-			parsers.put("Rule",
-					new GrammarRule("sendToRule", "'send' Term 'to' Term 'with' 'subject' Term", sendToParser, PLUGIN_NAME));
+			parsers.put("SendToRule",
+					new GrammarRule("SendToRule", "'send' Term 'to' Term 'with' 'subject' Term", sendToParser, PLUGIN_NAME));
+			
+			Parser<Node> createAgentParser = Parsers.array(
+					new Parser[] {
+							parserTools.getKeywParser(CREATE_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(AGENT_KEYWORD, PLUGIN_NAME),
+							termParser,
+							parserTools.getKeywParser(INITIALIZED_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(BY_KEYWORD, PLUGIN_NAME),
+							termParser,
+							parserTools.getKeywParser(USING_KEYWORD, PLUGIN_NAME),
+							termParser
+					}).map(
+							//This should be the parser of the SendTo rule
+							new org.codehaus.jparsec.functors.Map<Object[], Node>() {
+						public Node map(Object[] vals) {	
+							
+							Node node = new CreateAgentRuleNode(((Node) vals[0]).getScannerInfo());
+							node.addChild((Node) vals[0]);
+							node.addChild((Node) vals[1]);
+							node.addChild("id", (Node) vals[2]);
+							node.addChild((Node) vals[3]);
+							node.addChild((Node) vals[4]);
+							node.addChild("init", (Node) vals[5]);	
+							node.addChild((Node) vals[6]);
+							node.addChild("program", (Node) vals[7]);	
+							return node;
+						}
+					});
 
+
+			parsers.put("CreateAgentRule",
+					new GrammarRule("CreateAgentRule", "'create' 'agent' Term 'initialized' 'by' Term 'using' Term", createAgentParser, PLUGIN_NAME));
+			
+			Parser<Node> communicationRuleParser = Parsers.or(sendToParser,createAgentParser);
+			parsers.put("Rule",new GrammarRule("CommunicationRule", "SendToRule | CreateAgentRule", communicationRuleParser, PLUGIN_NAME));
 		}
 
 		return parsers;
@@ -217,8 +263,50 @@ public class CommunicationPlugin extends Plugin implements
 		if (pos instanceof SendToRuleNode) {
 			return interpretSendTo(interpreter, (SendToRuleNode)pos); 
 		}
+		// CreateAgent Rule
+		if (pos instanceof CreateAgentRuleNode) {
+			return interpretCreateAgent(interpreter, (CreateAgentRuleNode)pos); 
+		}
 		return pos;
 	}
+	
+	/*
+	 * Interprets the create agent rule.
+	 */
+	private ASTNode interpretCreateAgent(Interpreter interpreter, CreateAgentRuleNode pos) {
+		if (!pos.getAgentName().isEvaluated()) {
+			return pos.getAgentName();
+		} 
+		else if (!pos.getAgentInit().isEvaluated()) {
+			return pos.getAgentInit();
+		} 
+		else if (!pos.getAgentProgram().isEvaluated()) {
+			return pos.getAgentProgram();
+		} 
+		else{
+			AgentCreationElement ace;
+			try {
+				ace = new AgentCreationElement(pos.getAgentName().getValue(),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue());
+			
+			pos.setNode(
+					null, 
+					new UpdateMultiset(
+							new Update(
+									OUTBOX_FUNC_LOC,
+									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),ace.getClass().getSimpleName()),
+									MAIL_TO_ACTION,
+									interpreter.getSelf(),
+									pos.getScannerInfo()
+									)), 
+					null,
+					null);
+			} catch (Throwable e) {
+				capi.error(e);
+			}
+		}
+		return pos;
+	}
+
 
 	/*
 	 * Interprets the Send to rule.
@@ -241,7 +329,7 @@ public class CommunicationPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									OUTBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(), pos.getSubject().getValue().toString(),capi.getStepCount()),
+									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(), pos.getSubject().getValue().toString(),capi.getStepCount(), pos.getMessage().getValue().getClass().getSimpleName()),
 									MAIL_TO_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()

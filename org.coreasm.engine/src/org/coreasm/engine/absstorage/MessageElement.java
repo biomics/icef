@@ -80,6 +80,7 @@ public class MessageElement extends Element {
 	private String fromAgent;
 	private String subject;
 	private int stepcount;
+	private String type;
 	
 	public MessageElement()
 	{
@@ -90,7 +91,7 @@ public class MessageElement extends Element {
 		this.stepcount = -1;
 	}
 
-	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount) {
+	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount, String type) {
 		if (fromAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null sender");
 		if (message == null)
@@ -104,14 +105,30 @@ public class MessageElement extends Element {
 		this.toAgent = toAgent;
 		this.subject = subject;
 		this.stepcount = stepcount;
+		this.type =type;
 	}
 
 	public String toString() {
 		String result = "from "+fromAgent;
 		result +=" to "+toAgent;
+		result +=" of type "+type;
 		result +=" with subject '"+subject+"'";
 		result +=" at step "+stepcount;
 		result +=": "+message;
 		return result;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(String type) {
+		this.type = type;
 	}
 }
