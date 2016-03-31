@@ -35,7 +35,7 @@ public class MailboxImp implements Mailbox {
 
 	@Override
 	public Set<MessageElement> getInbox() {
-		return Collections.unmodifiableSet(inbox);
+		return inbox;
 	}
 
 	@Override
