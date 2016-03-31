@@ -30,6 +30,7 @@ public class MailboxImp implements Mailbox {
 
 	@Override
 	public void fillInbox(Set<MessageElement> msgs) {
+		//Does the inbox have to be empty as precondition?
 		inbox.addAll(msgs);
 	}
 

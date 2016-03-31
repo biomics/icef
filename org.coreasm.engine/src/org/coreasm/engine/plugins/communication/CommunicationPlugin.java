@@ -293,7 +293,7 @@ public class CommunicationPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									OUTBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),MessageElement.CREATION_TYPE),
+									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),ace.getClass().getSimpleName()),
 									MAIL_TO_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()
@@ -329,7 +329,7 @@ public class CommunicationPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									OUTBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(), pos.getSubject().getValue().toString(),capi.getStepCount(), MessageElement.NORMAL_TYPE),
+									new MessageElement(interpreter.getSelf().toString(), pos.getMessage().getValue(), pos.getAddress().getValue().toString(), pos.getSubject().getValue().toString(),capi.getStepCount(), pos.getMessage().getValue().getClass().getSimpleName()),
 									MAIL_TO_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()

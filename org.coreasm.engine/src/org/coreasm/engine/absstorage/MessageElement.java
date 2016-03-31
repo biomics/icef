@@ -34,8 +34,6 @@ public class MessageElement extends Element {
 	 * 
 	 */
 	private static final long serialVersionUID = 926274521917609653L;
-	public static final String NORMAL_TYPE = "normal";
-	public static final String CREATION_TYPE = "creation";
 
 	public Element getMessage() {
 		return message;
