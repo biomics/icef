@@ -951,7 +951,7 @@ public class Engine implements ControlAPI {
 							scheduler.startStep();
 							scheduler.retrieveAgents();
 							//FIXME BSL remove the loopback method!!!
-							// mailbox.loopback();
+							mailbox.loopback();
 							mailbox.startStep();
 							next(EngineMode.emSelectingAgents);
 							break;
@@ -966,10 +966,11 @@ public class Engine implements ControlAPI {
 							break;
 
 						case emRunningAgents:
+                            /* dummy!! */
 							/* simulate creation of agents */
-							agentsToCreate.put("loc1", "");
+							/* agentsToCreate.put("loc1", "");
 							agentsToCreate.put("loc2", "");
-							agentsToCreate.put("loc3", "wantThisName");
+							agentsToCreate.put("loc3", "wantThisName"); */
 
 							if (scheduler.getSelectedAgentSet().size() == 0)
 								// next(EngineMode.emAggregation);
@@ -1040,7 +1041,7 @@ public class Engine implements ControlAPI {
 						case emCreateAgent:
 							// there are no agents which have been 
 							// created in the last step
-							if(agentsToCreate.size() == 0 && engineBusy) {
+							if(agentsToCreate.size() == 0) {
 								next(EngineMode.emAggregation);
 							} else {
 								engineBusy = false;
