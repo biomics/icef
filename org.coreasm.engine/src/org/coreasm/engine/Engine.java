@@ -26,8 +26,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Iterator;
 
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.HashStorage;
 import org.coreasm.engine.absstorage.InvalidLocationException;
@@ -87,6 +89,11 @@ public class Engine implements ControlAPI {
 	private final Interpreter interpreter;
 	
 	private final Mailbox mailbox;
+
+	/** Agents to be created by the external CoreASM manager
+	 *  Keys of this map denote identifiers of locatoins in which the 
+	 *  name of the created agent (the value of the map) is stored */
+	private final Map<String, String> agentsToCreate;
 	
 	/** Loader used to obtain plugin classes */
 	private final PluginManager pluginLoader;
@@ -151,7 +158,7 @@ public class Engine implements ControlAPI {
 	 * This method is <code>protected</code>.
 	 *
 	 * @param properties
-	 *            properties of the engine to be created.
+	 *			properties of the engine to be created.
 	 */
 	protected Engine(java.util.Properties properties) {
 		name = "CoreASM" + Tools.lFormat(++lastEngineId, 5);
@@ -162,6 +169,7 @@ public class Engine implements ControlAPI {
 		storage = new HashStorage(this);
 		scheduler = new SchedulerImp(this);
 		mailbox = new MailboxImp(this);
+		agentsToCreate = new HashMap<String, String>();
 		parser = new JParsecParser(this);
 		interpreter = new InterpreterImp(this);
 		engineThread = new EngineThread(name);
@@ -513,7 +521,7 @@ public class Engine implements ControlAPI {
 	private void notifySuccess() {
 		// TODO no notification is sent
 		logger.debug("Last update succeeded.");
-        scheduler.incrementStepCount();
+		scheduler.incrementStepCount();
 	}
 
 	/**
@@ -759,6 +767,39 @@ public class Engine implements ControlAPI {
 	}
 
 	@Override
+	public Mailbox getMailbox() {
+		return mailbox;
+	}
+
+	@Override
+	public Map<String, String> getAgentsToCreate() {
+		return agentsToCreate;
+	}
+
+	@Override
+	public void reportNewAgents(Map<String,String> agents) {
+		Set<String> identifiers = agentsToCreate.keySet();
+		Iterator<String> it = identifiers.iterator();
+		while(it.hasNext()) {
+			String id = it.next();
+			if(agents.containsKey(id)) {
+				System.out.println("Store new agent name: "+agents.get(id)+" in identifier "+id);
+				agents.remove(id);
+			} else {
+				System.out.println("Identifier "+id+" must be set to 'undef'");
+				agents.remove(id);
+			}
+		}
+
+		if(agents.size() > 0) {
+			System.err.println("Undefined behaviour. coreASM manager reports to set agent for location which was not requested!");
+			System.err.println("Ignore!");
+		}
+
+		commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
+	}
+
+	@Override
 	public synchronized boolean isBusy() {
 		return (engineMode != EngineMode.emTerminated) && (engineBusy || !commandQueue.isEmpty());
 	}
@@ -910,7 +951,7 @@ public class Engine implements ControlAPI {
 							scheduler.startStep();
 							scheduler.retrieveAgents();
 							//FIXME BSL remove the loopback method!!!
-							//mailbox.loopback();
+							// mailbox.loopback();
 							mailbox.startStep();
 							next(EngineMode.emSelectingAgents);
 							break;
@@ -925,11 +966,18 @@ public class Engine implements ControlAPI {
 							break;
 
 						case emRunningAgents:
+							/* simulate creation of agents */
+							agentsToCreate.put("loc1", "");
+							agentsToCreate.put("loc2", "");
+							agentsToCreate.put("loc3", "wantThisName");
+
 							if (scheduler.getSelectedAgentSet().size() == 0)
-								next(EngineMode.emAggregation);
+								// next(EngineMode.emAggregation);
+								next(EngineMode.emCreateAgent);
 							else {
 								scheduler.executeAgentPrograms();
-								next(EngineMode.emAggregation);
+								// next(EngineMode.emAggregation);
+								next(EngineMode.emCreateAgent);
 							}
 							break;
 
@@ -988,6 +1036,22 @@ public class Engine implements ControlAPI {
 							next(EngineMode.emInitiatingExecution);
 							break;
 							*/
+
+						case emCreateAgent:
+							// there are no agents which have been 
+							// created in the last step
+							if(agentsToCreate.size() == 0 && engineBusy) {
+								next(EngineMode.emAggregation);
+							} else {
+								engineBusy = false;
+								processNextCommand();
+								try {
+									Thread.sleep(1);
+								} catch (InterruptedException e) {
+									logger.debug( "Engine is forced to stop.");
+								}
+								break;
+							}
 
 						case emAggregation:
 							storage.aggregateUpdates();
@@ -1076,7 +1140,7 @@ public class Engine implements ControlAPI {
 		 * Switches the engine mode to a new mode.
 		 *
 		 * @param newMode
-		 *            new mode of the engine
+		 *			new mode of the engine
 		 */
 		private void next(EngineMode newMode) throws EngineException {
 			engineBusy = true;
@@ -1196,6 +1260,13 @@ public class Engine implements ControlAPI {
 							error("The specification passed to the engine is invalid.");
 					break;
 
+				case ecAggregate:
+					engineBusy = true;
+					agentsToCreate.clear();
+					System.out.println("Continue aggregation");
+					next(EngineMode.emAggregation);
+					break;
+
 				case ecStep:
 					next(EngineMode.emStartingStep);
 					break;
@@ -1270,9 +1341,9 @@ public class Engine implements ControlAPI {
 	}
 
 	@Override
-    public int getStepCount() {
-        return scheduler.getStepCount();
-    }
+	public int getStepCount() {
+		return scheduler.getStepCount();
+	}
 
 	@Override
 	public void addServiceProvider(String type, ServiceProvider provider) {
@@ -1331,11 +1402,6 @@ public class Engine implements ControlAPI {
 	public List<InterpreterListener> getInterpreterListeners() {
 		return interpreterListeners;
 	}
-
-	@Override
-	public Mailbox getMailbox() {
-		return mailbox;
-	}
 }
 
 /**
@@ -1354,7 +1420,7 @@ class EngineCommand {
 	 * @author Roozbeh Farahbod
 	 */
 	public enum CmdType {
-		ecTerminate, ecInit, ecLoadSpec, ecOnlyParseSpec, ecOnlyParseHeader, ecStep, ecRun, ecRecover
+		ecTerminate, ecInit, ecLoadSpec, ecOnlyParseSpec, ecOnlyParseHeader, ecAggregate, ecStep, ecRun, ecRecover
 	};
 
 	/**

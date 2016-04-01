@@ -21,6 +21,7 @@ import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.Specification;
 import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.scheduler.Scheduler;
+import org.coreasm.engine.mailbox.Mailbox;
 
 import java.io.Reader;
 import java.util.Collection;
@@ -75,7 +76,8 @@ public interface CoreASMEngine extends VersionInfoProvider {
 //		emChoosingNextAgent,
 		emTerminating,
 		emTerminated,
-		emError
+		emError,
+		emCreateAgent 
 	};
 
 		 
@@ -494,6 +496,32 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 * @see #isBusy()
 	 */
 	public void waitWhileBusy();
+
+	/**
+	 * Returns the mailbox module of the engine.
+     */
+    public Mailbox getMailbox();
+
+	/**
+	 * Sets the set of agents successfully created by an external manager
+     * and makes the engine switch from mode emCreateAgent into amAggregation
+     *
+     * @param agents a map from location names to the names of new agents
+     */
+    public void reportNewAgents(Map<String,String> agents);
+
+	/**
+	 * If engine is in emCreateAgent mode, this method will deliver a map
+     * which contains as keys the locations for which the external coreASM
+     * manager must create new external agents. In case the key maps to a
+     * value which is not 'undef', the external agent will try to create an 
+     * agent with the name defined in the value
+     *
+     * @returns a map from location names to expected agent names or
+     * empty strings if a new external agent with a unique name should 
+     * be created
+     */
+    public Map<String,String> getAgentsToCreate();
 	
 	/** 
 	 * Returns <code>true</code> if the engine is

@@ -178,10 +178,5 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	 * Returns the last error encountered by the engine.
 	 */
 	public CoreASMError getError();
-	
-	/**
-	 * Returns the mailbox module of the engine.
-	 */
-	public Mailbox getMailbox();
 }
 
