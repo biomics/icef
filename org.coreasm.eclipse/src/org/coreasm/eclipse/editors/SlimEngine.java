@@ -715,4 +715,15 @@ public class SlimEngine implements ControlAPI {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void reportNewAgents(Map<String, String> agents) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public Map<String, String> getAgentsToCreate() {
+		throw new UnsupportedOperationException();
+	}
+
 }

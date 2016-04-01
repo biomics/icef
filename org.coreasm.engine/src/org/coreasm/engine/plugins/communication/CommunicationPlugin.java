@@ -56,7 +56,9 @@ import org.coreasm.engine.plugin.ParserPlugin;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.VocabularyExtender;
+import org.coreasm.engine.plugins.forallpolicy.ForallPolicyNode;
 import org.coreasm.engine.plugins.set.SetElement;
+import org.coreasm.engine.plugins.string.StringElement;
 
 /** 
  * A plugin that extends the Input/Output plugin using communication services 
@@ -84,6 +86,8 @@ public class CommunicationPlugin extends Plugin implements
 	public static final String AGENT_KEYWORD = "agent";
 	public static final String INITIALIZED_KEYWORD = "initialized";
 	public static final String BY_KEYWORD = "by";
+	public static final String ID_KEYWORD = "id";
+	public static final String IN_KEYWORD = "in";
 	public static final String USING_KEYWORD = "using";
 	
 	/**Inbox and outbox**/
@@ -187,7 +191,6 @@ public class CommunicationPlugin extends Plugin implements
 			Parser<Node> termParser = kernel.getTermParser();
 			
 			ParserTools parserTools = ParserTools.getInstance(capi);
-			Parser<Node> idParser = parserTools.getIdParser();
 
 			Parser<Node> sendToParser = Parsers.array(
 					new Parser[] {
@@ -222,34 +225,42 @@ public class CommunicationPlugin extends Plugin implements
 			Parser<Node> createAgentParser = Parsers.array(
 					new Parser[] {
 							parserTools.getKeywParser(CREATE_KEYWORD, PLUGIN_NAME),
-							parserTools.getKeywParser(AGENT_KEYWORD, PLUGIN_NAME),
-							termParser,
+							parserTools.seq(parserTools.getKeywParser(AGENT_KEYWORD, PLUGIN_NAME), termParser.optional()),
 							parserTools.getKeywParser(INITIALIZED_KEYWORD, PLUGIN_NAME),
 							parserTools.getKeywParser(BY_KEYWORD, PLUGIN_NAME),
 							termParser,
 							parserTools.getKeywParser(USING_KEYWORD, PLUGIN_NAME),
+							termParser,
+							parserTools.getKeywParser(IN_KEYWORD, PLUGIN_NAME),
 							termParser
+	
 					}).map(
 							//This should be the parser of the SendTo rule
-							new org.codehaus.jparsec.functors.Map<Object[], Node>() {
-						public Node map(Object[] vals) {	
-							
-							Node node = new CreateAgentRuleNode(((Node) vals[0]).getScannerInfo());
-							node.addChild((Node) vals[0]);
-							node.addChild((Node) vals[1]);
-							node.addChild("id", (Node) vals[2]);
-							node.addChild((Node) vals[3]);
-							node.addChild((Node) vals[4]);
-							node.addChild("init", (Node) vals[5]);	
-							node.addChild((Node) vals[6]);
-							node.addChild("program", (Node) vals[7]);	
-							return node;
-						}
-					});
+							new CreateAgentParseMap()); 
+//								
+//								
+//						public Node map(Object[] vals) {	
+//							
+//							Node node = new CreateAgentRuleNode(((Node) vals[0]).getScannerInfo());
+//							node.addChild((Node) vals[0]);
+//							node.addChild((Node) vals[1]);
+//							node.addChild((Node) vals[2]);
+//							node.addChild((Node) vals[3]);
+//							node.addChild("init", (Node) vals[2]);
+//							node.addChild((Node) vals[4]);
+//							node.addChild("program", (Node) vals[5]);	
+//							node.addChild((Node) vals[6]);
+//							node.addChild("location", (Node) vals[7]);
+//							
+//							node.addChild((Node) vals[8]);
+//							node.addChild("location", (Node) vals[9]);	
+//							return node;
+//						}
+//					});
 
 
 			parsers.put("CreateAgentRule",
-					new GrammarRule("CreateAgentRule", "'create' 'agent' Term 'initialized' 'by' Term 'using' Term", createAgentParser, PLUGIN_NAME));
+					new GrammarRule("CreateAgentRule", "'create' 'agent' (Term)? 'initialized' 'by' Term 'using' Term 'in' Location", createAgentParser, PLUGIN_NAME));
 			
 			Parser<Node> communicationRuleParser = Parsers.or(sendToParser,createAgentParser);
 			parsers.put("Rule",new GrammarRule("CommunicationRule", "SendToRule | CreateAgentRule", communicationRuleParser, PLUGIN_NAME));
@@ -274,23 +285,31 @@ public class CommunicationPlugin extends Plugin implements
 	 * Interprets the create agent rule.
 	 */
 	private ASTNode interpretCreateAgent(Interpreter interpreter, CreateAgentRuleNode pos) {
-		if (!pos.getAgentName().isEvaluated()) {
-			return pos.getAgentName();
-		} 
+		if( pos.getAgentName()!= null)
+		{
+			if (!pos.getAgentName().isEvaluated()) {
+				return pos.getAgentName();
+			}
+		}
 		else if (!pos.getAgentInit().isEvaluated()) {
 			return pos.getAgentInit();
 		} 
 		else if (!pos.getAgentProgram().isEvaluated()) {
 			return pos.getAgentProgram();
 		} 
+		else if (!pos.getAgentLocation().isEvaluated()) {
+			return pos.getAgentLocation();
+		} 
 		else{
 			AgentCreationElement ace;
-			try {
-				ace = new AgentCreationElement(pos.getAgentName().getValue(),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue());
+			Element newElement = (pos.getAgentName()!= null)? pos.getAgentName().getValue(): capi.getStorage().getNewElement();
+			capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), (pos.getAgentName()!= null)?newElement.toString():"");
 			
+			try {
+				ace = new AgentCreationElement(new StringElement(newElement.toString()),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue());
 			pos.setNode(
 					null, 
-					new UpdateMultiset(
+					new UpdateMultiset(new Update(pos.getAgentLocation().getLocation(),newElement, Update.UPDATE_ACTION,interpreter.getSelf(),pos.getScannerInfo()),
 							new Update(
 									OUTBOX_FUNC_LOC,
 									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),ace.getClass().getSimpleName()),
@@ -612,5 +631,39 @@ public class CommunicationPlugin extends Plugin implements
 	 * 1) Describe functions get sender, get receiver, get message
 	 * 2) Enrich message format? What can we send over the communication plugin?
 	 */
+	public static class CreateAgentParseMap //extends ParseMapN<Node> {
+	extends ParserTools.ArrayParseMap {
 
+		String nextChildName = "alpha";
+		
+		public CreateAgentParseMap() {
+			super(PLUGIN_NAME);
+		}
+
+		public Node map(Object[] vals) {
+			nextChildName = "alpha";
+            Node node = new CreateAgentRuleNode(((Node)vals[0]).getScannerInfo());
+            addChildren(node, vals);
+			return node;
+		}
+
+		@Override
+		public void addChild(Node parent, Node child) {
+			if (child instanceof ASTNode)
+				parent.addChild(nextChildName, child);
+			else {
+				String token = child.getToken();
+		        if (token.equals("agent"))
+		        	nextChildName = "id";
+		        else if (token.equals("by"))
+	        		nextChildName = "init";
+		        else if (token.equals("using"))
+		        	nextChildName = "program";
+		        else if (token.equals("in"))
+		        	nextChildName = "location";
+				super.addChild(parent, child);
+			}
+		}
+		
+	}
 }

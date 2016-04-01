@@ -48,14 +48,18 @@ public class CreateAgentRuleNode extends ASTNode {
 	 * @return the message part of this node
 	 */
 	public ASTNode getAgentName() {
-		return this.getFirst();
+		return (ASTNode) this.getChildNode("id");
 	}
 
 	public ASTNode getAgentInit() {
-		return this.getAgentName().getNext();
+		return (ASTNode) this.getChildNode("init");
 	}
 	
 	public ASTNode getAgentProgram() {
-		return this.getAgentInit().getNext();
+		return (ASTNode) this.getChildNode("program");
+	}
+	
+	public ASTNode getAgentLocation() {
+		return (ASTNode) this.getChildNode("location");
 	}
 }
