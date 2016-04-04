@@ -126,7 +126,6 @@ public class CoreASMContainer {
                         agents.put(loc, "Agent"+counter);
                     }
                 }
-                agents.put("xyz", "bla");
                 engine.reportNewAgents(agents);
             }
             engine.waitWhileBusy();

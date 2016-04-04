@@ -979,10 +979,10 @@ public class Engine implements ControlAPI {
 
 						case emRunningAgents:
                             /* dummy!! */
-							/* simulate creation of agents */
-							/* agentsToCreate.put("loc1", "");
+							/* simulate creation of agents 
+							agentsToCreate.put("loc1", "");
 							agentsToCreate.put("loc2", "");
-							agentsToCreate.put("loc3", "wantThisName"); */
+							agentsToCreate.put("loc3", "wantThisName");  */
 
 							if (scheduler.getSelectedAgentSet().size() == 0)
 								// next(EngineMode.emAggregation);
@@ -1056,10 +1056,8 @@ public class Engine implements ControlAPI {
 							if(agentsToCreate.size() == 0) {
 								next(EngineMode.emAggregation);
 							} else {
-								System.out.println("BEFORE");
 								processNextCommand();
-								System.out.println("AFTER");
-								agentsToCreate.clear();
+								// agentsToCreate.clear();
 								try {
 									Thread.sleep(1);
 								} catch (InterruptedException e) {
