@@ -765,7 +765,19 @@ public class Engine implements ControlAPI {
 		}
 		logger.debug("Finished waiting. (Mode: {})",getEngineMode());
 	}
-
+	
+	@Override
+	public void waitWhileBusyOrUntilCreation() {
+		while (isBusy() && getEngineMode() != EngineMode.emCreateAgent) {
+			try { 
+					Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		logger.debug("Finished waiting while busy or until creation. (Mode: {})",getEngineMode());
+	}
+	
 	@Override
 	public Mailbox getMailbox() {
 		return mailbox;
@@ -1044,9 +1056,10 @@ public class Engine implements ControlAPI {
 							if(agentsToCreate.size() == 0) {
 								next(EngineMode.emAggregation);
 							} else {
-								engineBusy = false;
+								System.out.println("BEFORE");
 								processNextCommand();
-								//agentsToCreate.clear();
+								System.out.println("AFTER");
+								agentsToCreate.clear();
 								try {
 									Thread.sleep(1);
 								} catch (InterruptedException e) {
@@ -1263,7 +1276,6 @@ public class Engine implements ControlAPI {
 					break;
 
 				case ecAggregate:
-					engineBusy = true;
 					agentsToCreate.clear();
 					System.out.println("Continue aggregation");
 					next(EngineMode.emAggregation);

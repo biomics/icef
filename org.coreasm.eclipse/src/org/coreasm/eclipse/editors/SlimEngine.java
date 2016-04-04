@@ -599,8 +599,12 @@ public class SlimEngine implements ControlAPI {
 	@Override
 	public void waitWhileBusy() {
 		throw new UnsupportedOperationException();
-
 	}
+	
+	@Override
+	public void waitWhileBusyOrUntilCreation() {
+		throw new UnsupportedOperationException();
+	} 
 
 	@Override
 	public boolean isBusy() {

@@ -298,6 +298,10 @@ public class WatchExpressionAPI implements ControlAPI {
 	@Override
 	public void waitWhileBusy() {
 	}
+	
+	@Override
+	public void waitWhileBusyOrUntilCreation() {
+	}
 
 	@Override
 	public boolean isBusy() {

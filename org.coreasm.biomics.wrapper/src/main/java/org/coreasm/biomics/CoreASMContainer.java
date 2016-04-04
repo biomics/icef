@@ -103,7 +103,8 @@ public class CoreASMContainer {
             }
 
 			engine.step();
-			engine.waitWhileBusy();
+			// engine.waitWhileBusy();
+			engine.waitWhileBusyOrUntilCreation();
 
             if(engine.getEngineMode() == EngineMode.emCreateAgent) {
                 System.out.println("Engine waits for creation of agents");
