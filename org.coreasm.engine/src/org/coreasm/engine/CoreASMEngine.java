@@ -496,6 +496,16 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 * @see #isBusy()
 	 */
 	public void waitWhileBusy();
+	
+	/** 
+	 * Waits for the engine to go to the idle/error mode or
+	 * to the creationMode. This method should periodically 
+	 * put the current thread in a sleep mode to avoid 
+	 * taking CPU time.
+	 * 
+	 * @see #isBusy()
+	 */
+	public void waitWhileBusyOrUntilCreation();
 
 	/**
 	 * Returns the mailbox module of the engine.

@@ -103,7 +103,8 @@ public class CoreASMContainer {
             }
 
 			engine.step();
-			engine.waitWhileBusy();
+			// engine.waitWhileBusy();
+			engine.waitWhileBusyOrUntilCreation();
 
             if(engine.getEngineMode() == EngineMode.emCreateAgent) {
                 System.out.println("Engine waits for creation of agents");
@@ -125,7 +126,6 @@ public class CoreASMContainer {
                         agents.put(loc, "Agent"+counter);
                     }
                 }
-                agents.put("xyz", "bla");
                 engine.reportNewAgents(agents);
             }
             engine.waitWhileBusy();
