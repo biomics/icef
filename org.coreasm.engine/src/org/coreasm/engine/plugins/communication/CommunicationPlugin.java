@@ -309,14 +309,15 @@ public class CommunicationPlugin extends Plugin implements
 				ace = new AgentCreationElement(new StringElement(newElement.toString()),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue());
 			pos.setNode(
 					null, 
-					new UpdateMultiset(new Update(pos.getAgentLocation().getLocation(),newElement, Update.UPDATE_ACTION,interpreter.getSelf(),pos.getScannerInfo()),
-							new Update(
-									OUTBOX_FUNC_LOC,
-									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),ace.getClass().getSimpleName()),
-									MAIL_TO_ACTION,
-									interpreter.getSelf(),
-									pos.getScannerInfo()
-									)), 
+					new UpdateMultiset(new Update(pos.getAgentLocation().getLocation(),newElement, Update.UPDATE_ACTION,interpreter.getSelf(),pos.getScannerInfo())
+//							,new Update(
+//									OUTBOX_FUNC_LOC,
+//									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),ace.getClass().getSimpleName()),
+//									MAIL_TO_ACTION,
+//									interpreter.getSelf(),
+//									pos.getScannerInfo()
+//									)
+							), 
 					null,
 					null);
 			} catch (Throwable e) {
