@@ -1046,7 +1046,7 @@ public class Engine implements ControlAPI {
 							} else {
 								engineBusy = false;
 								processNextCommand();
-								//agentsToCreate.clear();
+								agentsToCreate.clear();
 								try {
 									Thread.sleep(1);
 								} catch (InterruptedException e) {
