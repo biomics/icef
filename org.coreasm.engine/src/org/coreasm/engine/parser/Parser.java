@@ -4,8 +4,11 @@
  *
  * Copyright (C) 2005 Mashaal Memon
  * Copyright (C) 2005-2007 Roozbeh Farahbod
+ * Copyright (C) 2016 Daniel Schreckling
  * 
  * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $
+ * 
+ * Last modified by Daniel Schreckling, 2016-04-12
  *
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
@@ -56,6 +59,20 @@ public interface Parser {
 	 * @throws ParserException when a parser module specific expection occurs
 	 */
 	public void parseSpecification() throws ParserException;
+
+    /**
+	 * Parse the specified rule using the currently specified rule grammar
+	 * 
+	 * @throws ParserException when a parser module specific expection occurs
+	 */
+    public ASTNode parseRuleOnly(String strRule) throws ParserException;
+
+    /**
+	 * Parse the specified rule declaration using the currently specified rule grammar
+	 * 
+	 * @throws ParserException when a parser module specific expection occurs
+	 */
+    public ASTNode parseRuleDeclarationOnly(String strRule) throws ParserException;
 	
 	/**
 	 * Get the root node of the AST tree generated as a result of parsing the
