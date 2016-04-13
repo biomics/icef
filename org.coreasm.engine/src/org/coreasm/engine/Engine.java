@@ -963,7 +963,7 @@ public class Engine implements ControlAPI {
 							scheduler.startStep();
 							scheduler.retrieveAgents();
 							//FIXME BSL remove the loopback method!!!
-							mailbox.loopback();
+							// mailbox.loopback();
 							mailbox.startStep();
 							next(EngineMode.emSelectingAgents);
 							break;
@@ -1275,7 +1275,6 @@ public class Engine implements ControlAPI {
 
 				case ecAggregate:
 					agentsToCreate.clear();
-					System.out.println("Continue aggregation");
 					next(EngineMode.emAggregation);
 					break;
 
