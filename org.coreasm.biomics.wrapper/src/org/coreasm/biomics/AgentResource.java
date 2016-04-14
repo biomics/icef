@@ -10,9 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import java.io.IOException;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("agents")
 public class AgentResource {
@@ -41,6 +39,28 @@ public class AgentResource {
         EngineManager.startEngine(agentName);
 
         return "Started";
+    }
+
+    @GET
+    @Path("/{agentname}/pause")
+    @Produces("text/plain")
+    public String pauseAgent(@PathParam("agentname") String agentName) {
+        if(EngineManager.pauseEngine(agentName)) {
+            return "Agent '"+agentName+"' was paused.";
+        } else {
+            return "Unable to pause agent '"+agentName+"'.";
+        }
+    }
+
+    @GET
+    @Path("/{agentname}/resume")
+    @Produces("text/plain")
+    public String resumeAgent(@PathParam("agentname") String agentName) {
+        if(EngineManager.resumeEngine(agentName)) {
+            return "Agent '"+agentName+"' was resumed.";
+        } else {
+            return "Unable to resume agent '"+agentName+"'.";
+        }
     }
 
     @GET

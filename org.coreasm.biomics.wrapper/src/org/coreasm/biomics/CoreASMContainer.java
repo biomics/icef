@@ -1,7 +1,7 @@
 /*	
  * Copyright (C) 2016 Daniel Schreckling
  *
- * Uses Fractions from Carma.java in org.coreasm.ui with  
+ * Partially reuses Carma.java in org.coreasm.ui with  
  * Copyright (C) 2006-2010 Roozbeh Farahbod
  *
  * Licensed under the Academic Free License version 3.0 
@@ -16,10 +16,12 @@ import java.io.StringReader;
 import java.io.IOException;
 
 import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.coreasm.engine.Engine;
 import org.coreasm.engine.CoreASMEngine;
 import org.coreasm.engine.CoreASMEngine.EngineMode;
 import org.coreasm.engine.CoreASMEngineFactory;
@@ -49,14 +51,26 @@ import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.latex.CoreLaTeX;
 import org.coreasm.util.Tools;
+
+import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.RuleElement;
+import org.coreasm.engine.plugins.string.StringElement;
+import org.coreasm.engine.plugins.number.NumberElement;
+import org.coreasm.engine.plugins.set.SetElement;
+import org.coreasm.engine.plugins.list.ListElement;
+import org.coreasm.engine.plugins.map.MapElement;
+import org.coreasm.engine.plugins.signature.EnumerationElement;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.core.Version;
 
-public class CoreASMContainer {
+public class CoreASMContainer extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(CoreASMContainer.class);
 
     protected String agentName;
@@ -64,6 +78,9 @@ public class CoreASMContainer {
 
 	private CoreASMEngine engine = null;
 	private UpdateMultiset lastUpdateSet = null;
+    private ObjectMapper mapper = null;
+
+    private HashSet<MessageElement> inBox = null;
 
     public CoreASMContainer(AgentCreationRequest req) {
         agentName = req.name;
@@ -74,6 +91,8 @@ public class CoreASMContainer {
         agentName = newName;
         agentProgram = newProgram;
 
+        inBox = new HashSet<MessageElement>();
+
         initEngine();
 
         if(!loadSpec(newProgram)) {
@@ -81,9 +100,83 @@ public class CoreASMContainer {
         } else {
             System.out.println("Programm successfully loaded");
         }
+
+        prepareMapper();
     }
 
-    public void exec() {
+    private void prepareMapper() {
+        if(mapper == null) {
+            mapper = new ObjectMapper();
+            SimpleModule module = new SimpleModule("Element Serializer", new Version(0,1,1,"FINAL"));
+            module.addSerializer(StringElement.class, new StringElementSerializer());
+            module.addDeserializer(StringElement.class, new StringElementDeserializer());
+            module.addSerializer(NumberElement.class, new NumberElementSerializer());
+            module.addDeserializer(NumberElement.class, new NumberElementDeserializer());
+            module.addSerializer(SetElement.class, new SetElementSerializer());
+            module.addDeserializer(SetElement.class, new SetElementDeserializer());
+            module.addSerializer(ListElement.class, new ListElementSerializer());
+            module.addDeserializer(ListElement.class, new ListElementDeserializer());
+            module.addSerializer(MapElement.class, new MapElementSerializer());
+            module.addDeserializer(MapElement.class, new MapElementDeserializer());
+            module.addSerializer(EnumerationElement.class, new EnumerationElementSerializer());
+            module.addDeserializer(EnumerationElement.class, new EnumerationElementDeserializer());
+            module.addSerializer(RuleElement.class, new RuleElementSerializer());
+            module.addDeserializer(RuleElement.class, new RuleElementDeserializer((Engine)engine));
+
+            module.addSerializer(MessageElement.class, new MessageElementSerializer());
+            mapper.registerModule(module);
+        
+            mapper.addMixInAnnotations(Element.class, PolymorphicElement.class);
+        }
+    }
+
+    public void handleOutgoingMessages() {
+        Set<MessageElement> messages = engine.getMailbox().emptyOutbox();
+        Iterator<MessageElement> it = messages.iterator();
+
+        while(it.hasNext()) {
+            MessageElement msg = it.next();
+            if(msg.getFromAgent().equals("self")) {
+                msg.setFromAgent(agentName);
+            } else {
+                msg.setFromAgent(agentName + ":" + msg.getFromAgent());
+            }
+        }
+        
+        MessageElement m = new MessageElement();
+        String json = "";
+
+        it = messages.iterator();
+        while(it.hasNext()) {
+            MessageElement msg = it.next();
+
+            try {
+                json = mapper.writeValueAsString(msg);
+
+                MessageRequest req = new MessageRequest("agent", msg.getFromAgent(), msg.getToAgent(), json);
+                EngineManager.sendMsg(req);
+
+            } catch (Exception e) {
+                System.err.println("Unable to transform MessageElement into json.");
+                System.err.println(e);
+                e.printStackTrace();
+                
+                System.out.println("----------------------------------");
+                System.out.println("Error Msg: "+msg);
+                System.out.println("Error JSON: "+json);
+                System.out.println("----------------------------------");
+            }
+
+            /*
+              System.out.println("\t----------------------------------");
+              System.out.println("\tMsg: "+msg);
+              System.out.println("\tJSON: "+json);
+              System.out.println("\t----------------------------------");
+            */
+        }
+    }
+
+    public void run() {
         int currentStep = 1;
 
         Mailbox mailbox = null;
@@ -91,19 +184,19 @@ public class CoreASMContainer {
         Set<MessageElement> messages = null;
 
         do {
-            System.out.println(" + ----- start of STEP " + currentStep + " ----- + \n");
+            // System.out.println(" + ----- start of STEP " + currentStep + " ----- + \n");
             
 			if (currentStep == 1)
 				lastUpdateSet = new UpdateMultiset();
 			else
 				lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
 
-            if(messages != null) {
-                engine.getMailbox().fillInbox(messages);
+            if(inBox.size() > 0) {
+                engine.getMailbox().fillInbox(inBox);
+                inBox.clear();
             }
 
 			engine.step();
-			// engine.waitWhileBusy();
 			engine.waitWhileBusyOrUntilCreation();
 
             if(engine.getEngineMode() == EngineMode.emCreateAgent) {
@@ -130,41 +223,47 @@ public class CoreASMContainer {
             }
             engine.waitWhileBusy();
 			
-			if (engine.getEngineMode() == EngineMode.emError)
+			if (engine.getEngineMode() == EngineMode.emError) {
                 System.err.println("THERE WAS AN ERROR DURING EXECUTION");
+            }
 
-            // error(engine);
+            // System.out.println("handle outgoing Messages");
 
-			/* if (updateFailed)
-               break;*/
+            handleOutgoingMessages();
+                
+            /* System.out.println(" + ----- end of STEP " + currentStep + " ----- + \n");                
+            System.out.println("\tUpdates after step " + currentStep + " are : " + engine.getUpdateSet(0));
+            System.out.println();*/
 
-            /* State s = engine.getState();
+			currentStep++;
 
-            System.out.println("CURRENT STATE: "+s);
-
-            Set<Location> locations = s.getLocations();
-            Map<String, AbstractUniverse>universes = s.getUniverses();
-
-            System.out.println("Universes: "+universes); */
-
-            messages = engine.getMailbox().emptyOutbox();
-            Iterator<MessageElement> it = messages.iterator();
-            while(it.hasNext()) {
-                MessageElement msg = it.next();
-                if(msg.getFromAgent().equals("self")) {
-                    msg.setFromAgent(agentName);
-                } else {
-                    msg.setFromAgent(agentName + ":" + msg.getFromAgent());
-                }
+            // ugh ... how ugly but the way coreASM works, this is needed
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException ie) {
+                // TODO REPORT STH HERE
             }
             
-            System.out.println("Messages to send: " + messages.size());
-
-            System.out.println(" + ----- end of STEP " + currentStep + " ----- + \n");
-            
-            System.out.println("\tUpdates after step " + currentStep + " are : " + engine.getUpdateSet(0));
-			currentStep++;
 		} while(true || engine.getEngineMode().equals(EngineMode.emTerminated));
+    }
+
+    public void receiveMsg(MessageRequest req) {
+        String agentMsg = req.body;
+
+        // System.out.println("CoreASM receiveMsg");
+
+        MessageElement newMsg = null;
+        try {
+            newMsg = mapper.readValue(agentMsg, MessageElement.class);
+        } catch (IOException ioe) {
+            System.err.println("Unable to transform JSON '"+agentMsg+"' into MessageElement.");
+            System.err.println(ioe);
+        }
+
+        // System.out.println("Put new msg into CoreASM instance inBox");
+        // System.out.println("MSG: "+newMsg);
+        
+        inBox.add(newMsg);
     }
 
     private void initEngine() {

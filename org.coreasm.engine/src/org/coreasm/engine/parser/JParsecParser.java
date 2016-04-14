@@ -157,6 +157,78 @@ public class JParsecParser implements Parser {
 		} 
 	}
 
+    public ASTNode parseRuleDeclarationOnly(String strRule) throws ParserException {
+        Plugin kernel = capi.getPlugin("Kernel");
+        if (kernel != null) {
+            try {
+                org.codehaus.jparsec.Parser<Node> p = ((ParserPlugin)kernel).getParsers().get("RuleDeclaration").parser.from(parserTools.getTokenizer(), parserTools.getIgnored());
+                ASTNode a = (ASTNode) p.parse(strRule);
+
+                return a;
+            } catch (Throwable e) {
+					if (e instanceof org.codehaus.jparsec.error.ParserException) {
+						org.codehaus.jparsec.error.ParserException pe = (org.codehaus.jparsec.error.ParserException) e;
+						Throwable cause = pe.getCause();
+						String msg = pe.getMessage();
+						msg = msg.substring(msg.indexOf("\n")+1);
+						msg = "Error parsing " + msg + (cause==null?"":"\n" + cause.getMessage());
+						
+						String errorLogMsg = "Error in parsing.";
+						if (cause != null) {
+							StringWriter strWriter = new StringWriter();
+							cause.printStackTrace(new PrintWriter(strWriter));
+							errorLogMsg = errorLogMsg + Tools.getEOL() + strWriter.toString();
+						}
+						logger.error(errorLogMsg);
+						
+						throw new ParserException(msg, 
+								new CharacterPosition(pe.getLocation().line, pe.getLocation().column));
+					}
+					throw new ParserException(e);
+            }
+        } else {
+            logger.error("Parser cannot find the Kernel plugin.");
+            throw new EngineError("Parser cannot find the Kernel plugin.");
+        }        
+    }
+
+    public ASTNode parseRuleOnly(String strRule) throws ParserException {
+        Plugin kernel = capi.getPlugin("Kernel");
+        if (kernel != null) {
+            try {
+                org.codehaus.jparsec.Parser<Node> p = ((ParserPlugin)kernel).getParsers().get("Rule").parser.from(parserTools.getTokenizer(), parserTools.getIgnored());
+                
+                ASTNode a = (ASTNode) p.parse(strRule);
+                System.out.println("THIS IS A RULE: "+a);
+
+                return a;
+            } catch (Throwable e) {
+					if (e instanceof org.codehaus.jparsec.error.ParserException) {
+						org.codehaus.jparsec.error.ParserException pe = (org.codehaus.jparsec.error.ParserException) e;
+						Throwable cause = pe.getCause();
+						String msg = pe.getMessage();
+						msg = msg.substring(msg.indexOf("\n")+1);
+						msg = "Error parsing " + msg + (cause==null?"":"\n" + cause.getMessage());
+						
+						String errorLogMsg = "Error in parsing.";
+						if (cause != null) {
+							StringWriter strWriter = new StringWriter();
+							cause.printStackTrace(new PrintWriter(strWriter));
+							errorLogMsg = errorLogMsg + Tools.getEOL() + strWriter.toString();
+						}
+						logger.error(errorLogMsg);
+						
+						throw new ParserException(msg, 
+								new CharacterPosition(pe.getLocation().line, pe.getLocation().column));
+					}
+					throw new ParserException(e);
+            }
+        } else {
+            logger.error("Parser cannot find the Kernel plugin.");
+            throw new EngineError("Parser cannot find the Kernel plugin.");
+        }        
+    }
+
 	/* (non-Javadoc)
 	 * @see org.coreasm.engine.parser.Parser#parseSpecification()
 	 */
@@ -169,6 +241,7 @@ public class JParsecParser implements Parser {
 				this.parser = rootGrammarRule.parser;
 				try {
 					org.codehaus.jparsec.Parser<Node> _parser =  parser.from(parserTools.getTokenizer(), parserTools.getIgnored());
+                                        
 					rootNode = (ASTNode) _parser.parse(specification.getText());
 				} catch (Throwable e) {
 					if (e instanceof org.codehaus.jparsec.error.ParserException) {
