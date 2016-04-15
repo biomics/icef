@@ -1,10 +1,11 @@
 package org.coreasm.biomics;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import org.coreasm.biomics.serializers.MessageRequestDeserializer;
+import org.coreasm.biomics.serializers.MessageRequestSerializer;
+
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.core.Version;
 
 
 public class MessageRequest {
