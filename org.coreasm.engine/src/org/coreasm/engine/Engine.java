@@ -1057,7 +1057,7 @@ public class Engine implements ControlAPI {
 								next(EngineMode.emAggregation);
 							} else {
 								processNextCommand();
-								// agentsToCreate.clear();
+								agentsToCreate.clear();
 								try {
 									Thread.sleep(1);
 								} catch (InterruptedException e) {

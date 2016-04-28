@@ -1,4 +1,4 @@
-package org.coreasm.biomics;
+package org.coreasm.biomics.serializers;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;

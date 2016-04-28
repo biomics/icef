@@ -1,8 +1,8 @@
-package org.coreasm.biomics;
+package org.coreasm.biomics.serializers;
 
 import java.io.IOException;
 
-import org.coreasm.engine.plugins.number.NumberElement;
+import org.coreasm.engine.plugins.string.StringElement;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -10,17 +10,17 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 
-public class NumberElementSerializer extends JsonSerializer<NumberElement> {
+public class StringElementSerializer extends JsonSerializer<StringElement> {
 
     @Override
-    public void serialize(NumberElement number, JsonGenerator jgen, SerializerProvider provider) 
+    public void serialize(StringElement str, JsonGenerator jgen, SerializerProvider provider) 
         throws IOException, JsonProcessingException {
 
-        jgen.writeNumberField("value", number.getValue());
+        jgen.writeStringField("string", str.toString());
     }
     
     @Override 
-    public void serializeWithType(NumberElement str, JsonGenerator jgen, SerializerProvider provider, TypeSerializer typeSer)
+    public void serializeWithType(StringElement str, JsonGenerator jgen, SerializerProvider provider, TypeSerializer typeSer)
         throws IOException, JsonProcessingException {
 
         typeSer.writeTypePrefixForObject(str, jgen);

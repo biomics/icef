@@ -1,4 +1,4 @@
-package org.coreasm.biomics;
+package org.coreasm.biomics.serializers;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;

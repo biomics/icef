@@ -12,64 +12,53 @@
 
 package org.coreasm.biomics;
 
-import java.io.StringReader;
 import java.io.IOException;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
+import java.io.StringReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.coreasm.engine.Engine;
+import org.coreasm.biomics.serializers.EnumerationElementDeserializer;
+import org.coreasm.biomics.serializers.EnumerationElementSerializer;
+import org.coreasm.biomics.serializers.ListElementDeserializer;
+import org.coreasm.biomics.serializers.ListElementSerializer;
+import org.coreasm.biomics.serializers.MapElementDeserializer;
+import org.coreasm.biomics.serializers.MapElementSerializer;
+import org.coreasm.biomics.serializers.MessageElementSerializer;
+import org.coreasm.biomics.serializers.NumberElementDeserializer;
+import org.coreasm.biomics.serializers.NumberElementSerializer;
+import org.coreasm.biomics.serializers.PolymorphicElement;
+import org.coreasm.biomics.serializers.RuleElementDeserializer;
+import org.coreasm.biomics.serializers.RuleElementSerializer;
+import org.coreasm.biomics.serializers.SetElementDeserializer;
+import org.coreasm.biomics.serializers.SetElementSerializer;
+import org.coreasm.biomics.serializers.StringElementDeserializer;
+import org.coreasm.biomics.serializers.StringElementSerializer;
 import org.coreasm.engine.CoreASMEngine;
 import org.coreasm.engine.CoreASMEngine.EngineMode;
 import org.coreasm.engine.CoreASMEngineFactory;
-import org.coreasm.engine.CoreASMError;
-import org.coreasm.engine.CoreASMWarning;
-import org.coreasm.engine.EngineErrorEvent;
-import org.coreasm.engine.EngineErrorObserver;
-import org.coreasm.engine.EngineEvent;
+import org.coreasm.engine.Engine;
 import org.coreasm.engine.EngineProperties;
-import org.coreasm.engine.EngineStepObserver;
-import org.coreasm.engine.Specification;
-import org.coreasm.engine.Specification.BackgroundInfo;
-import org.coreasm.engine.Specification.FunctionInfo;
-import org.coreasm.engine.Specification.UniverseInfo;
-import org.coreasm.engine.StepFailedEvent;
-import org.coreasm.engine.VersionInfo;
-import org.coreasm.engine.VersionInfoProvider;
-import org.coreasm.engine.absstorage.UpdateMultiset;
-import org.coreasm.engine.absstorage.MessageElement;
-import org.coreasm.engine.interpreter.Node;
-import org.coreasm.engine.plugin.PluginServiceInterface;
-import org.coreasm.engine.plugins.io.IOPlugin.IOPluginPSI;
-import org.coreasm.engine.plugins.io.InputProvider;
-import org.coreasm.engine.absstorage.State;
-import org.coreasm.engine.absstorage.AbstractUniverse;
-import org.coreasm.engine.absstorage.Location;
-import org.coreasm.engine.absstorage.Update;
-import org.coreasm.engine.mailbox.Mailbox;
-import org.coreasm.latex.CoreLaTeX;
-import org.coreasm.util.Tools;
 
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.RuleElement;
-import org.coreasm.engine.plugins.string.StringElement;
-import org.coreasm.engine.plugins.number.NumberElement;
-import org.coreasm.engine.plugins.set.SetElement;
+import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.plugins.list.ListElement;
 import org.coreasm.engine.plugins.map.MapElement;
+import org.coreasm.engine.plugins.number.NumberElement;
+import org.coreasm.engine.plugins.set.SetElement;
 import org.coreasm.engine.plugins.signature.EnumerationElement;
-
+import org.coreasm.engine.plugins.string.StringElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.core.Version;
 
 public class CoreASMContainer extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(CoreASMContainer.class);

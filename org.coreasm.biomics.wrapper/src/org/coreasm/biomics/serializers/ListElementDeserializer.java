@@ -1,12 +1,12 @@
-package org.coreasm.biomics;
+package org.coreasm.biomics.serializers;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import java.io.IOException;
 
 import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.plugins.set.SetElement;
+import org.coreasm.engine.plugins.list.ListElement;
 
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.JsonParser;
@@ -15,10 +15,10 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class SetElementDeserializer extends JsonDeserializer<SetElement> {
+public class ListElementDeserializer extends JsonDeserializer<ListElement> {
 
     @Override
-    public SetElement deserialize(JsonParser jsonParser, DeserializationContext context) 
+    public ListElement deserialize(JsonParser jsonParser, DeserializationContext context) 
     throws IOException {
         ObjectCodec oc = jsonParser.getCodec();
         ObjectMapper mapper = (ObjectMapper) oc;
@@ -26,16 +26,16 @@ public class SetElementDeserializer extends JsonDeserializer<SetElement> {
         JsonNode node = oc.readTree(jsonParser);
         JsonNode membersNode = node.get("members");
 
-        HashSet<Element> realSet = new HashSet<Element>();
+        ArrayList<Element> realList = new ArrayList<Element>();
         if(membersNode != null && membersNode.isArray()) {
             Iterator<JsonNode> it = membersNode.elements();
             while(it.hasNext()) {
                 JsonNode n = it.next();
                 Element e = mapper.treeToValue(n, Element.class);
-                realSet.add(e);
+                realList.add(e);
             }
         }
        
-        return new SetElement(realSet);
+        return new ListElement(realList);
     }
 }
