@@ -74,11 +74,11 @@ public class EngineManager {
     }
 
     public static boolean receiveMsg(MessageRequest req) {
-        /* System.out.println("Engine Manager receives message");
-           System.out.println("Receiver: "+req.toAgent);
-           System.out.println("Sender: "+req.fromAgent);
-           System.out.println("Body: "+req.body);
-        */
+        System.out.println("Engine Manager receives message");
+        System.out.println("Receiver: "+req.toAgent);
+        System.out.println("Sender: "+req.fromAgent);
+        System.out.println("Body: "+req.body);   
+        System.out.println("Type: "+req.type);   
 
         // this is an agent message and must be 
         // forwarded to the correct agent
@@ -113,6 +113,12 @@ public class EngineManager {
             }
 
             return true;
+        } else {
+            if(req.type.equals("update")) {
+                String agent = "";
+
+                
+            }
         }
 
         System.out.println("EngineManager receives unknown message type. Ignore!");

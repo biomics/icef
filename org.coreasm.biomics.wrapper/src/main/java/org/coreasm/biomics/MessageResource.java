@@ -23,9 +23,6 @@ public class MessageResource {
     @Consumes("application/json")
     @Produces("text/plain")
     public String receiveMsg(String message) {
-        /* System.out.println("Wrapper receives Message");
-           System.out.println("JSON: "+message);*/
-
         MessageRequest req = MessageRequest.getMessage(message);
 
         boolean result = false;

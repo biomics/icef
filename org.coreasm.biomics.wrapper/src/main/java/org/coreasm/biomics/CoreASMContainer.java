@@ -48,6 +48,7 @@ import org.coreasm.engine.plugins.io.InputProvider;
 import org.coreasm.engine.absstorage.State;
 import org.coreasm.engine.absstorage.AbstractUniverse;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.latex.CoreLaTeX;
 import org.coreasm.util.Tools;
@@ -122,6 +123,9 @@ public class CoreASMContainer extends Thread {
             module.addDeserializer(EnumerationElement.class, new EnumerationElementDeserializer());
             module.addSerializer(RuleElement.class, new RuleElementSerializer());
             module.addDeserializer(RuleElement.class, new RuleElementDeserializer((Engine)engine));
+            module.addSerializer(UpdateMultiset.class, new UpdateMultisetSerializer());
+            module.addSerializer(Location.class, new LocationSerializer());
+            module.addSerializer(Update.class, new UpdateSerializer());
 
             module.addSerializer(MessageElement.class, new MessageElementSerializer());
             mapper.registerModule(module);
@@ -176,6 +180,28 @@ public class CoreASMContainer extends Thread {
         }
     }
 
+    public void handleUpdateSet(UpdateMultiset updates) {
+        System.out.println("+++ handleUpdateSet +++ ");
+        
+        String json = "";
+        try {
+            json = mapper.writeValueAsString(updates);
+            
+            System.out.println("JSON of Updates: "+json);
+        } catch (Exception e) {
+            System.err.println("Unable to transform UpdateSet into json.");
+            System.err.println(e);
+            e.printStackTrace();
+            
+            System.out.println("----------------------------------");
+            System.out.println("Error Update: "+updates);
+            System.out.println("Error JSON: "+json);
+            System.out.println("----------------------------------");
+        }
+        
+        System.out.println("--- handleUpdateSet --- ");
+    }
+
     public void run() {
         int currentStep = 1;
 
@@ -184,12 +210,14 @@ public class CoreASMContainer extends Thread {
         Set<MessageElement> messages = null;
 
         do {
-            // System.out.println(" + ----- start of STEP " + currentStep + " ----- + \n");
-            
 			if (currentStep == 1)
 				lastUpdateSet = new UpdateMultiset();
 			else
 				lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
+
+            System.out.println("lastUpdate: "+lastUpdateSet);
+
+            handleUpdateSet(lastUpdateSet);
 
             if(inBox.size() > 0) {
                 engine.getMailbox().fillInbox(inBox);
