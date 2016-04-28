@@ -1,4 +1,4 @@
-package org.coreasm.biomics;
+package org.coreasm.biomics.serializers;
 
 import java.util.Set;
 import java.util.Iterator;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
-
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -25,6 +24,7 @@ public class UpdateMultisetSerializer extends JsonSerializer<UpdateMultiset> {
         System.out.println("Serialize UpdateMultiSet");
 
         jgen.writeStartObject();
+
         jgen.writeArrayFieldStart("updates");
         Iterator<Update> it = set.iterator();
 
@@ -34,6 +34,7 @@ public class UpdateMultisetSerializer extends JsonSerializer<UpdateMultiset> {
             jgen.writeObject(update);
         }
         jgen.writeEndArray();
+
         jgen.writeEndObject();
     }
 }

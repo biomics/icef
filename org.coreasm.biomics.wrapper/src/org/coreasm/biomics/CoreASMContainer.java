@@ -35,7 +35,11 @@ import org.coreasm.biomics.serializers.RuleElementSerializer;
 import org.coreasm.biomics.serializers.SetElementDeserializer;
 import org.coreasm.biomics.serializers.SetElementSerializer;
 import org.coreasm.biomics.serializers.StringElementDeserializer;
-import org.coreasm.biomics.serializers.StringElementSerializer;
+import org.coreasm.biomics.serializers.StringElementSerializer; 
+import org.coreasm.biomics.serializers.UpdateMultisetSerializer;
+import org.coreasm.biomics.serializers.LocationSerializer;
+import org.coreasm.biomics.serializers.UpdateSerializer;
+
 import org.coreasm.engine.CoreASMEngine;
 import org.coreasm.engine.CoreASMEngine.EngineMode;
 import org.coreasm.engine.CoreASMEngineFactory;
@@ -43,6 +47,8 @@ import org.coreasm.engine.Engine;
 import org.coreasm.engine.EngineProperties;
 
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UpdateMultiset;

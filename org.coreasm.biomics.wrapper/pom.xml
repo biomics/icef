@@ -107,12 +107,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.1</version>
           <inherited>true</inherited>
           <configuration>
             <archive>
               <manifest>
-                <mainClass>org.coreasm.biomics.wrapper.Main</mainClass>
+                <mainClass>org.coreasm.biomics.wrapper.Wrapper</mainClass>
               </manifest>
             </archive>
             <source>1.7</source>
