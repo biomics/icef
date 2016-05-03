@@ -88,7 +88,7 @@
                 <mainClass>org.coreasm.biomics.Wrapper</mainClass>
               </manifest>
             </archive>
-            <finalName>biomicsWrapper</finalName>
+            <finalName>brapper</finalName>
             <appendAssemblyId>false</appendAssemblyId>
           </configuration>
           
@@ -131,7 +131,7 @@
             </execution>
           </executions>
           <configuration>
-            <mainClass>org.coreasm.biomics.Main</mainClass>
+            <mainClass>org.coreasm.biomics.Wrapper</mainClass>
           </configuration>
         </plugin>
       </plugins>
