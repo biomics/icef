@@ -104,6 +104,7 @@ public class CommunicationPlugin extends Plugin implements
 	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "messageContent";
 	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "messageSubject";
 	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "messageSender";
+	public static final String GET_MESSAGE_RECEIVER_FUNC_NAME = "messageReceiver";
 	public static final String GET_MESSAGE_STEP_FUNC_NAME = "messageStep";
 	private final Set<String> dependencyList;
 	
@@ -143,6 +144,7 @@ public class CommunicationPlugin extends Plugin implements
 		functionNames.add(OUTBOX_FUNC_NAME);
 		functionNames.add(GET_MESSAGE_CONTENT_FUNC_NAME);
 		functionNames.add(GET_MESSAGE_SENDER_FUNC_NAME);
+		functionNames.add(GET_MESSAGE_RECEIVER_FUNC_NAME);
 		functionNames.add(GET_MESSAGE_SUBJECT_FUNC_NAME);
 		functionNames.add(GET_MESSAGE_STEP_FUNC_NAME);
 	}
@@ -378,6 +380,7 @@ public class CommunicationPlugin extends Plugin implements
 			functions.put(GET_MESSAGE_CONTENT_FUNC_NAME, new GetMessageContentFunctionElement());
 			functions.put(GET_MESSAGE_SUBJECT_FUNC_NAME, new GetMessageSubjectFunctionElement());
 			functions.put(GET_MESSAGE_SENDER_FUNC_NAME, new GetMessageSenderFunctionElement());
+			functions.put(GET_MESSAGE_RECEIVER_FUNC_NAME, new GetMessageReceiverFunctionElement());
 			functions.put(GET_MESSAGE_STEP_FUNC_NAME, new GetMessageStepFunctionElement());
 		}
 		return functions;
