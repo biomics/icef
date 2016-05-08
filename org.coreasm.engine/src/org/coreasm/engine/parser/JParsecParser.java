@@ -17,6 +17,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +34,10 @@ import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.coreasm.engine.kernel.Kernel;
+
+import java.lang.reflect.*;
 
 /** 
  * This is an implementation of the {@link Parser} component 
@@ -64,6 +71,9 @@ public class JParsecParser implements Parser {
 	
 	/** the root node of the specification (after parsing) */
 	private ASTNode rootNode = null;
+
+    /** node containing the policy rule */
+    private ASTNode policyNode = null;
 	
 	//private final ParserTools parserTools;
 	private final ParserTools parserTools;
@@ -229,6 +239,175 @@ public class JParsecParser implements Parser {
         }        
     }
 
+    public Set<String> getFunctionNames() {
+       	Set<Plugin> plugins = capi.getPlugins();
+        Set<String> standard = new HashSet<String>();
+
+        for(Plugin p : plugins) {
+            Class pluginClass = p.getClass();
+            Method m = null;
+            boolean retrieveFunctions = false;
+            
+            try {
+                m = pluginClass.getDeclaredMethod("getFunctionNames", new Class[] {});
+                retrieveFunctions = true;
+            } catch(NoSuchMethodException e) {
+                // ignore
+            }
+            
+            Set<String> funcNames = null;
+            if(retrieveFunctions) {
+                try {
+                    funcNames = (Set<String>)m.invoke(p, null);
+                }
+                catch (InvocationTargetException e) {
+                    // e.printStackTrace();
+                    // System.out.println("\tInvocationTargetException");
+                }
+                catch(IllegalAccessException e) {
+                    // e.printStackTrace();
+                    // System.out.println("\tIllegalAccessException");
+                }
+            }
+
+            if(funcNames != null)
+                standard.addAll(funcNames);
+        }
+
+        return standard;
+    }
+
+    public Map<String, ASTNode> getDeclarations(ASTNode start) {
+        Map<String, ASTNode> declared = new HashMap<String, ASTNode>();
+
+        Kernel kernel = (Kernel) capi.getPlugin("Kernel");
+
+        if(start.getGrammarRule().equals("EnumerationDefinition")) {
+            List<ASTNode> childs = start.getAbstractChildNodes();
+            for(ASTNode child : childs) {
+                declared.put(child.getToken(), child);
+            }
+            return declared;
+        }
+
+        List<ASTNode> childs = start.getAbstractChildNodes();
+        for(ASTNode child : childs) {
+
+            // first handle childs such that top level definitions
+            // always have highest priority in evaluation
+            declared.putAll(getDeclarations(child));
+
+            String gc = child.getGrammarClass();
+            String gr = child.getGrammarRule();
+
+            if(gc.equals(ASTNode.DECLARATION_CLASS))  {
+                ASTNode n = child;
+                ASTNode last = n;
+                while(n != null && n.getGrammarClass().equals(ASTNode.DECLARATION_CLASS)) {
+                    last = n;
+                    n = n.getFirst();
+                }
+                if(n == null)
+                    n = last;
+                if(!n.getPluginName().equals(Kernel.PLUGIN_NAME)) {
+                    n = n.getNext();
+                }
+
+                declared.put(n.getToken(), child);
+                // System.out.println("DECLARATION: "+child+" => "+n.getToken());
+            }
+        }
+
+        return declared;
+    }
+
+    public Set<String> getUndeclaredRec(ASTNode node, Map<String, ASTNode> declared, Set<String> visited, Set<String> variables) {
+        Set<String> locations = new HashSet<String>();
+
+        // System.out.println("getUndeclared in node: "+node);
+
+        String gr = node.getGrammarRule();
+
+        // controlled functions are locations
+        if(gr.equals("FunctionClass") && node.getToken().equals("controlled")) {
+            // System.out.println(" ==> '"+node.getNext().getToken()+"' *** is *** a location (controlled function)");
+            locations.add(node.getNext().getToken());
+        }
+
+        if(node.getGrammarClass() == ASTNode.ID_CLASS) {
+            String nodeId = node.getToken();
+
+            if(declared.containsKey(nodeId) && !visited.contains(nodeId)) {
+                ASTNode start = declared.get(nodeId);
+                visited.add(nodeId);
+                ASTNode next = start.getFirst();
+                while(next != null) {
+                    locations.addAll(getUndeclaredRec(next, declared, visited, variables));
+                    next = next.getNext();
+                }
+            } else {
+                if(!visited.contains(nodeId)) {
+                    // check if parent node is a declaration
+                    if(node.getParent().getGrammarClass().equals(ASTNode.DECLARATION_CLASS)) {
+                        // System.out.println("==> no location as parent is declaration (assume variable)");
+                        variables.add(node.getToken());
+                    } else if(!variables.contains(nodeId)) {
+                        System.out.println("==> *** " + nodeId + " is probably a location ***");
+                        locations.add(nodeId);
+                    }
+                }
+            }
+        } else {
+            ASTNode cur = node.getFirst();
+
+            if(gr.equals("LetPolicy") || gr.equals("ChoosePolicy") || gr.equals("ForallPolicy")) {
+                /* System.out.println("\tCur '"+cur+"' is exists expression");
+                   System.out.println("\tAdd '"+cur.getToken()+"' as variable"); 
+                */
+                variables.add(cur.getToken());
+                ASTNode search = cur = cur.getNext();
+                while(search != null) {
+                    if(search.getGrammarClass() == ASTNode.ID_CLASS) {
+                        variables.add(search.getToken());
+                    }
+                    search = search.getNext();
+                }     
+            }
+            if(gr.equals("ExistsExp")) {
+                /* System.out.println("Cur '"+cur+"' is exists expression");
+                   System.out.println("Add '"+cur.getToken()+"' as variable");
+                */
+                variables.add(cur.getToken());
+                ASTNode search = cur = cur.getNext();
+                while(search != null) {
+                    if(search.getGrammarClass() == ASTNode.ID_CLASS) {
+                        variables.add(search.getToken());
+                    }
+                    search = search.getNext();
+                }     
+            }
+            if(gr.equals("SetComprehension")) {
+                variables.add(cur.getNext().getToken());
+                cur = cur.getNext().getNext();
+            }
+            
+            while(cur != null) {
+                locations.addAll(getUndeclaredRec(cur, declared, visited, variables));
+                cur = cur.getNext();
+            }
+        }
+
+        return locations;
+    }
+
+    public Set<String> getLocations(ASTNode node) {
+        Set<String> visited = getFunctionNames();
+        HashSet<String> variables = new HashSet<String>();
+        Map<String, ASTNode> declared = getDeclarations(rootNode);
+
+        return getUndeclaredRec(node, declared, visited, variables);
+    }
+
 	/* (non-Javadoc)
 	 * @see org.coreasm.engine.parser.Parser#parseSpecification()
 	 */
@@ -243,6 +422,30 @@ public class JParsecParser implements Parser {
 					org.codehaus.jparsec.Parser<Node> _parser =  parser.from(parserTools.getTokenizer(), parserTools.getIgnored());
                                         
 					rootNode = (ASTNode) _parser.parse(specification.getText());
+
+                    System.out.println("parseSpecification():");
+                    for(Node n : rootNode.getChildNodes()) {
+                        if(n instanceof ASTNode) {
+                            ASTNode an = (ASTNode) n;
+                            // Check if Grammarrule is scheduling then find policy name
+                            if(an.getGrammarRule().equals(Kernel.GR_SCHEDULING)) {
+                                Set<String> locations = getLocations(an);
+                                System.out.println("Locations required for scheduler: ");
+                                for(String l : locations) {
+                                    System.out.println("\t"+l);
+                                }
+                                break;
+                            }
+                            
+                            /* .getNext();
+                            while(an != null) {
+                                System.out.println("ASTNode: "+an.toString());
+                                
+                                an = rootNode.getNext();
+                                }*/
+                        }
+                    }
+
 				} catch (Throwable e) {
 					if (e instanceof org.codehaus.jparsec.error.ParserException) {
 						org.codehaus.jparsec.error.ParserException pe = (org.codehaus.jparsec.error.ParserException) e;
