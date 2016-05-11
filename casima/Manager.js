@@ -1,49 +1,49 @@
-var Agent = require("./agent.js");
-var Wrapper = require("./wrapper.js");
+var ASIM = require("./ASIM");
+var Brapper = require("./Brapper");
 
 var Manager = (function() {
 
     var cls = function() {
         this.agentMap = {};
-        this.availableWrappers = {};
+        this.availableBrappers = {};
     };
 
     cls.prototype = {
-        registerWrapper : function(descr) {
+        registerBrapper : function(descr) {
             if(!descr || descr.host == undefined || descr.port == undefined) {
                 return { success : false, msg : "Invalid wrapper description. Unable to register wrapper.\n" };
             }
 
-            var newWrapper = new Wrapper(descr.host, descr.port);
-            var key = newWrapper.getKey();
+            var newBrapper = new Brapper(descr.host, descr.port);
+            var key = newBrapper.getKey();
 
-            if(this.availableWrappers[key] != undefined) {
-                return { success : false, msg : "Unable to register new wrapper. Wrapper already exists!\n" };
+            if(this.availableBrappers[key] != undefined) {
+                return { success : false, msg : "Unable to register new wrapper. Brapper already exists!\n" };
             } else {
-                this.availableWrappers[key] = newWrapper;
-                return { success : true, msg : "Wrapper registered.\n" };   
+                this.availableBrappers[key] = newBrapper;
+                return { success : true, msg : "Brapper registered.\n" };   
             }
         },
 
-        delWrapper : function(id) {
+        delBrapper : function(id) {
             var toDel = null;
-            for(var w in this.availableWrappers) {
-                if(this.availableWrappers[w].id == id) {
+            for(var w in this.availableBrappers) {
+                if(this.availableBrappers[w].id == id) {
                     toDel = w;
                     break;
                 }
             }
 
             if(toDel != null) {
-                delete this.availableWrappers[w];
+                delete this.availableBrappers[w];
                 return true;
             } else {
                 return false;
             }
         },
 
-        getWrappers : function() {
-            return this.availableWrappers;
+        getBrappers : function() {
+            return this.availableBrappers;
         },
 
         getAgents : function() {
@@ -58,15 +58,15 @@ var Manager = (function() {
             } else {
                 // create a new agent
                 if(this.agentMap[descr.name] == undefined) {
-                    var hostingWrapper = this.getHostingWrapper();
-                    if(hostingWrapper == null) {
-                        console.log("Selected Wrapper: ", hostingWrapper);
+                    var hostingBrapper = this.getHostingBrapper();
+                    if(hostingBrapper == null) {
+                        console.log("Selected Brapper: ", hostingBrapper);
 
                         return { success : false, msg : "Unable to determine wrapper which could host this agent.\n" };
                     }
 
-                    hostingWrapper.createAgent(descr);
-                    this.agentMap[descr.name] = hostingWrapper;
+                    hostingBrapper.createAgent(descr);
+                    this.agentMap[descr.name] = hostingBrapper;
 
                     return { success : true, msg : "Agent created successfully.\n" };
                 } else {
@@ -76,11 +76,11 @@ var Manager = (function() {
             }
         },
 
-        getHostingWrapper : function() {
+        getHostingBrapper : function() {
             var minLoad = -1;
             var minId = -1;
-            for(var wid in this.availableWrappers) {
-                var wrapper = this.availableWrappers[wid];
+            for(var wid in this.availableBrappers) {
+                var wrapper = this.availableBrappers[wid];
                 var wl = wrapper.getLoad();
                 if(wl < minLoad || minLoad == -1) {
                     minLoad = wl;
@@ -91,7 +91,7 @@ var Manager = (function() {
             if(minId == -1)
                 return null;
             else
-                return this.availableWrappers[minId];
+                return this.availableBrappers[minId];
         },
 
         delAgent : function(descr) {
@@ -117,7 +117,7 @@ var Manager = (function() {
             if(this.agentMap[msg.toAgent] != undefined) {
                 console.log("Forward message from agent '"+msg.fromAgent+"' to agent '"+msg.toAgent+"'");
 
-                console.log("Wrapper hosting this agent: ",this.agentMap[msg.toAgent]);
+                console.log("Brapper hosting this agent: ",this.agentMap[msg.toAgent]);
 
                 this.agentMap[msg.toAgent].recvMsg(msg);
                 

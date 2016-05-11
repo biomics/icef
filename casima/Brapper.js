@@ -1,9 +1,9 @@
-var Agent = require("./agent.js");
+var ASIM = require("./ASIM");
 var http = require("http");
 
 var id = 1;
 
-var Wrapper = (function() {
+var Brapper = (function() {
     var cls = function(host, port) {
         this.id = id++;
         this.host = host;
@@ -22,8 +22,8 @@ var Wrapper = (function() {
             return this.load;
         },
 
-        createAgent : function(descr) {
-            this.agents[descr.name] = new Agent(descr.name, descr.program);
+        createASIM : function(descr) {
+            this.agents[descr.name] = new ASIM(descr.name, descr.program);
             this.load++;
         },
 
@@ -67,4 +67,4 @@ var Wrapper = (function() {
     return cls;
 })();
 
-module.exports = Wrapper;
+module.exports = Brapper;

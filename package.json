@@ -1,16 +1,16 @@
  {
-    "name"         : "ICEF Manager",
-    "version"      : "0.1",
-    "description"  : "BIOMICS Interaction Computing Execution Framework Manager",
+    "name"         : "casima",
+    "version"      : "0.1.0",
+    "description"  : "CoreASIM Manager - BIOMICS Interaction Computing Execution Framework Manager",
     "homepage"     : "http://biomicsproject.eu",
     "license"      : "Apache",
     "repository"   : {
         "type":"git",
         "url":"https://git.sec.uni-passau.de/biomiucs_d52/life"
     },
-    "main"         : "manager.js",
+    "main"         : "casima.js",
     "scripts"      : {
-        "start": "node manager.js"
+        "start": "node casima.js"
     },
     "contributors": [
         {"name": "Daniel Schreckling"},

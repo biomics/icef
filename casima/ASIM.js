@@ -1,11 +1,11 @@
-var Agent = (function() {
+var ASIM = (function() {
     var cls = function(_name, _program, _wrapper) {
         this.name = _name;
         this.program = _program;
-        this.wrapper = _wrapper;
+        this.brapper = _brapper;
     };
 
     return cls;
 })();
 
-module.exports = Agent;
+module.exports = ASIM;
