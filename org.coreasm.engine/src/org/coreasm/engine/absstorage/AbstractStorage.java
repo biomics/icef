@@ -28,7 +28,7 @@ public interface AbstractStorage extends State {
 	public static final String PROGRAM_FUNCTION_NAME = "program";
 	
 	/** 'program' function name */
-	public static final String POLICY_FUNCTION_NAME = "policy";
+	public static final String POLICY_FUNCTION_NAME = "schedulingPolicy";
 	
 	/** 'Agents' universe name */
 	public static final String AGENTS_UNIVERSE_NAME = "Agents";

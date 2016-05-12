@@ -1478,16 +1478,19 @@ public class InterpreterImp implements Interpreter {
 		Element initAgent = new EnvironmentAgent();
         capi.getScheduler().setEnvironmentAgent(initAgent);
         capi.getScheduler().setPolicy(schedulingPolicy);
-		Location l = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));
+		Location progloc = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));
+		Location polloc = new Location(AbstractStorage.POLICY_FUNCTION_NAME, ElementList.create(initAgent));
 		try {
 			// assigning the init rule as the program of the agent
-			storage.setValue(l, ruleValue(initRuleName));
+			storage.setValue(progloc, ruleValue(initRuleName));
+			// assigning the scheduling policy as the policy of the agent
+			storage.setValue(polloc, ruleValue(initRuleName));
 		} catch (InvalidLocationException e) {
 			e.printStackTrace();
 		}
 		
 		// adding the agent to the univers of agents
-		l = new Location(AbstractStorage.AGENTS_UNIVERSE_NAME, ElementList.create(initAgent));
+		Location l = new Location(AbstractStorage.AGENTS_UNIVERSE_NAME, ElementList.create(initAgent));
 		try {
 			storage.setValue(l, BooleanElement.TRUE);
 		} catch (InvalidLocationException e) {

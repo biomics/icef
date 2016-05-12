@@ -838,7 +838,13 @@ public class SignaturePlugin extends Plugin
             // TODO: check signature for correct signature of program function
             function = (MapFunction) capi.getStorage().getFunction(AbstractStorage.PROGRAM_FUNCTION_NAME);
         }
-        else if (functionNode.hasInitializer())
+        else 
+        	if (functionNode.getName().equals(AbstractStorage.POLICY_FUNCTION_NAME)) {
+                 // TODO: check signature for correct signature of policy function
+                 function = (MapFunction) capi.getStorage().getFunction(AbstractStorage.POLICY_FUNCTION_NAME);
+             }
+             else 
+        	if (functionNode.hasInitializer())
         	function = new DerivedMapFunction(capi, functionNode.getInitializerParams(), functionNode.getInitNode());
         else
         	function = new MapFunction();        
@@ -848,7 +854,7 @@ public class SignaturePlugin extends Plugin
         signature.setRange(functionNode.getRange());
         function.setSignature(signature);
 
-        if (!functionNode.getName().equals(AbstractStorage.PROGRAM_FUNCTION_NAME)) {
+        if (!functionNode.getName().equals(AbstractStorage.PROGRAM_FUNCTION_NAME)||!functionNode.getName().equals(AbstractStorage.POLICY_FUNCTION_NAME)) {
             addFunction(functionNode.getName(),function,functionNode, interpreter);
         }
     

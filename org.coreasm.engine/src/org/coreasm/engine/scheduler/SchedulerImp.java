@@ -12,6 +12,7 @@
 
 package org.coreasm.engine.scheduler;
 
+import java.awt.image.Kernel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.SchedulerPlugin;
+import org.coreasm.engine.plugins.schedulingpolicies.SchedulingPoliciesPlugin;
 import org.coreasm.engine.scheduler.DefaultSchedulingPolicy.DefaultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,8 +112,9 @@ public class SchedulerImp implements Scheduler {
 		
 		logger.debug("Scheduling policy '" + policy.getName() + "' was loaded");
 		logger.debug("Done preparing the initial state.");
-		//FIXME BSL changed this
-		loadSchedulingPolicy();
+		//BSL changed this so that it now looks for the policy in the step prepareInitialState
+		//loadSchedulingPolicy();
+
 
 		shouldPrintProcessorStats = (capi.getProperty(
 				EngineProperties.PRINT_PROCESSOR_STATS_PROPERTY, "no")
@@ -289,8 +292,28 @@ public class SchedulerImp implements Scheduler {
 		}
 		inter.cleanUp();
 		ASTNode rootNode = null;
-		if (policy.equals(Element.UNDEF)) 
-			throw new EngineException("Policy " + policy.denotation() + " is undefined.");
+		//TODO BSL Fetch the policy from the abstract storage
+		AbstractStorage storage = capi.getStorage();
+		Location loc = new Location(
+				AbstractStorage.POLICY_FUNCTION_NAME,
+				ElementList.create(environmentAgent));
+		try {
+			Element value = storage.getValue(loc);
+			if (value.equals(Element.UNDEF)){
+				capi.warning("Scheduler", "Did you set the scheduling policy of the self to undef? If so, please set it to skip instead.");
+				schedule = new HashSet<Element>();
+				return;
+			}
+			else
+			{
+				policy =(PolicyElement)value;
+			}
+		} catch (InvalidLocationException e) {
+			capi.error("Cannot get the value of location " + loc
+					+ ".");
+			logger.error("Cannot get the value of location " + loc
+					+ ".");
+		}
 		inter.setSelfForPolicy(environmentAgent, policy);
 		
 		ASTNode policyNode = policy.getBody();
@@ -321,7 +344,7 @@ public class SchedulerImp implements Scheduler {
 		{
 			result = new TriggerMultiset();
 			if (logger.isDebugEnabled())
-				logger.debug("Scheduling policy "+policy.getName()+ "caused an error: " + capi.getError().message);
+				logger.debug("Scheduling policy "+policy.getName()+ " caused an error: " + capi.getError().message);
 
 		}
 		else

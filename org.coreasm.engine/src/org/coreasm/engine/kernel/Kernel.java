@@ -1130,6 +1130,7 @@ public class Kernel extends Plugin
 			// self is not a function anymore
 			// functions.put(SelfFunctionElement.NAME, new SelfFunctionElement());
 			functions.put(AbstractStorage.PROGRAM_FUNCTION_NAME, new MapFunction(Element.UNDEF));
+			functions.put(AbstractStorage.POLICY_FUNCTION_NAME, new MapFunction(Element.UNDEF));
 		}
 		return functions;
 	}
