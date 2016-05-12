@@ -46,11 +46,15 @@ var Manager = (function() {
             return this.availableBrappers;
         },
 
-        getAgents : function() {
+        getBrapper : function(id) {
+            return this.availableBrappers[id];
+        },
+
+        getASIMs : function() {
             return this.agentMap;
         },
 
-        createAgent : function(descr) {
+        createASIM : function(descr) {
             console.log("Manager: Create new agent");
 
             if(!descr || descr.name == undefined || descr.program == undefined) {

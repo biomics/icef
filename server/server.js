@@ -31,45 +31,60 @@ function initServer() {
 function initApp() {
     app = express();
 
+    // ****************** BRAPPERS ******************
+
     app.get("/brappers", function(req, res) {
-        var allWrappers = manager.getWrappers();
+        var allWrappers = manager.getBrappers();
         res.send(allWrappers);
     });
 
-    app.put("/brappers/register", 
+    app.put("/brappers", 
             express.json(), 
             function(req, res) {
                 var result = manager.registerWrapper(req.body);
                 if(result.success) {
                     res.send(200, result.msg);
                 } else {
-                    res.send(400, result.msg);
+                    res.send(409, result.msg);
                 }
             },
             function(req, res) {
                 console.log("Unable to register new wrapper.");
-                res.send(404, "Unable to register new wrapper.");
+                res.status(500).json({ error : "Unable to register new wrapper."});
             }
     );
 
-    app.get("/brappers/delete/:id", function(req, res) {
+    app.get("/brappers/:id", function(req, res) {
+        var id = req.params.id;
+        var result = manager.getBrapper(id);
+        if(result == undefined) {
+            res.status(404).json({ error : "Brapper with id '"+id+"' has not been registered."});
+        } 
+        else {
+            res.status(200).send(result);
+        }
+    });
+
+    app.delete("/brappers/:id", function(req, res) {
         var id = req.params.id;
         if(manager.delWrapper(id)) {
             res.send(200, "Wrapper with id '"+id+"' delted successfully.\n");
         } else {
-            res.send(400, "Unable to delete wrapper with id '"+id+"'\n.");
+            res.json("Unable to delete wrapper with id '"+id+"'\n.", 400);
         }
     });
+
+    // ****************** ASIM ******************
  
     app.get("/asims", function(req, res) {
-        var allAgents = manager.getAgents();
+        var allAgents = manager.getASIMs();
         res.send(allAgents);
     });
 
-    app.put("/asims/create", 
+    app.put("/asims", 
              express.json(), 
              function(req, res) {
-                 var result = manager.createAgent(req.body);
+                 var result = manager.createASIM(req.body);
                  if(result.success) {
                      res.send(200, result.msg);
                  } else {
@@ -81,12 +96,12 @@ function initApp() {
                  res.send(404, "Unable to create new agent.");
              }
             );
-
-    app.put("/asims/delete/:agentname", 
+    
+    app.get("/asims/:asimname", 
              express.json(), 
              function(req, res) {
-                 manager.delAgent(req);
-                 res.send(200, "Agent deleted.");
+                 // TODO get the status info of an ASIM
+                 res.send(200, "ASIM deleted.");
              }, 
              function(req, res) {
                  console.log("Unable to create new agent.");
@@ -94,7 +109,31 @@ function initApp() {
              }
             );
 
-    app.post("/message",
+    app.put("/asims/:asimname", 
+             express.json(), 
+             function(req, res) {
+                 // TODO change the status of the ASIM
+                 res.send(200, "ASIM deleted.");
+             }, 
+             function(req, res) {
+                 console.log("Unable to create new agent.");
+                 res.send(404, "Unable to create new agent.");
+             }
+            );
+
+    app.delete("/asims/:asimname", 
+             express.json(), 
+             function(req, res) {
+                 manager.delASIM(req);
+                 res.send(200, "ASIM deleted.");
+             }, 
+             function(req, res) {
+                 console.log("Unable to create new agent.");
+                 res.send(404, "Unable to create new agent.");
+             }
+            );
+
+    app.put("/message",
             express.json(),
             function(req, res) {
                 var result = manager.recvMsg(req.body);
@@ -111,7 +150,7 @@ function initApp() {
             }
             );
     
-    app.post("/update",
+    app.put("/update",
              express.json(),
              function(req, res) {
                  var result = manager.recvUpdate(req.body);
