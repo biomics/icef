@@ -18,9 +18,9 @@ import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.interpreter.ScannerInfo;
 
 /** 
- * Update rule node.
+ * Scheduling policy node.
  *   
- * @author  Roozbeh Farahbod
+ * @author  Eric Rothstein
  * 
  */
 public class SchedulePrimitiveNode extends ASTNode {
@@ -41,10 +41,25 @@ public class SchedulePrimitiveNode extends ASTNode {
 	}
 	
 	/**
-	 * @return the LHS node of the assignment
+	 * @return the agent to be scheduled
 	 */
 	public Node getAgent() {
-		return this.getChildNode("alpha");
+		return this.getChildNode("id");
+	}
+	
+	/**
+	 * @return the content of the scheduling signal
+	 */
+	public Node getContent() {
+		return this.getChildNode("content");
+	}
+
+	
+	/**
+	 * @return the location of the scheduling signal
+	 */
+	public Node getSubject() {
+		return this.getChildNode("location");
 	}
 
 }

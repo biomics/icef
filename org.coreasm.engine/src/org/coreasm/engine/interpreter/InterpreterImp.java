@@ -39,6 +39,7 @@ import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.NameElement;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
@@ -55,11 +56,16 @@ import org.coreasm.engine.kernel.MacroCallRuleNode;
 import org.coreasm.engine.kernel.RuleOrFuncElementNode;
 import org.coreasm.engine.kernel.SchedulePrimitiveNode;
 import org.coreasm.engine.kernel.UpdateRuleNode;
+import org.coreasm.engine.mailbox.Mailbox;
+import org.coreasm.engine.mailbox.MailboxImp;
 import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.plugin.InterpreterPlugin;
 import org.coreasm.engine.plugin.OperatorProvider;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.UndefinedIdentifierHandler;
+import org.coreasm.engine.plugins.communication.CommunicationPlugin;
+import org.coreasm.engine.plugins.communication.CreateAgentRuleNode;
+import org.coreasm.engine.plugins.communication.SendToRuleNode;
 import org.coreasm.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,6 +183,8 @@ public class InterpreterImp implements Interpreter {
 					}
 					else if(pos.getTriggers() == null)
 							pos.setNode(pos.getLocation(), pos.getUpdates(),new TriggerMultiset(), pos.getValue());
+					else
+							pos.setNode(pos.getLocation(), pos.getUpdates(),pos.getTriggers(), pos.getValue());
 				}
 				if (pos.isEvaluated())
 					notifyListenersAfterNodeEvaluation(pos);
@@ -253,7 +261,6 @@ public class InterpreterImp implements Interpreter {
 		if (newPos == pos && !pos.isEvaluated()){
 			// if pos was not a rule, try a policy
 			newPos = interpretPolicies(pos);
-			//TODO BSL sometimes these appear to be FunctionRulePolicyTerms?
 			//capi.warning("Policy Interpretation", "InterpretPoliciesResult '" + newPos.toString());
 		}
 		// return the new pointer to pos (could be the same as the old one)
@@ -783,26 +790,80 @@ public class InterpreterImp implements Interpreter {
 		
 		// If the current node is an assignment
 		else if (pos instanceof SchedulePrimitiveNode) {
-			final ASTNode agent = pos.getFirst();
+			SchedulePrimitiveNode spn = (SchedulePrimitiveNode)pos;
+			final ASTNode agent = (ASTNode) spn.getAgent();
+			final ASTNode content = (ASTNode) spn.getContent();
+			final ASTNode subject = (ASTNode) spn.getSubject();
+			//If the current node is an 'skip'
+			if (x != null && x.equals("skip")) {
+				pos.setNode(null, null,new TriggerMultiset(), null);
+				return pos;
+			}
 			// if agent is not evaluated...
 			if (!agent.isEvaluated())
+			{
 				pos = agent;
+				return pos;
+			}
+			//Content is not evaluated
+			if (content!=null && !content.isEvaluated())
+			{
+				pos = content;
+				return pos;
+			}
+			//Subject is not evaluated
+			if (subject!=null && !subject.isEvaluated())
+			{
+				pos = subject;
+				return pos;
+			}
 			else {
 					Element agentName = agent.getValue();
 					if (agentName != null) {
 						{
-							Trigger trigger = new Trigger(agentName, Trigger.TRIGGER_ACTION, pos.scannerInfo);
-							pos.setNode(null, null, new TriggerMultiset(trigger), null);
+							if(content==null && subject ==null)
+							{
+								Trigger trigger = new Trigger(agentName, Trigger.TRIGGER_ACTION, pos.scannerInfo);
+								pos.setNode(null, null, new TriggerMultiset(trigger), null);
+							}
+							else if(content!=null && subject !=null)
+							{
+								Trigger trigger = new Trigger(agentName, Trigger.TRIGGER_ACTION, pos.scannerInfo);
+								//TODO Is the agent local? 
+								if(capi.getAgentSet().contains(agentName))
+								{
+									//The agent is local, put an update in the given location of the agent without generating a new message 
+									Location l = new Location(subject.getLocation().name,ElementList.create(agentName));
+									Update u = new Update(l, content.getValue(), Update.UPDATE_ACTION, agentName, null);
+									pos.setNode(null, new UpdateMultiset(u), new TriggerMultiset(trigger), null);
+								}
+								else
+								{
+									//The agent is not local, put an update in the given location of the agent without generating a new message
+									MessageElement me = new MessageElement(capi.getInterpreter().getSelf().toString(), content.getValue(), agentName.toString(),subject.getLocation().name, capi.getScheduler().getStepCount(), content.getValue().getClass().getSimpleName());
+									pos.setNode(
+											null, 
+											new UpdateMultiset(
+													new Update(
+															CommunicationPlugin.OUTBOX_FUNC_LOC,
+															me,
+															CommunicationPlugin.MAIL_TO_ACTION,
+															capi.getInterpreter().getSelf(),
+															pos.getScannerInfo()
+															)), 
+											null,
+											null);
+								}
+								
+							}
+							else
+								capi.error("Policy is not well formed", pos, this);
 							//capi.warning("Policy Interpretation", "Trigger obtained: " + trigger.toString());
 						}
 					}
 					else
 						capi.error("Cannot compute policy!", pos, this);
 				}
-		}
-		//If the current node is an 'skip'
-		else if (x != null && x.equals("skip")) {
-			pos.setNode(null, null,new TriggerMultiset(), null);
 		}
 		return pos;
 	}
@@ -1484,7 +1545,7 @@ public class InterpreterImp implements Interpreter {
 			// assigning the init rule as the program of the agent
 			storage.setValue(progloc, ruleValue(initRuleName));
 			// assigning the scheduling policy as the policy of the agent
-			storage.setValue(polloc, ruleValue(initRuleName));
+			storage.setValue(polloc, policyValue(schedulingPolicyName));
 		} catch (InvalidLocationException e) {
 			e.printStackTrace();
 		}

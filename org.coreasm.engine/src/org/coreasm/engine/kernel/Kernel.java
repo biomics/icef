@@ -132,6 +132,8 @@ public class Kernel extends Plugin
 	public static final String KW_SCHEDULING = "scheduling";
 	public static final String KW_POLICYELEMENT = "policyelement";
 	public static final String KW_SCHEDULE = "schedule";
+	public static final String KW_WITH = "with";
+	public static final String KW_IN = "in";
     
 	/** operators */
 	public static final String OP_RULE_OR_FUNCTION_ELEMENT = "@";
@@ -175,7 +177,7 @@ public class Kernel extends Plugin
 
     private final String[] keywords = {"CoreASM", "nosignature", "use", "init", "rule", 
     		"ruleelement", "skip", "import", "do", "undef", "true", "false", "self", 
-    		"scheduling", "policy", "policyelement", "schedule"};
+    		"scheduling", "policy", "policyelement", "schedule", "with", "in"};
     private final String[] operators = {"=", "(", ")", ",", "@", ":=", "!!", "#"};
          
     private final Parser.Reference<Node> refTupleTermParser = Parser.newReference();
@@ -601,14 +603,19 @@ public class Kernel extends Plugin
     	parsers.put("SkipPolicy", new GrammarRule("SkipPolicy", "'skip'", skipPolicyParser, PLUGIN_NAME));
     	policies.add(skipPolicyParser);
        	
-     // SchedulePrimitive : schedule Term
+     // SchedulePrimitive : schedule Term with Term in Term
        	Parser<Node> schedulePrimitiveParser = Parsers.array(
        			parserTools.getKeywParser("schedule", PLUGIN_NAME),
-       			refTermParser.lazy()
+       			refTermParser.lazy(),
+       			parserTools.seq(
+       			parserTools.getKeywParser("with", PLUGIN_NAME),
+       			refTermParser.lazy(),
+       			parserTools.getKeywParser("in", PLUGIN_NAME),
+       			refFuncRulePolicyTermParser.lazy()).optional()
        			).map(new SchedulePrimitiveParseMap());
        	parsers.put("SchedulePrimitive", 
        			new GrammarRule("SchedulePrimitive",
-       					"'schedule' Term", schedulePrimitiveParser, PLUGIN_NAME));
+       					"'schedule' Term ('with' Term 'in' Term)?", schedulePrimitiveParser, PLUGIN_NAME));
        	policies.add(schedulePrimitiveParser);
 
        	

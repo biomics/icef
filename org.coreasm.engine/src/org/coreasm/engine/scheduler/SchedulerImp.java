@@ -339,6 +339,7 @@ public class SchedulerImp implements Scheduler {
 			throw new EngineException("AST of " + policy.denotation() + " has been corrupted.");
 		
 		TriggerMultiset result = null;
+		UpdateMultiset updates = null;
 		// if an error occurred in the engine, just return an empty multiset
 		if (capi.hasErrorOccurred()) 
 		{
@@ -350,6 +351,7 @@ public class SchedulerImp implements Scheduler {
 		else
 		{
 			result = rootNode.getTriggers();
+			updates = rootNode.getUpdates();
 			if (logger.isDebugEnabled())
 				logger.debug("Scheduling policy "+policy.getName()+ " selects the agents " + result.toString());
 		} 
@@ -359,6 +361,7 @@ public class SchedulerImp implements Scheduler {
 			theSet.add(t.agent);
 		}
 		schedule = theSet; 
+		updateInstructions = updates;
 	}
 	
 

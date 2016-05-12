@@ -290,16 +290,16 @@ public class CommunicationPlugin extends Plugin implements
 				return pos.getAgentName();
 			}
 		}
-		else if (!pos.getAgentInit().isEvaluated()) {
+		if (!pos.getAgentInit().isEvaluated()) {
 			return pos.getAgentInit();
 		} 
-		else if (!pos.getAgentProgram().isEvaluated()) {
+		if (!pos.getAgentProgram().isEvaluated()) {
 			return pos.getAgentProgram();
 		} 
-		else if (!pos.getAgentPolicy().isEvaluated()) {
+		if (!pos.getAgentPolicy().isEvaluated()) {
 			return pos.getAgentPolicy();
 		} 
-		else if (!pos.getAgentLocation().isEvaluated()) {
+		if (!pos.getAgentLocation().isEvaluated()) {
 			return pos.getAgentLocation();
 		} 
 		else{
@@ -348,10 +348,10 @@ public class CommunicationPlugin extends Plugin implements
 		if (!pos.getMessage().isEvaluated()) {
 			return pos.getMessage();
 		} 
-		else if (!pos.getAddress().isEvaluated()) {
+		if (!pos.getAddress().isEvaluated()) {
 			return pos.getAddress();
 		} 
-		else if (!pos.getSubject().isEvaluated()) {
+		if (!pos.getSubject().isEvaluated()) {
 			return pos.getSubject();
 		} 
 		else {

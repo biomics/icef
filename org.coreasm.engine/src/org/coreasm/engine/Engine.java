@@ -1071,8 +1071,15 @@ public class Engine implements ControlAPI {
 							break;
 							
 						case emResolvePolicy:
+							scheduler.retrieveAgents();
 							scheduler.evaluatePolicy();
-							next(EngineMode.emIdle);
+							storage.aggregateUpdates();
+							if (storage.isConsistent(scheduler.getUpdateSet())) {
+								storage.fireUpdateSet(scheduler.getUpdateSet());
+								mailbox.endStep();
+								next(EngineMode.emIdle);}
+							else 
+								next(EngineMode.emUpdateFailed);
 							break;
 							/*
 						case emInitializingSelf:
@@ -1102,7 +1109,6 @@ public class Engine implements ControlAPI {
 							storage.aggregateUpdates();
 							if (storage.isConsistent(scheduler.getUpdateSet())) {
 								storage.fireUpdateSet(scheduler.getUpdateSet());
-								mailbox.endStep();
 								next(EngineMode.emStepSucceeded);
 							} else
 								next(EngineMode.emUpdateFailed);
