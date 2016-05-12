@@ -353,7 +353,7 @@ public class SchedulerImp implements Scheduler {
 			result = rootNode.getTriggers();
 			updates = rootNode.getUpdates();
 			if (logger.isDebugEnabled())
-				logger.debug("Scheduling policy "+policy.getName()+ " selects the agents " + result.toString());
+				logger.debug("Scheduling policy "+policy.getName()+ " selects the local agents " + result.toString());
 		} 
 		Set<Element> theSet = new HashSet<Element>();
 		for(Trigger t : result)
