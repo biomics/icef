@@ -68,6 +68,10 @@ public class Wrapper {
         return commUrl;
     }
 
+    public WrapperConfig getConfig() {
+        return config;
+    }
+
     /**
      * Wrapper main method.
      * @param args

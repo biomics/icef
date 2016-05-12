@@ -69,8 +69,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class CoreASMContainer extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(CoreASMContainer.class);
 
-    protected String agentName;
-    protected String agentProgram;
+    protected String asimName;
+    protected String asimProgram;
 
 	private CoreASMEngine engine = null;
 	private UpdateMultiset lastUpdateSet = null;
@@ -79,13 +79,13 @@ public class CoreASMContainer extends Thread {
     private HashSet<MessageElement> inBox = null;
 
     public CoreASMContainer(AgentCreationRequest req) {
-        agentName = req.name;
-        agentProgram = req.program;
+        asimName = req.name;
+        asimProgram = req.program;
     }
 
     public CoreASMContainer(String newName, String newProgram) {
-        agentName = newName;
-        agentProgram = newProgram;
+        asimName = newName;
+        asimProgram = newProgram;
 
         inBox = new HashSet<MessageElement>();
 
@@ -136,9 +136,9 @@ public class CoreASMContainer extends Thread {
         while(it.hasNext()) {
             MessageElement msg = it.next();
             if(msg.getFromAgent().equals("self")) {
-                msg.setFromAgent(agentName);
+                msg.setFromAgent(asimName);
             } else {
-                msg.setFromAgent(agentName + ":" + msg.getFromAgent());
+                msg.setFromAgent(asimName + ":" + msg.getFromAgent());
             }
         }
         
@@ -177,12 +177,14 @@ public class CoreASMContainer extends Thread {
 
     public void handleUpdateSet(UpdateMultiset updates) {
         System.out.println("+++ handleUpdateSet +++ ");
+
+        System.out.println("lastUpdate: "+updates);
         
         String json = "";
         try {
             json = mapper.writeValueAsString(updates);
-            
-            System.out.println("JSON of Updates: "+json);
+            MessageRequest req = new MessageRequest("update", asimName, json);
+            EngineManager.sendUpdate(req);
         } catch (Exception e) {
             System.err.println("Unable to transform UpdateSet into json.");
             System.err.println(e);
@@ -209,8 +211,6 @@ public class CoreASMContainer extends Thread {
 				lastUpdateSet = new UpdateMultiset();
 			else
 				lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
-
-            System.out.println("lastUpdate: "+lastUpdateSet);
 
             handleUpdateSet(lastUpdateSet);
 
@@ -287,6 +287,10 @@ public class CoreASMContainer extends Thread {
         // System.out.println("MSG: "+newMsg);
         
         inBox.add(newMsg);
+    }
+
+    public String getAsimName() {
+        return asimName;
     }
 
     private void initEngine() {

@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Path("agents")
+@Path("asims")
 public class AgentResource {
 
     /**

@@ -23,6 +23,13 @@ public class MessageRequest {
         body = _body;
     }
 
+    public MessageRequest(String _type, String _from, String _body) {
+        type = _type;
+        fromAgent = _from;
+        toAgent = null;
+        body = _body;
+    }
+
     public static void prepareMapper() {
         if(mapper == null) {
             mapper = new ObjectMapper();

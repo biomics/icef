@@ -152,6 +152,39 @@ public class EngineManager {
             System.out.println(exception);
         }
     }
+
+    public static void sendUpdate(MessageRequest req) {
+        if(wrapper == null) {
+            System.err.println("ERROR: Running without a wrapper!");
+            System.exit(1);
+        }
+        
+        if(wrapper.getConfig().getManager() == null || wrapper.commUrl == null) {
+            // no manager, so don't send updates
+            return;
+        }
+
+        System.out.println("SEND UPDATES");
+
+        String json = MessageRequest.getJSON(req);
+
+        try {
+            Response response = ClientBuilder.newBuilder()
+                .build()
+                .target(wrapper.commUrl)
+                .path("update")
+                .request(MediaType.APPLICATION_JSON)
+                .accept("*/*")
+                .post(Entity.json(json));
+            System.out.println("response: "+response);
+        } 
+        catch (ProcessingException pe) {
+            System.out.println("Problem processing: "+pe);
+            System.out.println("Cause: "+pe.getCause());
+        } catch (Exception exception) {
+            System.out.println(exception);
+        }
+    }
     
     public static void stopAll() {
         
