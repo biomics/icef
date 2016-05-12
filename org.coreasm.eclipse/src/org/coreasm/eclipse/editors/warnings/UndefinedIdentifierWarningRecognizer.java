@@ -13,7 +13,7 @@ import org.coreasm.eclipse.editors.ASMDocument;
 import org.coreasm.eclipse.editors.ASMEditor;
 import org.coreasm.engine.Specification.FunctionInfo;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.MacroCallRuleNode;
@@ -55,10 +55,10 @@ public class UndefinedIdentifierWarningRecognizer implements IWarningRecognizer 
 					fringe.add(declarationNode);
 					while (!fringe.isEmpty()) {
 						ASTNode node = fringe.pop();
-						if (ASTNode.FUNCTION_RULE_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRuleTermNode) {
+						if (ASTNode.FUNCTION_RULE_POLICY_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRulePolicyTermNode) {
 							if (node.getParent() instanceof MacroCallRuleNode)	// Undefined rules cause an error
 								break;
-							FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+							FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 							if (frNode.hasName()) {
 								if (!ASMDeclarationWatcher.isEnvironmentVariable(frNode) && !isFunctionName(frNode.getName(), functionNames) && !ASMDeclarationWatcher.isLocalFunction(frNode))
 									warnings.add(new UndefinedIdentifierWarning(frNode.getName(), Collections.<ASTNode>emptyList(), frNode, document));

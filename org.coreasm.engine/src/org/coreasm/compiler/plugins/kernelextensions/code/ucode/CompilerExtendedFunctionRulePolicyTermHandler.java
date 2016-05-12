@@ -6,21 +6,21 @@ import org.coreasm.compiler.codefragment.CodeFragment;
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.compiler.interfaces.CompilerCodeHandler;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.plugins.kernelextensions.ExtendedFunctionRuleTermNode;
+import org.coreasm.engine.plugins.kernelextensions.ExtendedFunctionRulePolicyTermNode;
 
 /**
- * Handles ExtendedFunctionRuleTerms
+ * Handles ExtendedFunctionRulePolicyTerms
  * @author Spellmaker
  *
  */
-public class CompilerExtendedFunctionRuleTermHandler implements
+public class CompilerExtendedFunctionRulePolicyTermHandler implements
 		CompilerCodeHandler {
 
 	@Override
 	public void compile(CodeFragment result, ASTNode node, CompilerEngine engine)
 			throws CompilerException {
-		if(!(node instanceof ExtendedFunctionRuleTermNode)) throw new CompilerException("expected astnode of type ExtendedFunctionRuleTermNode");
-		ExtendedFunctionRuleTermNode n = (ExtendedFunctionRuleTermNode) node;
+		if(!(node instanceof ExtendedFunctionRulePolicyTermNode)) throw new CompilerException("expected astnode of type ExtendedFunctionRulePolicyTermNode");
+		ExtendedFunctionRulePolicyTermNode n = (ExtendedFunctionRulePolicyTermNode) node;
 		result.appendFragment(engine.compile(n.getTerm(), CodeType.R));
 		result.appendLine("@decl(Object,o)=evalStack.pop();\n");
 		result.appendLine("if(!(@o@ instanceof @RuntimePkg@.FunctionElement)){\n");

@@ -35,7 +35,7 @@ import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.kernel.KernelServices;
@@ -112,7 +112,7 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
             		   loc.getFirst().setToken("-" + entry.getKey());
             		   while (loc.getFirst().getNextCSTNode() != null)	// Remove arguments from copy
             			   loc.getFirst().getNextCSTNode().removeFromTree();
-            		   FunctionRuleTermNode rule = (FunctionRuleTermNode)n;
+            		   FunctionRulePolicyTermNode rule = (FunctionRulePolicyTermNode)n;
 
             		   // If the rule part is of the form 'x' or 'x(...)'
             		   if (rule.hasName() && storage.isRuleName(rule.getName())) {
@@ -207,7 +207,7 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
 
 			Parser<Node> ruleParser = kernel.getRuleParser();
 			Parser<Node> termParser = kernel.getTermParser();
-			Parser<Node> funcRuleTermParser = kernel.getFunctionRuleTermParser();
+			Parser<Node> funcRuleTermParser = kernel.getFunctionRulePolicyTermParser();
 
 			ParserTools pTools = ParserTools.getInstance(capi);
 			Parser<Node> idParser = pTools.getIdParser();

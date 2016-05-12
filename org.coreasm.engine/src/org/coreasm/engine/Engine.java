@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.Iterator;
 
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.HashStorage;
@@ -93,7 +94,21 @@ public class Engine implements ControlAPI {
 	/** Agents to be created by the external CoreASM manager
 	 *  Keys of this map denote identifiers of locatoins in which the 
 	 *  name of the created agent (the value of the map) is stored */
-	private final Map<String, String> agentsToCreate;
+	private final Map<String, AgentCreationElement> agentsToCreate;
+	
+	/** Internal agents to be registered into the external CoreASM manager
+	 *  elements of this set contain the names of these agents
+	 */
+	private final Set<String> agentsToRegister;
+	
+	/** Agents to be deleted from the external CoreASM manager
+	 * The elements are the names of the external agents to be deleted*/
+	private final Set<String> agentsToDelete;
+	
+	/** Internal agents to be deregistered from the external CoreASM manager
+	 *  elements of this set contain the names of these agents
+	 */
+	private final Set<String> agentsToDeregister;
 	
 	/** Loader used to obtain plugin classes */
 	private final PluginManager pluginLoader;
@@ -169,7 +184,10 @@ public class Engine implements ControlAPI {
 		storage = new HashStorage(this);
 		scheduler = new SchedulerImp(this);
 		mailbox = new MailboxImp(this);
-		agentsToCreate = new HashMap<String, String>();
+		agentsToCreate = new HashMap<String, AgentCreationElement>();
+		agentsToRegister = new HashSet<String>();
+		agentsToDeregister = new HashSet<String>();
+		agentsToDelete = new HashSet<String>();
 		parser = new JParsecParser(this);
 		interpreter = new InterpreterImp(this);
 		engineThread = new EngineThread(name);
@@ -191,6 +209,20 @@ public class Engine implements ControlAPI {
 
 		// Starting the execution thread of the engine
 		engineThread.start();
+	}
+
+	/**
+	 * @return the agentsToDelete
+	 */
+	public Set<String> getAgentsToDelete() {
+		return agentsToDelete;
+	}
+
+	/**
+	 * @return the agentsToDeregister
+	 */
+	public Set<String> getAgentsToDeregister() {
+		return agentsToDeregister;
 	}
 
 	/**
@@ -784,7 +816,7 @@ public class Engine implements ControlAPI {
 	}
 
 	@Override
-	public Map<String, String> getAgentsToCreate() {
+	public Map<String, AgentCreationElement> getAgentsToCreate() {
 		return agentsToCreate;
 	}
 
@@ -963,7 +995,7 @@ public class Engine implements ControlAPI {
 							scheduler.startStep();
 							scheduler.retrieveAgents();
 							//FIXME BSL remove the loopback method!!!
-							// mailbox.loopback();
+							 mailbox.loopback();
 							mailbox.startStep();
 							next(EngineMode.emSelectingAgents);
 							break;
@@ -1412,6 +1444,11 @@ public class Engine implements ControlAPI {
 	@Override
 	public List<InterpreterListener> getInterpreterListeners() {
 		return interpreterListeners;
+	}
+
+	@Override
+	public Set<String> getAgentsToRegister() {
+		return agentsToRegister;
 	}
 }
 

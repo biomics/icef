@@ -6,14 +6,14 @@ import org.coreasm.compiler.codefragment.CodeFragment;
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.compiler.interfaces.CompilerCodeHandler;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 
 /**
  * Handles l-r code for f(t1, t2, ... tn)
  * @author Spellmaker
  *
  */
-public class KernelLRFunctionRuleTermHandler implements CompilerCodeHandler {
+public class KernelLRFunctionRulePolicyTermHandler implements CompilerCodeHandler {
 
 	@Override
 	public void compile(CodeFragment result, ASTNode node, CompilerEngine engine)
@@ -25,7 +25,7 @@ public class KernelLRFunctionRuleTermHandler implements CompilerCodeHandler {
 		//TODO: Maybe it should be considered, that the name could be the name of a rule parameter evaluating to a location?
 
 		result.appendLine("");
-		FunctionRuleTermNode frtn = (FunctionRuleTermNode) node;
+		FunctionRulePolicyTermNode frtn = (FunctionRulePolicyTermNode) node;
 
 		result.appendLine("@decl(java.util.List<@RuntimePkg@.Element>,args)=new java.util.ArrayList<@RuntimePkg@.Element>();\n");
 

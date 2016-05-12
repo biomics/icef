@@ -30,9 +30,9 @@ import org.coreasm.compiler.interfaces.CompilerVocabularyExtender;
 import org.coreasm.compiler.plugins.kernel.code.bcode.KernelCoreHandler;
 import org.coreasm.compiler.plugins.kernel.code.bcode.KernelInitHandler;
 import org.coreasm.compiler.plugins.kernel.code.bcode.KernelRuleDeclarationHandler;
-import org.coreasm.compiler.plugins.kernel.code.lcode.KernelFunctionRuleTermHandler;
+import org.coreasm.compiler.plugins.kernel.code.lcode.KernelFunctionRulePolicyTermHandler;
 import org.coreasm.compiler.plugins.kernel.code.lcode.KernelIDCodeHandler;
-import org.coreasm.compiler.plugins.kernel.code.lrcode.KernelLRFunctionRuleTermHandler;
+import org.coreasm.compiler.plugins.kernel.code.lrcode.KernelLRFunctionRulePolicyTermHandler;
 import org.coreasm.compiler.plugins.kernel.code.rcode.KernelBooleanTermHandler;
 import org.coreasm.compiler.plugins.kernel.code.rcode.KernelExpressionLiftHandler;
 import org.coreasm.compiler.plugins.kernel.code.rcode.KernelFunctionRuleExpressionHandler;
@@ -87,8 +87,8 @@ public class CompilerKernelPlugin extends CompilerCodePlugin implements
 
 	public void registerCodeHandlers() throws CompilerException {
 		this.register(new KernelIDCodeHandler(), CodeType.L, null, "ID", null);
-		this.register(new KernelFunctionRuleTermHandler(), CodeType.L,
-				"FunctionRule", "FunctionRuleTerm", null);
+		this.register(new KernelFunctionRulePolicyTermHandler(), CodeType.L,
+				"FunctionRule", "FunctionRulePolicyTerm", null);
 
 		this.register(new KernelUndefHandler(), CodeType.R, null,
 				"KernelTerms", "undef");
@@ -97,7 +97,7 @@ public class CompilerKernelPlugin extends CompilerCodePlugin implements
 		this.register(new KernelBooleanTermHandler(), CodeType.R, null,
 				"BooleanTerm", null);
 		this.register(new KernelFunctionRuleExpressionHandler(), CodeType.R,
-				null, "FunctionRuleTerm", null);
+				null, "FunctionRulePolicyTerm", null);
 		this.register(new KernelExpressionLiftHandler(), CodeType.R,
 				"Expression", "", null);
 		this.register(new KernelRuleOrFuncHandler(), CodeType.R, "Expression",
@@ -119,8 +119,8 @@ public class CompilerKernelPlugin extends CompilerCodePlugin implements
 		this.register(new KernelRuleDeclarationHandler(), CodeType.BASIC, null,
 				"RuleDeclaration", null);
 
-		this.register(new KernelLRFunctionRuleTermHandler(), CodeType.LR,
-				"FunctionRule", "FunctionRuleTerm", null);
+		this.register(new KernelLRFunctionRulePolicyTermHandler(), CodeType.LR,
+				"FunctionRule", "FunctionRulePolicyTerm", null);
 	}
 
 	@Override

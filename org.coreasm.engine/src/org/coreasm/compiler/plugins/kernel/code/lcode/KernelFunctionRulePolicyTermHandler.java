@@ -8,18 +8,18 @@ import org.coreasm.compiler.codefragment.CodeFragment;
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.compiler.interfaces.CompilerCodeHandler;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 
 /**
  * Handles Location-code for f(t1, t2...tn)
  * @author Spellmaker
  *
  */
-public class KernelFunctionRuleTermHandler implements CompilerCodeHandler {
+public class KernelFunctionRulePolicyTermHandler implements CompilerCodeHandler {
 
 	@Override
 	public void compile(CodeFragment result, ASTNode node, CompilerEngine engine) throws CompilerException{
-		FunctionRuleTermNode frtn = (FunctionRuleTermNode) node;
+		FunctionRulePolicyTermNode frtn = (FunctionRulePolicyTermNode) node;
 
 		//TODO: location might also be the name of a ruleparam, which could break stuff
 		

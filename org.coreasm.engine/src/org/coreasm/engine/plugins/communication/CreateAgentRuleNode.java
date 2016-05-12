@@ -17,7 +17,7 @@ import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.ScannerInfo;
 
 /** 
- * A node for Print Rule nodes.
+ * A node for Create Rule nodes.
  *   
  * @author  Eric Rothstein
  * 
@@ -57,6 +57,10 @@ public class CreateAgentRuleNode extends ASTNode {
 	
 	public ASTNode getAgentProgram() {
 		return (ASTNode) this.getChildNode("program");
+	}
+	
+	public ASTNode getAgentPolicy() {
+		return (ASTNode) this.getChildNode("policy");
 	}
 	
 	public ASTNode getAgentLocation() {

@@ -82,13 +82,15 @@ public class CommunicationPlugin extends Plugin implements
 	public static final String MAIL_FROM_ACTION = "mailFromAction";
 	
 	/**Create agent**/
-	public static final String CREATE_KEYWORD = "create";
-	public static final String AGENT_KEYWORD = "agent";
-	public static final String INITIALIZED_KEYWORD = "initialized";
-	public static final String BY_KEYWORD = "by";
+	public static final String CREATE_KEYWORD = "createASIM";
+	public static final String INITIALIZED_KEYWORD = "initializedBy";
 	public static final String ID_KEYWORD = "id";
 	public static final String IN_KEYWORD = "in";
-	public static final String USING_KEYWORD = "using";
+	public static final String PROGRAM_KEYWORD = "withProgram";
+	public static final String POLICY_KEYWORD = "andPolicy";
+	
+	/**Destroy agent**/
+	public static final String DESTROY_KEYWORD = "destroyASIM";
 	
 	/**Inbox and outbox**/
 	public static final String OUTBOX_FUNC_NAME = "outboxOf";
@@ -126,7 +128,7 @@ public class CommunicationPlugin extends Plugin implements
 
 
 
-	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD, CREATE_KEYWORD, AGENT_KEYWORD, INITIALIZED_KEYWORD, BY_KEYWORD, USING_KEYWORD};
+	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD, CREATE_KEYWORD, INITIALIZED_KEYWORD, PROGRAM_KEYWORD, POLICY_KEYWORD, DESTROY_KEYWORD};
 	private final String[] operators = { };
 	
 	/**
@@ -227,45 +229,36 @@ public class CommunicationPlugin extends Plugin implements
 			Parser<Node> createAgentParser = Parsers.array(
 					new Parser[] {
 							parserTools.getKeywParser(CREATE_KEYWORD, PLUGIN_NAME),
-							parserTools.seq(parserTools.getKeywParser(AGENT_KEYWORD, PLUGIN_NAME), termParser.optional()),
+							termParser.optional(),
 							parserTools.getKeywParser(INITIALIZED_KEYWORD, PLUGIN_NAME),
-							parserTools.getKeywParser(BY_KEYWORD, PLUGIN_NAME),
 							termParser,
-							parserTools.getKeywParser(USING_KEYWORD, PLUGIN_NAME),
+							parserTools.getKeywParser(PROGRAM_KEYWORD, PLUGIN_NAME),
 							termParser,
+							parserTools.getKeywParser(POLICY_KEYWORD, PLUGIN_NAME),
+							termParser,	
 							parserTools.getKeywParser(IN_KEYWORD, PLUGIN_NAME),
 							termParser
-	
 					}).map(
 							//This should be the parser of the SendTo rule
 							new CreateAgentParseMap()); 
-//								
-//								
-//						public Node map(Object[] vals) {	
-//							
-//							Node node = new CreateAgentRuleNode(((Node) vals[0]).getScannerInfo());
-//							node.addChild((Node) vals[0]);
-//							node.addChild((Node) vals[1]);
-//							node.addChild((Node) vals[2]);
-//							node.addChild((Node) vals[3]);
-//							node.addChild("init", (Node) vals[2]);
-//							node.addChild((Node) vals[4]);
-//							node.addChild("program", (Node) vals[5]);	
-//							node.addChild((Node) vals[6]);
-//							node.addChild("location", (Node) vals[7]);
-//							
-//							node.addChild((Node) vals[8]);
-//							node.addChild("location", (Node) vals[9]);	
-//							return node;
-//						}
-//					});
-
 
 			parsers.put("CreateAgentRule",
-					new GrammarRule("CreateAgentRule", "'create' 'agent' (Term)? 'initialized' 'by' Term 'using' Term 'in' Location", createAgentParser, PLUGIN_NAME));
+					new GrammarRule("CreateAgentRule", "'createASIM' (Term)? 'initializedBy' Term 'withProgram' Term 'andPolicy' Term 'in' Location", createAgentParser, PLUGIN_NAME));
 			
-			Parser<Node> communicationRuleParser = Parsers.or(sendToParser,createAgentParser);
-			parsers.put("Rule",new GrammarRule("CommunicationRule", "SendToRule | CreateAgentRule", communicationRuleParser, PLUGIN_NAME));
+			Parser<Node> destroyAgentParser = Parsers.array(
+					new Parser[] {
+							parserTools.getKeywParser(DESTROY_KEYWORD, PLUGIN_NAME),
+							termParser
+					}).map(
+							//This should be the parser of the SendTo rule
+							new DestroyAgentParseMap()); 
+
+			parsers.put("DestroyAgentRule",
+					new GrammarRule("DestroyAgentRule", "'destroyASIM' Term", destroyAgentParser, PLUGIN_NAME));
+			
+			
+			Parser<Node> communicationRuleParser = Parsers.or(sendToParser,createAgentParser, destroyAgentParser);
+			parsers.put("Rule",new GrammarRule("CommunicationRule", "SendToRule | CreateAgentRule | DestroyAgentRule", communicationRuleParser, PLUGIN_NAME));
 		}
 
 		return parsers;
@@ -280,6 +273,10 @@ public class CommunicationPlugin extends Plugin implements
 		if (pos instanceof CreateAgentRuleNode) {
 			return interpretCreateAgent(interpreter, (CreateAgentRuleNode)pos); 
 		}
+		// DestroyAgent Rule
+				if (pos instanceof DestroyAgentRuleNode) {
+					return interpretDestroyAgent(interpreter, (DestroyAgentRuleNode)pos); 
+				}
 		return pos;
 	}
 	
@@ -299,16 +296,19 @@ public class CommunicationPlugin extends Plugin implements
 		else if (!pos.getAgentProgram().isEvaluated()) {
 			return pos.getAgentProgram();
 		} 
+		else if (!pos.getAgentPolicy().isEvaluated()) {
+			return pos.getAgentPolicy();
+		} 
 		else if (!pos.getAgentLocation().isEvaluated()) {
 			return pos.getAgentLocation();
 		} 
 		else{
-			AgentCreationElement ace;
-			Element newElement = (pos.getAgentName()!= null)? pos.getAgentName().getValue(): capi.getStorage().getNewElement();
-			capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), (pos.getAgentName()!= null)?newElement.toString():"");
 			
 			try {
-				ace = new AgentCreationElement(new StringElement(newElement.toString()),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue());
+				Element newElement = (pos.getAgentName()!= null)? pos.getAgentName().getValue(): capi.getStorage().getNewElement();
+				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?newElement.toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue());
+				capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), ace);
+				
 			pos.setNode(
 					null, 
 					new UpdateMultiset(new Update(pos.getAgentLocation().getLocation(),newElement, Update.UPDATE_ACTION,interpreter.getSelf(),pos.getScannerInfo())
@@ -325,6 +325,17 @@ public class CommunicationPlugin extends Plugin implements
 			} catch (Throwable e) {
 				capi.error(e);
 			}
+		}
+		return pos;
+	}
+	
+	private ASTNode interpretDestroyAgent(Interpreter interpreter, DestroyAgentRuleNode pos) {
+		if (!pos.getAgentName().isEvaluated()) {
+				return pos.getAgentName();
+		}
+		else{
+		
+				capi.getAgentsToDelete().add(pos.getAgentName().getValue().toString());		
 		}
 		return pos;
 	}
@@ -657,14 +668,46 @@ public class CommunicationPlugin extends Plugin implements
 				parent.addChild(nextChildName, child);
 			else {
 				String token = child.getToken();
-		        if (token.equals("agent"))
+		        if (token.equals(CREATE_KEYWORD))
 		        	nextChildName = "id";
-		        else if (token.equals("by"))
+		        else if (token.equals(INITIALIZED_KEYWORD))
 	        		nextChildName = "init";
-		        else if (token.equals("using"))
+		        else if (token.equals(PROGRAM_KEYWORD))
 		        	nextChildName = "program";
 		        else if (token.equals("in"))
 		        	nextChildName = "location";
+		        else if (token.equals(POLICY_KEYWORD))
+		        	nextChildName = "policy";
+				super.addChild(parent, child);
+			}
+		}
+		
+	}
+	
+	public static class DestroyAgentParseMap //extends ParseMapN<Node> {
+	extends ParserTools.ArrayParseMap {
+
+		String nextChildName = "alpha";
+		
+		public DestroyAgentParseMap() {
+			super(PLUGIN_NAME);
+		}
+
+		public Node map(Object[] vals) {
+			nextChildName = "alpha";
+            Node node = new DestroyAgentRuleNode(((Node)vals[0]).getScannerInfo());
+            addChildren(node, vals);
+			return node;
+		}
+
+		@Override
+		public void addChild(Node parent, Node child) {
+			if (child instanceof ASTNode)
+				parent.addChild(nextChildName, child);
+			else {
+				String token = child.getToken();
+		        if (token.equals(DESTROY_KEYWORD))
+		        	nextChildName = "id";
 				super.addChild(parent, child);
 			}
 		}

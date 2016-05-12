@@ -312,7 +312,8 @@ public class JParsecParser implements Parser {
                 if(!n.getPluginName().equals(Kernel.PLUGIN_NAME)) {
                     n = n.getNext();
                 }
-
+                if (n== null)
+                	System.out.println("ERROR!");
                 declared.put(n.getToken(), child);
                 // System.out.println("DECLARATION: "+child+" => "+n.getToken());
             }

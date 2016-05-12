@@ -48,8 +48,7 @@ public class ASTNode extends Node implements Serializable {
 	public static final String RULE_CLASS = "Rule";
 	public static final String POLICY_CLASS = "Policy";
 	public static final String EXPRESSION_CLASS = "Expression";
-	public static final String FUNCTION_RULE_CLASS = "FunctionRule";
-	public static final String FUNCTION_POLICY_CLASS = "FunctionPolicy";
+	public static final String FUNCTION_RULE_POLICY_CLASS = "FunctionRulePolicy";
 	public static final String DECLARATION_CLASS = "Declaration";
 	public static final String UNARY_OPERATOR_CLASS = "UnaryOperator";
 	public static final String BINARY_OPERATOR_CLASS = "BinaryOperator";

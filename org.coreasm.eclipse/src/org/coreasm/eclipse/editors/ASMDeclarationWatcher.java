@@ -12,7 +12,7 @@ import org.coreasm.eclipse.util.Utilities;
 import org.coreasm.engine.EngineException;
 import org.coreasm.engine.absstorage.Signature;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.RuleOrFuncElementNode;
 import org.coreasm.engine.plugins.bag.BagCompNode;
@@ -450,8 +450,8 @@ public class ASMDeclarationWatcher implements Observer {
 						fringe.add(rootNode);
 						while (!fringe.isEmpty()) {
 							node = fringe.removeFirst();
-							if (node instanceof FunctionRuleTermNode) {
-								FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+							if (node instanceof FunctionRulePolicyTermNode) {
+								FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 								if (frNode.hasName()) {
 									if (declarationName.equals(frNode.getName()))
 										callers.add(new Call(ASMDocument.getSurroundingDeclaration(frNode), frNode.getParent(), document.getNodeFile(frNode)));
@@ -617,7 +617,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	public static boolean isLocalFunction(FunctionRuleTermNode frNode) {
+	public static boolean isLocalFunction(FunctionRulePolicyTermNode frNode) {
 		for (LocalRuleNode localRuleNode = getParentLocalRuleNode(frNode); localRuleNode != null; localRuleNode = getParentLocalRuleNode(localRuleNode)) {
 			if (localRuleNode.getFunctionNames().contains(frNode.getName()))
 				return true;
@@ -636,10 +636,10 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isReturnTermExpression(FunctionRuleTermNode frNode) {
+	private static boolean isReturnTermExpression(FunctionRulePolicyTermNode frNode) {
 		for (ReturnTermNode returnTermNode = getParentReturnTermNode(frNode); returnTermNode != null; returnTermNode = getParentReturnTermNode(returnTermNode)) {
 			ASTNode expression = returnTermNode.getExpressionNode();
-			if (expression instanceof FunctionRuleTermNode && ((FunctionRuleTermNode)expression).getName().equals(frNode.getName()))
+			if (expression instanceof FunctionRulePolicyTermNode && ((FunctionRulePolicyTermNode)expression).getName().equals(frNode.getName()))
 				return true;
 		}
 		return false;
@@ -654,7 +654,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	public static boolean isEnvironmentVariable(FunctionRuleTermNode frNode) {
+	public static boolean isEnvironmentVariable(FunctionRulePolicyTermNode frNode) {
 		if (isParam(frNode))
 			return true;
 		if (isInLetVariableMap(frNode))
@@ -684,7 +684,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return false;
 	}
 	
-	private static boolean isParam(FunctionRuleTermNode frNode) {
+	private static boolean isParam(FunctionRulePolicyTermNode frNode) {
 		final ASTNode ruleNode = getParentRuleNode(frNode);
 		if (ruleNode != null) {
 			final ASTNode idNode = ruleNode.getFirst().getFirst();
@@ -703,7 +703,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return parentRuleNode;
 	}
 	
-	private static boolean isInLetVariableMap(FunctionRuleTermNode frNode) {
+	private static boolean isInLetVariableMap(FunctionRulePolicyTermNode frNode) {
 		for (LetRuleNode letRuleNode = getParentLetRuleNode(frNode); letRuleNode != null; letRuleNode = getParentLetRuleNode(letRuleNode)) {
 			try {
 				if (letRuleNode.getVariableMap().containsKey(frNode.getName()))
@@ -723,7 +723,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isForallRuleVariable(FunctionRuleTermNode frNode) {
+	private static boolean isForallRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ForallRuleNode forallRuleNode = getParentForallRuleNode(frNode); forallRuleNode != null; forallRuleNode = getParentForallRuleNode(forallRuleNode)) {
 			if (forallRuleNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -740,7 +740,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isForallExpVariable(FunctionRuleTermNode frNode) {
+	private static boolean isForallExpVariable(FunctionRulePolicyTermNode frNode) {
 		for (ForallExpNode forallExpNode = getParentForallExpNode(frNode); forallExpNode != null; forallExpNode = getParentForallExpNode(forallExpNode)) {
 			if (forallExpNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -757,7 +757,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isForeachRuleVariable(FunctionRuleTermNode frNode) {
+	private static boolean isForeachRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ForeachRuleNode foreachRuleNode = getParentForeachRuleNode(frNode); foreachRuleNode != null; foreachRuleNode = getParentForeachRuleNode(foreachRuleNode)) {
 			if (foreachRuleNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -774,7 +774,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isExistsExpVariable(FunctionRuleTermNode frNode) {
+	private static boolean isExistsExpVariable(FunctionRulePolicyTermNode frNode) {
 		for (ExistsExpNode existsExpNode = getParentExistsExpNode(frNode); existsExpNode != null; existsExpNode = getParentExistsExpNode(existsExpNode)) {
 			if (existsExpNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -791,7 +791,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isChooseVariable(FunctionRuleTermNode frNode) {
+	private static boolean isChooseVariable(FunctionRulePolicyTermNode frNode) {
 		for (ChooseRuleNode chooseRuleNode = getParentChooseRuleNode(frNode); chooseRuleNode != null; chooseRuleNode = getParentChooseRuleNode(chooseRuleNode)) {
 			if (chooseRuleNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -808,7 +808,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isPickExpVariable(FunctionRuleTermNode frNode) {
+	private static boolean isPickExpVariable(FunctionRulePolicyTermNode frNode) {
 		for (PickExpNode pickExpNode = getParentPickExpNode(frNode); pickExpNode != null; pickExpNode = getParentPickExpNode(pickExpNode)) {
 			if (pickExpNode.getVariable().getToken().equals(frNode.getName()))
 				return true;
@@ -825,7 +825,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isExtendRuleVariable(FunctionRuleTermNode frNode) {
+	private static boolean isExtendRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ExtendRuleNode extendRuleNode = getParentExtendRuleNode(frNode); extendRuleNode != null; extendRuleNode = getParentExtendRuleNode(extendRuleNode)) {
 			if (extendRuleNode.getIdNode().getToken().equals(frNode.getName()))
 				return true;
@@ -842,7 +842,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isSetComprehensionVariable(FunctionRuleTermNode frNode) {
+	private static boolean isSetComprehensionVariable(FunctionRulePolicyTermNode frNode) {
 		for (SetCompNode setCompNode = getParentSetCompNode(frNode); setCompNode != null; setCompNode = getParentSetCompNode(setCompNode)) {
 			try {
 				if (setCompNode.getVarBindings().containsKey(frNode.getName()))
@@ -864,7 +864,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isBagComprehensionVariable(FunctionRuleTermNode frNode) {
+	private static boolean isBagComprehensionVariable(FunctionRulePolicyTermNode frNode) {
 		for (BagCompNode bagCompNode = getParentBagCompNode(frNode); bagCompNode != null; bagCompNode = getParentBagCompNode(bagCompNode)) {
 			try {
 				if (bagCompNode.getVarBindings().containsKey(frNode.getName()))
@@ -886,7 +886,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isListComprehensionVariable(FunctionRuleTermNode frNode) {
+	private static boolean isListComprehensionVariable(FunctionRulePolicyTermNode frNode) {
 		for (ListCompNode listCompNode = getParentListCompNode(frNode); listCompNode != null; listCompNode = getParentListCompNode(listCompNode)) {
 			try {
 				if (listCompNode.getVarBindings().containsKey(frNode.getName()))
@@ -908,7 +908,7 @@ public class ASMDeclarationWatcher implements Observer {
 		return null;
 	}
 	
-	private static boolean isImportRuleVariable(FunctionRuleTermNode frNode) {
+	private static boolean isImportRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ASTNode importRuleNode = getParentImportRuleNode(frNode); importRuleNode != null; importRuleNode = getParentImportRuleNode(importRuleNode)) {
 			if (importRuleNode.getFirst().getToken().equals(frNode.getName()))
 				return true;

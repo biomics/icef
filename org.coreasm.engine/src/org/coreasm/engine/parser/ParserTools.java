@@ -16,8 +16,7 @@ import org.codehaus.jparsec.functors.Map;
 import org.coreasm.engine.ControlAPI;
 import org.coreasm.engine.EngineError;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionPolicyTermNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.interpreter.ScannerInfo;
 import org.coreasm.engine.kernel.Kernel;
@@ -356,43 +355,16 @@ public class ParserTools
 	
 	
 	
-	public static class FunctionRuleTermParseMap
+	public static class FunctionRulePolicyTermParseMap
 	extends ArrayParseMap
 	{
 
-		public FunctionRuleTermParseMap() {
+		public FunctionRulePolicyTermParseMap() {
 			super(Kernel.PLUGIN_NAME);
 		}
 		
 		public Node map(Object[] v) {
-			Node node = new FunctionRuleTermNode(((Node)v[0]).getScannerInfo());
-			node.addChild("alpha", (Node)v[0]); // ID
-			
-			for (int i=1; i < v.length; i++) {
-				if (v[i] != null && v[i] instanceof ASTNode) {
-					// Then it should be a TupleTerm
-					for (Node n: ((Node)v[i]).getChildNodes())
-						if (n instanceof ASTNode) 
-							node.addChild("lambda", n);
-						else 
-							node.addChild(n);
-				}
-			}
-			return node;
-		}
-
-	}
-	
-	public static class FunctionPolicyTermParseMap
-	extends ArrayParseMap
-	{
-
-		public FunctionPolicyTermParseMap() {
-			super(Kernel.PLUGIN_NAME);
-		}
-		
-		public Node map(Object[] v) {
-			Node node = new FunctionPolicyTermNode(((Node)v[0]).getScannerInfo());
+			Node node = new FunctionRulePolicyTermNode(((Node)v[0]).getScannerInfo());
 			node.addChild("alpha", (Node)v[0]); // ID
 			
 			for (int i=1; i < v.length; i++) {

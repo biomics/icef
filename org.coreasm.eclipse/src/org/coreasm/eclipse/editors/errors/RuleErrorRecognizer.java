@@ -18,7 +18,7 @@ import org.coreasm.eclipse.editors.ASMDocument;
 import org.coreasm.eclipse.editors.ASMEditor;
 import org.coreasm.eclipse.editors.AstTools;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.MacroCallRuleNode;
@@ -78,8 +78,8 @@ implements ITreeErrorRecognizer
 					fringe.add(declarationNode);
 					while (!fringe.isEmpty()) {
 						ASTNode node = fringe.pop();
-						if (ASTNode.FUNCTION_RULE_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRuleTermNode && node.getParent() instanceof MacroCallRuleNode) {
-							FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+						if (ASTNode.FUNCTION_RULE_POLICY_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRulePolicyTermNode && node.getParent() instanceof MacroCallRuleNode) {
+							FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 							if (frNode.hasName()) {
 								RuleDeclaration declaration = ruleDeclarations.get(frNode.getName());
 								if (declaration != null) {
@@ -109,14 +109,14 @@ implements ITreeErrorRecognizer
 						}
 						else if (node instanceof ReturnResultNode) {
 							ASTNode ruleNode = ((ReturnResultNode)node).getRuleNode();
-							if (ruleNode instanceof FunctionRuleTermNode) {
-								FunctionRuleTermNode frNode = (FunctionRuleTermNode)ruleNode;
+							if (ruleNode instanceof FunctionRulePolicyTermNode) {
+								FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)ruleNode;
 								if (frNode.hasName() && !ruleDeclarations.containsKey(frNode.getName()))
 									errors.add(new SimpleError(null, "'" + frNode.getName() + "' is not a rule name", frNode, document, frNode.getName().length(), CLASSNAME, NOT_A_RULE_NAME));
 							}
 						}
-						else if (node instanceof FunctionRuleTermNode && !(node.getParent() instanceof MacroCallRuleNode) && !(node.getParent() instanceof ReturnResultNode) && !(!(node.getParent() instanceof LetRuleNode) || ((LetRuleNode)node.getParent()).isLetResultRule())) {
-							FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+						else if (node instanceof FunctionRulePolicyTermNode && !(node.getParent() instanceof MacroCallRuleNode) && !(node.getParent() instanceof ReturnResultNode) && !(!(node.getParent() instanceof LetRuleNode) || ((LetRuleNode)node.getParent()).isLetResultRule())) {
+							FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 							if (frNode.hasName() && frNode.hasArguments() && ruleDeclarations.containsKey(frNode.getName()))
 								errors.add(new SimpleError(null, "'" + frNode.getName() + "' is not a derived function", frNode, document, frNode.getName().length(), CLASSNAME, NOT_A_DERIVED_FUNCTION));
 						}

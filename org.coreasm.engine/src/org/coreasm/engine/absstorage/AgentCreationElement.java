@@ -5,15 +5,18 @@ package org.coreasm.engine.absstorage;
 
 import org.coreasm.engine.plugins.string.StringElement;
 
-/**
- * @author EricRothstein
- *
+/** 
+ * An Element to represent the action of creating an agent
+ *   
+ * @author Eric Rothstein
+ * 
  */
 public class AgentCreationElement extends Element {
 
 	private StringElement name;
 	private RuleElement initRule;
 	private RuleElement program;
+	private PolicyElement policy;
 
 
 	/**
@@ -23,10 +26,11 @@ public class AgentCreationElement extends Element {
 		this.name = (StringElement) Element.UNDEF;
 		this.initRule = (RuleElement)Element.UNDEF;
 		this.program = (RuleElement) Element.UNDEF;
+		this.policy = (PolicyElement) Element.UNDEF;
 	}
 
 
-	public AgentCreationElement(Element name, Element initRule, Element program) throws NameConflictException, IdentifierNotFoundException {
+	public AgentCreationElement(Element name, Element initRule, Element program, Element policy) throws NameConflictException, IdentifierNotFoundException {
 		if(!(name instanceof StringElement))
 			throw new IdentifierNotFoundException("The name of the new agent must be a string");
 		if (name.toString().equals("self"))
@@ -34,10 +38,29 @@ public class AgentCreationElement extends Element {
 		if (! (initRule instanceof RuleElement))
 			throw new IdentifierNotFoundException("Cannot use "+initRule.toString()+" as an initialization rule");
 		if (! (program instanceof RuleElement))
-			throw new IdentifierNotFoundException("Cannot use "+program.toString()+" as a main rule");
+			throw new IdentifierNotFoundException("Cannot use "+program.toString()+" as its main rule");
+		if (! (policy instanceof PolicyElement))
+			throw new IdentifierNotFoundException("Cannot use "+program.toString()+" as its scheduling policy");
 		this.name = (StringElement) name;
 		this.initRule = (RuleElement)initRule;
 		this.program = (RuleElement) program;
+		this.policy = (PolicyElement) policy;
+	}
+
+
+	/**
+	 * @param policy the policy to set
+	 */
+	public void setPolicy(PolicyElement policy) {
+		this.policy = policy;
+	}
+
+
+	/**
+	 * @return the policy
+	 */
+	public PolicyElement getPolicy() {
+		return policy;
 	}
 
 
@@ -93,6 +116,7 @@ public class AgentCreationElement extends Element {
 		String result = "create agent \""+name+"\"";
 		result +=" initialized by: "+initRule+"";
 		result +="with program: "+program+""; 
+		result +="and policy: "+policy+""; 
 		return result;
 	}
 

@@ -556,5 +556,17 @@ public class ASMParser extends Observable implements org.coreasm.engine.parser.P
 		}
 		return positionMap;
 	}
+
+	@Override
+	public ASTNode parseRuleOnly(String strRule) throws org.coreasm.engine.parser.ParserException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTNode parseRuleDeclarationOnly(String strRule) throws org.coreasm.engine.parser.ParserException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

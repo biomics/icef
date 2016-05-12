@@ -19,7 +19,7 @@ import java.util.List;
 import org.coreasm.engine.CoreASMError;
 import org.coreasm.engine.absstorage.FunctionElement.FunctionClass;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.ScannerInfo;
 import org.coreasm.engine.plugins.chooserule.ChooseRulePlugin;
 import org.coreasm.engine.plugins.number.NumberRangeNode;
@@ -236,13 +236,13 @@ public class FunctionNode extends ASTNode {
    }
    
    public List<String> getInitializerParams() {
-	   if (!hasInitializer() || !(getInitNode() instanceof FunctionRuleTermNode))
+	   if (!hasInitializer() || !(getInitNode() instanceof FunctionRulePolicyTermNode))
 		   return Collections.<String>emptyList();
-	   FunctionRuleTermNode frNode = (FunctionRuleTermNode)getInitNode();
+	   FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)getInitNode();
 	   List<String> params = new ArrayList<String>();
 	   for (ASTNode argNode : frNode.getArguments()) {
-		   if (argNode instanceof FunctionRuleTermNode) {
-			   FunctionRuleTermNode arg = (FunctionRuleTermNode)argNode;
+		   if (argNode instanceof FunctionRulePolicyTermNode) {
+			   FunctionRulePolicyTermNode arg = (FunctionRulePolicyTermNode)argNode;
 			   params.add(arg.getName());
 		   }
 		   else

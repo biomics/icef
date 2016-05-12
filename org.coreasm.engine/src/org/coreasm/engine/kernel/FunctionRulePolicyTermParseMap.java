@@ -1,5 +1,5 @@
 /*	
- * FunctionRuleTermParseMap.java 	$Revision: 243 $
+ * FunctionRulePolicyTermParseMap.java 	$Revision: 243 $
  * 
  * Copyright (C) 2007 Roozbeh Farahbod
  *
@@ -14,24 +14,24 @@
 package org.coreasm.engine.kernel;
 
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.parser.ParseMapN;
 
 /** 
- * A parser map for the BasicFunctionRuleTerm grammar rule.
+ * A parser map for the BasicFunctionRulePolicyTerm grammar rule.
  *   
  * @author Roozbeh Farahbod
  * 
  */
-public class FunctionRuleTermParseMap extends ParseMapN<Node> {
+public class FunctionRulePolicyTermParseMap extends ParseMapN<Node> {
 
-	public FunctionRuleTermParseMap() {
+	public FunctionRulePolicyTermParseMap() {
 		super(Kernel.PLUGIN_NAME);
 	}
 	
 	public Node map(Object... v) {
-		Node node = new FunctionRuleTermNode(((Node)v[0]).getScannerInfo());
+		Node node = new FunctionRulePolicyTermNode(((Node)v[0]).getScannerInfo());
 		node.addChild("alpha", (Node)v[0]); // ID
 		
 		for (int i=1; i < v.length; i++) {

@@ -359,7 +359,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 			
 			parsers.put(importRuleParser.toString(),
 					new GrammarRule(importRuleParser.toString(),
-							"'import' 'native' FunctionRuleTerm 'into' Term", importRuleParser, PLUGIN_NAME));
+							"'import' 'native' FunctionRulePolicyTerm 'into' Term", importRuleParser, PLUGIN_NAME));
 
 			Parser<Node> storeRuleParser = Parsers.array(
 					new Parser[] {

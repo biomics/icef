@@ -1,5 +1,5 @@
 /*	
- * ExtendedFunctionRuleTermNode.java
+ * ExtendedFunctionRulePolicyTermNode.java
  * 
  * Copyright (C) 2010 Roozbeh Farahbod
  * 
@@ -25,7 +25,7 @@ import org.coreasm.engine.interpreter.ScannerInfo;
  *  @author  Roozbeh Farahbod
  */
 
-public class ExtendedFunctionRuleTermNode extends ASTNode {
+public class ExtendedFunctionRulePolicyTermNode extends ASTNode {
 
     /**
      * 
@@ -34,16 +34,16 @@ public class ExtendedFunctionRuleTermNode extends ASTNode {
 
 	private List<ASTNode> argsList = null;
 
-    public ExtendedFunctionRuleTermNode(ScannerInfo info) {
+    public ExtendedFunctionRulePolicyTermNode(ScannerInfo info) {
         super(
         		KernelExtensionsPlugin.PLUGIN_NAME,
         		ASTNode.EXPRESSION_CLASS,
-        		KernelExtensionsPlugin.EXTENDED_FUNC_RULE_TERM_NAME,
+        		KernelExtensionsPlugin.EXTENDED_FUNC_RULE_POLICY_TERM_NAME,
         		null,
         		info);
     }
 
-    public ExtendedFunctionRuleTermNode(ExtendedFunctionRuleTermNode node) {
+    public ExtendedFunctionRulePolicyTermNode(ExtendedFunctionRulePolicyTermNode node) {
     	super(node);
     }
     

@@ -18,7 +18,7 @@ import org.coreasm.engine.Specification.FunctionInfo;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Enumerable;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.kernel.RuleOrFuncElementNode;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
@@ -179,8 +179,8 @@ implements ITextHover, ITextHoverExtension, ITextHoverExtension2, IDebugContextL
 				if (hoverRegion.getOffset() >= offset) {
 					if (hoverNode == null || offset >= document.getNodePosition(hoverNode))
 						hoverNode = node;
-					if (node instanceof FunctionRuleTermNode) {
-						FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+					if (node instanceof FunctionRulePolicyTermNode) {
+						FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 						if (frNode.hasName() && hoverRegion.getOffset() + hoverRegion.getLength() < offset + frNode.getName().length()) {
 							String value = getExpressionValue(textViewer.getDocument(), frNode.getName());
 							if (ASMDeclarationWatcher.isEnvironmentVariable(frNode))
@@ -208,7 +208,7 @@ implements ITextHover, ITextHoverExtension, ITextHoverExtension2, IDebugContextL
 					}
 				}
 			}
-			if (hoverNode == null || hoverNode instanceof FunctionRuleTermNode)
+			if (hoverNode == null || hoverNode instanceof FunctionRulePolicyTermNode)
 				return null;
 			return new HoverInfo("Plugin: " + hoverNode.getPluginName() + "\nParser Info: " + hoverNode);
 		} catch (BadLocationException e) {

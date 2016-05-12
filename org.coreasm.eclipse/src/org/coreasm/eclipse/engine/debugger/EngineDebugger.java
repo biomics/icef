@@ -36,7 +36,7 @@ import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Interpreter.CallStackElement;
 import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.InterpreterListener;
@@ -530,7 +530,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	 * @param frNode ASTNode to test
 	 * @return whether frNode hits a breakpoint
 	 */
-	private boolean isWatchpointHit(FunctionRuleTermNode frNode) {
+	private boolean isWatchpointHit(FunctionRulePolicyTermNode frNode) {
 		if (!DebugPlugin.getDefault().getBreakpointManager().isEnabled())
 			return false;
 		ASTNode parent = frNode.getParent();
@@ -587,8 +587,8 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 			}
 			
 //			handle watchpoints (access)
-			if (Kernel.GR_FUNCTION_RULE_TERM.equals(pos.getGrammarRule())) {
-				FunctionRuleTermNode frNode = (FunctionRuleTermNode) pos;
+			if (Kernel.GR_FUNCTION_RULE_POLICY_TERM.equals(pos.getGrammarRule())) {
+				FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode) pos;
 				if (frNode.hasName()) {
 					if (isWatchpointHit(frNode)) {
 						onBreakpointHit(frNode);

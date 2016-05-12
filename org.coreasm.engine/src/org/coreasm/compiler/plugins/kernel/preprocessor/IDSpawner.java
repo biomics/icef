@@ -20,7 +20,7 @@ public class IDSpawner implements SynthesizeRule {
 	public Map<String, Information> transform(ASTNode n,
 			List<Map<String, Information>> children) {
 		//lift ids on function rule term
-		if(n.getGrammarClass().equals("FunctionRule") && n.getGrammarRule().equals("FunctionRuleTerm")){
+		if(n.getGrammarClass().equals("FunctionRule") && n.getGrammarRule().equals("FunctionRulePolicyTerm")){
 			if(children.size() <= 0) return null;
 			
 			Map<String, Information> first = children.get(0);
@@ -43,7 +43,7 @@ public class IDSpawner implements SynthesizeRule {
 	@Override
 	public List<Trigger> getTriggers() {
 		List<Trigger> triggers = new ArrayList<Trigger>();
-		triggers.add(new Trigger(null, "FunctionRule", "FunctionRuleTerm", null));
+		triggers.add(new Trigger(null, "FunctionRule", "FunctionRulePolicyTerm", null));
 		triggers.add(new Trigger(null, "Id", "ID", null));
 		return triggers;
 	}

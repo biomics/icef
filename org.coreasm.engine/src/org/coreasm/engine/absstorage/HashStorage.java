@@ -234,9 +234,25 @@ public class HashStorage implements AbstractStorage {
 			{
 				try {	
 					if(u.value == Element.UNDEF)
+					{
+						if(!u.loc.args.get(0).equals(capi.getScheduler().getEnvironmentAgent()))
+						{
+							capi.getAgentsToDeregister().add(u.loc.args.toString());
+						}
+						else
+						{
+							capi.getAgentsToDelete().add("self");
+						}
 						agents.setValue(u.loc.args, BooleanElement.FALSE);
+					}
 					else
-						agents.setValue(u.loc.args, BooleanElement.TRUE);
+					{
+						if(!u.loc.args.get(0).equals(capi.getScheduler().getEnvironmentAgent()))
+						{
+							capi.getAgentsToRegister().add(u.loc.args.toString());
+							agents.setValue(u.loc.args, BooleanElement.TRUE);
+						}
+					}
 				} 
 				catch (UnmodifiableFunctionException e) {
 					// this should not happen 

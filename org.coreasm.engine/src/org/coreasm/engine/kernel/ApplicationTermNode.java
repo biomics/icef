@@ -43,7 +43,7 @@ public class ApplicationTermNode extends ASTNode {
 	
 	public ApplicationTermNode(Node firstNode) {
 		super(Kernel.PLUGIN_NAME,
-				ASTNode.FUNCTION_RULE_CLASS,
+				ASTNode.FUNCTION_RULE_POLICY_CLASS,
 				"ApplicationTerm",
 				null,
 				firstNode.getScannerInfo());

@@ -1,5 +1,5 @@
 /*	
- * ExtendedFunctionRuleTermNode.java
+ * ExtendedFunctionRulePolicyTermNode.java
  * 
  * Copyright (C) 2010 Roozbeh Farahbod
  * 

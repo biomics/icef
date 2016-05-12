@@ -1,7 +1,7 @@
 /*	
- * FunctionRuleTermNode.java 	1.1 	$Revision: 243 $
+ * FunctionRulePolicyTermNode.java 	1.1 	$Revision: 243 $
  * 
- * Last modified on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $ by $Author: rfarahbod $
+ * Last modified on $Date: 2015-04-12 02:05:21$ by $Author: Eric Rothstein $
  *
  * Copyright (C) 2006-2007 Roozbeh Farahbod
  *
@@ -25,34 +25,34 @@ import org.slf4j.LoggerFactory;
  * Wrapper around a <code>Node</code> object, to see the node as a 
  * function/rule term node.
  *   
- *  @author  Roozbeh Farahbod
+ *  @author  Roozbeh Farahbod, Eric Rothstein
  *  
  */
-public class FunctionPolicyTermNode extends ASTNode {
+public class FunctionRulePolicyTermNode extends ASTNode {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger logger = LoggerFactory.getLogger(FunctionPolicyTermNode.class);
+    private static final Logger logger = LoggerFactory.getLogger(FunctionRulePolicyTermNode.class);
     
     private ASTNode actualNode = null;
 
 	private List<ASTNode> argsList = null;
 
-	public FunctionPolicyTermNode(ScannerInfo info) {
+	public FunctionRulePolicyTermNode(ScannerInfo info) {
 		super(Kernel.PLUGIN_NAME,
-				ASTNode.FUNCTION_POLICY_CLASS,
-				Kernel.GR_FUNCTION_POLICY_TERM,
+				ASTNode.FUNCTION_RULE_POLICY_CLASS,
+				Kernel.GR_FUNCTION_RULE_POLICY_TERM,
 				null,
 				info);
 	}
 
-    public FunctionPolicyTermNode(FunctionPolicyTermNode node) {
+    public FunctionRulePolicyTermNode(FunctionRulePolicyTermNode node) {
     	super((ASTNode)node);
    }
 
     protected void checkNodeValidity() {
-		if (!this.getGrammarClass().equals(ASTNode.FUNCTION_POLICY_CLASS))
-			throw new IllegalArgumentException("Expecting a FunctionPolicyTerm node.");
+		if (!this.getGrammarClass().equals(ASTNode.FUNCTION_RULE_POLICY_CLASS))
+			throw new IllegalArgumentException("Expecting a FunctionRulePolicyTerm node.");
 	}
 
     /**
@@ -62,7 +62,7 @@ public class FunctionPolicyTermNode extends ASTNode {
 		// return actualNode.getFirst().getNext() != null;
 		// The above line changed to the following, which
 		// is more robust and also is consistent with the spec -- Roozbeh Farahbod
-		return getActualFunctionPolicyNode().getChildNode("lambda") != null;
+		return getActualFunctionRuleNode().getChildNode("lambda") != null;
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class FunctionPolicyTermNode extends ASTNode {
 	 */
 	public List<ASTNode> getArguments() {
 		if (argsList == null) {
-			List<Node> args = getActualFunctionPolicyNode().getChildNodes("lambda");
+			List<Node> args = getActualFunctionRuleNode().getChildNodes("lambda");
 			if (args.size() == 0)
 				argsList = Collections.emptyList();
 			else {
@@ -82,7 +82,7 @@ public class FunctionPolicyTermNode extends ASTNode {
 					if (n instanceof ASTNode)
 						argsList.add((ASTNode)n);
 					else
-						logger.warn("Bad argument node in a FunctionPolicyTerm!");
+						logger.warn("Bad argument node in a FunctionRulePolicyTerm!");
 			}
 		}
 
@@ -93,7 +93,7 @@ public class FunctionPolicyTermNode extends ASTNode {
 	 * Returns <code>true</code> if this function/rule term starts with a name (id).
 	 */
 	public boolean hasName() {
-		Node name = getActualFunctionPolicyNode().getChildNode("alpha");
+		Node name = getActualFunctionRuleNode().getChildNode("alpha");
 		if (name instanceof ASTNode) 
 			return ((ASTNode)name).getGrammarClass().equals(ASTNode.ID_CLASS);
 		else
@@ -106,15 +106,15 @@ public class FunctionPolicyTermNode extends ASTNode {
 	 */
 	public String getName() {
 		if (hasName()) { 
-			return getActualFunctionPolicyNode().getChildNode("alpha").getToken();
+			return getActualFunctionRuleNode().getChildNode("alpha").getToken();
 		} else
 			return null;
 	}
 
-	public ASTNode getActualFunctionPolicyNode() {
+	public ASTNode getActualFunctionRuleNode() {
 		if (actualNode == null) {
 			ASTNode cNode = this;
-			while (cNode.getFirst().getGrammarClass().equals(ASTNode.FUNCTION_POLICY_CLASS)) 
+			while (cNode.getFirst().getGrammarClass().equals(ASTNode.FUNCTION_RULE_POLICY_CLASS)) 
 				cNode = cNode.getFirst();
 			actualNode = cNode; 
 		}

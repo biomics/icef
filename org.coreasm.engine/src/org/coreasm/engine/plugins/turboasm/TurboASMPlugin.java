@@ -46,7 +46,7 @@ import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.Node;
@@ -157,7 +157,7 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 
 			Parser<Node> ruleParser = kernel.getRuleParser();
 			Parser<Node> termParser = kernel.getTermParser();
-			Parser<Node> funcRuleTermParser = kernel.getFunctionRuleTermParser();
+			Parser<Node> funcRuleTermParser = kernel.getFunctionRulePolicyTermParser();
 
 			ParserTools pTools = ParserTools.getInstance(capi);
 			Parser<Node> idParser = pTools.getIdParser();
@@ -224,7 +224,7 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 			parsers.put("WhileRule",
 					new GrammarRule("WhileRule", "'while' Term Rule", whileRuleParser, PLUGIN_NAME));
 
-			// ReturnResultRule: FunctionRuleTerm '<-' FunctionRuleTerm
+			// ReturnResultRule: FunctionRulePolicyTerm '<-' FunctionRulePolicyTerm
 			Parser<Node> retResRuleParser = Parsers.array(
 					new Parser[] {
 						funcRuleTermParser,
@@ -241,7 +241,7 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 					}
 			 );
 			parsers.put("ReturnResultRule",
-					new GrammarRule("ReturnResultRule", "FunctionRuleTerm '<-' FunctionRuleTerm", 
+					new GrammarRule("ReturnResultRule", "FunctionRulePolicyTerm '<-' FunctionRulePolicyTerm", 
 							retResRuleParser, PLUGIN_NAME));
 			
 			// ReturnTerm : 'return' Term 'in' Rule
@@ -298,7 +298,7 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 							 *  see ParserTools.getIdentifierParser()
 							 */
 							
-							Node node = new FunctionRuleTermNode(v.getScannerInfo());
+							Node node = new FunctionRulePolicyTermNode(v.getScannerInfo());
 							node.addChild("alpha", new ASTNode(
 									"Kernel", 
 									ASTNode.ID_CLASS, 
@@ -316,13 +316,13 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 							"'result'", 
 							resultLocationParser, PLUGIN_NAME));
 			
-			// FunctionRuleTerm : 'result'
+			// FunctionRulePolicyTerm : 'result'
 			/*
 			 * !! Notice that to be on the safe side, any
-			 *    grammar rule that extends the FunctionRuleTerm 
-			 *    rule has to return a node of the class FunctionRuleTermNode.
+			 *    grammar rule that extends the FunctionRulePolicyTerm 
+			 *    rule has to return a node of the class FunctionRulePolicyTermNode.
 			 */
-			parsers.put(Kernel.GR_FUNCTION_RULE_TERM, 
+			parsers.put(Kernel.GR_FUNCTION_RULE_POLICY_TERM, 
 					new GrammarRule(resultLocationParser.toString(),
 					"ResultLocation", 
 					resultLocationParser, PLUGIN_NAME));
@@ -444,7 +444,7 @@ public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterP
 					if (pos instanceof ReturnResultNode) {
 						ReturnResultNode node = (ReturnResultNode)pos;
 						ASTNode loc = node.getLocationNode();
-						FunctionRuleTermNode rule = (FunctionRuleTermNode)node.getRuleNode();
+						FunctionRulePolicyTermNode rule = (FunctionRulePolicyTermNode)node.getRuleNode();
 						
 						// If the rule part is of the form 'x' or 'x(...)'
 						if (rule.hasName()) {

@@ -291,7 +291,7 @@ public class CoreASMCompiler implements CompilerEngine {
 		
 		
 		//test, if the node is a function call
-		if(node.getGrammarClass().equals("FunctionRule") && node.getGrammarRule().equals("FunctionRuleTerm") && type == CodeType.R && node.getPluginName().equals("Kernel")){
+		if(node.getGrammarClass().equals("FunctionRule") && node.getGrammarRule().equals("FunctionRulePolicyTerm") && type == CodeType.R && node.getPluginName().equals("Kernel")){
 			getLogger().debug(CoreASMCompiler.class, "Function call detected - checking for Function Plugin");
 			//get the function name
 			String functionname = node.getAbstractChildNodes().get(0).getToken();

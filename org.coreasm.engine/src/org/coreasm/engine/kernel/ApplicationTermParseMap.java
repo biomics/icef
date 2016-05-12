@@ -32,7 +32,7 @@ public class ApplicationTermParseMap extends ParseMapN<Node> {
 	
 	public Node map(Object... vals) {
 		Node node = new ApplicationTermNode((Node)vals[0]);
-		node.addChild("alpha", (Node)vals[0]); // FunctionRuleTerm
+		node.addChild("alpha", (Node)vals[0]); // FunctionRulePolicyTerm
 		
 		for (int i=1; i < vals.length; i++) {
 			if (vals[i] != null && vals[i] instanceof ASTNode) {

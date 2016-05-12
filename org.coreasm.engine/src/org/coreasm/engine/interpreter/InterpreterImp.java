@@ -244,18 +244,17 @@ public class InterpreterImp implements Interpreter {
 		// I changed it so that if it is evaluated, it won't be evaluated again -- Roozbeh 21-May-2007
 		if (newPos == pos && !pos.isEvaluated()) {
 			// try expressions
-			newPos = interpretExpressions(pos);{
-			if (newPos == pos && !pos.isEvaluated())
-				// if pos was not an expression, try rules
-				newPos = interpretRules(pos);
-				if (newPos == pos && !pos.isEvaluated())
-				{	// if pos was not a rule, try a policy
-					newPos = interpretPolicies(pos);
-					//TODO BSL sometimes these appear to be FunctionRuleTerms?
-					//capi.warning("Policy Interpretation", "InterpretPoliciesResult '" + newPos.toString());
-				}
-			}
-				
+			newPos = interpretExpressions(pos);
+		}
+		if (newPos == pos && !pos.isEvaluated()){
+			// if pos was not an expression, try rules
+			newPos = interpretRules(pos);
+		}	
+		if (newPos == pos && !pos.isEvaluated()){
+			// if pos was not a rule, try a policy
+			newPos = interpretPolicies(pos);
+			//TODO BSL sometimes these appear to be FunctionRulePolicyTerms?
+			//capi.warning("Policy Interpretation", "InterpretPoliciesResult '" + newPos.toString());
 		}
 		// return the new pointer to pos (could be the same as the old one)
 		return newPos;
@@ -399,9 +398,9 @@ public class InterpreterImp implements Interpreter {
 		String x = pos.getToken();
 		
 		// If the current node is a function/rule term
-		if (gClass.equals(ASTNode.FUNCTION_RULE_CLASS)) {
-			if (pos instanceof FunctionRuleTermNode) {
-				FunctionRuleTermNode frNode = (FunctionRuleTermNode)pos;
+		if (gClass.equals(ASTNode.FUNCTION_RULE_POLICY_CLASS)) {
+			if (pos instanceof FunctionRulePolicyTermNode) {
+				FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)pos;
 				
 				// If the current node is of the form 'x' or 'x(...)'
 				if (frNode.hasName()) {
@@ -577,12 +576,12 @@ public class InterpreterImp implements Interpreter {
 		String x = pos.getToken();
 		
 		// If the current node is a macro call term...
-		if (gRule.equals(Kernel.GR_FUNCTION_RULE_TERM) || pos instanceof MacroCallRuleNode) {
-			FunctionRuleTermNode frNode = null;
+		if (gRule.equals(Kernel.GR_FUNCTION_RULE_POLICY_TERM) || pos instanceof MacroCallRuleNode) {
+			FunctionRulePolicyTermNode frNode = null;
 			RuleElement theRule = null;
 			if (pos instanceof MacroCallRuleNode) {
-				if (pos.getFirst() instanceof FunctionRuleTermNode)
-					frNode = (FunctionRuleTermNode)pos.getFirst();
+				if (pos.getFirst() instanceof FunctionRulePolicyTermNode)
+					frNode = (FunctionRulePolicyTermNode)pos.getFirst();
 				else if (pos.getFirst() instanceof ConstantValueNode) {
 					ConstantValueNode constantValueNode = (ConstantValueNode)pos.getFirst();
 					if (constantValueNode.getValue() instanceof RuleElement)
@@ -590,13 +589,13 @@ public class InterpreterImp implements Interpreter {
 				}
 			}
 			else
-				frNode = (FunctionRuleTermNode)pos;
+				frNode = (FunctionRulePolicyTermNode)pos;
 			
 			List<ASTNode> args = pos.getFirst().getAbstractChildNodes();
 			
 			if (theRule == null) {
 				if (!frNode.hasName())
-					throw new CoreASMError("A FunctionRuleTerm must have a name.", frNode);
+					throw new CoreASMError("A FunctionRulePolicyTerm must have a name.", frNode);
 			
 				// If the current node is of the form 'x' or 'x(...)'
 				x = frNode.getName();
@@ -618,8 +617,10 @@ public class InterpreterImp implements Interpreter {
 								capi.error("\"" + x + "\" is not a rule name.", pos, this);
 						}
 					} catch (InvalidLocationException e) {
-						throw new EngineError("Location is invalid in 'interpretRules()'." + 
-								"This cannot happen!");
+						//throw new EngineError("Location is invalid in 'interpretRules()'." +
+						//		"This cannot happen!");
+						//Well, it was not a rule for sure, try policies
+						return pos;
 					}
 				}
 			}
@@ -709,12 +710,12 @@ public class InterpreterImp implements Interpreter {
 		final String gRule = pos.getGrammarRule();
 		String x = pos.getToken();
 		// If the current node is a macro call term...
-		if (gRule.equals(Kernel.GR_FUNCTION_POLICY_TERM) || pos instanceof MacroCallPolicyNode) {
-			FunctionPolicyTermNode fpNode = null;
+		if (gRule.equals(Kernel.GR_FUNCTION_RULE_POLICY_TERM) || pos instanceof MacroCallPolicyNode) {
+			FunctionRulePolicyTermNode fpNode = null;
 			PolicyElement thePolicy = null;
 			if (pos instanceof MacroCallPolicyNode) {
-				if (pos.getFirst() instanceof FunctionPolicyTermNode)
-					fpNode = (FunctionPolicyTermNode)pos.getFirst();
+				if (pos.getFirst() instanceof FunctionRulePolicyTermNode)
+					fpNode = (FunctionRulePolicyTermNode)pos.getFirst();
 				else if (pos.getFirst() instanceof ConstantValueNode) {
 					ConstantValueNode constantValueNode = (ConstantValueNode)pos.getFirst();
 					if (constantValueNode.getValue() instanceof PolicyElement)
@@ -722,7 +723,7 @@ public class InterpreterImp implements Interpreter {
 				}
 			}
 			else
-				fpNode = (FunctionPolicyTermNode)pos;
+				fpNode = (FunctionRulePolicyTermNode)pos;
 			
 			List<ASTNode> args = pos.getFirst().getAbstractChildNodes();
 			
@@ -940,7 +941,8 @@ public class InterpreterImp implements Interpreter {
 	private boolean isUndefined(String token) {
 		return !storage.isRuleName(token) 
 				&& !storage.isFunctionName(token) 
-				&& !storage.isUniverseName(token);
+				&& !storage.isUniverseName(token)
+				&& !storage.isPolicyName(token);
 	}
 	
 	/**
@@ -1286,14 +1288,14 @@ public class InterpreterImp implements Interpreter {
 		
 		if (a != null) {
 			// if this node belongs to the abstract syntax tree
-			// and it is a FunctionRuleTerm and its child is a parameter of the rule
+			// and it is a FunctionRulePolicyTerm and its child is a parameter of the rule
 			if (a instanceof ASTNode 
-					&& ast.getGrammarClass().equals(ASTNode.FUNCTION_RULE_CLASS) 
+					&& ast.getGrammarClass().equals(ASTNode.FUNCTION_RULE_POLICY_CLASS) 
 					&& (ast.getFirst().getGrammarClass().equals(ASTNode.ID_CLASS) 
 							&& (i = params.indexOf(ast.getFirst().getToken())) >= 0)) {
 				ASTNode arg = args.get(i);
 				if (arg instanceof RuleOrFuncElementNode) {
-					FunctionRuleTermNode frNode = new FunctionRuleTermNode(arg.getScannerInfo());
+					FunctionRulePolicyTermNode frNode = new FunctionRulePolicyTermNode(arg.getScannerInfo());
 					frNode.addChild("alpha", arg.getFirst());
 					arg = frNode;
 				}
@@ -1306,13 +1308,13 @@ public class InterpreterImp implements Interpreter {
 				result.setParent(parent);
 			} else {
 				if (args != null && a instanceof ASTNode 
-					&& ast.getGrammarClass().equals(ASTNode.FUNCTION_RULE_CLASS) 
+					&& ast.getGrammarClass().equals(ASTNode.FUNCTION_RULE_POLICY_CLASS) 
 					&& ast.getFirst().getGrammarClass().equals(ASTNode.ID_CLASS)) {
 					if (getEnv(ast.getFirst().getToken()) != null)
 						capi.warning(Kernel.PLUGIN_NAME, "\""+ast.getFirst().getToken() + "\" collides with an environment variable.", ast, this);
 					else {
 						for (ASTNode arg : args) {
-							if (arg.getGrammarClass().equals(ASTNode.FUNCTION_RULE_CLASS) 
+							if (arg.getGrammarClass().equals(ASTNode.FUNCTION_RULE_POLICY_CLASS) 
 							&& arg.getFirst().getGrammarClass().equals(ASTNode.ID_CLASS)
 							&& arg.getChildNode("lambda") == null
 							&& !params.get(args.indexOf(arg)).equals(arg.getFirst().getToken())
@@ -1355,7 +1357,7 @@ public class InterpreterImp implements Interpreter {
 	}
 	
 	/**
-	 * Replaces all FunctionRuleTermNodes that refer to an environment variable by a ConstantValueNode with the corresponding value
+	 * Replaces all FunctionRulePolicyTermNodes that refer to an environment variable by a ConstantValueNode with the corresponding value
 	 * @param arg argument to do the replacement in
 	 * @return the processed AST of the given argument
 	 */
@@ -1364,8 +1366,8 @@ public class InterpreterImp implements Interpreter {
 		fringe.push(arg);
 		while (!fringe.isEmpty()) {
 			ASTNode node = fringe.pop();
-			if (node instanceof FunctionRuleTermNode) {
-				FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+			if (node instanceof FunctionRulePolicyTermNode) {
+				FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 				if (frNode.hasName()) {
 					if (getEnv(frNode.getName()) != null) {
 						ConstantValueNode constantValueNode = new ConstantValueNode(frNode.getScannerInfo(), getEnv(frNode.getName()));

@@ -20,6 +20,7 @@ import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.Specification;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.RuleElement;
@@ -510,7 +511,22 @@ public class WatchExpressionAPI implements ControlAPI {
 	}
 
 	@Override
-	public Map<String, String> getAgentsToCreate() {
+	public Map<String, AgentCreationElement> getAgentsToCreate() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToRegister() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToDeregister() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToDelete() {
 		throw new UnsupportedOperationException();
 	}
 

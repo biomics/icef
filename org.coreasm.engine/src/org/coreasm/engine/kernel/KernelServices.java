@@ -82,10 +82,10 @@ public class KernelServices implements PluginServiceInterface {
 	}
 
 	/**
-	 * @return the FunctionRuleTerm parser hook from the Kernel plugin
+	 * @return the FunctionRulePolicyTerm parser hook from the Kernel plugin
 	 */
-	public Parser<Node> getFunctionRuleTermParser() {
-		return kernel.getParser("FunctionRuleTerm");
+	public Parser<Node> getFunctionRulePolicyTermParser() {
+		return kernel.getParser("FunctionRulePolicyTerm");
 	}
 	/**
 	 * @return the FunctionPolicyTerm parser hook from the Kernel plugin
