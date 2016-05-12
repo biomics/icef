@@ -1071,6 +1071,7 @@ public class Engine implements ControlAPI {
 							break;
 							
 						case emResolvePolicy:
+							scheduler.startStep();
 							scheduler.retrieveAgents();
 							scheduler.evaluatePolicy();
 							storage.aggregateUpdates();
