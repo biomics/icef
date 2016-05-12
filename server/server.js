@@ -133,6 +133,8 @@ function initApp() {
              }
             );
 
+    // ****************** Message ******************
+
     app.put("/message",
             express.json(),
             function(req, res) {
@@ -150,6 +152,102 @@ function initApp() {
             }
             );
     
+    // ****************** Schedulers ******************
+
+    app.get("/schedulers", function(req, res) {
+        res.send(501);
+    });
+
+    app.put("/schedulers", 
+             express.json(), 
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+    
+    app.get("/schedulers/:id", 
+             express.json(), 
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+
+    app.put("/schedulers/:id", 
+             express.json(), 
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+
+    app.delete("/schedulers/:id", 
+             express.json(), 
+
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+
+    // ****************** Channels ******************
+
+    app.get("/channels", function(req, res) {
+        res.send(501);
+    });
+
+    app.put("/channels", 
+             express.json(), 
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+    
+    app.get("/channels/:id", 
+             express.json(), 
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+
+    app.put("/channels/:id", 
+             express.json(), 
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+
+    app.delete("/channels/:id", 
+             express.json(), 
+
+             function(req, res) {
+                 res.send(501);
+             }, 
+             function(req, res) {
+                 res.send(501);
+             }
+            );
+
+    // ****************** Updates ******************    
+
     app.put("/update",
              express.json(),
              function(req, res) {
@@ -164,6 +262,16 @@ function initApp() {
              function(error, req, res, next) {
                  console.log("Error: Invalid update request. "+error);
                  res.send(400, "Invalid update request. Check format!\n");
+             }
+            );
+
+    app.put("/update/register",
+             express.json(),
+             function(req, res) {
+                 res.send(501);
+             },
+             function(error, req, res, next) {
+                 res.send(501);
              }
             );
 };
