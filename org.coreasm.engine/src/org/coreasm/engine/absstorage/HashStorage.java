@@ -226,10 +226,9 @@ public class HashStorage implements AbstractStorage {
 		if (isStateStacked()) 
 			throw new EngineError("Cannot fire updates when the state stack is not empty.");
 		AbstractUniverse agents = this.getUniverse(AbstractStorage.AGENTS_UNIVERSE_NAME);
-		//TODO this should be done in a transactional fashion
+		//this is done in a transactional fashion
 		for (Update u: updateSet) {
-			//TODO BSL Here is where we have to updat
-			//for(Location l: u.getLocations(name))
+			//BSL Here is where we have to update
 			if 	(u.loc.name==AbstractStorage.PROGRAM_FUNCTION_NAME)
 			{
 				try {	
