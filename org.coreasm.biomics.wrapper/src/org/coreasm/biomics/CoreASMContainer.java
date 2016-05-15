@@ -16,9 +16,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 import org.coreasm.biomics.serializers.EnumerationElementDeserializer;
 import org.coreasm.biomics.serializers.EnumerationElementSerializer;
@@ -37,16 +39,23 @@ import org.coreasm.biomics.serializers.SetElementSerializer;
 import org.coreasm.biomics.serializers.StringElementDeserializer;
 import org.coreasm.biomics.serializers.StringElementSerializer; 
 import org.coreasm.biomics.serializers.UpdateMultisetSerializer;
+import org.coreasm.biomics.serializers.UpdateMultisetDeserializer;
 import org.coreasm.biomics.serializers.LocationSerializer;
+import org.coreasm.biomics.serializers.LocationDeserializer;
 import org.coreasm.biomics.serializers.UpdateSerializer;
+import org.coreasm.biomics.serializers.UpdateDeserializer;
 
 import org.coreasm.engine.CoreASMEngine;
 import org.coreasm.engine.CoreASMEngine.EngineMode;
 import org.coreasm.engine.CoreASMEngineFactory;
 import org.coreasm.engine.Engine;
 import org.coreasm.engine.EngineProperties;
+import org.coreasm.engine.InconsistentUpdateSetException;
+import org.coreasm.engine.CoreASMError;
 
+import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.NameElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.MessageElement;
@@ -92,12 +101,21 @@ public class CoreASMContainer extends Thread {
         initEngine();
 
         if(!loadSpec(newProgram)) {
-            System.err.println("Error while loading program '"+newProgram+"'");
+            System.err.println("[ASIM "+newName+"]: Error while loading program.");
+            System.err.println("[ASIM "+newName+"]: "+getError());
         } else {
-            System.out.println("Programm successfully loaded");
+            System.err.println("[ASIM "+newName+"]: Programm successfully loaded.");
         }
 
         prepareMapper();
+    }
+
+    public boolean hasErrorOccurred() {
+        return engine.hasErrorOccurred();
+    }
+
+    public CoreASMError getError() {
+        return engine.getError();
     }
 
     private void prepareMapper() {
@@ -118,9 +136,12 @@ public class CoreASMContainer extends Thread {
             module.addDeserializer(EnumerationElement.class, new EnumerationElementDeserializer());
             module.addSerializer(RuleElement.class, new RuleElementSerializer());
             module.addDeserializer(RuleElement.class, new RuleElementDeserializer((Engine)engine));
-            module.addSerializer(UpdateMultiset.class, new UpdateMultisetSerializer());
             module.addSerializer(Location.class, new LocationSerializer());
+            module.addDeserializer(Location.class, new LocationDeserializer());
             module.addSerializer(Update.class, new UpdateSerializer());
+            module.addDeserializer(Update.class, new UpdateDeserializer());
+            module.addSerializer(UpdateMultiset.class, new UpdateMultisetSerializer());
+            module.addDeserializer(UpdateMultiset.class, new UpdateMultisetDeserializer());
 
             module.addSerializer(MessageElement.class, new MessageElementSerializer());
             mapper.registerModule(module);
@@ -152,7 +173,7 @@ public class CoreASMContainer extends Thread {
             try {
                 json = mapper.writeValueAsString(msg);
 
-                MessageRequest req = new MessageRequest("agent", msg.getFromAgent(), msg.getToAgent(), json);
+                MessageRequest req = new MessageRequest("msg", msg.getFromAgent(), msg.getToAgent(), json);
                 EngineManager.sendMsg(req);
 
             } catch (Exception e) {
@@ -199,6 +220,57 @@ public class CoreASMContainer extends Thread {
         System.out.println("--- handleUpdateSet --- ");
     }
 
+    // TODO: NEEDS TO BE SYNCHRONIZED!!!
+    public boolean injectUpdates() {
+        /* engine.updateState(updateSet);
+           updateSet.clear(); */
+
+        return true;
+    }
+
+    // TODO: NEEDS TO BE SYNCHRONIZED!!!
+    public void receiveUpdate(MessageRequest req) {
+        System.out.println("CoreASMContainer receives update");
+
+        String strUpdates = req.body;
+        System.out.println("strUpdates: "+strUpdates);
+
+        UpdateMultiset updates = null;
+        try {
+            updates = mapper.readValue(strUpdates, UpdateMultiset.class);
+        } catch (IOException ioe) {
+            System.err.println("Unable to transform JSON '"+strUpdates+"' into UpdateMultiset.");
+            System.err.println(ioe);
+        }
+        // updateSet.add(updates);
+        Set<Update> updateSet = new HashSet<>();
+        Iterator<Update> it = updates.iterator();
+
+        System.out.println("Iterate through all ... "+updates.toString());
+
+        // introduce a scope
+        for(Update u : updates) {
+            // u.loc.args.add(0, new StringElement(req.fromAgent));
+            List<Element> newArgs = new ArrayList<>();
+            newArgs.add(new StringElement(req.fromAgent));
+            newArgs.addAll(u.loc.args);
+            Location newLoc = new Location(u.loc.name, newArgs);
+            Update newUpdate = new Update(newLoc, u.value, u.action, (Element)null, null);
+            System.out.println(">>> "+newUpdate.toString()+" <<<");
+            updateSet.add(newUpdate);
+        }
+
+        try {
+            engine.updateState(updateSet);
+        } 
+        catch(InconsistentUpdateSetException incUpdate) {
+            System.err.println("Refuse update as it is inconsistent.");
+        } 
+        catch(InvalidLocationException invalidLoc) {
+            System.err.println("Refuse update as a location is invalid.");
+        }
+    }
+
     public void run() {
         int currentStep = 1;
 
@@ -214,6 +286,8 @@ public class CoreASMContainer extends Thread {
 
             handleUpdateSet(lastUpdateSet);
 
+            injectUpdates();
+            
             if(inBox.size() > 0) {
                 engine.getMailbox().fillInbox(inBox);
                 inBox.clear();
@@ -262,7 +336,7 @@ public class CoreASMContainer extends Thread {
 
             // ugh ... how ugly but the way coreASM works, this is needed
             try {
-                Thread.sleep(300);
+                Thread.sleep(100);
             } catch (InterruptedException ie) {
                 // TODO REPORT STH HERE
             }
@@ -270,6 +344,7 @@ public class CoreASMContainer extends Thread {
 		} while(true || engine.getEngineMode().equals(EngineMode.emTerminated));
     }
 
+    // TODO: CHECK! MAY NEED TO BE SYNCHRONIZED
     public void receiveMsg(MessageRequest req) {
         String agentMsg = req.body;
 
@@ -320,7 +395,11 @@ public class CoreASMContainer extends Thread {
         if(engine != null) {
             engine.loadSpecification(new StringReader(prog));
             engine.waitWhileBusy();
-            return true;
+
+            if(engine.getEngineMode() == EngineMode.emError)
+                return false;
+            else
+                return true;
         } else 
             return false;
     }

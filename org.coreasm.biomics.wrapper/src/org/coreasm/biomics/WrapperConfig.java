@@ -21,7 +21,7 @@ public class WrapperConfig {
     @Option(name="-rp", depends={"-r"}, forbids={ "-m", "-mp" }, metaVar="<port>", usage="Specifies the port of the remote wrapper.")
     public int remotePort = 8080;
 
-    @Option(name="-u", forbids={ "-r", "-rp" }, usage="Enables the accumulation of updates.")
+    @Option(name="-u", forbids={ "-r", "-rp", "-m", "-mp" }, usage="Enables the accumulation of updates.")
     public boolean accUpdatesMode = false;
 
     @Option(name="-s", depends={ "-u" }, forbids={ "-r", "-rp" }, usage="Allows the execution of several scheduling agents.")

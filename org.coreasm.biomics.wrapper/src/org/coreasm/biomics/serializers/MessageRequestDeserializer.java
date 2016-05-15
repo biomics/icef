@@ -43,12 +43,6 @@ public class MessageRequestDeserializer extends JsonDeserializer<MessageRequest>
         if(jsonType != null) 
             strType = jsonType.textValue();
 
-        /* MessageRequest msg = new MessageRequest();
-        msg.toAgent = strTo;
-        msg.fromAgent = strFrom;
-        msg.type = strType;
-        msg.body = strBody;
-        return msg;*/
         return new MessageRequest(strType, strFrom, strTo, strBody);
     }
 }

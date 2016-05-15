@@ -83,7 +83,6 @@ public class MessageRequest {
     }
 
     public String getType() {
-        System.out.println("getType");
         return type;
     }
 }

@@ -80,6 +80,9 @@ public interface CoreASMEngine extends VersionInfoProvider {
 		emCreateAgent 
 	};
 
+    public boolean hasErrorOccurred();
+
+    public CoreASMError getError();
 		 
     /**
      * Initializes the engine.

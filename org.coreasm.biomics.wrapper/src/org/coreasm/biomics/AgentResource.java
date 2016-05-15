@@ -7,10 +7,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.coreasm.engine.CoreASMError;
 
 @Path("asims")
 public class AgentResource {
@@ -72,10 +77,9 @@ public class AgentResource {
     }
 
     @PUT
-    @Path("create")
     @Consumes("application/json")
-    @Produces("text/plain")
-    public String createNewAgent(String createParameters) {
+    @Produces("application/json")
+    public Response createNewAgent(String createParameters) {
         System.out.println("Create a new agent");
         System.out.println("JSON: "+createParameters);
 
@@ -89,14 +93,19 @@ public class AgentResource {
             System.err.println(ioe);
         }
 
-        // TODO: Check the generated AgentCreationRequest and throw a WebApplicationException
-        // to respond to the client
-
-        if(req != null) {
-            EngineManager.createEngine(req);
-            return "Success";
+        CoreASMError error = EngineManager.createEngine(req);
+        AgentCreationResponse res = new AgentCreationResponse(req.name, error);
+        String json = "{}";
+        try {
+            json  = mapper.writeValueAsString(res);
+        }  catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return "Fail";
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 }
