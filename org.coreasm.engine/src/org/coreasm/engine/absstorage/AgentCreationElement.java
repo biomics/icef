@@ -17,6 +17,7 @@ public class AgentCreationElement extends Element {
 	private RuleElement initRule;
 	private RuleElement program;
 	private PolicyElement policy;
+	private String signature;
 
 
 	/**
@@ -30,7 +31,7 @@ public class AgentCreationElement extends Element {
 	}
 
 
-	public AgentCreationElement(Element name, Element initRule, Element program, Element policy) throws NameConflictException, IdentifierNotFoundException {
+	public AgentCreationElement(Element name, Element initRule, Element program, Element policy, String signature) throws NameConflictException, IdentifierNotFoundException {
 		if(!(name instanceof StringElement))
 			throw new IdentifierNotFoundException("The name of the new agent must be a string");
 		if (name.toString().equals("self"))
@@ -45,6 +46,15 @@ public class AgentCreationElement extends Element {
 		this.initRule = (RuleElement)initRule;
 		this.program = (RuleElement) program;
 		this.policy = (PolicyElement) policy;
+		this.signature = signature;
+	}
+
+
+	/**
+	 * @return the signature
+	 */
+	public String getSignature() {
+		return signature;
 	}
 
 

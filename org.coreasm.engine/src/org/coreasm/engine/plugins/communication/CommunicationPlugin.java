@@ -58,6 +58,8 @@ import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.VocabularyExtender;
 import org.coreasm.engine.plugins.forallpolicy.ForallPolicyNode;
 import org.coreasm.engine.plugins.set.SetElement;
+import org.coreasm.engine.plugins.signature.SignaturePlugin;
+import org.coreasm.engine.plugins.signature.SignaturePlugin.SignaturePluginPSI;
 import org.coreasm.engine.plugins.string.StringElement;
 
 /** 
@@ -306,7 +308,7 @@ public class CommunicationPlugin extends Plugin implements
 			
 			try {
 				Element newElement = (pos.getAgentName()!= null)? pos.getAgentName().getValue(): capi.getStorage().getNewElement();
-				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?newElement.toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue());
+				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?newElement.toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue(),  ((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions());
 				capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), ace);
 				
 			pos.setNode(

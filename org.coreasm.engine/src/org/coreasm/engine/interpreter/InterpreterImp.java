@@ -869,7 +869,7 @@ public class InterpreterImp implements Interpreter {
 								return pos;
 							} else {
 								capi.error(
-										"The policy is trying to schedule an external agent, but it does not provide the location and/or the content",
+										"The policy is trying to schedule "+agentName.toString()+"as an external agent, but it does not have the location and/or the content of the scheduling rule. Did you set "+agentName.toString()+"'s program to undef?",
 										pos, this);
 							}
 						}

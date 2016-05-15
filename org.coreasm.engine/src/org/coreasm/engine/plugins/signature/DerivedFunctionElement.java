@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2007 Roozbeh Farahbod
  *
- * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
+ * Last modified by $Author: erothst $ on $Date: 2016-04-14 23:05:21 +0200 (Di, 29 Mrz 2011) $.
  *
  * Licensed under the Academic Free License version 3.0
  *   http://www.opensource.org/licenses/afl-3.0.php
@@ -43,13 +43,15 @@ public class DerivedFunctionElement extends FunctionElement {
 	protected final List<String> params;
 	protected final ASTNode expr;
 	protected final Map<ASTNode, ASTNode> exprCopies = new IdentityHashMap<ASTNode, ASTNode>();
+	protected final String name;
 	
 	/**
 	 * Creates a new derived function with the given list 
 	 * of parameters.
 	 */
-	public DerivedFunctionElement(ControlAPI capi, List<String> params, ASTNode expr) {
+	public DerivedFunctionElement(ControlAPI capi, String name, List<String> params, ASTNode expr) {
 		this.capi = capi;
+		this.name = name;
 		this.params = Collections.unmodifiableList(params);
 		this.expr = expr;
 		setFClass(FunctionClass.fcDerived);
@@ -98,4 +100,31 @@ public class DerivedFunctionElement extends FunctionElement {
 			interpreter.removeEnv(params.get(i));
 		interpreter.unhideEnvVars();
 	}
+	
+	@Override
+	public String toString(){
+		return "";
+	}
+
+	/**
+	 * @return the params
+	 */
+	public List<String> getParams() {
+		return params;
+	}
+
+	/**
+	 * @return the expr
+	 */
+	public ASTNode getExpr() {
+		return expr;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+	
 }

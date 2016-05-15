@@ -350,17 +350,18 @@ public class ASTNode extends Node implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		String str = "[";
-		if (token != null)
-			str = str + "'" + token + "':";
-		if (grammarClass != null) 
-			str = str + grammarClass + ":";
-		if (grammarRule != null)
-			str = str + grammarRule + " ";
-
-        if (str.length() == 1)
-			str = "[GenericNode";
-		return str + (scannerInfo==null?"":scannerInfo) + "]";
+//		String str = "[";
+//		if (token != null)
+//			str = str + "'" + token + "':";
+//		if (grammarClass != null) 
+//			str = str + grammarClass + ":";
+//		if (grammarRule != null)
+//			str = str + grammarRule + " ";
+//
+//        if (str.length() == 1)
+//			str = "[GenericNode";
+//		return str + (scannerInfo==null?"":scannerInfo) + "]";
+		return this.unparseTree();
 	}
 	
 	/**

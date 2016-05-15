@@ -60,10 +60,10 @@ import org.coreasm.engine.parser.ParserTools;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.ParserPlugin;
 import org.coreasm.engine.plugin.Plugin;
+import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.UndefinedIdentifierHandler;
 import org.coreasm.engine.plugin.VocabularyExtender;
-import org.coreasm.engine.plugins.chooserule.ChooseRuleNode;
-import org.coreasm.engine.plugins.chooserule.ChooseRulePlugin;
+import org.coreasm.engine.plugins.communication.CommunicationPlugin.CommunicationPSI;
 import org.coreasm.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +77,8 @@ public class SignaturePlugin extends Plugin
 		implements ParserPlugin, VocabularyExtender, ExtensionPointPlugin, UndefinedIdentifierHandler {
   
 	protected static final Logger logger = LoggerFactory.getLogger(SignaturePlugin.class);
-
+	protected SignaturePluginPSI pluginPSI;
+	
 	public static final VersionInfo VERSION_INFO = new VersionInfo(0, 3, 1, "beta");
 	
 	public static final String PLUGIN_NAME = SignaturePlugin.class.getSimpleName();
@@ -145,6 +146,7 @@ public class SignaturePlugin extends Plugin
         idCheckingMode = CheckMode.cmOff;
 		funcRangeFunction = new FunctionRangeFunctionElement();
 		funcDomainFunction = new FunctionDomainFunctionElement();
+		pluginPSI = new SignaturePluginPSI();
     }
 
 	public Set<Parser<? extends Object>> getLexers() {
@@ -359,6 +361,14 @@ public class SignaturePlugin extends Plugin
 			
 		}
 		return parsers;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.coreasm.engine.plugin.Plugin#getPluginInterface()
+	 */
+	@Override
+	public PluginServiceInterface getPluginInterface() {
+		return pluginPSI;
 	}
 	
     /* (non-Javadoc)
@@ -930,7 +940,7 @@ public class SignaturePlugin extends Plugin
 			currentParams = currentParams.getNext();
 		}
 
-		DerivedFunctionElement func = new DerivedFunctionElement(capi, params, exprNode);
+		DerivedFunctionElement func = new DerivedFunctionElement(capi,idNode.getToken(), params, exprNode);
 		
 		addFunction(idNode.getToken(), func, currentSignature, interpreter);
 
@@ -1126,4 +1136,56 @@ public class SignaturePlugin extends Plugin
 
 	}
 	
+public class SignaturePluginPSI implements PluginServiceInterface {
+		
+		public void setDerivedFunctions(Set<DerivedFunctionElement> incomingDerivedFunctions)
+		{
+			synchronized(pluginPSI){
+				//TODO BSL Discuss with Daniel how we are going to create function elements!
+				
+			}
+		}
+		
+		public Set<DerivedFunctionElement> getDerivedFunctions() 
+		{
+			synchronized(pluginPSI){
+				Set<DerivedFunctionElement> result= new HashSet<DerivedFunctionElement>();
+				for (String s:functions.keySet())
+				{
+					FunctionElement function = functions.get(s);
+					if(function instanceof DerivedFunctionElement)
+					{
+						result.add((DerivedFunctionElement) function);
+					}
+				}
+				return result; 
+			}
+			
+		}
+		
+		public String getDerivedFunctionsDefinitions() {
+			synchronized (pluginPSI) {
+				StringBuilder result = new StringBuilder();
+				Set<DerivedFunctionElement> dfunctions = getDerivedFunctions();
+				for (DerivedFunctionElement f : dfunctions) {
+					result.append("derived ");
+					result.append(f.name);
+					if (f.params.size() > 0) {
+						result.append("(");
+						int i = 0;
+						for (; i < f.params.size() - 1; i++) {
+							result.append(f.params.get(i));
+							result.append(",");
+						}
+						result.append(f.params.get(i));
+						result.append(")");
+					}
+					result.append(" = ");
+					result.append(f.getExpr().toString());
+					result.append("\n");
+				}
+				return result.toString();
+			}
+		}
+	}
 }
