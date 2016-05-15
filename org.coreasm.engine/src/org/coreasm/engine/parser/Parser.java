@@ -86,6 +86,13 @@ public interface Parser {
 	 * Returns a position map object based on the currently loaded specification.
 	 */
 	public PositionMap getPositionMap();
+
+	/**
+	 * Parses the string of derived function definitions, all separated by '\\n'
+	 * 
+	 * @throws ParserException when a parser module specific exception occurs
+	 */
+	public ASTNode parseDerivedFunction(String function) throws ParserException;
 	
 	/**
 	 * Returns the {@link ParserTools} instance of this parser.

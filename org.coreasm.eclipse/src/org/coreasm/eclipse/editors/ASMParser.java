@@ -568,5 +568,11 @@ public class ASMParser extends Observable implements org.coreasm.engine.parser.P
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public ASTNode parseDerivedFunction(String function) throws org.coreasm.engine.parser.ParserException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

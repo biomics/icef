@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +57,7 @@ import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.KernelServices;
 import org.coreasm.engine.parser.GrammarRule;
 import org.coreasm.engine.parser.ParseMap;
+import org.coreasm.engine.parser.ParserException;
 import org.coreasm.engine.parser.ParserTools;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.ParserPlugin;
@@ -1138,7 +1140,46 @@ public class SignaturePlugin extends Plugin
 	
 public class SignaturePluginPSI implements PluginServiceInterface {
 		
-		public void setDerivedFunctions(Set<DerivedFunctionElement> incomingDerivedFunctions)
+		public void setDerivedFunctionsDefinitions(String incomingDerivedFunctions)
+		{
+			synchronized(pluginPSI){
+				String[] definitions = incomingDerivedFunctions.split("\n");
+				DerivedFunctionNode derivedFuncNode = null;
+				org.coreasm.engine.parser.Parser parser = capi.getParser();
+				for(String function: definitions)
+				{
+					try {
+						derivedFuncNode = (DerivedFunctionNode)parser.parseDerivedFunction(function);
+						ASTNode exprNode = derivedFuncNode.getExpressionNode();
+						ASTNode idNode = derivedFuncNode.getNameSignatureNode().getFirst();
+						
+						// create structure for all parameters
+						ArrayList<String> params = new ArrayList<String>();
+						ASTNode currentParams = idNode.getNext();
+						// while there are parameters to add to the list
+						while (currentParams != null) {
+							// add parameters to the list
+							params.add(currentParams.getToken());
+							// get next parameter
+							currentParams = currentParams.getNext();
+						}
+
+						DerivedFunctionElement func = new DerivedFunctionElement(capi,idNode.getToken(), params, exprNode);
+//						DerivedFunctionElement test = (DerivedFunctionElement) getFunctions().get(idNode.getToken());
+//						if(test!=null)
+//						{
+//							test.getExpr();
+//							test.getName();
+//						}
+						getFunctions().put(idNode.getToken(), func);
+					} catch (ParserException e) {
+						capi.error(e);
+					}
+				}			
+			}
+		}
+		
+		public void addDerivedFunctions(Set<DerivedFunctionElement> parsedDerivedFunctions)
 		{
 			synchronized(pluginPSI){
 				//TODO BSL Discuss with Daniel how we are going to create function elements!
@@ -1184,6 +1225,8 @@ public class SignaturePluginPSI implements PluginServiceInterface {
 					result.append(f.getExpr().toString());
 					result.append("\n");
 				}
+				//FIXME BSL remove the following line: used for testing!
+				//setDerivedFunctionsDefinitions(result.toString());
 				return result.toString();
 			}
 		}

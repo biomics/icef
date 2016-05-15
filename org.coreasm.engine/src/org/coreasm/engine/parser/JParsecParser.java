@@ -499,5 +499,39 @@ public class JParsecParser implements Parser {
 	public ParserTools getParserTools() {
 		return parserTools;
 	}
+	
+	public ASTNode parseDerivedFunction(String strRule) throws ParserException {
+        Plugin signature = capi.getPlugin("Signature");
+        if (signature != null) {
+            try {
+                org.codehaus.jparsec.Parser<Node> p = ((ParserPlugin)signature).getParsers().get("DerivedFunctionDeclaration").parser.from(parserTools.getTokenizer(), parserTools.getIgnored());
+                ASTNode a = (ASTNode) p.parse(strRule);
+                return a;
+            } catch (Throwable e) {
+					if (e instanceof org.codehaus.jparsec.error.ParserException) {
+						org.codehaus.jparsec.error.ParserException pe = (org.codehaus.jparsec.error.ParserException) e;
+						Throwable cause = pe.getCause();
+						String msg = pe.getMessage();
+						msg = msg.substring(msg.indexOf("\n")+1);
+						msg = "Error parsing " + msg + (cause==null?"":"\n" + cause.getMessage());
+						
+						String errorLogMsg = "Error in parsing.";
+						if (cause != null) {
+							StringWriter strWriter = new StringWriter();
+							cause.printStackTrace(new PrintWriter(strWriter));
+							errorLogMsg = errorLogMsg + Tools.getEOL() + strWriter.toString();
+						}
+						logger.error(errorLogMsg);
+						
+						throw new ParserException(msg, 
+								new CharacterPosition(pe.getLocation().line, pe.getLocation().column));
+					}
+					throw new ParserException(e);
+            }
+        } else {
+            logger.error("Parser cannot find the Kernel plugin.");
+            throw new EngineError("Parser cannot find the Kernel plugin.");
+        }        
+    }
 
 }
