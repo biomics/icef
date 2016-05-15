@@ -1,19 +1,24 @@
 var WebSocketServer = require('ws').Server;
-var config = require('./../config.js');
 var express = require('express');
 var http = require('http');
+
+var sys = require('sys');
+var exec = require('child_process').exec;
 
 var app = null;
 var server = null;
 var manager = null;
+var config = null;
 
-function init(mng) {
+function init(_config, mng) {
     console.log("Starting manager server ...");
 
+    config = _config;
     manager = mng;
     
     initApp();
     initServer();
+    startUpdater();
 };
 
 function initServer() {
@@ -28,8 +33,45 @@ function initServer() {
     });
 };
 
+function startUpdater() {
+    var cmd = "java -jar "+config.updater.path+" ";
+    cmd = cmd + (config.updater.host ? " -h " + config.updater.host : "" );
+    cmd = cmd + (config.updater.port ? " -p " + config.updater.port : "" );
+
+    var updater = exec(cmd, function(error, stdout, stderr) {
+        if(error != null) {
+            console.log("Fatal error: Update ASIM crashed");
+            console.log(error);
+            process.exit(1);
+
+            console.log("stdout: "+stdout);
+            console.log("stderr: "+stderr);
+
+            // TODO: try to restart
+        }
+    });
+}
+
 function initApp() {
     app = express();
+
+    // ****************** SIMULATIONS ****************** 
+
+    app.put("/simulations",
+            express.json(),
+            function(req, res) {
+                var result = manager.loadSimulation(req.body);
+                if(result.success) {
+                    res.send(200, result);
+                } else {
+                    res.send(409, result);
+                }
+            },
+            function(req, res) {
+                console.log("Unable to load new simulation.");
+                res.status(500).json({ error : "Unable to load new simulation."});
+            }
+           );
 
     // ****************** BRAPPERS ******************
 
@@ -41,16 +83,16 @@ function initApp() {
     app.put("/brappers", 
             express.json(), 
             function(req, res) {
-                var result = manager.registerWrapper(req.body);
+                var result = manager.registerBrapper(req.body);
                 if(result.success) {
-                    res.send(200, result.msg);
+                    res.send(200, result);
                 } else {
-                    res.send(409, result.msg);
+                    res.send(409, result);
                 }
             },
             function(req, res) {
-                console.log("Unable to register new wrapper.");
-                res.status(500).json({ error : "Unable to register new wrapper."});
+                console.log("Unable to register new brapper.");
+                res.status(500).json({ error : "Unable to register new brapper."});
             }
     );
 
@@ -86,26 +128,31 @@ function initApp() {
              function(req, res) {
                  var result = manager.createASIM(req.body);
                  if(result.success) {
-                     res.send(200, result.msg);
+                     if(result.asim == undefined)
+                         res.send(204);
+                     else
+                         res.send(200, result);
                  } else {
-                     res.send(400, result.msg);
+                     res.send(409, result);
                  }
              }, 
              function(req, res) {
-                 console.log("Unable to create new agent.");
-                 res.send(404, "Unable to create new agent.");
+                 res.send(500, "Unable to create new agent.");
              }
             );
     
-    app.get("/asims/:asimname", 
+    app.get("/asims/:id", 
              express.json(), 
              function(req, res) {
-                 // TODO get the status info of an ASIM
-                 res.send(200, "ASIM deleted.");
+                 var id = req.params.id;
+                 var result = manager.getASIM(id);
+                 if(result == undefined)
+                     res.send(404);
+                 else
+                     res.send(200, result);
              }, 
              function(req, res) {
-                 console.log("Unable to create new agent.");
-                 res.send(404, "Unable to create new agent.");
+                 res.send(500, "Unable to retrieve ASIM");
              }
             );
 
