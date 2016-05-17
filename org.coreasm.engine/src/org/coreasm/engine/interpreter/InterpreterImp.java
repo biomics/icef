@@ -1606,7 +1606,7 @@ public class InterpreterImp implements Interpreter {
 			return;
 		}
 		// creating the first agent to run the initial step
-		Element initAgent = new EnvironmentAgent();
+		Element initAgent = EnvironmentAgent.getInstance();
 		capi.getScheduler().setEnvironmentAgent(initAgent);
 		capi.getScheduler().setPolicy(schedulingPolicy);
 		Location progloc = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));

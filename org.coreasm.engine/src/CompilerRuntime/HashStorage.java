@@ -147,7 +147,7 @@ public class HashStorage implements AbstractStorage {
         runtime.getScheduler().setPolicy(schPolicy);
         try {
         	UniverseElement agentsuniverse = new UniverseElement();
-        	Element initagent = new EnvironmentAgent();
+        	Element initagent = EnvironmentAgent.getInstance();
         	agentsuniverse.setValue(initagent, BooleanElement.TRUE);
         	List<Element> arglist = new ArrayList<Element>();
         	arglist.add(initagent);

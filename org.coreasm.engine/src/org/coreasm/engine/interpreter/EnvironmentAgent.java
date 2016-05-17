@@ -23,7 +23,25 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class EnvironmentAgent extends Element {
 
+	private static EnvironmentAgent instance = new EnvironmentAgent();
+	private String name;
+	
+	private EnvironmentAgent(){
+		name = "self";
+	}
 	public String toString() {
-		return "self";
+		return name;
+	}
+	/**
+	 * @return the instance
+	 */
+	public static EnvironmentAgent getInstance() {
+		return instance;
+	}
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 }
