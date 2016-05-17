@@ -56,21 +56,15 @@ import org.coreasm.engine.kernel.MacroCallRuleNode;
 import org.coreasm.engine.kernel.RuleOrFuncElementNode;
 import org.coreasm.engine.kernel.SchedulePrimitiveNode;
 import org.coreasm.engine.kernel.UpdateRuleNode;
-import org.coreasm.engine.mailbox.Mailbox;
-import org.coreasm.engine.mailbox.MailboxImp;
 import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.plugin.InterpreterPlugin;
 import org.coreasm.engine.plugin.OperatorProvider;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.UndefinedIdentifierHandler;
 import org.coreasm.engine.plugins.communication.CommunicationPlugin;
-import org.coreasm.engine.plugins.communication.CreateAgentRuleNode;
-import org.coreasm.engine.plugins.communication.SendToRuleNode;
 import org.coreasm.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.AbstractScheduledService.Scheduler;
 
 /**
  * Implements the <code>Interpreter</code> interface.
@@ -852,7 +846,14 @@ public class InterpreterImp implements Interpreter {
 								pos.setNode(null, new UpdateMultiset(u), new TriggerMultiset(trigger), null);
 								return pos;
 							}
-						} else {
+						} 
+						else
+						{
+							pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
+							return pos;
+						}
+						//FIXME BSL Uncomment the following to activate external scheduling and erase the else branch above
+						/**else {
 							// We assume that the agent is an external agent!
 							if (content != null && subject != null) {
 								// everything alright! Create the message
@@ -872,7 +873,7 @@ public class InterpreterImp implements Interpreter {
 										"The policy is trying to schedule "+agentName.toString()+"as an external agent, but it does not have the location and/or the content of the scheduling rule. Did you set "+agentName.toString()+"'s program to undef?",
 										pos, this);
 							}
-						}
+						}**/
 
 					} else
 						capi.error("The policy is trying to schedule undef!", pos, this);

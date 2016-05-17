@@ -997,7 +997,19 @@ public class Engine implements ControlAPI {
 							//FIXME BSL remove the loopback method!!!
 							//mailbox.loopback();
 							mailbox.startStep();
-							next(EngineMode.emSelectingAgents);
+							next(EngineMode.emResolvePolicy);
+							break;
+							
+						case emResolvePolicy:
+//							scheduler.startStep();
+//							scheduler.retrieveAgents();
+							scheduler.evaluatePolicy();
+							storage.aggregateUpdates();
+							if (storage.isConsistent(scheduler.getUpdateSet())) {
+								storage.fireUpdateSet(scheduler.getUpdateSet());
+								next(EngineMode.emSelectingAgents);}
+							else 
+								next(EngineMode.emUpdateFailed);
 							break;
 
 						case emSelectingAgents:
@@ -1062,7 +1074,8 @@ public class Engine implements ControlAPI {
 
 						case emStepSucceeded:
 							notifySuccess();
-							next(EngineMode.emResolvePolicy);
+							mailbox.endStep();
+							next(EngineMode.emIdle);
 							break;
 
 						case emStepFailed:
@@ -1070,18 +1083,6 @@ public class Engine implements ControlAPI {
 							next(EngineMode.emIdle);
 							break;
 							
-						case emResolvePolicy:
-							scheduler.startStep();
-							scheduler.retrieveAgents();
-							scheduler.evaluatePolicy();
-							storage.aggregateUpdates();
-							if (storage.isConsistent(scheduler.getUpdateSet())) {
-								storage.fireUpdateSet(scheduler.getUpdateSet());
-								mailbox.endStep();
-								next(EngineMode.emIdle);}
-							else 
-								next(EngineMode.emUpdateFailed);
-							break;
 							/*
 						case emInitializingSelf:
 							storage.setChosenAgent(scheduler.getChosenAgent());
