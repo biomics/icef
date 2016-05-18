@@ -57,6 +57,7 @@ import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.ServiceProvider;
 import org.coreasm.engine.plugin.ServiceRequest;
+import org.coreasm.engine.plugins.signature.EnumerationElement;
 import org.coreasm.engine.scheduler.Scheduler;
 import org.coreasm.engine.scheduler.SchedulerImp;
 import org.coreasm.util.Tools;
@@ -824,14 +825,21 @@ public class Engine implements ControlAPI {
 	public void reportNewAgents(Map<String,String> agents) {
 		Set<String> identifiers = agentsToCreate.keySet();
 		Iterator<String> it = identifiers.iterator();
+		
 		while(it.hasNext()) {
 			String id = it.next();
 			if(agents.containsKey(id)) {
 				System.out.println("Store new agent name: "+agents.get(id)+" in identifier "+id);
+				AgentCreationElement ace = agentsToCreate.get(id);
+				Element e = new EnumerationElement(agents.get(id));
+				Update u = new Update(ace.getLocation(),e, Update.UPDATE_ACTION,interpreter.getSelf(),ace.getScannerInfo());						
+				//TODO BSL how do you prevent the new element from being overwritten?
+				scheduler.getUpdateInstructions().add(u);
 				agents.remove(id);
 			} else {
 				System.out.println("Identifier "+id+" must be set to 'undef'");
 				agents.remove(id);
+				warning("ASIM Creation Failure", "The ASIM to be created in "+id+" could not be created");
 			}
 		}
 
