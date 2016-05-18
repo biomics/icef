@@ -14,6 +14,7 @@ package org.coreasm.engine.scheduler;
 
 import java.awt.image.Kernel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,6 +74,7 @@ public class SchedulerImp implements Scheduler {
 	private Set<Update> updateSet;
 
 	private Set<Element> agentSet;
+	private Set<Element> ASIMSet;
 	private Set<Element> selectedAgentSet;
 
 
@@ -93,6 +95,8 @@ public class SchedulerImp implements Scheduler {
 
 	private Element environmentAgent;
 	private PolicyElement  policy;
+
+	
 
 	public SchedulerImp(ControlAPI engine) {
 		this.capi = engine;
@@ -140,6 +144,10 @@ public class SchedulerImp implements Scheduler {
 
 	public synchronized Set<Element> getAgentSet() {
 		return new HashSet<Element>(agentSet);
+	}
+	
+	public synchronized Set<Element> getASIMSet() {
+		return new HashSet<Element>(ASIMSet);
 	}
 
 	public Set<Element> getSelectedAgentSet() {
@@ -197,6 +205,23 @@ public class SchedulerImp implements Scheduler {
 		}
 		else {
 			String msg = "Value of \"Agents\" is not enumerable. Cannot determine the agent set.";
+			logger.error(msg);
+			throw new EngineError(msg);
+		}
+	}
+	
+	public synchronized void retrieveASIMs() {
+		AbstractStorage storage = capi.getStorage();
+		agentSet = new HashSet<Element>();
+		FunctionElement asimsSetFlat = 	storage.getUniverse(AbstractStorage.ASIMS_UNIVERSE_NAME);
+		if (asimsSetFlat instanceof Enumerable) {
+			// pick only those that have a non-null program
+			for (Element asims : ((Enumerable) asimsSetFlat).enumerate()) {				
+				agentSet.add(asims);
+			}
+		}
+		else {
+			String msg = "Value of \"ASIMs\" is not enumerable. Cannot determine the ASIMs set.";
 			logger.error(msg);
 			throw new EngineError(msg);
 		}
@@ -616,5 +641,7 @@ public class SchedulerImp implements Scheduler {
 	public void dispose() {
 		agentContextMap.clear();
 	}
+
+	
 
 }

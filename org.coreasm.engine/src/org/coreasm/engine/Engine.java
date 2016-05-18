@@ -30,10 +30,13 @@ import java.util.Iterator;
 
 import org.coreasm.engine.absstorage.AbstractStorage;
 import org.coreasm.engine.absstorage.AgentCreationElement;
+import org.coreasm.engine.absstorage.BooleanElement;
 import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.HashStorage;
 import org.coreasm.engine.absstorage.InvalidLocationException;
+import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.State;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
@@ -407,6 +410,10 @@ public class Engine implements ControlAPI {
 	@Override
 	public Set<? extends Element> getAgentSet() {
 		return scheduler.getAgentSet();
+	}
+	@Override
+	public Set<? extends Element> getASIMSet() {
+		return scheduler.getASIMSet();
 	}
 
 	@Override
@@ -850,6 +857,55 @@ public class Engine implements ControlAPI {
 
 		commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
 	}
+	
+	@Override
+	public void addASIMs(Set<String> asims) {
+		for(String asimName: asims) {
+		
+				Element e = new EnumerationElement(asimName);
+				Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
+				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
+				//TODO BSL how do you prevent the new element from being overwritten?
+				scheduler.getUpdateInstructions().add(u);
+		}
+		asims.clear();
+	//	commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
+		
+	}
+	
+	@Override
+	public void deleteASIMs(Set<String> asims) {
+		Set<? extends Element> knownASIMs = scheduler.getASIMSet();
+		for(String asimName: asims) {
+		//find the asim in the set of known ASIMs
+			for (Element e: knownASIMs)
+			{
+				EnumerationElement knownASIM = (EnumerationElement)e;
+				if (knownASIM.getName().equals(asimName))
+				{
+					//found it! Remove from universe and list of known asims
+					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
+					Update u = new Update(l,BooleanElement.FALSE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
+					scheduler.getUpdateInstructions().add(u);
+					knownASIMs.remove(e);
+					asims.remove(asimName);
+					break;
+				}
+			}
+				
+		}
+		if(!asims.isEmpty())
+		{
+			for(String a : asims)
+			{
+				System.err.println("You asked me to delete the ASIM "+a+" but I have no record of that ASIM!");
+			}
+			warning("Error deleting ASIM","I tried to delete an ASIM that I did not know!");
+		}
+		asims.clear();
+	//	commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
+		
+	}
 
 	@Override
 	public synchronized boolean isBusy() {
@@ -1002,6 +1058,7 @@ public class Engine implements ControlAPI {
 							warnings.clear();
 							scheduler.startStep();
 							scheduler.retrieveAgents();
+							scheduler.retrieveASIMs();
 							//FIXME BSL remove the loopback method!!!
 							//mailbox.loopback();
 							mailbox.startStep();

@@ -616,4 +616,16 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 */
 	public List<CoreASMWarning> getWarnings();
 
+	/**
+	 * Returns the current set of known ASIMs. This methods returns the
+	 * outcome of {@link Scheduler#getASIMSet()}.
+	 * 
+	 * @return set of known ASIMs
+	 */
+	public Set<? extends Element> getASIMSet();
+
+	void addASIMs(Set<String> asims);
+
+	void deleteASIMs(Set<String> asims);
+
 }

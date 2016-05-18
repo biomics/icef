@@ -230,4 +230,8 @@ public interface Scheduler {
 	public void evaluatePolicy() throws EngineException;
 	
 	public void dispose();
+
+	public void retrieveASIMs();
+
+	public Set<? extends Element> getASIMSet();
 }
