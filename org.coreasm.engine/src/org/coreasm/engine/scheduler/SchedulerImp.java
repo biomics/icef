@@ -212,12 +212,12 @@ public class SchedulerImp implements Scheduler {
 	
 	public synchronized void retrieveASIMs() {
 		AbstractStorage storage = capi.getStorage();
-		agentSet = new HashSet<Element>();
+		ASIMSet = new HashSet<Element>();
 		FunctionElement asimsSetFlat = 	storage.getUniverse(AbstractStorage.ASIMS_UNIVERSE_NAME);
 		if (asimsSetFlat instanceof Enumerable) {
 			// pick only those that have a non-null program
 			for (Element asims : ((Enumerable) asimsSetFlat).enumerate()) {				
-				agentSet.add(asims);
+				ASIMSet.add(asims);
 			}
 		}
 		else {
