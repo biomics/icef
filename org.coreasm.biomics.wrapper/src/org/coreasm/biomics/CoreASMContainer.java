@@ -53,6 +53,7 @@ import org.coreasm.engine.EngineProperties;
 import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.CoreASMError;
 
+import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.NameElement;
@@ -396,12 +397,12 @@ public class CoreASMContainer extends Thread {
 
             if(engine.getEngineMode() == EngineMode.emCreateAgent) {
                 System.out.println("Engine waits for creation of agents");
-                Map<String, String> loc2Agent = engine.getAgentsToCreate();
+                Map<String, AgentCreationElement> loc2Agent = engine.getAgentsToCreate();
                 Set<String> locs = loc2Agent.keySet();
                 Iterator<String> it = locs.iterator();
                 while(it.hasNext()) {
                     String loc = it.next();
-                    System.out.println("\tLoc: "+loc+"; name: "+loc2Agent.get(loc));
+                    System.out.println("\tLoc: "+loc+"; name: "+loc2Agent.get(loc).getName());
                 }
 
                 HashMap<String,String> agents = new HashMap<String,String>();
@@ -409,7 +410,7 @@ public class CoreASMContainer extends Thread {
                 int counter = 1;
                 while(it.hasNext()) {
                     String loc = it.next();
-                    if(loc2Agent.get(loc).equals("")) {
+                    if(loc2Agent.get(loc).getName().equals("")) {
                         counter++;
                         agents.put(loc, "Agent"+counter);
                     }
