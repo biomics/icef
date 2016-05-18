@@ -37,6 +37,7 @@ import org.coreasm.engine.absstorage.PluginAggregationAPI.Flag;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
 import org.coreasm.engine.absstorage.Update;
@@ -309,8 +310,12 @@ public class CommunicationPlugin extends Plugin implements
 			try {
 				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?pos.getAgentName().toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue(),  ((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions(),pos.getAgentLocation().getLocation(),pos.getScannerInfo());
 				capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), ace);
-			
-				
+				pos.setNode(
+						null, 
+						new UpdateMultiset(), 
+						new TriggerMultiset(),
+						null);
+				return pos;
 			} catch (Throwable e) {
 				capi.error(e);
 			}
