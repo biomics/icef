@@ -18,7 +18,9 @@ public class MessageRequestSerializer extends JsonSerializer<MessageRequest> {
 
         jgen.writeStartObject();
         jgen.writeStringField("type", req.type);
-        jgen.writeStringField("toAgent", req.toAgent);
+        jgen.writeStringField("simulation", req.simulation);
+        if(req.toAgent != null)
+            jgen.writeStringField("toAgent", req.toAgent);
         jgen.writeStringField("fromAgent", req.fromAgent);
         jgen.writeStringField("body", req.body);
         jgen.writeEndObject();

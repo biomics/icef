@@ -62,9 +62,13 @@ public interface CoreASMEngine extends VersionInfoProvider {
 		emTerminating, emTerminated, emError, emCreateAgent
 	};
 
-	/**
-	 * Initializes the engine.
-	 */
+    public boolean hasErrorOccurred();
+
+    public CoreASMError getError();
+		 
+    /**
+     * Initializes the engine.
+     */
 	public void initialize();
 
 	/**

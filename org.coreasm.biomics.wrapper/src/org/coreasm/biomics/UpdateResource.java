@@ -6,6 +6,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 
@@ -16,27 +17,23 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.core.Version;
 
 
-@Path("message")
-public class MessageResource {
+@Path("update")
+public class UpdateResource {
 
     @PUT
     @Consumes("application/json")
-    @Produces("text/plain")
-    public String receiveMsg(String message) {
-        System.out.println("MessageResource: receiveMsg");
-        System.out.println("Message: "+message);
-        
-        MessageRequest req = MessageRequest.getMessage(message);
+    public Response receiveMsg(String update) {
+        MessageRequest req = MessageRequest.getMessage(update);
 
         boolean result = false;
         if(req != null) {
-            result = EngineManager.receiveMsg(req);
+            result = EngineManager.receiveUpdate(req);
         }
 
         if(result) {
-            return "Success.\n";
+            return Response.status(200).build();
         } else {
-            return "Fail.\n";
+            return Response.status(403).build();
         }
     }
 }

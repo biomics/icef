@@ -18,8 +18,13 @@ public class MessageRequestDeserializer extends JsonDeserializer<MessageRequest>
         ObjectCodec oc = jsonParser.getCodec();
         JsonNode node = oc.readTree(jsonParser);
 
+        JsonNode jsonSim = node.get("simulation");
+        String simulation = "";
+        if(jsonSim != null)
+            simulation = jsonSim.textValue();
+
         JsonNode jsonTo = node.get("toAgent");
-        String strTo = "";
+        String strTo = null;
         if(jsonTo != null)
             strTo = jsonTo.textValue();
 
@@ -43,12 +48,6 @@ public class MessageRequestDeserializer extends JsonDeserializer<MessageRequest>
         if(jsonType != null) 
             strType = jsonType.textValue();
 
-        /* MessageRequest msg = new MessageRequest();
-        msg.toAgent = strTo;
-        msg.fromAgent = strFrom;
-        msg.type = strType;
-        msg.body = strBody;
-        return msg;*/
-        return new MessageRequest(strType, strFrom, strTo, strBody);
+        return new MessageRequest(strType, simulation, strFrom, strTo, strBody);
     }
 }
