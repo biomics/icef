@@ -57,6 +57,11 @@ function initApp() {
 
     // ****************** SIMULATIONS ****************** 
 
+    app.get("/simulations", function(req, res) {
+        var simus = manager.getSimulations();
+        res.send(simus);
+    });
+
     app.put("/simulations",
             express.json(),
             function(req, res) {
@@ -72,6 +77,8 @@ function initApp() {
                 res.status(500).json({ error : "Unable to load new simulation."});
             }
            );
+
+    // TODO: SOME DELETION
 
     // ****************** BRAPPERS ******************
 
@@ -119,8 +126,12 @@ function initApp() {
     // ****************** ASIM ******************
  
     app.get("/asims", function(req, res) {
-        var allAgents = manager.getASIMs();
-        res.send(allAgents);
+        var allASIMs = manager.getASIMs();
+        var simpleASIMs = [];
+
+        for(var i in allASIMs)
+            simpleASIMs.push(allASIMs[i].simplify());
+        res.send(simpleASIMs);
     });
 
     app.put("/asims", 
@@ -140,12 +151,34 @@ function initApp() {
                  res.send(500, "Unable to create new agent.");
              }
             );
-    
-    app.get("/asims/:id", 
+
+    app.get("/asims/:simulation", 
              express.json(), 
              function(req, res) {
-                 var id = req.params.id;
-                 var result = manager.getASIM(id);
+                 var simulation = req.params.simulation;
+                 
+                 var allASIMs = manager.getASIMs(simulation);
+                 var result = [];
+                 
+                 for(var i in allASIMs)
+                     result.push(allASIMs[i].simplify());
+
+                 if(result == undefined)
+                     res.send(404);
+                 else
+                     res.send(200, result);
+             }, 
+             function(req, res) {
+                 res.send(500, "Unable to retrieve ASIM");
+             }
+            );
+    
+    app.get("/asims/:simulation/:name", 
+             express.json(), 
+             function(req, res) {
+                 var simulation = req.params.simulation;
+                 var name = req.params.name;
+                 var result = manager.getASIM(simulation, name);
                  if(result == undefined)
                      res.send(404);
                  else
@@ -156,37 +189,46 @@ function initApp() {
              }
             );
 
-    app.put("/asims/:asimname", 
+    app.put("/asims/:simulation/:name", 
              express.json(), 
              function(req, res) {
-                 // TODO change the status of the ASIM
-                 res.send(200, "ASIM deleted.");
+                 var simulation = req.params.simulation;
+                 var name = req.params.name;
+
+                 var result = manager.controlASIM(simulation, name, req.body.command);
+                 if(!result.success)
+                     res.send(404);
+                 else
+                     res.send(200, result.msg);
              }, 
              function(req, res) {
-                 console.log("Unable to create new agent.");
-                 res.send(404, "Unable to create new agent.");
+                 res.send(500, "Unable to retrieve ASIM");
              }
             );
 
-    app.delete("/asims/:asimname", 
+    app.delete("/asims/:simulation/:name", 
              express.json(), 
              function(req, res) {
-                 manager.delASIM(req);
-                 res.send(200, "ASIM deleted.");
+                 var simulation = req.params.simulation;
+                 var name = req.params.name;
+                 if(manager.delASIM(simulation, name)) 
+                     res.send(200, "ASIM deleted.");
+                 else
+                     res.send(404);
              }, 
              function(req, res) {
-                 console.log("Unable to create new agent.");
-                 res.send(404, "Unable to create new agent.");
+                 res.send(500, "Unable to delte ASIM.");
              }
             );
 
     // ****************** Message ******************
 
-    app.put("/message",
+    app.put("/message/:simulation",
             express.json(),
             function(req, res) {
-                var result = manager.recvMsg(req.body);
+                var simulation = req.params.simulation;
 
+                var result = manager.recvMsg(simulation, req.body);
                 if(!result.success) {
                     res.send(400, result.msg);
                 } else {
@@ -299,7 +341,7 @@ function initApp() {
              express.json(),
              function(req, res) {
                  var result = manager.recvUpdate(req.body);
-
+                 // console.log("result: ",result.msg);
                  if(!result.success) {
                      res.send(400, result.msg);
                  } else {

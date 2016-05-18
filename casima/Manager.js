@@ -1,6 +1,8 @@
 var ASIM = require("./ASIM");
+var ASIMCreationError = require("./ASIMCreationError");
 var Brapper = require("./Brapper");
 var Scheduler = require("./Scheduler");
+var Simulation = require("./Simulation");
 
 var uuid = require("node-uuid");
 
@@ -13,120 +15,42 @@ var Manager = (function() {
         this.channelList = {};
         this.channelMap = {};
 
-        this.asimMap = {};
-        this.asimList = {};
-
         this.brapperMap = {};
+
+        this.simMap = {};
     };
 
     cls.prototype = {
-        resetSimulation : function() {
-            this.asimList = {};
-            this.schedulerList = {};
-            this.channelList = {};
+        getSimulations : function() {
+            var ids = [];
+            for(var id in this.simMap) 
+                ids.push(id);
+            return ids;
         },
 
         loadSimulation : function(spec) {
-            this.resetSimulation();
+            var newSimulation = new Simulation(this);
+            var result = newSimulation.load(spec);
 
-            if(!spec || spec.asims == undefined) {
-                return { success : false, msg : "Invalid simulation specification. Unable to load specification.\n" };
-            }
+            if(result.success)
+                this.simMap[newSimulation.getId()] = newSimulation;
 
-            if(spec.channels != undefined && !(spec.schedulers instanceof Array))
-                return { success : false, msg : "Invalid simulation specification. 'schedulers' must be an array.\n" };
-
-            if(!(spec.asims instanceof Array))
-                return { success : false, msg : "Invalid simulation specification. 'asims' must be an array.\n" };
-
-            if(spec.channels != undefined && !(spec.channels instanceof Array))
-                return { success : false, msg : "Invalid simulation specification. 'channels' must be an array if specified.\n" };
-
-            var self = this;
-            try {
-                spec.schedulers.forEach(function(current, index, array) {
-                    var scheduler = new Scheduler(
-                        current.name,
-                        current.signature,
-                        current.init,
-                        current.program,
-                        current.policy);
-
-                    if(self.schedulerList[scheduler.getName()] != undefined) {
-                        self.asimList = {};
-                        self.schedulerList = {};
-
-                        var e = new Error();
-                        e.msg = "Invalid simulation specification. Two scheduler carry same name.";
-                        e.sender = "Scheduler";
-                        throw e;
-                    }
-
-                    self.schedulerList[scheduler.getName()] = scheduler;
-                });
-            } 
-            catch(e) {
-                if(e.sender != "Scheduler") throw e;
-                return { success : false, msg : e };
-            }
-
-            try {
-                spec.asims.forEach(function(current, index, array) {
-                    var asim = new ASIM(
-                        current.name,
-                        current.signature,
-                        current.init,
-                        current.program,
-                        current.policy);
-                    if(self.asimList[asim.getName()]) {
-                        self.asimList = {};
-                        self.schedulerList = {};
-
-                        var e = new Error();
-                        e.msg = "Invalid simulation specification. Two asims carry same name.";
-                        e.sender = "ASIM";
-                        throw e;
-                    }
-                    self.asimList[asim.getName()] = asim;
-                });
-            } 
-            catch(e) {
-                if(e.sender != "ASIM") throw e;
-                return { success : false, msg : e };
-            }
-            
-            // create ASIM for the specifications
-            try {
-                for(var name in this.asimList) {
-                    if(!this.assignBrapper(this.asimList[name])) {
-                        var e = new Error();
-                        e.msg = "Unable to assign ASIM '"+name+"' to a brapper.\n";
-                        e.sender = "Assignment";
-                        throw e;
-                    }
-                }
-            }
-            catch(e) {
-                if(e.sender != "Assignment") throw e;
-                return { success : false, msg : e.msg };
-            }
-            
-            return { success : true, msg : "Simulation loaded successfully.\n", id : uuid.v4() };
+            return result;
         },
 
         registerBrapper : function(descr) {
             if(!descr || descr.host == undefined || descr.port == undefined) {
-                return { success : false, msg : "Invalid brapper description. Unable to register wrapper.\n" };
+                return { success : false, msg : "Invalid brapper description. Unable to register brapper.\n" };
             }
 
             var newBrapper = new Brapper(descr.host, descr.port);
-            var key = newBrapper.getKey();
+            var id = newBrapper.getId();
 
-            if(this.brapperMap[key] != undefined) {
+            if(this.brapperMap[id] != undefined) {
                 return { success : false, msg : "Unable to register new wrapper. Brapper already exists!\n" };
             } else {
-                this.brapperMap[key] = newBrapper;
-                return { success : true, msg : "Brapper successfully registered.", key : key };
+                this.brapperMap[id] = newBrapper;
+                return { success : true, msg : "Brapper successfully registered.", id : id };
             }
         },
 
@@ -155,32 +79,97 @@ var Manager = (function() {
             return this.brapperMap[id];
         },
 
-        getASIMs : function() {
-            return this.asimList;
+        getASIMs : function(simulation) {
+            var list = [];
+
+            if(simulation == undefined || simulation == null) {
+                for(var sim in this.simMap) {
+                    if(this.simMap[sim])
+                        list = list.concat(this.simMap[sim].getASIMs());
+                }
+            } else {
+                if(this.simMap[simulation] == undefined)
+                    return [];
+                else
+                    return this.simMap[simulation].getASIMs();
+            }
+            
+            return list;
         },
 
-        getASIM : function(id) {
-            return this.asimList[id];
+        getASIM : function(simulation, asimName) {
+            if(!this.simMap[simulation])
+                return undefined;
+            else {
+                var asim = this.simMap[simulation].getASIM(asimName);
+                if(asim)
+                    return asim.simplify();
+                else
+                    return asim;
+            }
         },
 
         createASIM : function(descr) {
-            console.log("Manager: Create new ASIM");
+            // check for an empty brapper
+            var brapper = this.getHostingBrapper();
+            if(brapper == null) 
+                return { success : false, msg : "Manager has no brappers to run ASIMs. Register or restart them." };
 
-            if(!descr || descr.program == undefined || descr.init == undefined || descr.policy == undefined ) {
-                return { success : false, msg : "Invalid creation request. Missing or invalid ASIM description.\n" };
+            var simulation = null;
+            // create a new simulation for this ASIM
+            if(descr.simulation == undefined || descr.simulation == null) {
+                simulation = new Simulation(this);
+                this.simMap[simulation.getId()] = simulation;
             } else {
-                var newASIM = new ASIM(descr.name, descr.signature, descr.init, descr.program, descr.policy);
-
-                if(this.asimMap[newASIM.getName()] == undefined && this.asimList[newASIM.getName()] == undefined) {
-                    if(this.assignBrapper(newASIM)) 
-                        return { success : true, msg : "ASIM successfully created", asim : newASIM };
-                    else
-                        return { success : false, msg : "Unable to find hosting brapper for ASIM "+newASIM.getName()+".\n" };
-                } else {
-                    // ASIM already exists => error
-                    return { success : false, msg : "ASIM already exists.\n" };
-                }
+                if(this.simMap[descr.simulation] == undefined) {
+                    simulation = new Simulation(this);
+                    simulation.setId(descr.simulation);
+                    this.simMap[simulation.getId()] = simulation;
+                } else 
+                    simulation = this.simMap[descr.simulation];                
             }
+
+            // first create the new ASIM
+            var newASIM = null;
+            try{               
+                newASIM = new ASIM(descr);
+            }
+            catch(e) {
+                if(e instanceof ASIMCreationError) {
+                    return { success : false, error : e.toString() };
+                } else 
+                    throw e;
+            }
+
+            // ASIM already exists => error
+            if(simulation.hasASIM(newASIM))
+                return { success : false, msg : "ASIM '"+newASIM.getName()+"' already exists in simulation '"+simulation.getId()+"'.\n" };
+            else
+                simulation.addASIM(newASIM);
+            
+            brapper.addASIM(newASIM);
+
+            var self = this;
+            newASIM.load();
+            
+            return { success : true, msg : "ASIM '"+newASIM.getName()+"' created successfully in simulation '"+simulation.getId()+"'.\n", asim : newASIM.simplify() };
+        },
+
+        controlASIM : function(simulation, name, cmd) {
+            var sim = this.simMap[simulation];
+
+            if(sim)
+                return sim.controlASIM(name, cmd);
+            else
+                return false;
+        },
+
+        delASIM : function(simulation, name) {
+            var sim = this.simMap[simulation];
+            if(sim)
+                return sim.delASIM(name);
+            else
+                return false;
         },
 
         getHostingBrapper : function() {
@@ -201,77 +190,32 @@ var Manager = (function() {
                 return this.brapperMap[minId];
         },
 
-        assignBrapper : function(asim) {
-            var hostingBrapper = this.getHostingBrapper();
-
-            if(hostingBrapper == null) {
-                return false;
-            }
+        recvMsg : function(simulation, msg) {
+            var sim = this.simMap[simulation];
             
-            var self = this;
-            // TODO check success by implementing a callback
-            hostingBrapper.createASIM(asim, function(e) {                
-                if(e != null && e != undefined && e.name != undefined) {
-                    if(self.asimMap != undefined && self.asimMap != null)
-                        delete self.asimMap[e.name];
-
-                    if(self.asimList != undefined && self.asimList != null) {
-                        console.log("e: "+e);
-                        if(e.error && e.error != "") {
-                            self.asimList[e.name].setError(e.error);
-                            self.asimList[e.name].setBrapper(null);
-                        }
-                    }
-                }
-            });
-
-            this.asimMap[asim.getName()] = hostingBrapper;
-            asim.setBrapper(hostingBrapper.id);
+            if(sim == undefined || sim == null)
+                return { success : false, msg : "Simulation for message does not exist. Ignore." };
             
-            return true;
-        },
-
-        delAgent : function(descr) {
-        },
-
-        recvMsg : function(msg) {
-
-            if(msg == undefined || msg == null)
-                return { success : false, msg : "Error: Invalid message\n" };
-
-            if(msg.type != "msg") {
-                return { success : false, msg : "Cannot forward messages without type 'msg'.\n" };
-            }
-
-            if(msg.toAgent == undefined || msg.toAgent == null) {
-                return { success : false, msg : "Message specifies no or invalid target.\n" };
-            }
-
-            if(msg.fromAgent == undefined || msg.fromAgent == null) {
-                return { success : false, msg : "Message specifies no or invalid source.\n" };
-            }
-
-            if(this.asimMap[msg.toAgent] != undefined) {
-                console.log("Forward message from agent '"+msg.fromAgent+"' to agent '"+msg.toAgent+"'");
-
-                console.log("Brapper hosting this agent: ",this.asimMap[msg.toAgent]);
-
-                this.asimMap[msg.toAgent].recvMsg(msg);
-                
-                return { success : true };
-            } else {
-                return { success : false, msg : "Unable to forward message. Target does not exist.\n" };
-            }
+            return sim.recvMsg(msg);
         },
 
         recvUpdate : function(update) {
-            console.log("Manager: Receive an update.");
+            // console.log("Manager: Receive: ", update);
 
             if(update == undefined || update == null)
                 return { success : false, msg : "Error: Invalid update\n" };
 
-            if(msg.type != "update") {
-                return { success : false, msg : "Cannot process update with payload type 'update'.\n" };
+            if(update.type != "update") {
+                return { success : false, msg : "Cannot process update with payload type '"+update.type+"'.\n" };
+            }
+
+            if(update.simulation == undefined || update.simulation == null) {
+               return { success : false, msg : "Cannot process update without simulation specification.\n" };
+            }
+
+            var sim = this.simMap[update.simulation];
+            if(sim == undefined || sim == null) {
+                return { success : false, msg : "Error: Update for unknown simulation '" + update.simulation + "'.\n" };
             }
 
             // update from which agent?
@@ -287,6 +231,9 @@ var Manager = (function() {
                 return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
             }
             
+            console.log("Ignore update for now");
+
+            return { success: true, msg : "Ignored" };
         }, 
 
         sendUpdate : function(update) {

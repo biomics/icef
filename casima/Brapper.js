@@ -15,7 +15,7 @@ var Brapper = (function() {
     };
 
     cls.prototype = {
-        getKey : function() {
+        getId : function() {
             return this.id;
         },
 
@@ -27,53 +27,11 @@ var Brapper = (function() {
             this.error = e;
         },
 
-        createASIM : function(asim , callback) {
+        addASIM : function(asim) {
             this.asims[asim.getName()] = asim;
             this.load++;
 
-            var request = {};
-            request.program = asim.program;
-            request.init = asim.init;
-            request.policy = asim.policy;
-            request.name = asim.name;
-
-            data = JSON.stringify(request);
-
-            var options = {
-                host: this.host,
-                port: this.port,
-                path: '/asims',
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
-                }
-            };
-
-            var request = http.request(options, function(res) {
-                var resData = "";
-
-                res.setEncoding('utf8');
-
-                res.on('data', function(chunk) {
-                    if(chunk)
-                        resData += chunk;
-                });
-
-                res.on('end', function(chunk) {
-                    if(chunk)
-                        resData += chunk;
-
-                    callback(JSON.parse(resData));
-                });
-            });
-            
-            request.on('error', function(e) {
-                console.log("Problem: ", e);          
-            });
-            
-            request.write(data);
-            request.end();
+            asim.setBrapper(this);
         },
 
         getASIMs : function() {
@@ -81,7 +39,9 @@ var Brapper = (function() {
         },
 
         recvMsg : function(msg) {
-            console.log("Sending message to brapper at "+this.host+":"+this.port+"\n");
+            /* console.log("Sending message to brapper at "+this.host+":"+this.port+"\n");
+               console.log("Message: ",msg);
+            */
 
             var data = JSON.stringify(msg);
 
@@ -89,7 +49,7 @@ var Brapper = (function() {
                 host: this.host,
                 port: this.port,
                 path: '/message',
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(data)
