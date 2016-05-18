@@ -230,19 +230,19 @@ public class CoreASMContainer extends Thread {
             index = fromAgent.indexOf("@");
 
             if(fromAgent.equals("self")) {
-                msg.setFromAgent(asimName);
-            }
-
-            if(index != -1) {
-                msg.setFromAgent(fromAgent + "@" + asimName);
+                msg.setFromAgent(asimName + "@" + asimName);
             } else {
-                if(index == 0)
-                    msg.setFromAgent(asimName + "@" + asimName);
-                else {
-                    String suffix = fromAgent.substring(index + 1);
-                    if(!suffix.equals(asimName)) {
-                        if(index > 0)
-                            msg.setFromAgent(fromAgent.substring(0, index + 1) + asimName);
+                if(index == -1) {
+                    msg.setFromAgent(fromAgent + "@" + asimName);
+                } else {
+                    if(index == 0)
+                        msg.setFromAgent(asimName + "@" + asimName);
+                    else {
+                        String suffix = fromAgent.substring(index + 1);
+                        if(!suffix.equals(asimName)) {
+                            if(index > 0)
+                                msg.setFromAgent(fromAgent.substring(0, index + 1) + asimName);
+                        }
                     }
                 }
             }
