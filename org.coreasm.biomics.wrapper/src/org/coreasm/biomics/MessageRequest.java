@@ -11,15 +11,25 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class MessageRequest {
     public static ObjectMapper mapper = null;
 
+    public String simulation;
     public String fromAgent;
     public String toAgent;
     public String body;
     public String type;
 
-    public MessageRequest(String _type, String _from, String _to, String _body) {
+    public MessageRequest(String _type, String _simulation, String _from, String _to, String _body) {
         type = _type;
+        simulation = _simulation;
         fromAgent = _from;
         toAgent = _to;
+        body = _body;
+    }
+
+    public MessageRequest(String _type, String _simulation, String _from, String _body) {
+        type = _type;
+        simulation = _simulation;
+        fromAgent = _from;
+        toAgent = null;
         body = _body;
     }
 
@@ -76,7 +86,6 @@ public class MessageRequest {
     }
 
     public String getType() {
-        System.out.println("getType");
         return type;
     }
 }

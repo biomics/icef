@@ -19,6 +19,8 @@ public class Wrapper {
      * @return Grizzly HTTP server.
      */
     public void startServer() {
+        // TODO: Disable logging
+
         // search for resources and components in org.coreasm.biomics
         // final ResourceConfig rc = new ResourceConfig().packages("org.coreasm.biomics.wrapper");
         ResourceConfig rc = new ResourceConfig().packages("org.coreasm.biomics");
@@ -66,6 +68,10 @@ public class Wrapper {
 
     public String getCommUrl() {
         return commUrl;
+    }
+
+    public WrapperConfig getConfig() {
+        return config;
     }
 
     /**
