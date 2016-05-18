@@ -887,7 +887,7 @@ public class Engine implements ControlAPI {
 					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
 					Update u = new Update(l,BooleanElement.FALSE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
 					scheduler.getUpdateInstructions().add(u);
-					knownASIMs.remove(e);
+					//knownASIMs.remove(e); // removed, this should update from the content in the abstract storage!
 					asims.remove(asimName);
 					break;
 				}

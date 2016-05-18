@@ -204,7 +204,7 @@ public class Kernel extends Plugin
     public Kernel() {
     	universeNames = new HashSet<String>();
 		universeNames.add(AbstractStorage.AGENTS_UNIVERSE_NAME);
-
+		universeNames.add(AbstractStorage.ASIMS_UNIVERSE_NAME);
     	backgroundNames = new HashSet<String>();
 		backgroundNames.add(BooleanBackgroundElement.BOOLEAN_BACKGROUND_NAME);
 		backgroundNames.add(FunctionBackgroundElement.FUNCTION_BACKGROUND_NAME);
@@ -1148,7 +1148,7 @@ public class Kernel extends Plugin
 	public Map<String,UniverseElement> getUniverses() {
 		if (universes == null) {
 			universes = new HashMap<String, UniverseElement>();
-			
+			universes.put(AbstractStorage.ASIMS_UNIVERSE_NAME, new UniverseElement());
 			universes.put(AbstractStorage.AGENTS_UNIVERSE_NAME, new UniverseElement());
 		}
 		return universes;
