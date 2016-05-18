@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.coreasm.engine.CoreASMError;
 
 @Path("asims")
-public class AgentResource {
+public class ASIMResource {
 
     /**
      * Method handling HTTP GET requests. The returned object will be sent
@@ -27,51 +27,55 @@ public class AgentResource {
      * @return String that will be returned as a text/plain response.
      */
     @GET
-    @Path("/{agentname}")
+    @Path("/{asimName}")
     @Produces("text/plain")
-    public String getAgentName(@PathParam("agentname") String agentName) {
-        System.out.println("agentName: '"+agentName+"'");
+    public String getASIMStatus(@PathParam("asimName") String asimName) {
+        System.out.println("asimName: '"+asimName+"'");
 
         return "Got it!";
     }
 
-    @GET
-    @Path("/{agentname}/start")
-    @Produces("text/plain")
-    public String startAgent(@PathParam("agentname") String agentName) {
-        System.out.println("Start an existing agent");
-
-        EngineManager.startEngine(agentName);
-
-        return "Started";
-    }
-
-    @GET
-    @Path("/{agentname}/pause")
-    @Produces("text/plain")
-    public String pauseAgent(@PathParam("agentname") String agentName) {
-        if(EngineManager.pauseEngine(agentName)) {
-            return "Agent '"+agentName+"' was paused.";
-        } else {
-            return "Unable to pause agent '"+agentName+"'.";
+    @PUT
+    @Path("/{simId}/{asimName}")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response controlASIM(@PathParam("simId") String simId, @PathParam("asimName") String asimName, String controlParameters) {
+        ObjectMapper mapper = new ObjectMapper();
+        ASIMControlRequest req = null;
+        try {
+            req = mapper.readValue(controlParameters, ASIMControlRequest.class);
+        } catch (IOException ioe) {
+            System.err.println("Invalid control request: '"+controlParameters+"'");
+            System.err.println(ioe);
         }
-    }
 
-    @GET
-    @Path("/{agentname}/resume")
-    @Produces("text/plain")
-    public String resumeAgent(@PathParam("agentname") String agentName) {
-        if(EngineManager.resumeEngine(agentName)) {
-            return "Agent '"+agentName+"' was resumed.";
-        } else {
-            return "Unable to resume agent '"+agentName+"'.";
+        boolean success = EngineManager.controlASIM(simId, asimName, req.command);
+
+        String error = null;
+        if(!success) {
+            error = "Unable to '" + req.command + "' ASIM.";
         }
+
+        ASIMControlResponse res = new ASIMControlResponse(asimName, simId, error);
+
+        String json = "{}";
+        try {
+            json  = mapper.writeValueAsString(res);
+        }  catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 
     @GET
     @Produces("text/plain")
-    public String getAgentName() {
-        System.out.println("All currently running agents");
+    public String getAllASIMs() {
+        System.out.println("All currently running ASIMs");
 
         return "Got it!";
     }
@@ -79,22 +83,23 @@ public class AgentResource {
     @PUT
     @Consumes("application/json")
     @Produces("application/json")
-    public Response createNewAgent(String createParameters) {
-        System.out.println("Create a new agent");
+    public Response createNewASIM(String createParameters) {
+        System.out.println("Create new ASIM");
         System.out.println("JSON: "+createParameters);
 
         ObjectMapper mapper = new ObjectMapper();
         
-        AgentCreationRequest req = null;
+        ASIMCreationRequest req = null;
         try {
-            req = mapper.readValue(createParameters, AgentCreationRequest.class);
+            req = mapper.readValue(createParameters, ASIMCreationRequest.class);
         } catch (IOException ioe) {
             System.err.println("Invalid creation request: '"+createParameters+"'");
             System.err.println(ioe);
         }
 
-        CoreASMError error = EngineManager.createEngine(req);
-        AgentCreationResponse res = new AgentCreationResponse(req.name, error);
+        CoreASMError error = EngineManager.createASIM(req);
+
+        ASIMCreationResponse res = new ASIMCreationResponse(req.name, req.simulation != null ? req.simulation : "undefined", error);
         String json = "{}";
         try {
             json  = mapper.writeValueAsString(res);
