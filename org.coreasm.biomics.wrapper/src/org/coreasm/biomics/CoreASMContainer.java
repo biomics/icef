@@ -78,6 +78,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class CoreASMContainer extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(CoreASMContainer.class);
 
+    protected String simId;
     protected String asimName;
     protected String asimProgram;
 
@@ -87,14 +88,17 @@ public class CoreASMContainer extends Thread {
 
     private HashSet<MessageElement> inBox = null;
 
-    public CoreASMContainer(AgentCreationRequest req) {
+    private boolean paused = false;
+
+    public CoreASMContainer(ASIMCreationRequest req) {
         asimName = req.name;
         asimProgram = req.program;
     }
 
-    public CoreASMContainer(String newName, String newProgram) {
+    public CoreASMContainer(String simulation, String newName, String newProgram) {
         asimName = newName;
         asimProgram = newProgram;
+        simId = simulation;
 
         inBox = new HashSet<MessageElement>();
 
@@ -108,6 +112,16 @@ public class CoreASMContainer extends Thread {
         }
 
         prepareMapper();
+    }
+
+    // TODO: Synchronize this!!!
+    public void pauseASIM() {
+        paused = true;
+    }
+
+    // TODO: Synchronize this!!!
+    public void resumeASIM() {
+        paused = false;
     }
 
     public boolean hasErrorOccurred() {
@@ -154,26 +168,98 @@ public class CoreASMContainer extends Thread {
         Set<MessageElement> messages = engine.getMailbox().emptyOutbox();
         Iterator<MessageElement> it = messages.iterator();
 
+        Set<MessageElement> toSend = new HashSet<>();
+
+        // 1. check all toAgent addresses
+        //  + if address has format self, replace it by asim name and put in inbox directly
+        //  + if address has format NAME@NAME or @NAME and NAME is name of this ASIM, remove @NAME and put in inbox directly
+        //  + if address has format NAME, check for NAME in local agents, if found, deliver directly
+        //    otherwise, transform address into NAME@NAME
+        //  + if address has format XYZ@NAME and NAME is not this ASIM, do nothing 
+
+        // 2. for addresses in fromAgent
+        //  + if address has format self, replace it by asim name
+        //  + if address has format NAME, add the name of this ASIM in the form NAME@ASIM
+        //  + if address has format NAME@XYZ, replace it by NAME@ASIM
+        //  - if address has format @XYZ or @ASIM, replace if by ASIM@ASIM
+
+        Set<? extends Element> a = engine.getAgentSet();
+        HashSet<String> agents = new HashSet<>();
+        for(Element e : a)
+            agents.add(e.toString());
+
         while(it.hasNext()) {
             MessageElement msg = it.next();
-            if(msg.getFromAgent().equals("self")) {
-                msg.setFromAgent(asimName);
-            } else {
-                msg.setFromAgent(asimName + ":" + msg.getFromAgent());
+
+            System.out.println("Handle Message: "+msg);
+
+            String toAgent = msg.getToAgent();
+            
+            if(toAgent.equals("self")) {
+                msg.setToAgent(asimName);
+                fillInBox(msg);
+                continue;
             }
+
+            int index = -1;
+            if(agents.contains(toAgent)) {
+                fillInBox(msg);
+                continue;
+            } else {
+                index = toAgent.indexOf("@");
+
+                if(index == -1)
+                    msg.setToAgent(toAgent + "@" + toAgent);
+                else {
+                    if(toAgent.substring(index+1).equals(asimName)) {
+                        if(index == 0) {
+                            msg.setToAgent(asimName);
+                            fillInBox(msg);
+                            continue;
+                        } else {
+                            msg.setToAgent(toAgent.substring(0, index));
+                            fillInBox(msg);
+                            continue;
+                        }
+                    }
+                }
+            }
+            
+            String fromAgent = msg.getFromAgent();
+            index = fromAgent.indexOf("@");
+
+            if(fromAgent.equals("self")) {
+                msg.setFromAgent(asimName);
+            }
+
+            if(index != -1) {
+                msg.setFromAgent(fromAgent + "@" + asimName);
+            } else {
+                if(index == 0)
+                    msg.setFromAgent(asimName + "@" + asimName);
+                else {
+                    String suffix = fromAgent.substring(index + 1);
+                    if(!suffix.equals(asimName)) {
+                        if(index > 0)
+                            msg.setFromAgent(fromAgent.substring(0, index + 1) + asimName);
+                    }
+                }
+            }
+
+            toSend.add(msg);
         }
         
         MessageElement m = new MessageElement();
         String json = "";
 
-        it = messages.iterator();
+        it = toSend.iterator();
         while(it.hasNext()) {
             MessageElement msg = it.next();
 
             try {
                 json = mapper.writeValueAsString(msg);
 
-                MessageRequest req = new MessageRequest("msg", msg.getFromAgent(), msg.getToAgent(), json);
+                MessageRequest req = new MessageRequest("msg", simId, msg.getFromAgent(), msg.getToAgent(), json);
                 EngineManager.sendMsg(req);
 
             } catch (Exception e) {
@@ -187,12 +273,12 @@ public class CoreASMContainer extends Thread {
                 System.out.println("----------------------------------");
             }
 
-            /*
+            
               System.out.println("\t----------------------------------");
               System.out.println("\tMsg: "+msg);
               System.out.println("\tJSON: "+json);
               System.out.println("\t----------------------------------");
-            */
+            
         }
     }
 
@@ -204,7 +290,7 @@ public class CoreASMContainer extends Thread {
         String json = "";
         try {
             json = mapper.writeValueAsString(updates);
-            MessageRequest req = new MessageRequest("update", asimName, json);
+            MessageRequest req = new MessageRequest("update", simId, asimName, json);
             EngineManager.sendUpdate(req);
         } catch (Exception e) {
             System.err.println("Unable to transform UpdateSet into json.");
@@ -279,6 +365,18 @@ public class CoreASMContainer extends Thread {
         Set<MessageElement> messages = null;
 
         do {
+
+            // ugh ... how ugly but the way coreASM works, this is needed
+            try {
+                Thread.sleep(1000);
+                if(paused) {
+                    Thread.sleep(500);
+                    continue;
+                }
+            } catch (InterruptedException ie) {
+                // TODO REPORT STH HERE
+            }
+
 			if (currentStep == 1)
 				lastUpdateSet = new UpdateMultiset();
 			else
@@ -289,8 +387,8 @@ public class CoreASMContainer extends Thread {
             injectUpdates();
             
             if(inBox.size() > 0) {
-                engine.getMailbox().fillInbox(inBox);
-                inBox.clear();
+                engine.getMailbox().fillInbox(getInBox());
+                emptyInBox();
             }
 
 			engine.step();
@@ -321,7 +419,8 @@ public class CoreASMContainer extends Thread {
             engine.waitWhileBusy();
 			
 			if (engine.getEngineMode() == EngineMode.emError) {
-                System.err.println("THERE WAS AN ERROR DURING EXECUTION");
+                System.out.println("THERE WAS AN ERROR DURING EXECUTION");
+                System.out.println("ERROR: "+engine.getError());
             }
 
             // System.out.println("handle outgoing Messages");
@@ -333,22 +432,14 @@ public class CoreASMContainer extends Thread {
             System.out.println();*/
 
 			currentStep++;
-
-            // ugh ... how ugly but the way coreASM works, this is needed
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ie) {
-                // TODO REPORT STH HERE
-            }
             
 		} while(true || engine.getEngineMode().equals(EngineMode.emTerminated));
     }
 
-    // TODO: CHECK! MAY NEED TO BE SYNCHRONIZED
-    public void receiveMsg(MessageRequest req) {
+    public boolean receiveMsg(MessageRequest req) {
         String agentMsg = req.body;
 
-        // System.out.println("CoreASM receiveMsg");
+        System.out.println("CoreASM receiveMsg");
 
         MessageElement newMsg = null;
         try {
@@ -358,10 +449,34 @@ public class CoreASMContainer extends Thread {
             System.err.println(ioe);
         }
 
-        // System.out.println("Put new msg into CoreASM instance inBox");
-        // System.out.println("MSG: "+newMsg);
+        System.out.println("Put new msg into CoreASM instance inBox");
+        System.out.println("MSG1: "+newMsg);
         
+        String toAgent = newMsg.getToAgent();
+        int index = toAgent.indexOf("@"+asimName);
+        if(index == -1) {
+            System.err.println("WARNING: Message not determined for this ASIM. Ignored");
+            return false;
+        } else
+            newMsg.setToAgent(toAgent.substring(0, index));
+
+        System.out.println("MSG2: "+newMsg);
+        
+        fillInBox(newMsg);
+
+        return true;
+    }
+
+    private synchronized Set<MessageElement> getInBox() {
+        return inBox;
+    }
+
+    private synchronized void fillInBox(MessageElement newMsg) {
         inBox.add(newMsg);
+    }
+
+    private synchronized void emptyInBox() {
+        inBox.clear();
     }
 
     public String getAsimName() {
