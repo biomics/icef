@@ -33,6 +33,9 @@ public interface AbstractStorage extends State {
 	/** 'Agents' universe name */
 	public static final String AGENTS_UNIVERSE_NAME = "Agents";
 	
+	/** 'ASIMs' universe name */
+	public static final String ASIMS_UNIVERSE_NAME = "ASIMs";
+	
 	/** 'functionElement' function name */
 	public static final String FUNCTION_ELEMENT_FUNCTION_NAME = "functionElement";
 	

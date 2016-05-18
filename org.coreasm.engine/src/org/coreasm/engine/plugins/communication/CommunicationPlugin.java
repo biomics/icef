@@ -307,23 +307,10 @@ public class CommunicationPlugin extends Plugin implements
 		else{
 			
 			try {
-				Element newElement = (pos.getAgentName()!= null)? pos.getAgentName().getValue(): capi.getStorage().getNewElement();
-				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?newElement.toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue(),  ((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions());
+				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?pos.getAgentName().toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue(),  ((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions(),pos.getAgentLocation().getLocation(),pos.getScannerInfo());
 				capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), ace);
+			
 				
-			pos.setNode(
-					null, 
-					new UpdateMultiset(new Update(pos.getAgentLocation().getLocation(),newElement, Update.UPDATE_ACTION,interpreter.getSelf(),pos.getScannerInfo())
-//							,new Update(
-//									OUTBOX_FUNC_LOC,
-//									new MessageElement(interpreter.getSelf().toString(), ace, "Scheduler", "AgentCreation" ,capi.getStepCount(),ace.getClass().getSimpleName()),
-//									MAIL_TO_ACTION,
-//									interpreter.getSelf(),
-//									pos.getScannerInfo()
-//									)
-							), 
-					null,
-					null);
 			} catch (Throwable e) {
 				capi.error(e);
 			}

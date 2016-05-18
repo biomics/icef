@@ -846,20 +846,16 @@ public class InterpreterImp implements Interpreter {
 								pos.setNode(null, new UpdateMultiset(u), new TriggerMultiset(trigger), null);
 								return pos;
 							}
-						} 
-						else
-						{
-							pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
-							return pos;
 						}
-						//FIXME BSL Uncomment the following to activate external scheduling and erase the else branch above
-						/**else {
-							// We assume that the agent is an external agent!
+						else if (capi.getASIMSet().contains(agentName)) {
+							// We assume that the agent is an external
+							// agent!
 							if (content != null && subject != null) {
 								// everything alright! Create the message
 								// element and prepare to send it
-								MessageElement me = new MessageElement(capi.getScheduler().getEnvironmentAgent().toString(),
-										content.getValue(), agentName.toString(), subject.getLocation().name,
+								MessageElement me = new MessageElement(
+										capi.getScheduler().getEnvironmentAgent().toString(), content.getValue(),
+										agentName.toString(), subject.getLocation().name,
 										capi.getScheduler().getStepCount(),
 										content.getValue().getClass().getSimpleName());
 								pos.setNode(null,
@@ -869,14 +865,28 @@ public class InterpreterImp implements Interpreter {
 										null, null);
 								return pos;
 							} else {
-								capi.error(
-										"The policy is trying to schedule "+agentName.toString()+"as an external agent, but it does not have the location and/or the content of the scheduling rule. Did you set "+agentName.toString()+"'s program to undef?",
+								capi.error("The policy is trying to schedule " + agentName.toString()
+										+ "as an external ASIM, but it does not have the location and/or the content of the scheduling rule", // Did
+																																				// you
+																																				// set
+																																				// "+agentName.toString()+"'s
+																																				// program
+																																				// to
+																																				// undef?",
 										pos, this);
 							}
-						}**/
 
-					} else
-						capi.error("The policy is trying to schedule undef!", pos, this);
+						} else {
+							capi.warning("Policy Warning",
+									"The policy is trying to schedule an agent that is neither a local agent nor an ASIM");
+							pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
+							return pos;
+						}
+					} else {
+						capi.warning("Policy Warning", "The policy is trying to schedule undef!");
+						pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
+						return pos;
+					}
 				} else
 					capi.error("The policy tries to schedule a null agent!", pos, this);
 			}
