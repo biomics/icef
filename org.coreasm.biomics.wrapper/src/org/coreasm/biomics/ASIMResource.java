@@ -99,8 +99,10 @@ public class ASIMResource {
 
         CoreASMError error = EngineManager.createASIM(req);
 
-        ASIMCreationResponse res = new ASIMCreationResponse(req.name, req.simulation != null ? req.simulation : "undefined", error);
+        ASIMCreationResponse res = new ASIMCreationResponse(req.name, req.simulation, error == null ? true : false, error == null ? "" : error.toString());
+
         String json = "{}";
+
         try {
             json  = mapper.writeValueAsString(res);
         }  catch (JsonGenerationException e) {

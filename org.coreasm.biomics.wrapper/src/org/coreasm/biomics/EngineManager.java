@@ -1,5 +1,7 @@
 package org.coreasm.biomics;
 
+import java.io.IOException;
+
 import java.util.Map;
 import java.util.HashMap;
 
@@ -17,14 +19,21 @@ import javax.ws.rs.ProcessingException;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import org.coreasm.engine.CoreASMError;
+import org.coreasm.engine.absstorage.AgentCreationElement;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class EngineManager {
 
     private static Wrapper wrapper = null;
 
+    private static int asimCounter = 0;
+
     private static final HashMap<String, HashMap<String, CoreASMContainer>> asims = new HashMap<>();
 
     public static CoreASMError createASIM(ASIMCreationRequest req) {
+        asimCounter++;
+
         System.out.println("Create new ASIM");
         System.out.println("ASIM Simulation: "+req.simulation);
         System.out.println("ASIM Name: "+req.name);
@@ -39,8 +48,10 @@ public class EngineManager {
         if(req.init == null || req.init.equals(""))
             return new CoreASMError("ASIM specification does not define init rule.");
 
-        if(req.name == null || req.name.equals(""))
+        if(req.name == null || req.name.equals("")) {
+            System.out.println("--- XXX ---");
             return new CoreASMError("ASIM specification does not define a name.");
+        }
 
         if(req.program == null || req.program.equals(""))
             return new CoreASMError("ASIM specification does not define a program.");
@@ -121,42 +132,33 @@ public class EngineManager {
 
             String asim = "";
 
-            if(wrapper.config.managerHost != null) {
-                // this message is sent to a simulation which
-                // is not hosted by this brapper
-                if(!asims.containsKey(req.simulation))
-                    return false;
 
-                Map<String, CoreASMContainer> simAsims = asims.get(req.simulation);
-
-                // check whether this ASIM is managed here
-                String[] names = req.toAgent.split("@");
-                if(names.length != 2) {
-                    System.out.println("EngineManager detects wrong address format");
-                    return false;
-                } else 
-                    asim = names[1];
-                
-                if(simAsims.containsKey(asim)) {
-                    System.out.println("EngineManager knows this ASIM");
-                } else {
-                    System.out.println("EngineManager does not know this ASIM");
-                    return false;
-                }
-                req.toAgent = asim;
-
-                CoreASMContainer trg = simAsims.get(asim);
-
-                return trg.receiveMsg(req);
+            // this message is sent to a simulation which
+            // is not hosted by this brapper
+            if(!asims.containsKey(req.simulation))
+                return false;
+            
+            Map<String, CoreASMContainer> simAsims = asims.get(req.simulation);
+            
+            // check whether this ASIM is managed here
+            String[] names = req.toAgent.split("@");
+            if(names.length != 2) {
+                System.out.println("EngineManager detects wrong address format in '"+req.toAgent+"'");
+                return false;
+            } else 
+                asim = names[1];
+            
+            if(simAsims.containsKey(asim)) {
+                System.out.println("EngineManager knows this ASIM");
             } else {
-                // TODO - forward the message to all possible agents that match specified target
-                /* for(CoreASMContainer trg : asims.values()) {
-                   trg.receiveMsg(req);
-                   }
-                */ 
+                System.out.println("EngineManager does not know this ASIM");
+                return false;
             }
-
-            return true;
+            req.toAgent = asim;
+            
+            CoreASMContainer trg = simAsims.get(asim);
+            
+            return trg.receiveMsg(req);
         }
 
         System.out.println("EngineManager receives unknown message type. Ignore!");
@@ -197,11 +199,35 @@ public class EngineManager {
     }
 
     public static void sendMsg(MessageRequest req) {
-        if(wrapper == null || wrapper.commUrl == null) {
-            System.err.println("FATAL: Unable to send message. Target unknown!");
+        if(wrapper == null) {
+            System.err.println("FATAL: Unable to send message. No Wrapper!");
             System.exit(1);
         }
 
+        String sim = req.simulation;
+        
+        // we host the simulation
+        if(asims.containsKey(sim)) {
+            String asimAddress[] = req.toAgent.split("@");
+            if(asimAddress.length != 2) {
+                System.err.println("Invalid target address '"+req.toAgent+"'");
+                return;
+            }
+            String trg = asimAddress[1];
+
+            Map<String, CoreASMContainer> hostedASIMs = asims.get(sim);
+            // ASIM is also hosted here and can be delivered locally
+            if(hostedASIMs.containsKey(trg)) {
+                // ASIM is hosted here, deliver directly
+                receiveMsg(req);
+                return;
+            }
+        }
+
+        // we cannot deliver if there is no manager
+        if(wrapper.config.managerHost == null)
+            return;
+       
         String json = MessageRequest.getJSON(req);
 
         try {
@@ -220,6 +246,81 @@ public class EngineManager {
         } catch (Exception exception) {
             System.out.println(exception);
         }
+    }
+
+    public static String requestASIMCreation(AgentCreationElement req, String simId) {
+        if(wrapper == null) {
+            System.err.println("FATAL: EngineManager cannot access Brapper!");
+            System.exit(1);
+        }
+
+        // this engine is not managed, creation of ASIM must take place locally
+        if(wrapper.config.managerHost == null) {
+            String newName = "ASIM" + asimCounter;
+
+            ASIMCreationRequest localReq = new ASIMCreationRequest(req, simId);
+            if(localReq.name == null || localReq.name.equals(""))
+                localReq.name = newName;
+
+            CoreASMError e = createASIM(localReq);
+            
+            if(e != null) {
+                System.out.println(e);
+                return null;
+            } else {
+                Map<String, CoreASMContainer> hostedASIMs = asims.get(simId);
+                if(hostedASIMs != null) {
+                    CoreASMContainer casm = hostedASIMs.get(newName);
+                    
+                    // and start the ASIM directly
+                    if(casm != null)
+                        casm.start();
+                    else
+                        return null;
+                } else
+                    return null;
+                
+                return newName;
+            }
+        }
+
+        String json = "{ \"simulation\" : \"" + simId + "\", " + req.toJSON().substring(1);
+
+        System.out.println("AGENT CREATION REQUEST: "+json);
+
+        Response response = null;
+        try {
+            response = ClientBuilder.newBuilder()
+                // .register(JacksonFeature.class) // would be the better way but did not get it working
+                .build()
+                .target(wrapper.commUrl)
+                .path("asims/")
+                .request(MediaType.APPLICATION_JSON)
+                .accept("*/*")
+                .put(Entity.json(json));
+        } 
+        catch (ProcessingException pe) {
+            System.out.println("Problem processing: "+pe);
+            System.out.println("Cause: "+pe.getCause());
+        } catch (Exception exception) {
+            System.out.println(exception);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        
+        if(response.getStatus() == 201) {
+            String strResponse = response.readEntity(String.class);
+            ASIMCreationResponse res = null;
+            try {
+                res = mapper.readValue(strResponse, ASIMCreationResponse.class);
+            } catch (IOException ioe) {
+                System.err.println("Invalid Response from Manager: '"+strResponse+"'");
+                System.err.println(ioe);
+            }
+            return res.name;
+        }
+
+        return null;
     }
 
     public static void sendUpdate(MessageRequest req) {

@@ -1,20 +1,21 @@
 package org.coreasm.biomics;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import org.coreasm.engine.CoreASMError;
 
 public class ASIMCreationResponse {
-    public String name;
-    public String simulation;
-    public boolean success;
-    public String error;
+    @JsonProperty("name") public String name;
+    @JsonProperty("simulation") public String simulation;
+    @JsonProperty("success") public boolean success;
+    @JsonProperty("error") public String error;
 
-    public ASIMCreationResponse(String n, String s, CoreASMError e) {
+    @JsonCreator
+    public ASIMCreationResponse(@JsonProperty("name") String n, @JsonProperty("simulation") String sim, @JsonProperty("success") boolean s, @JsonProperty("error") String e) {
         name = n;
-        simulation = s;
-        success = e == null;
-        if(e == null)
-            error = "";
-        else
-            error = e.toString();
+        simulation = sim;
+        success = s;
+        error = e;
     }
 }

@@ -396,29 +396,23 @@ public class CoreASMContainer extends Thread {
 			engine.waitWhileBusyOrUntilCreation();
 
             if(engine.getEngineMode() == EngineMode.emCreateAgent) {
-                System.out.println("Engine waits for creation of agents");
                 Map<String, AgentCreationElement> loc2Agent = engine.getAgentsToCreate();
                 Set<String> locs = loc2Agent.keySet();
                 Iterator<String> it = locs.iterator();
-                while(it.hasNext()) {
-                    String loc = it.next();
-                    System.out.println("\tLoc: "+loc+"; name: "+loc2Agent.get(loc).getName());
-                }
 
-                HashMap<String,String> agents = new HashMap<String,String>();
+                HashMap<String, String> agents = new HashMap<String,String>();
                 it = locs.iterator();
                 int counter = 1;
                 while(it.hasNext()) {
                     String loc = it.next();
-                    if(loc2Agent.get(loc).getName().equals("")) {
-                        counter++;
-                        agents.put(loc, "Agent"+counter);
-                    }
+                    String name = EngineManager.requestASIMCreation(loc2Agent.get(loc), simId);
+                    System.out.println("NEW NAME: "+name);
+                    agents.put(loc, name);
                 }
                 engine.reportNewAgents(agents);
             }
             engine.waitWhileBusy();
-			
+
 			if (engine.getEngineMode() == EngineMode.emError) {
                 System.out.println("THERE WAS AN ERROR DURING EXECUTION");
                 System.out.println("ERROR: "+engine.getError());
@@ -450,8 +444,6 @@ public class CoreASMContainer extends Thread {
             System.err.println(ioe);
         }
 
-        System.out.println("Put new msg into CoreASM instance inBox");
-        System.out.println("MSG1: "+newMsg);
         
         String toAgent = newMsg.getToAgent();
         int index = toAgent.indexOf("@"+asimName);
@@ -461,8 +453,8 @@ public class CoreASMContainer extends Thread {
         } else
             newMsg.setToAgent(toAgent.substring(0, index));
 
-        System.out.println("MSG2: "+newMsg);
-        
+        System.out.println("[ASIM "+asimName+"]: fillInBox: "+newMsg);
+
         fillInBox(newMsg);
 
         return true;

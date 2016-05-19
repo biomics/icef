@@ -141,6 +141,18 @@ public class AgentCreationElement extends Element {
 	public void setProgram(RuleElement program) {
 		this.program = program;
 	}
+
+    public String toJSON() {
+        String result = "{";
+        if(!name.toString().equals(""))
+            result += "\"name\" : \"" + name.toString().replace("\"", "\\\"") + "\",";
+        result += "\"signature\" : \"" + signature.replace("\"", "\\\"") + "\",";
+        result += "\"init\" : \""+ initRule.getBody().unparseTree().replace("\"", "\\\"") + "\",";
+        result += "\"program\" : \""+ program.getBody().unparseTree().replace("\"", "\\\"") + "\",";
+        result += "\"policy\" : \""+ policy.getBody().unparseTree().replace("\"", "\\\"") + "\"}";
+
+        return result;
+    }
 	
 	@Override
 	public String toString() {
