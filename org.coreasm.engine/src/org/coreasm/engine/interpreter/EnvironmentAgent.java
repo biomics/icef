@@ -25,6 +25,7 @@ public class EnvironmentAgent extends Element {
 
 	private static EnvironmentAgent instance = new EnvironmentAgent();
 	private String name;
+	private String externalName;
 	
 	private EnvironmentAgent(){
 		name = "self";
@@ -43,5 +44,15 @@ public class EnvironmentAgent extends Element {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getExternalName() {
+		return externalName;
+	}
+	
+	/**
+	 * @param externalName the externalName to set
+	 */
+	public void setExternalName(String externalName) {
+		this.externalName = externalName;
 	}
 }
