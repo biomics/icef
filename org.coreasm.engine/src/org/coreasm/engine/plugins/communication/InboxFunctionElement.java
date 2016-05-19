@@ -71,7 +71,7 @@ public class InboxFunctionElement extends FunctionElement {
 					 String toAgent = theMessage.getToAgent();
 					 Element checker = args.get(0);
 					 Element selfAgent = capi.getScheduler().getSelfAgent();
-					if (checker.toString().equals(capi.getScheduler().getSelfAgent()))
+					if (checker.toString().equals(capi.getScheduler().getSelfAgent().toString()))
 					{
 						if(toAgent.equals(((SelfAgent) selfAgent).getExternalName())||toAgent.equals(checker.toString()))
 							filteredSet.add(theMessage);	
