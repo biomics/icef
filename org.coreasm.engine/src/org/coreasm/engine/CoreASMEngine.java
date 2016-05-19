@@ -66,7 +66,7 @@ public interface CoreASMEngine extends VersionInfoProvider {
 
     public CoreASMError getError();
 
-    public Scheduler getScheduler();
+    public void setSelfName(String name);
 		 
     /**
      * Initializes the engine.
