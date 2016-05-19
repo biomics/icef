@@ -65,6 +65,8 @@ public interface CoreASMEngine extends VersionInfoProvider {
     public boolean hasErrorOccurred();
 
     public CoreASMError getError();
+
+    public Scheduler getScheduler();
 		 
     /**
      * Initializes the engine.

@@ -53,6 +53,8 @@ import org.coreasm.engine.EngineProperties;
 import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.CoreASMError;
 
+import org.coreasm.engine.interpreter.SelfAgent;
+
 import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Element;
@@ -369,7 +371,7 @@ public class CoreASMContainer extends Thread {
 
             // ugh ... how ugly but the way coreASM works, this is needed
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 if(paused) {
                     Thread.sleep(500);
                     continue;
@@ -490,7 +492,6 @@ public class CoreASMContainer extends Thread {
         tempEngine.setProperty(EngineProperties.MAX_PROCESSORS, String.valueOf(1));
         tempEngine.setProperty(EngineProperties.AGENT_EXECUTION_THREAD_BATCH_SIZE, String.valueOf(1));
 
-		// tempEngine.addObserver(this); 
         tempEngine.initialize();
 		tempEngine.waitWhileBusy();
 
@@ -503,6 +504,9 @@ public class CoreASMContainer extends Thread {
         if(engine != null) {
             engine.loadSpecification(new StringReader(prog));
             engine.waitWhileBusy();
+
+            SelfAgent sa = (SelfAgent) engine.getScheduler().getSelfAgent();
+            sa.getInstance().setExternalName(asimName);
 
             if(engine.getEngineMode() == EngineMode.emError)
                 return false;
