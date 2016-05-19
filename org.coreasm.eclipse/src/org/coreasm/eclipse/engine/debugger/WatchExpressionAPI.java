@@ -530,4 +530,19 @@ public class WatchExpressionAPI implements ControlAPI {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public Set<? extends Element> getASIMSet() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addASIMs(Set<String> asims) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteASIMs(Set<String> asims) {
+		throw new UnsupportedOperationException();
+	}
+
 }

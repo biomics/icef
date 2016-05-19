@@ -171,6 +171,10 @@ public class Engine implements ControlAPI {
 
 	private final List<CoreASMWarning> warnings;
 
+	private String selfExternalName;
+
+	private String externalName;
+
 	/**
 	 * Constructs a new CoreASM engine with the specified properties. This is
 	 * mainly for future extensions.
@@ -633,7 +637,7 @@ public class Engine implements ControlAPI {
 	}
 
     public void setSelfName(String name) {
-        SelfAgent.getInstance().setExternalName(name);
+    	 externalName =name;
     }
 
 	@Override
@@ -1527,6 +1531,12 @@ public class Engine implements ControlAPI {
 	@Override
 	public Set<String> getAgentsToRegister() {
 		return agentsToRegister;
+	}
+
+	@Override
+	public String getSelfAgentName() {
+		//System.out.println("Returning the external name "+ externalName);
+		return externalName;
 	}
 }
 

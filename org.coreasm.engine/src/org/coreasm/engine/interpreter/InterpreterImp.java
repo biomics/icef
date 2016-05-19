@@ -1616,7 +1616,7 @@ public class InterpreterImp implements Interpreter {
 			return;
 		}
 		// creating the first agent to run the initial step
-		Element initAgent = SelfAgent.getInstance();
+		SelfAgent initAgent = new SelfAgent();
 		capi.getScheduler().setSelfAgent(initAgent);
 		capi.getScheduler().setPolicy(schedulingPolicy);
 		Location progloc = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));

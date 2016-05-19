@@ -168,7 +168,7 @@ public class CommunicationPlugin extends Plugin implements
 	 */
 	@Override
 	public void initialize() {
-		inboxFunction = new InboxFunctionElement();
+		inboxFunction = new InboxFunctionElement(capi);
 		outboxFunction = new OutboxFunctionElement();
 		allMessages = new ArrayList<MessageElement>();
 		pluginPSI = new CommunicationPSI();
@@ -377,7 +377,7 @@ public class CommunicationPlugin extends Plugin implements
 		if (functions == null) {
 			functions = new HashMap<String,FunctionElement>();
 			if(inboxFunction == null)
-				inboxFunction = new InboxFunctionElement();
+				inboxFunction = new InboxFunctionElement(capi);
 			if(outboxFunction == null)
 				outboxFunction = new OutboxFunctionElement();
 			functions.put(OUTBOX_FUNC_NAME, outboxFunction);

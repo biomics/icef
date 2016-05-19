@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.coreasm.engine.ControlAPI;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
@@ -39,12 +40,14 @@ public class InboxFunctionElement extends FunctionElement {
 	private static final long serialVersionUID = -782541721957242779L;
 	private Set<Location> locations;
 	private SetElement messages;
+	private ControlAPI capi;
 	
-	public InboxFunctionElement() {
+	public InboxFunctionElement(ControlAPI capi) {
 		setFClass(FunctionClass.fcMonitored);
 		messages = new SetElement();
 		locations = new HashSet<Location>();
 		locations.add(CommunicationPlugin.INBOX_FUNC_LOC);//THIS IS A GLOBAL INBOX
+		this.capi =capi;
 	}
 
 	/* (non-Javadoc)
@@ -53,7 +56,8 @@ public class InboxFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (args.size() == 0) //FIXME BSL should we allow this? to get the whole mailbox?
-			return Element.UNDEF;//	return messages;
+			return new SetElement(messages.getSet()) ;
+			//return Element.UNDEF;//	return messages;
 		else if (args.size() == 1) //The owner of the inbox. 
 		{
 			//FIXME BSL this implementation is very inefficient, consider filtering during value setting?
@@ -66,9 +70,10 @@ public class InboxFunctionElement extends FunctionElement {
 					MessageElement theMessage = (MessageElement) m;
 					 String toAgent = theMessage.getToAgent();
 					 Element checker = args.get(0);
-					if (checker.toString().equals(SelfAgent.getInstance().toString()))
+					 Element selfAgent = capi.getScheduler().getSelfAgent();
+					if (checker.toString().equals(capi.getScheduler().getSelfAgent()))
 					{
-						if(toAgent.equals(SelfAgent.getInstance().getExternalName())||toAgent.equals(checker.toString()))
+						if(toAgent.equals(((SelfAgent) selfAgent).getExternalName())||toAgent.equals(checker.toString()))
 							filteredSet.add(theMessage);	
 					}
 					else if(toAgent.equals(checker.toString()))

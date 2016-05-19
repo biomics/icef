@@ -22,6 +22,7 @@ import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasm.engine.interpreter.SelfAgent;
 
 /** 
  *	Defines the interface of the scheduler module.
@@ -198,7 +199,7 @@ public interface Scheduler {
     /**
      * Sets the value of <i>EnvironmentAgent</i> in the scheduler.
      */
-    public void setSelfAgent(Element agent);
+    public void setSelfAgent(SelfAgent agent);
         
     /**
      * Returns the value of <i>EnvironmentAgent</i> in the scheduler.

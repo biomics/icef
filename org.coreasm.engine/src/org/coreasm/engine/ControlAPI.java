@@ -178,5 +178,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	 * Returns the last error encountered by the engine.
 	 */
 	public CoreASMError getError();
+
+	public String getSelfAgentName();
 }
 

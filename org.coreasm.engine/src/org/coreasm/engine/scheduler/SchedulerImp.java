@@ -45,6 +45,7 @@ import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.InterpreterImp;
+import org.coreasm.engine.interpreter.SelfAgent;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.SchedulerPlugin;
 import org.coreasm.engine.plugins.schedulingpolicies.SchedulingPoliciesPlugin;
@@ -93,9 +94,8 @@ public class SchedulerImp implements Scheduler {
 
 	private AgentContextMap agentContextMap;
 
-	private Element environmentAgent;
+	private SelfAgent selfAgent;
 	private PolicyElement  policy;
-
 	
 
 	public SchedulerImp(ControlAPI engine) {
@@ -159,6 +159,7 @@ public class SchedulerImp implements Scheduler {
 	 */
 
 	public synchronized void startStep() {
+		((SelfAgent) getSelfAgent()).setExternalName(capi.getSelfAgentName());
 		updateInstructions = new UpdateMultiset();
 		// changed by Roozbeh
 		// updateSet.clear();
@@ -173,10 +174,10 @@ public class SchedulerImp implements Scheduler {
 		agentSet = new HashSet<Element>();
 		Location loc = new Location(
 				AbstractStorage.PROGRAM_FUNCTION_NAME,
-				ElementList.create(environmentAgent));
+				ElementList.create(selfAgent));
 		try {
 			if (!storage.getValue(loc).equals(Element.UNDEF))
-				agentSet.add(environmentAgent);
+				agentSet.add(selfAgent);
 		} catch (InvalidLocationException e) {
 			capi.error("Cannot get the value of location " + loc
 					+ ".");
@@ -275,7 +276,7 @@ public class SchedulerImp implements Scheduler {
 
 
 	public boolean selectAgents() {
-		schedule.add(environmentAgent);
+		schedule.add(selfAgent);
 		//we need to filter scheduled agents that have no program
 		for (Element e : schedule)
 		{
@@ -304,11 +305,11 @@ public class SchedulerImp implements Scheduler {
 	 * Evaluates the policy.
 	 */
 	public void evaluatePolicy() throws EngineException {
-		AgentContext context = agentContextMap.get(environmentAgent); 
+		AgentContext context = agentContextMap.get(selfAgent); 
 		Interpreter inter;
 		if (context == null) {
-			context = new AgentContext(environmentAgent);
-			agentContextMap.put(environmentAgent, context);
+			context = new AgentContext(selfAgent);
+			agentContextMap.put(selfAgent, context);
 			context.interpreter = new InterpreterImp(capi);
 			inter = context.interpreter;
 		} else {
@@ -321,7 +322,7 @@ public class SchedulerImp implements Scheduler {
 		AbstractStorage storage = capi.getStorage();
 		Location loc = new Location(
 				AbstractStorage.POLICY_FUNCTION_NAME,
-				ElementList.create(environmentAgent));
+				ElementList.create(selfAgent));
 		try {
 			Element value = storage.getValue(loc);
 			if (value.equals(Element.UNDEF)){
@@ -339,7 +340,7 @@ public class SchedulerImp implements Scheduler {
 			logger.error("Cannot get the value of location " + loc
 					+ ".");
 		}
-		inter.setSelfForPolicy(environmentAgent, policy);
+		inter.setSelfForPolicy(selfAgent, policy);
 		
 		ASTNode policyNode = policy.getBody();
 		rootNode = context.nodeCopyCache.get(policyNode);
@@ -532,7 +533,7 @@ public class SchedulerImp implements Scheduler {
 	}
 
 	public boolean environmentPresent() {
-		return selectedAgentSet.contains(environmentAgent);
+		return selectedAgentSet.contains(selfAgent);
 	}
 
 	/*
@@ -541,11 +542,11 @@ public class SchedulerImp implements Scheduler {
 	 */
 
 	public Element getSelfAgent() {
-		return environmentAgent;
+		return selfAgent;
 	}
 
-	public void setSelfAgent(Element agent) {
-		environmentAgent = agent;
+	public void setSelfAgent(SelfAgent agent) {
+		selfAgent = agent;
 	}
 
 	public int getStepCount() {

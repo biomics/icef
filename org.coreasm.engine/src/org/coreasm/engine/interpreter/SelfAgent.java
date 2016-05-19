@@ -22,23 +22,18 @@ import org.coreasm.engine.absstorage.Element;
  * 
  */
 public class SelfAgent extends Element {
-
-	private static SelfAgent instance = new SelfAgent();
+	
 	private String name;
 	private String externalName;
 	
-	private SelfAgent(){
+	public SelfAgent(){
 		name = "self";
 	}
 	public String toString() {
 		return name;
 	}
-	/**
-	 * @return the instance
-	 */
-	public static SelfAgent getInstance() {
-		return instance;
-	}
+	
+	
 	/**
 	 * @param name the name to set
 	 */
@@ -46,6 +41,7 @@ public class SelfAgent extends Element {
 		this.name = name;
 	}
 	public String getExternalName() {
+		
 		return externalName;
 	}
 	
