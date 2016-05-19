@@ -540,11 +540,11 @@ public class SchedulerImp implements Scheduler {
 	 * program; }
 	 */
 
-	public Element getEnvironmentAgent() {
+	public Element getSelfAgent() {
 		return environmentAgent;
 	}
 
-	public void setEnvironmentAgent(Element agent) {
+	public void setSelfAgent(Element agent) {
 		environmentAgent = agent;
 	}
 

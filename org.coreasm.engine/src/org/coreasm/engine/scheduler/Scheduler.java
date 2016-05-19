@@ -198,12 +198,12 @@ public interface Scheduler {
     /**
      * Sets the value of <i>EnvironmentAgent</i> in the scheduler.
      */
-    public void setEnvironmentAgent(Element agent);
+    public void setSelfAgent(Element agent);
         
     /**
      * Returns the value of <i>EnvironmentAgent</i> in the scheduler.
      */    
-    public Element getEnvironmentAgent();
+    public Element getSelfAgent();
     
     /**
      * Sets <i>stepCount</i> to the specified value.

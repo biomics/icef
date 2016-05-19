@@ -21,13 +21,13 @@ import org.coreasm.engine.absstorage.Element;
  * @author  Roozbeh Farahbod
  * 
  */
-public class EnvironmentAgent extends Element {
+public class SelfAgent extends Element {
 
-	private static EnvironmentAgent instance = new EnvironmentAgent();
+	private static SelfAgent instance = new SelfAgent();
 	private String name;
 	private String externalName;
 	
-	private EnvironmentAgent(){
+	private SelfAgent(){
 		name = "self";
 	}
 	public String toString() {
@@ -36,7 +36,7 @@ public class EnvironmentAgent extends Element {
 	/**
 	 * @return the instance
 	 */
-	public static EnvironmentAgent getInstance() {
+	public static SelfAgent getInstance() {
 		return instance;
 	}
 	/**

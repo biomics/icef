@@ -21,7 +21,7 @@ import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MessageElement;
-import org.coreasm.engine.interpreter.EnvironmentAgent;
+import org.coreasm.engine.interpreter.SelfAgent;
 import org.coreasm.engine.plugins.set.SetElement;
 
 /** 
@@ -66,9 +66,9 @@ public class InboxFunctionElement extends FunctionElement {
 					MessageElement theMessage = (MessageElement) m;
 					 String toAgent = theMessage.getToAgent();
 					 Element checker = args.get(0);
-					if (checker.toString().equals(EnvironmentAgent.getInstance().toString()))
+					if (checker.toString().equals(SelfAgent.getInstance().toString()))
 					{
-						if(toAgent.equals(EnvironmentAgent.getInstance().getExternalName())||toAgent.equals(checker.toString()))
+						if(toAgent.equals(SelfAgent.getInstance().getExternalName())||toAgent.equals(checker.toString()))
 							filteredSet.add(theMessage);	
 					}
 					else if(toAgent.equals(checker.toString()))

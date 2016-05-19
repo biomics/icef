@@ -45,7 +45,7 @@ import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.EngineError;
 import org.coreasm.engine.absstorage.NameElement;
-import org.coreasm.engine.interpreter.EnvironmentAgent;
+import org.coreasm.engine.interpreter.SelfAgent;
 
 /** 
  *	This is an implementation of the <code>AbstractStorage</code> interface that
@@ -147,7 +147,7 @@ public class HashStorage implements AbstractStorage {
         runtime.getScheduler().setPolicy(schPolicy);
         try {
         	UniverseElement agentsuniverse = new UniverseElement();
-        	Element initagent = EnvironmentAgent.getInstance();
+        	Element initagent = SelfAgent.getInstance();
         	agentsuniverse.setValue(initagent, BooleanElement.TRUE);
         	List<Element> arglist = new ArrayList<Element>();
         	arglist.add(initagent);

@@ -234,7 +234,7 @@ public class HashStorage implements AbstractStorage {
 				try {	
 					if(u.value == Element.UNDEF)
 					{
-						if(!u.loc.args.get(0).equals(capi.getScheduler().getEnvironmentAgent()))
+						if(!u.loc.args.get(0).equals(capi.getScheduler().getSelfAgent()))
 						{
 							capi.getAgentsToDeregister().add(u.loc.args.toString());
 						}
@@ -246,7 +246,7 @@ public class HashStorage implements AbstractStorage {
 					}
 					else
 					{
-						if(!u.loc.args.get(0).equals(capi.getScheduler().getEnvironmentAgent()))
+						if(!u.loc.args.get(0).equals(capi.getScheduler().getSelfAgent()))
 						{
 							capi.getAgentsToRegister().add(u.loc.args.toString());
 							agents.setValue(u.loc.args, BooleanElement.TRUE);

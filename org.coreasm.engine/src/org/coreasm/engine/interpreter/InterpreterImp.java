@@ -854,7 +854,7 @@ public class InterpreterImp implements Interpreter {
 								// everything alright! Create the message
 								// element and prepare to send it
 								MessageElement me = new MessageElement(
-										capi.getScheduler().getEnvironmentAgent().toString(), content.getValue(),
+										capi.getScheduler().getSelfAgent().toString(), content.getValue(),
 										agentName.toString(), subject.getLocation().name,
 										capi.getScheduler().getStepCount(),
 										content.getValue().getClass().getSimpleName());
@@ -1616,8 +1616,8 @@ public class InterpreterImp implements Interpreter {
 			return;
 		}
 		// creating the first agent to run the initial step
-		Element initAgent = EnvironmentAgent.getInstance();
-		capi.getScheduler().setEnvironmentAgent(initAgent);
+		Element initAgent = SelfAgent.getInstance();
+		capi.getScheduler().setSelfAgent(initAgent);
 		capi.getScheduler().setPolicy(schedulingPolicy);
 		Location progloc = new Location(AbstractStorage.PROGRAM_FUNCTION_NAME, ElementList.create(initAgent));
 		Location polloc = new Location(AbstractStorage.POLICY_FUNCTION_NAME, ElementList.create(initAgent));
