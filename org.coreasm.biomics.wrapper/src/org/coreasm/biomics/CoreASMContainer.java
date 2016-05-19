@@ -53,8 +53,6 @@ import org.coreasm.engine.EngineProperties;
 import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.CoreASMError;
 
-import org.coreasm.engine.interpreter.SelfAgent;
-
 import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Element;
@@ -505,8 +503,7 @@ public class CoreASMContainer extends Thread {
             engine.loadSpecification(new StringReader(prog));
             engine.waitWhileBusy();
 
-            SelfAgent sa = (SelfAgent) engine.getScheduler().getSelfAgent();
-            sa.getInstance().setExternalName(asimName);
+            engine.setSelfName(asimName);
 
             if(engine.getEngineMode() == EngineMode.emError)
                 return false;

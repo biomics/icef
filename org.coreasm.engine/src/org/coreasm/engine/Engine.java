@@ -44,6 +44,7 @@ import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.interpreter.SelfAgent;
 import org.coreasm.engine.loader.PluginManager;
 import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.mailbox.MailboxImp;
@@ -630,6 +631,10 @@ public class Engine implements ControlAPI {
 
 		return plugins;
 	}
+
+    public void setSelfName(String name) {
+        SelfAgent.getInstance().setExternalName(name);
+    }
 
 	@Override
 	public Scheduler getScheduler() {
