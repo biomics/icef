@@ -177,6 +177,9 @@ var Manager = (function() {
 
             var self = this;
             newASIM.load();
+
+            if(descr.start)
+                simulation.report2Scheduler(newASIM.getName(), "start");
             
             return { success : true, msg : "ASIM '"+newASIM.getName()+"' created successfully in simulation '"+simulation.getId()+"'.\n", asim : newASIM.simplify() };
         },

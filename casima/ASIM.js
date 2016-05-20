@@ -32,9 +32,12 @@ var ASIM = (function() {
         else
             this.policy = spec.policy;
 
-        if(spec.simualtion != undefined || spec.simulation != null) {
+        if(spec.start != undefined && spec.start != null)
+            this.start = spec.start;
+
+        if(spec.simualtion != undefined || spec.simulation != null)
             this.simulation = spec.simulation;
-        } else 
+        else 
             this.simulation = null;
 
         this.brapper = null;
@@ -222,12 +225,12 @@ var ASIM = (function() {
             var request = {};
 
             request.simulation = this.simulation;
-            if(this.signature != undefined && this.signature != null)
-                request.signature = this.signature;
+            request.signature = this.signature;
             request.program = this.program;
             request.init = this.init;
             request.policy = this.policy;
             request.name = this.name;
+            request.start = this.start;
             
             var data = JSON.stringify(request);
             
@@ -281,7 +284,7 @@ var ASIM = (function() {
             });
             
             request.on('error', function(e) {
-                console.log("Problem: ", e);          
+                console.log("Problem: ", e);
             });
             
             request.write(data);
