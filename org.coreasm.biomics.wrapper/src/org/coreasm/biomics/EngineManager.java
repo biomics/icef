@@ -60,7 +60,7 @@ public class EngineManager {
         program += "use Standard\n\n";
 
         program += req.signature+"\n\n";
-
+        
         String newRule = "RULE"+UUID.randomUUID().toString().replace("-","");
 
         program += "rule " + newRule + " = {\n"+req.init+"\nprogram(self) := "+req.program+"\n}\n\n";
@@ -71,6 +71,11 @@ public class EngineManager {
         System.out.println("Program to execute:\n"+program);
 
         CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program);
+
+        if(req.start) {
+            System.out.println("Start execution right away");
+            casm.start();
+        }
 
         if(asims.containsKey(req.simulation))
             asims.get(req.simulation).put(req.name, casm);
@@ -335,6 +340,7 @@ public class EngineManager {
             String newName = "ASIM" + UUID.randomUUID().toString().replace("-", "");
 
             ASIMCreationRequest localReq = new ASIMCreationRequest(req, simId);
+            localReq.start = true;
             if(localReq.name == null || localReq.name.equals(""))
                 localReq.name = newName;
 

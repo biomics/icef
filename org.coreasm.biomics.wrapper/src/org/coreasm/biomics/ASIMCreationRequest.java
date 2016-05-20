@@ -12,6 +12,7 @@ public class ASIMCreationRequest {
     public String init; 
     public String program;
     public String policy;
+    public boolean start;
 
     @JsonCreator
     public ASIMCreationRequest(@JsonProperty("name") String n, 
@@ -19,21 +20,30 @@ public class ASIMCreationRequest {
                                @JsonProperty("signature") String sig,
                                @JsonProperty("init") String in,
                                @JsonProperty("program") String prog,
-                               @JsonProperty("policy") String pol) {
+                               @JsonProperty("policy") String pol,
+                               @JsonProperty("start") boolean s) {
         name = n;
         simulation = sim;
         signature = sig;
         init = in;
         program = prog;
         policy = pol;
+        start = s;
     }
 
     public ASIMCreationRequest(AgentCreationElement e, String simId) {
         simulation = simId;
         name = e.getName().toString();
-        signature = e.getSignature();
-        init = e.getInitRule().getBody().unparseTree();
-        program = e.getProgram().getBody().unparseTree();
-        policy = e.getPolicy().getBody().unparseTree();
+
+        signature = e.getSignature() + "\\n";
+        signature = e.getInitRule().getDeclarationNode().unparseTree() + "\\n\\n";
+        signature += e.getInitRule().getDeclarationNode().unparseTree() + "\\n\\n";
+        signature += e.getProgram().getDeclarationNode().unparseTree() + "\\n\\n";
+        signature += e.getPolicy().getDeclarationNode().unparseTree() + "\\n\\n";
+
+        init = e.getInitRule().getName();
+        program = e.getProgram().getName();
+        policy = e.getPolicy().getName();
+        start = true;
     }
 }
