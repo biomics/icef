@@ -37,23 +37,17 @@ public class EngineManager {
     public static CoreASMError createASIM(ASIMCreationRequest req) {
         asimCounter++;
 
-        System.out.println("Create new ASIM");
-        System.out.println("ASIM Simulation: "+req.simulation);
-        System.out.println("ASIM Name: "+req.name);
-        System.out.println("ASIM Signature: "+req.signature);
-        System.out.println("ASIM Init: "+req.init);
-        System.out.println("ASIM Program: "+req.program);
-        System.out.println("ASIM Policy: "+req.policy);
-
         if(req.simulation == null || req.simulation.equals(""))
             return new CoreASMError("ASIM specification does not define simulation.");
 
         if(req.init == null || req.init.equals(""))
             return new CoreASMError("ASIM specification does not define init rule.");
 
-        if(req.name == null || req.name.equals("")) {
+        if(req.name == null || req.name.equals(""))
             return new CoreASMError("ASIM specification does not define a name.");
-        }
+ 
+        if(req.signature == null || req.signature.equals(""))
+            return new CoreASMError("ASIM specification requires a signature.");
 
         if(req.program == null || req.program.equals(""))
             return new CoreASMError("ASIM specification does not define a program.");
@@ -62,19 +56,19 @@ public class EngineManager {
             return new CoreASMError("ASIM specification does not define a policy.");
 
         String program = "CoreASM "+req.name+"\n\n";
+
         program += "use Standard\n\n";
 
-        // the program signature may be empty
-        if(req.signature != null && !req.signature.equals(""))
-            program += req.signature+"\n\n";
+        program += req.signature+"\n\n";
 
-        program += "init Start\n\n";
-        program += "policy p = "+req.policy+"\n\n";
-        program += "rule Start = {\n"+req.init+"\n\tprogram(self) := Main\n}\n\n";
-        program += "rule Main = {\n"+req.program+"\n}\n\n";
-        program += "scheduling p\n";
+        String newRule = "RULE"+UUID.randomUUID().toString().replace("-","");
 
-        System.out.println("Program to execute: "+program);
+        program += "rule " + newRule + " = {\n"+req.init+"\nprogram(self) := "+req.program+"\n}\n\n";
+        program += "init " + newRule + "\n\n";
+
+        program += "scheduling "+req.policy+"\n\n";
+
+        System.out.println("Program to execute:\n"+program);
 
         CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program);
 
