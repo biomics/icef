@@ -3,7 +3,7 @@ var express = require('express');
 var http = require('http');
 
 var sys = require('sys');
-var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 
 var app = null;
 var server = null;
@@ -34,24 +34,30 @@ function initServer() {
 };
 
 function startScheduler() {
-    var cmd = "java -jar "+config.scheduler.jar+" -u -s ";
-    cmd = cmd + (config.scheduler.host ? " -h " + config.scheduler.host : "" );
-    cmd = cmd + (config.scheduler.port ? " -p " + config.scheduler.port : "" );
-    cmd = cmd + (config.httpServer.host ? " -m " + config.httpServer.host : "" );
-    cmd = cmd + (config.httpServer.port ? " -mp " + config.httpServer.port : "" );
+    var args = [];
 
-    var scheduler = exec(cmd, function(error, stdout, stderr) {
-        if(error != null) {
-            console.log("Fatal error: Scheduler ASIM crashed");
-            console.log(error);
-            process.exit(1);
+    args.push("-jar");
+    args.push(config.scheduler.jar);
+    args.push("-u");
+    args.push("-s");
+    if(config.scheduler.host) {
+        args.push("-h");
+        args.push(config.scheduler.host);
+    }
+    if(config.scheduler.port) {
+        args.push("-p");
+        args.push(config.scheduler.port);
+    }
+    if(config.httpServer.host) {
+        args.push("-m");
+        args.push(config.httpServer.host);
+    }
+    if(config.httpServer.port) {
+        args.push("-mp");
+        args.push(config.httpServer.port);
+    }
 
-            console.log("stdout: "+stdout);
-            console.log("stderr: "+stderr);
-        }
-
-        console.log("Scheduler stopped!");
-    });
+    var scheduler = spawn("java", args);
 
     scheduler.stdout.on('data', function(data) {
         console.log("[Scheduler ASIM]: "+data);
@@ -59,6 +65,15 @@ function startScheduler() {
 
     scheduler.stderr.on('data', function(data) {
         console.log("[Scheduler ASIM]: Error: "+data);
+    });
+
+    scheduler.on('error', function(e) {
+        console.log("[Scheduler ASIM]: Error: "+e);
+    });
+
+    scheduler.on('exit', function(code) {
+        if(code != 0)
+            console.log("[Scheduler ASIM]: Error: "+code);
     });
 
     manager.registerSchedulerBrapper(config.scheduler);
