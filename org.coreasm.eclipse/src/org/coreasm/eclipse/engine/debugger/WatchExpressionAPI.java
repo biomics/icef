@@ -545,4 +545,15 @@ public class WatchExpressionAPI implements ControlAPI {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void setSelfName(String name) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public String getSelfAgentName() {
+		throw new UnsupportedOperationException();
+	}
+
 }
