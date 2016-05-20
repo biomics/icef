@@ -308,7 +308,7 @@ public class CoreASMContainer extends Thread {
     }
 
     public void distributeUpdateSet(UpdateMultiset updates) {
-        System.out.println("+++ handleUpdateSet +++ ");
+        // System.out.println("+++ handleUpdateSet +++ ");
 
         Map<String, UpdateMultiset> toSend = prepareUpdates(updates);
         Set<String> targets = toSend.keySet();
@@ -331,7 +331,7 @@ public class CoreASMContainer extends Thread {
             }
         }
         
-        System.out.println("--- handleUpdateSet --- ");
+        // System.out.println("--- handleUpdateSet --- ");
     }
 
     public synchronized void newASIM(String name) {
@@ -340,10 +340,8 @@ public class CoreASMContainer extends Thread {
     }
 
     public synchronized void injectASIMs() {
-        System.out.println("CoreASMContainer.injectASIMs");
-
         for(String asim : asimsToAdd) 
-            System.out.println("CoreASMContainer: Adding ASIM: "+asim);
+            System.out.println("***** CoreASMContainer: Adding ASIM: "+asim+" *****");
         engine.addASIMs(asimsToAdd);
         asimsToAdd.clear();
     }
@@ -459,7 +457,6 @@ public class CoreASMContainer extends Thread {
                 while(it.hasNext()) {
                     String loc = it.next();
                     String name = EngineManager.requestASIMCreation(loc2Agent.get(loc), simId);
-                    System.out.println("NEW NAME: "+name);
                     agents.put(loc, name);
                 }
                 engine.reportNewAgents(agents);
