@@ -863,6 +863,7 @@ public class InterpreterImp implements Interpreter {
 												CommunicationPlugin.MAIL_TO_ACTION, capi.getInterpreter().getSelf(),
 												pos.getScannerInfo())),
 										null, null);
+								capi.getMailbox().putOnSchedulingOutbox(me);
 								return pos;
 							} else {
 								capi.error("The policy is trying to schedule " + agentName.toString()

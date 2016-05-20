@@ -49,7 +49,7 @@ public interface Mailbox {
      * Puts the message into the outbox
      * @param message The MessageElement to be put into the outbox
      */
-    public void putOnOutbox(MessageElement message); 
+    public void putOnSchedulingOutbox(MessageElement message); 
     
     /**
      * Cleans up any cached data in the mailbox to run a new specification

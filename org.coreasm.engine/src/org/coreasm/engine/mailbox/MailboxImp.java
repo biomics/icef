@@ -20,10 +20,12 @@ public class MailboxImp implements Mailbox {
 	private Set<MessageElement> outbox;
 	private ControlAPI capi;
 	private CommunicationPSI communicationPSI;
+	private Set<MessageElement> schedulingOutbox;
 
 	@Override
 	public Set<MessageElement> emptyOutbox() {
 		Set<MessageElement> oldOutbox = new HashSet<MessageElement>(outbox);
+		schedulingOutbox.clear();
 		outbox.clear();
 		return oldOutbox;
 	}
@@ -40,8 +42,8 @@ public class MailboxImp implements Mailbox {
 	}
 
 	@Override
-	public void putOnOutbox(MessageElement message) {
-		outbox.add(message);
+	public void putOnSchedulingOutbox(MessageElement message) {
+		schedulingOutbox.add(message);
 	}
 
 	@Override
@@ -56,6 +58,7 @@ public class MailboxImp implements Mailbox {
 		super();
 		inbox = new HashSet<MessageElement>();
 		outbox = new HashSet<MessageElement>();
+		schedulingOutbox = new HashSet<MessageElement>();
 		this.capi = capi;
 		}
 
@@ -73,6 +76,7 @@ public class MailboxImp implements Mailbox {
 			capi.error("Inbox is not empty at the end of the current step");
 		outbox.clear();
 		outbox.addAll(communicationPSI.collectOutgoingMessages());	
+		outbox.addAll(schedulingOutbox);
 	}
 
 	@Override
