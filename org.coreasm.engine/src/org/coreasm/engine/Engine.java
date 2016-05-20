@@ -175,6 +175,8 @@ public class Engine implements ControlAPI {
 
 	private String externalName;
 
+	private UpdateMultiset ASIMsUpdates;
+
 	/**
 	 * Constructs a new CoreASM engine with the specified properties. This is
 	 * mainly for future extensions.
@@ -189,7 +191,7 @@ public class Engine implements ControlAPI {
 		this.properties = new EngineProperties();
 		if (properties != null)
 			this.properties.putAll(properties);
-
+		ASIMsUpdates = new UpdateMultiset();
 		storage = new HashStorage(this);
 		scheduler = new SchedulerImp(this);
 		mailbox = new MailboxImp(this);
@@ -870,12 +872,12 @@ public class Engine implements ControlAPI {
 	@Override
 	public void addASIMs(Set<String> asims) {
 		for(String asimName: asims) {
-            System.out.println("asimName: "+asimName);
+            System.out.println("ADDING UPDATE TO SCHEDULER FOR "+asimName);
 				Element e = new EnumerationElement(asimName);
 				Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
 				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
 				//TODO BSL how do you prevent the new element from being overwritten?
-				scheduler.getUpdateInstructions().add(u);
+				ASIMsUpdates.add(u);
 		}
 		asims.clear();
 	//	commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
@@ -895,7 +897,7 @@ public class Engine implements ControlAPI {
 					//found it! Remove from universe and list of known asims
 					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
 					Update u = new Update(l,BooleanElement.FALSE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
-					scheduler.getUpdateInstructions().add(u);
+					scheduler.getUpdateSet().add(u);
 					//knownASIMs.remove(e); // removed, this should update from the content in the abstract storage!
 					asims.remove(asimName);
 					break;
@@ -1182,6 +1184,8 @@ public class Engine implements ControlAPI {
 							}
 
 						case emAggregation:
+							scheduler.getUpdateInstructions().addAll(ASIMsUpdates);
+							ASIMsUpdates.clear();
 							storage.aggregateUpdates();
 							if (storage.isConsistent(scheduler.getUpdateSet())) {
 								storage.fireUpdateSet(scheduler.getUpdateSet());

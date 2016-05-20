@@ -219,6 +219,7 @@ public class SchedulerImp implements Scheduler {
 			// pick only those that have a non-null program
 			for (Element asims : ((Enumerable) asimsSetFlat).enumerate()) {				
 				ASIMSet.add(asims);
+				System.out.println("I have the asim "+asims);
 			}
 		}
 		else {

@@ -226,6 +226,8 @@ public class HashStorage implements AbstractStorage {
 		if (isStateStacked()) 
 			throw new EngineError("Cannot fire updates when the state stack is not empty.");
 		AbstractUniverse agents = this.getUniverse(AbstractStorage.AGENTS_UNIVERSE_NAME);
+		AbstractUniverse asims = this.getUniverse(AbstractStorage.ASIMS_UNIVERSE_NAME);
+		
 		//this is done in a transactional fashion
 		for (Update u: updateSet) {
 			//BSL Here is where we have to update
@@ -259,6 +261,20 @@ public class HashStorage implements AbstractStorage {
 					logger.error(msg);
 					throw new EngineError(msg);
 				}
+			}
+			else if 	(u.loc.name==AbstractStorage.ASIMS_UNIVERSE_NAME)
+			{
+				
+						try {
+							asims.setValue(u.loc.args, u.value);
+							System.out.println("Setting ASIM: "+u.loc.args+":="+u.value);
+						} catch (UnmodifiableFunctionException e) {
+							// this should not happen 
+							String msg = "Agents universe appears to be not modifiable!";
+							logger.error(msg);
+							throw new EngineError(msg);
+						}
+					
 			}
 			else if(u.loc.name==AbstractStorage.AGENTS_UNIVERSE_NAME)
 			{
