@@ -5,15 +5,10 @@ var Config = {
         path : '/'
     },
 
-    updater : {
-        port : 9091,
-        host : 'localhost',
-        path : '../coreASM/org.coreasm.biomics.wrapper/target/brapper.jar'
-    },
-
     scheduler : {
         port : 9091,
-        host : 'localhost'
+        host : 'localhost',
+        jar : '../coreASM/org.coreasm.biomics.wrapper/target/brapper.jar'
     }
 };
 

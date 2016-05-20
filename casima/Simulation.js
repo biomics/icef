@@ -72,8 +72,34 @@ var Simulation = (function() {
             var asim = this.asimList[name];
             if(asim == undefined) {
                 return { success : false, msg : "Simulation "+this.id+" does not host ASIM '"+name+"'" };
-            } else
+            } else {
+                this.report2Scheduler(name, command);
                 return asim.control(command)
+            }
+        },
+
+        report2Scheduler : function(name, command) {
+            console.log("Simulation.report2Scheduler('"+name+"', '"+command+"')");
+            for(var strScheduler in this.schedulerList) {
+                var scheduler = this.schedulerList[strScheduler];
+                switch(command) {
+                    case "start" :
+                    case "resume" : scheduler.reportNewASIM(name, command); break;
+                    case "pause" : 
+                    case "stop" : scheduler.removeASIM(name, command); break;
+                    default : console.log("Unknown command");
+                }
+            }
+        },
+
+        controlScheduler : function(name, command) {
+            console.log("Simulation.controlScheduler('"+name+"', '"+command+"')");
+
+            var scheduler = this.schedulerList[name];
+            if(scheduler == undefined) {
+                return { success : false, msg : "Simulation "+this.id+" does not host scheduler ASIM '"+name+"'" };
+            } else
+                return scheduler.control(command)
         },
 
         addScheduler : function(scheduler) {
@@ -82,6 +108,8 @@ var Simulation = (function() {
             
             scheduler.setSimulation(this.id);
             this.schedulerList[scheduler.getName()] = scheduler;
+
+            console.log("Simulation: Scheduler '"+scheduler.getName()+"' added to simulation '" + this.id + "'");
             
             return true;
         },
@@ -132,7 +160,7 @@ var Simulation = (function() {
             var self = this;
             try {
                 spec.schedulers.forEach(function(current, index, array) {
-                    var scheduler = new Scheduler(current);
+                    var scheduler = new ASIM(current);
                     scheduler.setSimulation(self.id);
 
                     if(!self.addScheduler(scheduler)) {
@@ -171,11 +199,28 @@ var Simulation = (function() {
                 if(e.sender != "ASIM") throw e;
                 return { success : false, msg : e };
             }
+
+            // create scheduler ASIM for the specifications
+            try {
+                for(var name in this.schedulerList) {
+                    var brapper = this.manager.getSchedulerBrapper();
+                    if(brapper == null) 
+                        return { success : false, msg : "Manager has no scheduler brappers to load simulation. Register or restart the brappers first." };
+
+                    var scheduler = this.schedulerList[name];
+                    brapper.addASIM(scheduler);
+                    scheduler.load();
+                }
+            }
+            catch(e) {
+                if(e.sender != "Assignment") throw e;
+                return { success : false, msg : e.msg };
+            }
             
             // create ASIM for the specifications
             try {
                 for(var name in this.asimList) {
-                    var brapper = this.manager.getHostingBrapper();
+                    var brapper = this.manager.getASIMBrapper();
                     if(brapper == null) 
                         return { success : false, msg : "Manager has no brappers to load simulation. Register or restart the brappers first." };
 
@@ -190,6 +235,45 @@ var Simulation = (function() {
             }
             
             return { success : true, msg : "Simulation loaded successfully.\n", id : this.id };
+        },
+
+        recvUpdate : function(update) {
+            if(update == undefined || update == null)
+                return { success : false, msg : "Error: Invalid update\n" };
+
+            if(update.type != "update") {
+                return { success : false, msg : "Cannot process update with payload type '"+update.type+"'.\n" };
+            }
+
+            // update from which agent?
+            if(update.fromAgent == undefined || update.fromAgent == null) {
+                return { success : false, msg : "Update message does not specify the agent for which the update should take place\n" };
+            }
+
+            if(update.body == undefined || update.body == null) {
+                return { success : false, msg : "Update set is not specified in received update!\n" };
+            }
+
+            /* if(this.updateASIM == undefined || this.updateASIM == null) {
+                return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
+            }*/
+
+            console.log("TOAGENT: "+update.toAgent);
+            var address = update.toAgent.split("@");
+            if(address.length != 2) {
+                console.log("Target '"+update.toAgent+"' has invalid address format\n");
+                return { success : false, msg : "Invalid address format\n" };
+            }
+
+            var asim = this.schedulerList[address[1]];
+            if(asim != undefined) {
+                console.log("Forwarding update from ASIM '"+update.fromAgent+"' to scheduler ASIM '"+update.toAgent+"'");
+                return asim.recvUpdate(update);
+            } else {
+                return { success : false, msg : "Unable to forward update. Scheduler at '"+update.toAgent+"' does not exist.\n" };
+            } 
+
+            return true;
         },
 
         recvMsg : function(msg) {
@@ -216,7 +300,7 @@ var Simulation = (function() {
 
             var asim = this.asimList[address[1]];
             if(asim != undefined) {
-                console.log("Forward message from agent '"+msg.fromAgent+"' to agent '"+msg.toAgent+"'");
+                console.log("Forward message from ASIM '"+msg.fromAgent+"' to ASIM '"+msg.toAgent+"'");
                 return asim.recvMsg(msg);
             } else {
                 return { success : false, msg : "Unable to forward message. Target does not exist.\n" };

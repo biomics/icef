@@ -11,14 +11,14 @@ var manager = null;
 var config = null;
 
 function init(_config, mng) {
-    console.log("Starting manager server ...");
-
     config = _config;
     manager = mng;
     
     initApp();
     initServer();
-    startUpdater();
+    startScheduler();
+
+    console.log("Manager up and running at http://"+config.httpServer.host+":"+config.httpServer.port);
 };
 
 function initServer() {
@@ -33,23 +33,35 @@ function initServer() {
     });
 };
 
-function startUpdater() {
-    var cmd = "java -jar "+config.updater.path+" ";
-    cmd = cmd + (config.updater.host ? " -h " + config.updater.host : "" );
-    cmd = cmd + (config.updater.port ? " -p " + config.updater.port : "" );
+function startScheduler() {
+    var cmd = "java -jar "+config.scheduler.jar+" -u -s ";
+    cmd = cmd + (config.scheduler.host ? " -h " + config.scheduler.host : "" );
+    cmd = cmd + (config.scheduler.port ? " -p " + config.scheduler.port : "" );
+    cmd = cmd + (config.httpServer.host ? " -m " + config.httpServer.host : "" );
+    cmd = cmd + (config.httpServer.port ? " -mp " + config.httpServer.port : "" );
 
-    var updater = exec(cmd, function(error, stdout, stderr) {
+    var scheduler = exec(cmd, function(error, stdout, stderr) {
         if(error != null) {
-            console.log("Fatal error: Update ASIM crashed");
+            console.log("Fatal error: Scheduler ASIM crashed");
             console.log(error);
             process.exit(1);
 
             console.log("stdout: "+stdout);
             console.log("stderr: "+stderr);
-
-            // TODO: try to restart
         }
+
+        console.log("Scheduler stopped!");
     });
+
+    scheduler.stdout.on('data', function(data) {
+        console.log("[Scheduler ASIM]: "+data);
+    });
+
+    scheduler.stderr.on('data', function(data) {
+        console.log("[Scheduler ASIM]: Error: "+data);
+    });
+
+    manager.registerSchedulerBrapper(config.scheduler);
 }
 
 function initApp() {
@@ -83,14 +95,14 @@ function initApp() {
     // ****************** BRAPPERS ******************
 
     app.get("/brappers", function(req, res) {
-        var allWrappers = manager.getBrappers();
+        var allWrappers = manager.getASIMBrappers();
         res.send(allWrappers);
     });
 
     app.put("/brappers", 
             express.json(), 
             function(req, res) {
-                var result = manager.registerBrapper(req.body);
+                var result = manager.registerASIMBrapper(req.body);
                 if(result.success) {
                     res.send(200, result);
                 } else {
@@ -105,7 +117,7 @@ function initApp() {
 
     app.get("/brappers/:id", function(req, res) {
         var id = req.params.id;
-        var result = manager.getBrapper(id);
+        var result = manager.getASIMBrapper(id);
         if(result == undefined) {
             res.status(404).json({ error : "Brapper with id '"+id+"' has not been registered."});
         } 
@@ -141,8 +153,14 @@ function initApp() {
                  if(result.success) {
                      if(result.asim == undefined)
                          res.send(204);
-                     else
-                         res.send(200, result);
+                     else {
+                         var response = {};
+                         response.name = result.asim.name;
+                         response.simulation = result.asim.simulation;
+                         response.success = true;
+                         response.error = "";
+                         res.send(201, response);
+                     }
                  } else {
                      res.send(409, result);
                  }
@@ -250,10 +268,24 @@ function initApp() {
     app.put("/schedulers", 
              express.json(), 
              function(req, res) {
-                 res.send(501);
+                 var result = manager.createASIM(req.body);
+                 if(result.success) {
+                     if(result.asim == undefined)
+                         res.send(204);
+                     else {
+                         var response = {};
+                         response.name = result.asim.name;
+                         response.simulation = result.asim.simulation;
+                         response.success = true;
+                         response.error = "";
+                         res.send(201, response);
+                     }
+                 } else {
+                     res.send(409, result);
+                 }
              }, 
              function(req, res) {
-                 res.send(501);
+                 res.send(500, "Unable to create new scheduler ASIM.");
              }
             );
     
@@ -267,13 +299,21 @@ function initApp() {
              }
             );
 
-    app.put("/schedulers/:id", 
+    app.put("/schedulers/:simulation/:name", 
              express.json(), 
              function(req, res) {
-                 res.send(501);
+                 var simulation = req.params.simulation;
+                 var name = req.params.name;
+                 
+                 var result = manager.controlScheduler(simulation, name, req.body.command);
+
+                 if(!result.success)
+                     res.send(404);
+                 else
+                     res.send(200, result.msg);
              }, 
              function(req, res) {
-                 res.send(501);
+                 res.send(500, "Unable to control scheduler.");
              }
             );
 
@@ -337,12 +377,14 @@ function initApp() {
 
     // ****************** Updates ******************    
 
-    app.put("/update",
+    app.put("/updates/:simulation",
              express.json(),
              function(req, res) {
-                 var result = manager.recvUpdate(req.body);
-                 // console.log("result: ",result.msg);
+                var simulation = req.params.simulation;
+                 console.log("simulation: "+simulation);
+                 var result = manager.recvUpdate(simulation, req.body);
                  if(!result.success) {
+                     console.log("ERROR: "+result.msg);
                      res.send(400, result.msg);
                  } else {
                      res.send(200);
@@ -354,7 +396,7 @@ function initApp() {
              }
             );
 
-    app.put("/update/register",
+    app.put("/updates/register",
              express.json(),
              function(req, res) {
                  res.send(501);

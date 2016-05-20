@@ -58,6 +58,18 @@ var Scheduler = (function() {
             return this.name;
         },
 
+        setBrapper : function(b) {
+            this.brapper = b;
+        },
+
+        recvUpdate : function(update) {
+            
+        },
+
+        load : function(spec) {
+            
+        },
+
         setSimulation : function(id) {
             this.simulation = id;
         }

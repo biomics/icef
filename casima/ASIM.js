@@ -7,8 +7,8 @@ var uuid = require("node-uuid");
 var ASIM = (function() {        
 
     var cls = function(spec) {
-        if(spec.name == undefined || spec.name == null) 
-            this.name = uuid.v4();
+        if(spec.name == undefined || spec.name == null || spec.name == "") 
+            this.name = "ASIM"+uuid.v4().replace(/-/g, "");
         else
             this.name = spec.name;
 
@@ -263,12 +263,15 @@ var ASIM = (function() {
                         result = JSON.parse(resData);
                     } 
                     catch(e) {
+                        console.log("ERROR DURING CREATION: "+e);
+                        console.log("DATA: "+resData);
                         self.setError(resData);
                         self.brapper = null;
                         self.unload();
                         return;
                     }
                     if(result.error != undefined && result.error != null && result.error != "") {
+                        console.log("ERROR DURING CREATION: "+result.error);
                         self.setError(result.error);
                         self.brapper = null;
                         self.unload();
@@ -292,8 +295,56 @@ var ASIM = (function() {
                 return { success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" };
         },
 
+        recvUpdate : function(msg) {
+            if(this.status == ASIMState.RUNNING)
+                return this.brapper.recvUpdate(msg);
+            else
+                return { success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" };
+        },
+
         unload : function() {
             // TODO: unload a loaded ASIM from brapper
+        },
+
+        reportNewASIM : function(name, command) {
+            if(this.status == ASIMState.ERROR)
+                return { success : true, msg : "ERROR: ASIM '"+this.name+"' is in error state\n" };
+
+            var options = {
+                host: this.brapper.host,
+                port: this.brapper.port,
+                path: '/updates/'+this.simulation+'/asim/'+name,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': 0
+                }
+            };
+            
+            var self = this;
+            var error = null;
+
+            var request = http.request(options, function(res) {
+                var resData = "";
+                res.setEncoding('utf8');
+                
+                if(res.statusCode != 201) 
+                    error = { success : false, msg : "Unable to report new ASIM '"+this.name+"'\n" };
+            });
+            
+            request.on('error', function(e) {
+                error = { success : false, msg : "Unable to report new ASIM '"+this.name+"'\n" };
+            });
+            
+            request.write("");
+            request.end();
+
+            error = { success : true, msg : "New ASIM '"+this.name+"' successfully added.\n" };
+
+            return error;
+        },
+
+        removeASIM : function() {
         },
 
         getName : function() {

@@ -15,12 +15,22 @@ var Manager = (function() {
         this.channelList = {};
         this.channelMap = {};
 
-        this.brapperMap = {};
+        this.asimBrapperMap = {};
+
+        // the scheduler brapper
+        this.schedulerBrapperMap = {};
 
         this.simMap = {};
     };
 
     cls.prototype = {
+        getScheduler : function() {
+            return this.scheduler;
+        },
+
+        setScheduler : function() {
+        },
+
         getSimulations : function() {
             var ids = [];
             for(var id in this.simMap) 
@@ -38,45 +48,61 @@ var Manager = (function() {
             return result;
         },
 
-        registerBrapper : function(descr) {
+        registerSchedulerBrapper : function(descr) {
             if(!descr || descr.host == undefined || descr.port == undefined) {
-                return { success : false, msg : "Invalid brapper description. Unable to register brapper.\n" };
+                return { success : false, msg : "Invalid brapper description. Unable to register scheduler brapper.\n" };
+            }
+
+            var newBrapper = new Brapper(descr.host, descr.port, "scheduler");
+            var id = newBrapper.getId();
+
+            if(this.schedulerBrapperMap[id] != undefined) {
+                return { success : false, msg : "Unable to register new scheduling brapper. Brapper already exists!\n" };
+            } else {
+                this.schedulerBrapperMap[id] = newBrapper;
+                return { success : true, msg : "Scheduling brapper successfully registered.", id : id };
+            }
+        },
+
+        registerASIMBrapper : function(descr) {
+            if(!descr || descr.host == undefined || descr.port == undefined) {
+                return { success : false, msg : "Invalid brapper description. Unable to register ASIM brapper.\n" };
             }
 
             var newBrapper = new Brapper(descr.host, descr.port);
             var id = newBrapper.getId();
 
-            if(this.brapperMap[id] != undefined) {
-                return { success : false, msg : "Unable to register new wrapper. Brapper already exists!\n" };
+            if(this.asimBrapperMap[id] != undefined) {
+                return { success : false, msg : "Unable to register new brapper. Brapper already exists!\n" };
             } else {
-                this.brapperMap[id] = newBrapper;
+                this.asimBrapperMap[id] = newBrapper;
                 return { success : true, msg : "Brapper successfully registered.", id : id };
             }
         },
 
         delBrapper : function(id) {
             var toDel = null;
-            for(var w in this.brapperMap) {
-                if(this.brapperMap[w].id == id) {
+            for(var w in this.asimBrapperMap) {
+                if(this.asimBrapperMap[w].id == id) {
                     toDel = w;
                     break;
                 }
             }
 
             if(toDel != null) {
-                delete this.brapperMap[w];
+                delete this.asimBrapperMap[w];
                 return true;
             } else {
                 return false;
             }
         },
 
-        getBrappers : function() {
-            return this.brapperMap;
+        getASIMBrappers : function() {
+            return this.asimBrapperMap;
         },
 
-        getBrapper : function(id) {
-            return this.brapperMap[id];
+        getASIMBrapper : function(id) {
+            return this.asimBrapperMap[id];
         },
 
         getASIMs : function(simulation) {
@@ -111,7 +137,7 @@ var Manager = (function() {
 
         createASIM : function(descr) {
             // check for an empty brapper
-            var brapper = this.getHostingBrapper();
+            var brapper = this.getASIMBrapper();
             if(brapper == null) 
                 return { success : false, msg : "Manager has no brappers to run ASIMs. Register or restart them." };
 
@@ -172,11 +198,20 @@ var Manager = (function() {
                 return false;
         },
 
-        getHostingBrapper : function() {
+        controlScheduler : function(simulation, name, cmd) {
+            var sim = this.simMap[simulation];
+
+            if(sim)
+                return sim.controlScheduler(name, cmd);
+            else
+                return false;
+        },
+
+        getSchedulerBrapper : function() {
             var minLoad = -1;
             var minId = -1;
-            for(var wid in this.brapperMap) {
-                var wrapper = this.brapperMap[wid];
+            for(var wid in this.schedulerBrapperMap) {
+                var wrapper = this.schedulerBrapperMap[wid];
                 var wl = wrapper.getLoad();
                 if(wl < minLoad || minLoad == -1) {
                     minLoad = wl;
@@ -187,7 +222,25 @@ var Manager = (function() {
             if(minId == -1)
                 return null;
             else
-                return this.brapperMap[minId];
+                return this.schedulerBrapperMap[minId];
+        },
+
+        getASIMBrapper : function() {
+            var minLoad = -1;
+            var minId = -1;
+            for(var wid in this.asimBrapperMap) {
+                var wrapper = this.asimBrapperMap[wid];
+                var wl = wrapper.getLoad();
+                if(wl < minLoad || minLoad == -1) {
+                    minLoad = wl;
+                    minId = wid;
+                }
+            }
+
+            if(minId == -1)
+                return null;
+            else
+                return this.asimBrapperMap[minId];
         },
 
         recvMsg : function(simulation, msg) {
@@ -199,41 +252,18 @@ var Manager = (function() {
             return sim.recvMsg(msg);
         },
 
-        recvUpdate : function(update) {
-            // console.log("Manager: Receive: ", update);
-
-            if(update == undefined || update == null)
-                return { success : false, msg : "Error: Invalid update\n" };
-
-            if(update.type != "update") {
-                return { success : false, msg : "Cannot process update with payload type '"+update.type+"'.\n" };
-            }
-
-            if(update.simulation == undefined || update.simulation == null) {
-               return { success : false, msg : "Cannot process update without simulation specification.\n" };
-            }
-
-            var sim = this.simMap[update.simulation];
-            if(sim == undefined || sim == null) {
-                return { success : false, msg : "Error: Update for unknown simulation '" + update.simulation + "'.\n" };
-            }
-
-            // update from which agent?
-            if(update.fromAgent == undefined || update.fromAgent == null) {
-                return { success : false, msg : "Update message does not specify the agent for which the update should take place\n" };
-            }
-
-            if(update.body == undefined || update.body == null) {
-                return { success : false, msg : "Update set is not specified in received update!\n" };
-            }
-
-            if(this.updateASIM == undefined || this.updateASIM == null) {
-                return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
-            }
+        // TODO also send the updates to some internal 
+        // data structure in case these are updates belonging 
+        // to the UI
+        recvUpdate : function(simulation, update) {
+            var sim = this.simMap[simulation];
             
-            console.log("Ignore update for now");
+            if(sim == undefined || sim == null) {
+                console.log("Simulation '"+simulation+"' for updates does not exist. Ignore.");
+                return { success : false, msg : "Simulation for updates does not exist. Ignore." };
+            }
 
-            return { success: true, msg : "Ignored" };
+            return sim.recvUpdate(update);
         }, 
 
         sendUpdate : function(update) {
