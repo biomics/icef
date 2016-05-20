@@ -3,6 +3,8 @@ package org.coreasm.biomics;
 import java.io.IOException;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.List;
 import java.util.HashMap;
 
 import javax.ws.rs.core.MediaType;
@@ -117,7 +119,7 @@ public class EngineManager {
             return false;
     }
 
-    public static boolean receiveMsg(MessageRequest req) {
+    public static boolean receiveMsg(String simId, MessageRequest req) {
         System.out.println("Engine Manager receives message");
         System.out.println("Simulation: "+req.simulation);
         System.out.println("Receiver: "+req.toAgent);
@@ -132,13 +134,12 @@ public class EngineManager {
 
             String asim = "";
 
-
             // this message is sent to a simulation which
             // is not hosted by this brapper
-            if(!asims.containsKey(req.simulation))
+            if(!asims.containsKey(simId))
                 return false;
             
-            Map<String, CoreASMContainer> simAsims = asims.get(req.simulation);
+            Map<String, CoreASMContainer> simAsims = asims.get(simId);
             
             // check whether this ASIM is managed here
             String[] names = req.toAgent.split("@");
@@ -148,9 +149,7 @@ public class EngineManager {
             } else 
                 asim = names[1];
             
-            if(simAsims.containsKey(asim)) {
-                System.out.println("EngineManager knows this ASIM");
-            } else {
+            if(!simAsims.containsKey(asim)) {
                 System.out.println("EngineManager does not know this ASIM");
                 return false;
             }
@@ -166,36 +165,119 @@ public class EngineManager {
         return false;
     }
 
-    public static boolean receiveUpdate(MessageRequest req) {
-        System.out.println("Engine Manager receives update");
+    public static boolean register4Updates(String simId, UpdateRegistrationRequest req) {
+        System.out.println("EngineManager.register4Updates");
+        System.out.println("req.target: "+req.target);
+        
+        // no target asim given
+        if(req.target == null)
+            return false;
+
+        // this message is sent to a simulation which
+        // is not hosted by this brapper
+        if(!asims.containsKey(simId))
+            return false;
+   
+        Map<String, CoreASMContainer> simAsims = asims.get(simId);
+        
+        List<UpdateLocation> registrations = req.registrations;
+        for(UpdateLocation reg : registrations) {
+            if(reg.location == null)
+                continue;
+
+            // only register with one ASIM
+            if(reg.asim != null) {
+                String asim = null;
+                String asimAddress[] = reg.asim.split("@");
+                if(asimAddress.length != 2) {
+                    System.err.println("Invalid ASIM address in update registration: '"+reg.asim+"'");
+                    continue;
+                } else
+                    asim = asimAddress[1];
+
+                if(!simAsims.containsKey(asim)) {
+                    System.out.println("EngineManager does not know this ASIM. Ignore update registration");
+                    continue;
+                }
+                
+                CoreASMContainer trg = simAsims.get(asim);
+                trg.register4Update(req.target, reg.location);
+            } 
+            // register with all ASIMs at this brapper in this simulation
+            else {
+                Set<String> allAsims = simAsims.keySet();
+                for(String asimName : allAsims) {
+                    CoreASMContainer trg = simAsims.get(asimName);
+                    trg.register4Update(req.target, reg.location);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean newASIM(String simId, String name) {
+        System.out.println("New ASIM reported");
+
+        if(wrapper.config.schedulingMode) {
+            // this message is sent to a simulation which
+            // is not hosted by this brapper
+            if(!asims.containsKey(simId))
+                return false;
+
+            Map<String, CoreASMContainer> simAsims = asims.get(simId);
+            Set<String> allASIMs = simAsims.keySet();
+            for(String trg : allASIMs) {
+                System.out.println("PUT new ASIM name '"+name+"' into Scheduling ASIM '"+trg+"'");
+                simAsims.get(trg).newASIM(name);
+            }
+        } else
+            return false;
+
+        return true;
+    }
+
+    public static boolean receiveUpdate(String simId, MessageRequest req) {
+        System.out.println("** Engine Manager receives update");
 
         String agent = "";
 
-        /* if(req.type.equals("update")) {
-            if(wrapper.config.accUpdatesMode) {
-                String[] names = req.fromAgent.split(":");
-                if(names.length > 1)
-                    agent = names[1];
-                else
-                    agent = names[0];
-
-                if(asims.containsKey(agent)) {
-                    System.out.println("EngineManager knows this ASIM");
-                } else {
+        if(wrapper.config.accUpdatesMode) {
+            if(req.type.equals("update")) {
+                
+                // this message is sent to a simulation which
+                // is not hosted by this brapper
+                if(!asims.containsKey(simId))
+                    return false;
+                
+                Map<String, CoreASMContainer> simAsims = asims.get(simId);
+                
+                String asim = null;
+                String asimAddress[] = req.toAgent.split("@");
+                if(asimAddress.length != 2) {
+                    System.err.println("Invalid target address '"+req.toAgent+"'");
+                    return false;
+                } else
+                    asim = asimAddress[1];
+                
+                if(!simAsims.containsKey(asim)) {
                     System.out.println("EngineManager does not know this ASIM");
                     return false;
                 }
-                req.fromAgent = agent;
+                
+                req.toAgent = asim;
+                
+                CoreASMContainer trg = simAsims.get(asim);
 
-                CoreASMContainer trg = asims.get(agent);
-                trg.receiveUpdate(req);
+                return trg.receiveUpdate(req);
             } else {
-                System.err.println("WARNING: Update received although wrapper is not in update accumulation mode. Ignored!");
+                System.err.println("WARNING: Ignore message as it is not update!");
                 return false;
             }
-            }*/
-
-        return true;
+        } else {
+            System.out.println("WARNING: Update received although brapper is not in update accumulation mode. Ignored!");
+            return false;
+        }
     }
 
     public static void sendMsg(MessageRequest req) {
@@ -219,7 +301,7 @@ public class EngineManager {
             // ASIM is also hosted here and can be delivered locally
             if(hostedASIMs.containsKey(trg)) {
                 // ASIM is hosted here, deliver directly
-                receiveMsg(req);
+                receiveMsg(req.simulation, req);
                 return;
             }
         }
@@ -323,14 +405,14 @@ public class EngineManager {
         return null;
     }
 
-    public static void sendUpdate(MessageRequest req) {
+    public static void sendUpdate(String simId, MessageRequest req) {
         if(wrapper == null) {
             System.err.println("ERROR: Running without a wrapper!");
             System.exit(1);
         }
         
         if(wrapper.getConfig().getManager() == null || wrapper.commUrl == null) {
-            // no manager, so don't send updates
+            System.out.println("No manager available. Don't send updates");
             return;
         }
 
@@ -340,7 +422,7 @@ public class EngineManager {
             Response response = ClientBuilder.newBuilder()
                 .build()
                 .target(wrapper.commUrl)
-                .path("update")
+                .path("updates/"+simId)
                 .request(MediaType.APPLICATION_JSON)
                 .accept("*/*")
                 .put(Entity.json(json));
@@ -361,21 +443,24 @@ public class EngineManager {
     public static void reset(Wrapper wrapper) {
         EngineManager.wrapper = wrapper;
 
-        if(wrapper.config.managerHost != null) {
+        if(wrapper.config.managerHost != null)
             registerWithManager();
-        }
 
         asims.clear();
     }
 
     private static void registerWithManager() {
-        System.out.print("Try to register brapper with manager ... ");
+        if(wrapper.config.schedulingMode)
+            return;
 
+        System.out.println("Registering ASIM brapper with manager ... ");
+            
         String registration = "{ \"host\" : \""+ 
             wrapper.config.getHost() + "\", \"port\" : \"" + 
             wrapper.config.getPort() + "\" }";
 
         try {
+            
             Response response = ClientBuilder.newBuilder()
                 .build()
                 .target(wrapper.commUrl)
@@ -385,10 +470,9 @@ public class EngineManager {
                 .put(Entity.json(registration));
             int status = response.getStatus(); 
             if(status == 200) {
-                System.out.println("Success.");
                 System.out.println(response.readEntity(String.class));
             } else {
-                System.out.println("Fail.");
+                System.err.println("Unable to register brapper.");
             }
         } 
         catch (ProcessingException pe) {

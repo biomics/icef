@@ -87,7 +87,9 @@ public class CoreASMContainer extends Thread {
 	private UpdateMultiset lastUpdateSet = null;
     private ObjectMapper mapper = null;
 
+    private HashSet<String> asimsToAdd = null;
     private HashSet<MessageElement> inBox = null;
+    private HashMap<String, HashSet<String>> updateRegistrations = null;
 
     private boolean paused = false;
 
@@ -102,6 +104,8 @@ public class CoreASMContainer extends Thread {
         simId = simulation;
 
         inBox = new HashSet<MessageElement>();
+        asimsToAdd = new HashSet<String>();
+        updateRegistrations = new HashMap<>();
 
         initEngine();
 
@@ -283,28 +287,65 @@ public class CoreASMContainer extends Thread {
         }
     }
 
-    public void handleUpdateSet(UpdateMultiset updates) {
+    public Map<String, UpdateMultiset> prepareUpdates(UpdateMultiset updates) {
+        HashMap<String, UpdateMultiset> map = new HashMap<>();
+
+        Iterator<Update> it = updates.iterator();
+        while(it.hasNext()) {
+            Update update = it.next();
+            if(updateRegistrations.containsKey(update.loc.name)) {
+                Set<String> targets = updateRegistrations.get(update.loc.name);
+                for(String t : targets) {
+                    System.out.println("=> Send "+update.loc.name+" to "+t);
+                    if(!map.containsKey(t))
+                        map.put(t, new UpdateMultiset());
+                    map.get(t).add(update);
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public void distributeUpdateSet(UpdateMultiset updates) {
         System.out.println("+++ handleUpdateSet +++ ");
 
-        System.out.println("lastUpdate: "+updates);
-        
+        Map<String, UpdateMultiset> toSend = prepareUpdates(updates);
+        Set<String> targets = toSend.keySet();
+
         String json = "";
-        try {
-            json = mapper.writeValueAsString(updates);
-            MessageRequest req = new MessageRequest("update", simId, asimName, json);
-            EngineManager.sendUpdate(req);
-        } catch (Exception e) {
-            System.err.println("Unable to transform UpdateSet into json.");
-            System.err.println(e);
-            e.printStackTrace();
-            
-            System.out.println("----------------------------------");
-            System.out.println("Error Update: "+updates);
-            System.out.println("Error JSON: "+json);
-            System.out.println("----------------------------------");
+        for(String target : targets) {
+            try {
+                json = mapper.writeValueAsString(toSend.get(target));
+                MessageRequest req = new MessageRequest("update", simId, asimName, target, json);
+                EngineManager.sendUpdate(simId, req);
+            } catch (Exception e) {
+                System.err.println("Unable to transform UpdateSet into json.");
+                System.err.println(e);
+                e.printStackTrace();
+                
+                System.out.println("----------------------------------");
+                System.out.println("Error Update: "+updates);
+                System.out.println("Error JSON: "+json);
+                System.out.println("----------------------------------");
+            }
         }
         
         System.out.println("--- handleUpdateSet --- ");
+    }
+
+    public synchronized void newASIM(String name) {
+        System.out.println("Prepare adding new ASIM "+name);
+        asimsToAdd.add(name);
+    }
+
+    public synchronized void injectASIMs() {
+        System.out.println("CoreASMContainer.injectASIMs");
+
+        for(String asim : asimsToAdd) 
+            System.out.println("CoreASMContainer: Adding ASIM: "+asim);
+        engine.addASIMs(asimsToAdd);
+        asimsToAdd.clear();
     }
 
     // TODO: NEEDS TO BE SYNCHRONIZED!!!
@@ -316,7 +357,7 @@ public class CoreASMContainer extends Thread {
     }
 
     // TODO: NEEDS TO BE SYNCHRONIZED!!!
-    public void receiveUpdate(MessageRequest req) {
+    public boolean receiveUpdate(MessageRequest req) {
         System.out.println("CoreASMContainer receives update");
 
         String strUpdates = req.body;
@@ -356,6 +397,17 @@ public class CoreASMContainer extends Thread {
         catch(InvalidLocationException invalidLoc) {
             System.err.println("Refuse update as a location is invalid.");
         }
+
+        return true;
+    }
+
+    public synchronized boolean register4Update(String target, String location) {
+        if(!updateRegistrations.containsKey(location))
+            updateRegistrations.put(location, new HashSet<String>());
+        
+        updateRegistrations.get(location).add(target);
+        
+        return true;
     }
 
     public void run() {
@@ -383,9 +435,10 @@ public class CoreASMContainer extends Thread {
 			else
 				lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
 
-            handleUpdateSet(lastUpdateSet);
+            distributeUpdateSet(lastUpdateSet);
 
             injectUpdates();
+            injectASIMs();
             
             if(inBox.size() > 0) {
                 engine.getMailbox().fillInbox(getInBox());

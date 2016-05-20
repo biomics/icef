@@ -18,16 +18,16 @@ public class WrapperConfig {
     @Option(name="-r", forbids={ "-m", "-mp" }, metaVar="<host>", usage="Wrapper only mode operates without manager, i.e. all messages are sent to the remote wrapper specified in this option.")
    public String remoteHost = null;
 
-    @Option(name="-rp", depends={"-r"}, forbids={ "-m", "-mp" }, metaVar="<port>", usage="Specifies the port of the remote wrapper.")
+    @Option(name="-rp", depends={"-r"}, forbids={ "-m", "-mp" }, metaVar="<port>", usage="Specifies the port of the remote brapper.")
     public int remotePort = 8080;
 
-    @Option(name="-u", forbids={ "-r", "-rp", "-m", "-mp" }, usage="Enables the accumulation of updates.")
+    @Option(name="-u", forbids={ "-r", "-rp" }, usage="Enables update accumulation inside the brapper.")
     public boolean accUpdatesMode = false;
 
-    @Option(name="-s", depends={ "-u" }, forbids={ "-r", "-rp" }, usage="Allows the execution of several scheduling agents.")
+    @Option(name="-s", depends={ "-u" }, forbids={ "-r", "-rp" }, usage="Allows the execution of several scheduling ASIMs.")
     public boolean schedulingMode = false;
 
-    @Option(name="-c", depends={ "-u" }, forbids={ "-r", "-rp" }, usage="Allows the execution of channel agents.")
+    @Option(name="-c", depends={ "-u" }, forbids={ "-r", "-rp" }, usage="Allows the execution of channel ASIMs.")
     public boolean channelMode = false;
 
     public String getHost() {

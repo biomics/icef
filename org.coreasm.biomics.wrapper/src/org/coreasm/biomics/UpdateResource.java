@@ -1,5 +1,7 @@
 package org.coreasm.biomics;
 
+import java.util.List;
+
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -16,18 +18,57 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.core.Version;
 
-
-@Path("update")
+@Path("updates")
 public class UpdateResource {
 
     @PUT
+    @Path("/{simId}")
     @Consumes("application/json")
-    public Response receiveMsg(String update) {
+    public Response receiveUpdate(@PathParam("simId") String simId, String update) {
         MessageRequest req = MessageRequest.getMessage(update);
 
         boolean result = false;
         if(req != null) {
-            result = EngineManager.receiveUpdate(req);
+            result = EngineManager.receiveUpdate(simId, req);
+        }
+
+        if(result) {
+            return Response.status(200).build();
+        } else {
+            return Response.status(403).build();
+        }
+    }
+
+    @PUT
+    @Path("/{simId}/asim/{name}")
+    @Consumes("application/json")
+    public Response newASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
+        boolean result = false;
+        
+        result = EngineManager.newASIM(simId, name);
+
+        if(result) {
+            return Response.status(201).build();
+        } else {
+            return Response.status(403).build();
+        }
+    }
+
+    @PUT
+    @Path("/{simId}/register")
+    @Consumes("application/json")
+    public Response resgiter(@PathParam("simId") String simId, String update) {
+        UpdateRegistrationRequest req = UpdateRegistrationRequest.getUpdateRegistrationRequest(update);
+
+        List<UpdateLocation> list = req.registrations;
+        for(UpdateLocation loc : list) {
+            System.out.println("location: "+loc.location);
+            System.out.println("asim: "+loc.asim);
+        }
+
+        boolean result = false;
+        if(req != null && req.target != null) {
+            result = EngineManager.register4Updates(simId, req);
         }
 
         if(result) {
