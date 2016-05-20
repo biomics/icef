@@ -848,7 +848,7 @@ public class InterpreterImp implements Interpreter {
 							}
 						}
 						else if (capi.getASIMSet().contains(agentName)) {
-							// We assume that the agent is an external
+							// We see that the agent is an external
 							// agent!
 							if (content != null && subject != null) {
 								// everything alright! Create the message
