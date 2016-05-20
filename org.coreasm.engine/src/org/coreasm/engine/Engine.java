@@ -62,6 +62,7 @@ import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.ServiceProvider;
 import org.coreasm.engine.plugin.ServiceRequest;
 import org.coreasm.engine.plugins.signature.EnumerationElement;
+import org.coreasm.engine.plugins.string.StringElement;
 import org.coreasm.engine.scheduler.Scheduler;
 import org.coreasm.engine.scheduler.SchedulerImp;
 import org.coreasm.util.Tools;
@@ -872,8 +873,8 @@ public class Engine implements ControlAPI {
 	@Override
 	public void addASIMs(Set<String> asims) {
 		for(String asimName: asims) {
-            System.out.println("ADDING UPDATE TO SCHEDULER FOR "+asimName);
-				Element e = new EnumerationElement(asimName);
+         //   System.out.println("ADDING UPDATE TO SCHEDULER FOR "+asimName);
+				StringElement e = new StringElement(asimName);
 				Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
 				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
 				//TODO BSL how do you prevent the new element from being overwritten?
