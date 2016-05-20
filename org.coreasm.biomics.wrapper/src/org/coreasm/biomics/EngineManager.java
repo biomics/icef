@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.List;
 import java.util.HashMap;
+import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -51,7 +52,6 @@ public class EngineManager {
             return new CoreASMError("ASIM specification does not define init rule.");
 
         if(req.name == null || req.name.equals("")) {
-            System.out.println("--- XXX ---");
             return new CoreASMError("ASIM specification does not define a name.");
         }
 
@@ -338,7 +338,7 @@ public class EngineManager {
 
         // this engine is not managed, creation of ASIM must take place locally
         if(wrapper.config.managerHost == null) {
-            String newName = "ASIM" + asimCounter;
+            String newName = "ASIM" + UUID.randomUUID().toString().replace("-", "");
 
             ASIMCreationRequest localReq = new ASIMCreationRequest(req, simId);
             if(localReq.name == null || localReq.name.equals(""))
