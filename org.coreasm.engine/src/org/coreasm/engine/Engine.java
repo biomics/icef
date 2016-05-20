@@ -870,7 +870,7 @@ public class Engine implements ControlAPI {
 	@Override
 	public void addASIMs(Set<String> asims) {
 		for(String asimName: asims) {
-		
+            System.out.println("asimName: "+asimName);
 				Element e = new EnumerationElement(asimName);
 				Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
 				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						

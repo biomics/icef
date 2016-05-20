@@ -6,6 +6,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 
@@ -20,9 +21,9 @@ import com.fasterxml.jackson.core.Version;
 public class MessageResource {
 
     @PUT
+    @Path("/{simId}")
     @Consumes("application/json")
-    @Produces("text/plain")
-    public String receiveMsg(String message) {
+    public Response receiveMsg(@PathParam("simId") String simId, String message) {
         System.out.println("MessageResource: receiveMsg");
         System.out.println("Message: "+message);
         
@@ -30,13 +31,13 @@ public class MessageResource {
 
         boolean result = false;
         if(req != null) {
-            result = EngineManager.receiveMsg(req);
+            result = EngineManager.receiveMsg(simId, req);
         }
 
         if(result) {
-            return "Success.\n";
+            return Response.status(200).build();
         } else {
-            return "Fail.\n";
+            return Response.status(403).build();
         }
     }
 }
