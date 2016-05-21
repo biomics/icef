@@ -23,27 +23,33 @@ public class MailboxImp implements Mailbox {
 	private Set<MessageElement> schedulingOutbox;
 
 	@Override
-	public Set<MessageElement> emptyOutbox() {
-		Set<MessageElement> oldOutbox = new HashSet<MessageElement>(outbox);
-		schedulingOutbox.clear();
-		outbox.clear();
+	public synchronized Set<MessageElement> emptyOutbox() {
+        for(MessageElement e : outbox) {
+            System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX EMPTY> "+e);
+        }
+
+        Set<MessageElement> oldOutbox = null;
+        oldOutbox = new HashSet<MessageElement>();
+        for(MessageElement me : outbox) {
+            oldOutbox.add(new MessageElement(me));
+        }
+        schedulingOutbox.clear();
+        outbox.clear();
 		return oldOutbox;
 	}
 
 	@Override
-	public void fillInbox(Set<MessageElement> msgs) {
-		synchronized(inbox) {//Does the inbox have to be empty as precondition?
-		inbox.addAll(msgs);
-		}
+	public synchronized void fillInbox(Set<MessageElement> msgs) {
+        inbox.addAll(msgs);
 	}
 
 	@Override
-	public Set<MessageElement> getInbox() {
+	public synchronized Set<MessageElement> getInbox() {
 		return inbox;
 	}
 
 	@Override
-	public void putOnSchedulingOutbox(MessageElement message) {
+	public synchronized void putOnSchedulingOutbox(MessageElement message) {
 		schedulingOutbox.add(message);
 	}
 
@@ -64,7 +70,7 @@ public class MailboxImp implements Mailbox {
 		}
 
 	@Override
-	public void startStep() {
+	public synchronized void startStep() {
 		if(!outbox.isEmpty())
 			capi.error("Outbox is not empty at the beginning of the current step");
 		communicationPSI.updateInboxLocation(inbox);
@@ -72,12 +78,16 @@ public class MailboxImp implements Mailbox {
 	}
 
 	@Override
-	public void endStep() {
+	public synchronized void endStep() {
 		if(!inbox.isEmpty())
 			capi.error("Inbox is not empty at the end of the current step");
 		outbox.clear();
-		outbox.addAll(communicationPSI.collectOutgoingMessages());	
+		outbox.addAll(communicationPSI.collectOutgoingMessages());
 		outbox.addAll(schedulingOutbox);
+        System.out.println("[Thread "+Thread.currentThread().getName()+"]: Adding new messages");
+        for(MessageElement e : outbox) {
+            System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX ADD> "+e);
+        }
 	}
 
 	@Override

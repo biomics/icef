@@ -829,10 +829,20 @@ public class Engine implements ControlAPI {
 		}
 		logger.debug("Finished waiting while busy or until creation. (Mode: {})",getEngineMode());
 	}
+
+    @Override
+    public Mailbox getMailbox() {
+        return mailbox;
+    }
 	
 	@Override
-	public Mailbox getMailbox() {
-		return mailbox;
+	public synchronized void fillInBox(Set<MessageElement> msgs) {
+		mailbox.fillInbox(msgs);
+	}
+
+	@Override
+    public synchronized Set<MessageElement> emptyOutbox() {
+        return mailbox.emptyOutbox();
 	}
 
 	@Override

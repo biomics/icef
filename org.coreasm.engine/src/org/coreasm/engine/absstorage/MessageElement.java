@@ -85,6 +85,15 @@ public class MessageElement extends Element {
 		this.stepcount = -1;
 	}
 
+	public MessageElement(MessageElement e) {
+        fromAgent = e.getFromAgent();
+        toAgent = e.getToAgent();
+        subject = e.getSubject();
+        message = e.getMessage();
+        stepcount = e.getStepcount();
+        type = e.getType();
+    }
+
 	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount, String type) {
 		if (fromAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null sender");

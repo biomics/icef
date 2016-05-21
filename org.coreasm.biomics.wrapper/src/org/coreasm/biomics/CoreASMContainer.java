@@ -170,10 +170,12 @@ public class CoreASMContainer extends Thread {
     }
 
     public void handleOutgoingMessages() {
-        Set<MessageElement> messages = engine.getMailbox().emptyOutbox();
-        Iterator<MessageElement> it = messages.iterator();
+        Set<MessageElement> messages = engine.emptyOutbox();
 
+        Iterator<MessageElement> it = messages.iterator();
         Set<MessageElement> toSend = new HashSet<>();
+
+        System.out.println("[Thread "+getName()+"]: ASIM "+asimName+" handleOutgoingMessages() - messages: "+messages.size());
 
         // 1. check all toAgent addresses
         //  + if address has format self, replace it by asim name and put in inbox directly
@@ -188,15 +190,22 @@ public class CoreASMContainer extends Thread {
         //  + if address has format NAME@XYZ, replace it by NAME@ASIM
         //  - if address has format @XYZ or @ASIM, replace if by ASIM@ASIM
 
-        Set<? extends Element> a = engine.getAgentSet();
+        Set<? extends Element> a = null;
+        a = engine.getAgentSet();
+
+        if(a == null)
+            return;
+
         HashSet<String> agents = new HashSet<>();
         for(Element e : a)
             agents.add(e.toString());
 
+        int counter = 0;
         while(it.hasNext()) {
-            MessageElement msg = it.next();
+            counter++;
+            MessageElement msg = new MessageElement(it.next());
 
-            System.out.println("Handle Message: "+msg);
+            System.out.println(counter + ": [Thread "+getName()+", size: "+messages.size()+"]: CoreASMContainer.handleOutgoingMessages: "+msg);
 
             String toAgent = msg.getToAgent();
             
@@ -411,15 +420,11 @@ public class CoreASMContainer extends Thread {
     public void run() {
         int currentStep = 1;
 
-        Mailbox mailbox = null;
-
-        Set<MessageElement> messages = null;
-
         do {
 
             // ugh ... how ugly but the way coreASM works, this is needed
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
                 if(paused) {
                     Thread.sleep(500);
                     continue;
@@ -438,8 +443,8 @@ public class CoreASMContainer extends Thread {
             injectUpdates();
             injectASIMs();
             
-            if(inBox.size() > 0) {
-                engine.getMailbox().fillInbox(getInBox());
+            if(getInBoxSize() > 0) {
+                engine.fillInBox(getInBox());
                 emptyInBox();
             }
 
@@ -484,7 +489,7 @@ public class CoreASMContainer extends Thread {
     public boolean receiveMsg(MessageRequest req) {
         String agentMsg = req.body;
 
-        System.out.println("CoreASM receiveMsg");
+        System.out.println("[Thread "+getName()+"]: CoreASMContainer: Receiving message "+req.fromAgent+"; "+req.body);
 
         MessageElement newMsg = null;
         try {
@@ -493,7 +498,6 @@ public class CoreASMContainer extends Thread {
             System.err.println("Unable to transform JSON '"+agentMsg+"' into MessageElement.");
             System.err.println(ioe);
         }
-
         
         String toAgent = newMsg.getToAgent();
         int index = toAgent.indexOf("@"+asimName);
@@ -502,8 +506,6 @@ public class CoreASMContainer extends Thread {
             return false;
         } else
             newMsg.setToAgent(toAgent.substring(0, index));
-
-        System.out.println("[ASIM "+asimName+"]: fillInBox: "+newMsg);
 
         fillInBox(newMsg);
 
@@ -520,6 +522,10 @@ public class CoreASMContainer extends Thread {
 
     private synchronized void emptyInBox() {
         inBox.clear();
+    }
+
+    private synchronized int getInBoxSize() {
+        return inBox.size();
     }
 
     public String getAsimName() {

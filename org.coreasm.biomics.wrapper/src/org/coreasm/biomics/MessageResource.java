@@ -22,17 +22,19 @@ public class MessageResource {
 
     @PUT
     @Path("/{simId}")
-    @Consumes("application/json")
+    @Consumes("application/json")    
+    @Produces("application/json")
     public Response receiveMsg(@PathParam("simId") String simId, String message) {
-        System.out.println("MessageResource: receiveMsg");
-        System.out.println("Message: "+message);
-        
         MessageRequest req = MessageRequest.getMessage(message);
+
+        System.out.println("BRAPPER.JAVA receiveMsg1");
 
         boolean result = false;
         if(req != null) {
             result = EngineManager.receiveMsg(simId, req);
         }
+
+        System.out.println("BRAPPER.JAVA receiveMsg2");
 
         if(result) {
             return Response.status(200).build();

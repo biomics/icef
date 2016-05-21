@@ -15,6 +15,7 @@ package org.coreasm.engine;
 
 import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.State;
@@ -513,10 +514,20 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 */
 	public void waitWhileBusyOrUntilCreation();
 
+    /**
+     * Returns the mailbox module of the engine.
+     */
+    public Mailbox getMailbox();
+
 	/**
-	 * Returns the mailbox module of the engine.
+	 * Fills the Inbox of this engine
 	 */
-	public Mailbox getMailbox();
+	public void fillInBox(Set<MessageElement> msgs);
+
+	/**
+	 * Empties the outbox
+	 */
+    public Set<MessageElement> emptyOutbox();
 
 	/**
 	 * Sets the set of agents successfully created by an external manager and
