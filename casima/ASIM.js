@@ -50,7 +50,7 @@ var ASIM = (function() {
             var cmd = command.toLowerCase();
 
             switch(command) {
-                case "start" : return this.start(); break;
+                case "start" : return this.run(); break;
                 case "pause" : return this.pause(); break;
                 case "resume" : return this.resume(); break;
                 default : console.log("Don't know what to do!");
@@ -169,7 +169,7 @@ var ASIM = (function() {
             return { success : true, msg : "Resuming of ASIM '"+this.name+"' successfully triggered\n" };
         },
 
-        start : function() {
+        run : function() {
             if(this.status == ASIMState.ERROR)
                 return { success : true, msg : "Cannot start ASIM '"+this.name+"' as it is in error state\n" };
 
@@ -278,8 +278,12 @@ var ASIM = (function() {
                         self.setError(result.error);
                         self.brapper = null;
                         self.unload();
-                    } else 
-                        self.status = ASIMState.LOADED;
+                    } else {
+                        if(self.start)
+                            self.status = ASIMState.RUNNING;
+                        else
+                            self.status = ASIMState.LOADED;
+                    }
                 });
             });
             
@@ -291,11 +295,12 @@ var ASIM = (function() {
             request.end();
         },
 
-        recvMsg : function(msg) {
-            if(this.status == ASIMState.RUNNING)
-                return this.brapper.recvMsg(msg);
-            else
-                return { success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" };
+        recvMsg : function(msg, callback) {
+            if(this.status == ASIMState.RUNNING) {
+                console.log("ASIM.recvMsg");
+                this.brapper.recvMsg(msg, callback);
+            } else
+                callback({ success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" });
         },
 
         recvUpdate : function(msg) {
@@ -364,6 +369,10 @@ var ASIM = (function() {
 
         setSimulation : function(id) {
             this.simulation = id;
+        },
+
+        setState : function(state) {
+            this.status = state;
         },
 
         setError : function(e) {

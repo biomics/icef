@@ -176,7 +176,7 @@ var Manager = (function() {
             brapper.addASIM(newASIM);
 
             var self = this;
-            newASIM.load();
+            newASIM.load(descr.start);
 
             if(descr.start)
                 simulation.report2Scheduler(newASIM.getName(), "start");
@@ -246,13 +246,15 @@ var Manager = (function() {
                 return this.asimBrapperMap[minId];
         },
 
-        recvMsg : function(simulation, msg) {
+        recvMsg : function(simulation, msg, callback) {
             var sim = this.simMap[simulation];
+
+            console.log("Manager.recvMsg");
             
             if(sim == undefined || sim == null)
-                return { success : false, msg : "Simulation for message does not exist. Ignore." };
+                callback({ success : false, msg : "Simulation for message does not exist. Ignore." });
             
-            return sim.recvMsg(msg);
+            sim.recvMsg(msg, callback);
         },
 
         // TODO also send the updates to some internal 

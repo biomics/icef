@@ -276,34 +276,42 @@ var Simulation = (function() {
             return true;
         },
 
-        recvMsg : function(msg) {
+        recvMsg : function(msg, callback) {
+            console.log("Simulation.recvMsg");
+
             if(msg == undefined || msg == null)
-                return { success : false, msg : "Error: Invalid message\n" };
+                callback({ success : false, msg : "Error: Invalid message\n" });
 
             if(msg.type != "msg") {
-                return { success : false, msg : "Cannot forward messages without type 'msg'.\n" };
+                callback({ success : false, msg : "Cannot forward messages without type 'msg'.\n" });
             }
 
             if(msg.toAgent == undefined || msg.toAgent == null) {
-                return { success : false, msg : "Message specifies no or invalid target.\n" };
+                callback({ success : false, msg : "Message specifies no or invalid target.\n" });
             }
 
             if(msg.fromAgent == undefined || msg.fromAgent == null) {
-                return { success : false, msg : "Message specifies no or invalid source.\n" };
+                callback({ success : false, msg : "Message specifies no or invalid source.\n" });
             }
 
             var address = msg.toAgent.split("@");
             if(address.length != 2) {
                 console.log("Target '"+msg.toAgent+"' has invalid address format\n");
-                return { success : false, msg : "Invalid address format\n" };
+                callback({ success : false, msg : "Invalid address format\n" });
             }
 
             var asim = this.asimList[address[1]];
             if(asim != undefined) {
-                console.log("Forward message from ASIM '"+msg.fromAgent+"' to ASIM '"+msg.toAgent+"'");
-                return asim.recvMsg(msg);
+                // console.log("Forward message from ASIM '"+msg.fromAgent+"' to ASIM '"+msg.toAgent+"'");
+                asim.recvMsg(msg, callback);
             } else {
-                return { success : false, msg : "Unable to forward message. Target does not exist.\n" };
+                var scheduler = this.schedulerList[address[1]];
+                if(scheduler != undefined) {
+                    console.log("Forward message from ASIM '"+msg.fromAgent+"' to Scheduler '"+msg.toAgent+"'");
+                    console.log("SIMULATION Body: "+msg.body);
+                    scheduler.recvMsg(msg, callback);
+                } else
+                    callback({ success : false, msg : "Unable to forward message. Target does not exist.\n" });
             }
         }
     };

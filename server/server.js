@@ -261,12 +261,14 @@ function initApp() {
             function(req, res) {
                 var simulation = req.params.simulation;
 
-                var result = manager.recvMsg(simulation, req.body);
-                if(!result.success) {
-                    res.send(400, result.msg);
-                } else {
-                    res.send(200);
-                }
+                console.log("server.recvMsg");
+         
+                var result = manager.recvMsg(simulation, req.body, function(result) {
+                    if(!result.success)
+                        console.log("ERROR: "+result.msg);
+                });
+
+                res.send(200);
             },
             function(error, req, res, next) {
                 console.log("Error: Invalid message request. "+error);

@@ -74,17 +74,15 @@ var Brapper = (function() {
             return { success : true, msg : "Update forwarded\n" };
         },
 
-        recvMsg : function(msg) {
-            /* console.log("Sending message to brapper at "+this.host+":"+this.port+"\n");
-               console.log("Message: ",msg);
-            */
-
+        recvMsg : function(msg, callback) {
+            console.log("BRAPPER.JS Sending message to brapper at "+this.host+":"+this.port+"\n");
+            
             var data = JSON.stringify(msg);
 
             var options = {
                 host: this.host,
                 port: this.port,
-                path: '/message',
+                path: '/message/'+msg.simulation,
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -93,23 +91,29 @@ var Brapper = (function() {
             };
 
             var request = http.request(options, function(res) {
+
+                console.log("BRAPPER.JS res.statusCode == "+res.statusCode+" (host "+options.host+":"+options.port+")");
+
                 res.setEncoding('utf8');
+
                 res.on('data', function(chunk) {
-                    console.log("Response: "+chunk);
-                });
+                    console.log("BRAPPER.JS SOME DATA ARRIVING");
+                })
+
                 res.on('end', function(chunk) {
-                    console.log("Response: "+chunk);
+                    console.log("BRAPPER.JS REQUEST FINISHED!!");
+                    // callback({ success : true, msg : "Message forwarded\n" });
                 });
             });
 
             request.on('error', function(e) {
-                console.log("Problem: ", e);
+
+                console.log("BRAPPER.JS: AN ERROR OCCURRED");
+                // callback({ success : false, msg : "Something went wrong\n" });
             });
 
-            request.write(data);
-            request.end();
-
-            return { success : true, msg : "Message forwarded\n" };
+            // request.write(data);
+            request.end(data);
         }
     };
 
