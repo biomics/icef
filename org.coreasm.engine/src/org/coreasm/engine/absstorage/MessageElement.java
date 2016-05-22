@@ -134,4 +134,31 @@ public class MessageElement extends Element {
 	public void setType(String type) {
 		this.type = type;
 	}
+	
+	@Override
+	public boolean equals(Object anElement)
+	{
+		if (anElement == null)
+			return false;
+ 		if (anElement instanceof MessageElement)
+ 			{
+ 				MessageElement otherMessage = (MessageElement) anElement;
+ 				return otherMessage.getMessage().equals(this.getMessage()) &&
+ 					   otherMessage.getSubject().equals(this.getSubject()) &&
+ 					  otherMessage.getStepcount() == this.getStepcount() &&
+ 					 otherMessage.getFromAgent().equals(this.getFromAgent()) &&
+ 					 otherMessage.getToAgent().equals(this.getToAgent());
+ 				
+ 			}
+ 		else
+ 			return ((Element)this).equals(anElement);
+	}
+	@Override
+	public MessageElement clone() {
+		MessageElement clone = null; 
+		try{ clone = (MessageElement) super.clone(); }
+		catch(CloneNotSupportedException e){ 
+			throw new RuntimeException(e); // won't happen 
+			} 
+		return clone; }
 }

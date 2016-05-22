@@ -641,4 +641,6 @@ public interface CoreASMEngine extends VersionInfoProvider {
 
 	void deleteASIMs(Set<String> asims);
 
+	public void clearOutboxLocation();
+
 }

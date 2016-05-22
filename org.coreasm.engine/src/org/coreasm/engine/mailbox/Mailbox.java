@@ -75,5 +75,7 @@ public interface Mailbox {
 	 * to the inbox, and empties the outbox
 	 */
 	public void loopback();
+
+	public void clearOutboxLocation();
 }
 

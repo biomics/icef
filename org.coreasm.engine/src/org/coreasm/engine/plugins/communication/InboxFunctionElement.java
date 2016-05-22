@@ -54,7 +54,7 @@ public class InboxFunctionElement extends FunctionElement {
 	 * @see org.coreasm.engine.absstorage.FunctionElement#getValue(java.util.List)
 	 */
 	@Override
-	public Element getValue(List<? extends Element> args) {
+	public synchronized Element getValue(List<? extends Element> args) {
 		if (args.size() == 0) //FIXME BSL should we allow this? to get the whole mailbox?
 			return new SetElement(messages.getSet()) ;
 			//return Element.UNDEF;//	return messages;
@@ -94,7 +94,7 @@ public class InboxFunctionElement extends FunctionElement {
 	 * is no argument.
 	 */
 	@Override
-	public void setValue(List<? extends Element> args, Element value) {
+	public synchronized void setValue(List<? extends Element> args, Element value) {
 		if (args.size() == 0) {
 			if (value instanceof SetElement) 
 				messages = (SetElement)value;

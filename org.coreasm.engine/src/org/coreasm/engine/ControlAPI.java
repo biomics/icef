@@ -180,5 +180,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	public CoreASMError getError();
 
 	public String getSelfAgentName();
+
+	public int getCounter();
 }
 

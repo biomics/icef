@@ -21,6 +21,7 @@ public class MailboxImp implements Mailbox {
 	private ControlAPI capi;
 	private CommunicationPSI communicationPSI;
 	private Set<MessageElement> schedulingOutbox;
+	private int timesExecuted =-1;
 
 	@Override
 	public synchronized Set<MessageElement> emptyOutbox() {
@@ -75,19 +76,23 @@ public class MailboxImp implements Mailbox {
 			capi.error("Outbox is not empty at the beginning of the current step");
 		communicationPSI.updateInboxLocation(inbox);
 		inbox.clear();
+		outbox.clear();
+		
 	}
 
 	@Override
 	public synchronized void endStep() {
+		timesExecuted++;
 		if(!inbox.isEmpty())
 			capi.error("Inbox is not empty at the end of the current step");
-		outbox.clear();
-		outbox.addAll(communicationPSI.collectOutgoingMessages());
-		outbox.addAll(schedulingOutbox);
-        System.out.println("[Thread "+Thread.currentThread().getName()+"]: Adding new messages");
-        for(MessageElement e : outbox) {
-            System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX ADD> "+e);
-        }
+		synchronized(communicationPSI.collectOutgoingMessages()){
+			int sizeOutbox = communicationPSI.collectOutgoingMessages().size();
+			outbox.addAll(communicationPSI.collectOutgoingMessages());
+			outbox.addAll(schedulingOutbox);
+	        for(MessageElement e : outbox) {
+	            System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX ADD> "+e+" Size of Agent Outbox: "+sizeOutbox+". endStep:" +timesExecuted +" times. StartingStep: "+capi.getCounter()+". Stepcount: "+capi.getStepCount());
+	        }
+		}
 	}
 
 	@Override
@@ -95,6 +100,11 @@ public class MailboxImp implements Mailbox {
 		inbox.clear();
 		inbox.addAll(outbox);
 		emptyOutbox();//outbox.clear();
+	}
+
+	@Override
+	public synchronized void clearOutboxLocation() {
+		communicationPSI.clearOutboxLocation();
 	}
 
 }

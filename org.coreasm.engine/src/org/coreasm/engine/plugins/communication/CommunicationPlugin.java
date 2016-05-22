@@ -507,8 +507,9 @@ public class CommunicationPlugin extends Plugin implements
 		return VERSION_INFO;
 	}
 
-	public void aggregateUpdates(PluginAggregationAPI pluginAgg) {
-		synchronized (this) {
+	public synchronized void aggregateUpdates(PluginAggregationAPI pluginAgg) {
+		//synchronized (this) 
+		{
 			aggregateOutbox(pluginAgg);
 		}
 	}
@@ -519,7 +520,7 @@ public class CommunicationPlugin extends Plugin implements
 	 * Aggregate updates for the outbox location.
 	 * @param pluginAgg
 	 */
-	public void aggregateOutbox(PluginAggregationAPI pluginAgg) {
+	public synchronized void aggregateOutbox(PluginAggregationAPI pluginAgg) {
 		// all locations on which contain print actions
 		Set<Location> locsToAggregate = pluginAgg.getLocsWithAnyAction(MAIL_TO_ACTION);
 		Set<Element> contributingAgents = new HashSet<Element>();
@@ -554,7 +555,7 @@ public class CommunicationPlugin extends Plugin implements
 	 * Aggregate updates for the inbox location.
 	 * @param pluginAgg
 	 */
-	public void aggregateInbox(PluginAggregationAPI pluginAgg) {
+	public synchronized void aggregateInbox(PluginAggregationAPI pluginAgg) {
 		// all locations on which contain print actions
 		Set<Location> locsToAggregate = pluginAgg.getLocsWithAnyAction(MAIL_FROM_ACTION);
 		Set<Element> contributingAgents = new HashSet<Element>();
@@ -617,21 +618,28 @@ public class CommunicationPlugin extends Plugin implements
 	
 	public class CommunicationPSI implements PluginServiceInterface {
 		
-		public void updateInboxLocation(Set<MessageElement> inbox)
+		public synchronized void updateInboxLocation(Set<MessageElement> inbox)
 		{
-			synchronized(pluginPSI){
+			//synchronized(pluginPSI)
+			{
 				
 				inboxFunction.setValue(INBOX_FUNC_LOC.args, new SetElement(inbox));
 			}
 		}
 		
-		public Set<MessageElement> collectOutgoingMessages() 
+		public synchronized Set<MessageElement> collectOutgoingMessages() 
 		{
-			synchronized(pluginPSI){
-				
-				 return outboxFunction.getMessages(); 
+			//(pluginPSI)
+			{
+				 return outboxFunction.getMessages();
 			}
 			
+		}
+
+		public synchronized void clearOutboxLocation() 
+		{
+			//outboxFunction.clearValue();
+			outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement());
 		}
 		
 	}

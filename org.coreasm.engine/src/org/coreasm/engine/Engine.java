@@ -178,6 +178,8 @@ public class Engine implements ControlAPI {
 
 	private UpdateMultiset ASIMsUpdates;
 
+	private int counter=-1;
+
 	/**
 	 * Constructs a new CoreASM engine with the specified properties. This is
 	 * mainly for future extensions.
@@ -1072,6 +1074,8 @@ public class Engine implements ControlAPI {
 							break;
 
 						case emStartingStep:
+							counter++;
+					        
 							if (!isStateInitialized
 									|| specification == null
 									|| specification.getRootNode() == null)
@@ -1084,6 +1088,8 @@ public class Engine implements ControlAPI {
 							//FIXME BSL remove the loopback method!!!
 							//mailbox.loopback();
 							mailbox.startStep();
+							//TODO FIXME BSL If I uncomment the line below, the mailbox gets emptied!
+							//mailbox.clearOutboxLocation();
 							next(EngineMode.emResolvePolicy);
 							break;
 							
@@ -1160,8 +1166,8 @@ public class Engine implements ControlAPI {
 							*/
 
 						case emStepSucceeded:
-							notifySuccess();
 							mailbox.endStep();
+							notifySuccess();
 							next(EngineMode.emIdle);
 							break;
 
@@ -1553,6 +1559,19 @@ public class Engine implements ControlAPI {
 		//System.out.println("Returning the external name "+ externalName);
 		return externalName;
 	}
+
+	@Override
+	public int getCounter() {
+		// TODO Auto-generated method stub
+		return counter;
+	}
+
+	@Override
+	public synchronized void clearOutboxLocation() {
+		mailbox.clearOutboxLocation();
+		
+	}
+
 }
 
 /**

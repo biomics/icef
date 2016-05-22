@@ -13,7 +13,10 @@
  
 package org.coreasm.engine.plugins.communication;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -37,11 +40,11 @@ public class OutboxFunctionElement extends FunctionElement {
 	 */
 	private static final long serialVersionUID = 936788345941442793L;
 	private Set<Location> locations;
-	private Set<MessageElement> messages;
+	private SetElement messages;
 	
 	public OutboxFunctionElement() {
 		setFClass(FunctionClass.fcDerived);
-		messages = new HashSet<MessageElement>();
+		messages =  new SetElement();//new HashSet<MessageElement>();
 		locations = new HashSet<Location>();
 		locations.add(CommunicationPlugin.OUTBOX_FUNC_LOC);//THIS IS A GLOBAL OUTBOX
 	}
@@ -50,18 +53,23 @@ public class OutboxFunctionElement extends FunctionElement {
 	 * @see org.coreasm.engine.absstorage.FunctionElement#getValue(java.util.List)
 	 */
 	@Override
-	public Element getValue(List<? extends Element> args) {
+	public synchronized Element getValue(List<? extends Element> args) {
 		if (args.size() == 0) //FIXME BSL should we allow this? to get the whole mailbox?
 			return Element.UNDEF;	//return messages;
 		else if (args.size() == 1) //The owner of the outbox. 
 		{
 			//FIXME BSL this implementation is very inefficient, consider filtering during value setting?
 			Set<MessageElement> filteredSet = new HashSet<>(); 
-			for (MessageElement theMessage : messages)
+			Set<Element> theSet = messages.getSet();
+			for (Element m : theSet)
 			{
-				String fromAgent = theMessage.getFromAgent();
-				if(fromAgent.equals(args.get(0).toString()))
-					filteredSet.add(theMessage);	
+				if (m instanceof MessageElement)
+				{
+					MessageElement theMessage = (MessageElement) m;
+					String fromAgent = theMessage.getFromAgent();
+					if(fromAgent.equals(args.get(0).toString()))
+						filteredSet.add(theMessage);
+				}
 			
 			}
 			return new SetElement(filteredSet) ;
@@ -75,25 +83,11 @@ public class OutboxFunctionElement extends FunctionElement {
 	 * is no argument.
 	 */
 	@Override
-	public void setValue(List<? extends Element> args, Element value) {
+	public synchronized void setValue(List<? extends Element> args, Element value) {
 		if (args.size() == 0) {
 			if (value instanceof SetElement) 
 				{
-					messages.clear();
-					SetElement theSet = (SetElement) value;
-					Set<Element> iterableSet = theSet.getSet();
-					for(Element e : iterableSet)
-					{
-						if(e instanceof MessageElement)
-						{
-							messages.add((MessageElement) e);
-						}
-						else
-						{
-							System.out.println("You are trying to set values that are not Message Elements to the outbox location");
-						}
-					}
-					
+					messages = (SetElement)value;
 				}
 			else
 			{
@@ -104,6 +98,7 @@ public class OutboxFunctionElement extends FunctionElement {
 		}
 	}
 
+
 	/**
 	 * Parameter <code>name</code> is ignored.
 	 * 
@@ -113,8 +108,14 @@ public class OutboxFunctionElement extends FunctionElement {
 		return locations;
 	}
 
-	public Set<MessageElement> getMessages() {
-		return messages;
+	public synchronized Set<MessageElement> getMessages() {
+		Set<MessageElement> theMessages = new HashSet<MessageElement>();
+		for (Element e:messages.getSet())
+		{
+			
+			theMessages.add((MessageElement) e);
+		}
+		return theMessages;
 	}
 
 }
