@@ -25,9 +25,9 @@ public class MailboxImp implements Mailbox {
 
 	@Override
 	public synchronized Set<MessageElement> emptyOutbox() {
-        for(MessageElement e : outbox) {
+        /* for(MessageElement e : outbox) {
             System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX EMPTY> "+e);
-        }
+            } */
 
         Set<MessageElement> oldOutbox = null;
         oldOutbox = new HashSet<MessageElement>();
@@ -40,13 +40,17 @@ public class MailboxImp implements Mailbox {
 	}
 
 	@Override
-	public synchronized void fillInbox(Set<MessageElement> msgs) {
-        inbox.addAll(msgs);
+	public void fillInbox(Set<MessageElement> msgs) {
+        synchronized(inbox) {
+            inbox.addAll(msgs);
+        }
 	}
 
 	@Override
-	public synchronized Set<MessageElement> getInbox() {
-		return inbox;
+	public Set<MessageElement> getInbox() {
+        synchronized(inbox) {
+            return inbox;
+        }
 	}
 
 	@Override
@@ -71,13 +75,14 @@ public class MailboxImp implements Mailbox {
 		}
 
 	@Override
-	public synchronized void startStep() {
+	public void startStep() {
 		if(!outbox.isEmpty())
 			capi.error("Outbox is not empty at the beginning of the current step");
-		communicationPSI.updateInboxLocation(inbox);
-		inbox.clear();
+        synchronized(inbox) {
+            communicationPSI.updateInboxLocation(inbox);
+            inbox.clear();
+        }
 		outbox.clear();
-		
 	}
 
 	@Override
@@ -85,14 +90,13 @@ public class MailboxImp implements Mailbox {
 		timesExecuted++;
 		if(!inbox.isEmpty())
 			capi.error("Inbox is not empty at the end of the current step");
-		synchronized(communicationPSI.collectOutgoingMessages()){
-			int sizeOutbox = communicationPSI.collectOutgoingMessages().size();
+
 			outbox.addAll(communicationPSI.collectOutgoingMessages());
 			outbox.addAll(schedulingOutbox);
-	        for(MessageElement e : outbox) {
-	            System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX ADD> "+e+" Size of Agent Outbox: "+sizeOutbox+". endStep:" +timesExecuted +" times. StartingStep: "+capi.getCounter()+". Stepcount: "+capi.getStepCount());
-	        }
-		}
+	        /* for(MessageElement e : outbox) {
+               System.out.println("[Thread "+Thread.currentThread().getName()+"]: OUTBOX ADD> "+e+"; endStep:" +timesExecuted +" times. StartingStep: "+capi.getCounter()+". Stepcount: "+capi.getStepCount());
+               }
+            */
 	}
 
 	@Override
@@ -103,7 +107,7 @@ public class MailboxImp implements Mailbox {
 	}
 
 	@Override
-	public synchronized void clearOutboxLocation() {
+	public void clearOutboxLocation() {
 		communicationPSI.clearOutboxLocation();
 	}
 

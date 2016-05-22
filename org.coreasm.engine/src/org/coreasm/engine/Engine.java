@@ -843,8 +843,12 @@ public class Engine implements ControlAPI {
 	}
 
 	@Override
-    public synchronized Set<MessageElement> emptyOutbox() {
-        return mailbox.emptyOutbox();
+    public Set<MessageElement> emptyOutbox() {
+        Set<MessageElement> msgs = null;
+        synchronized(mailbox) {
+            msgs = mailbox.emptyOutbox();
+        }
+        return msgs;
 	}
 
 	@Override

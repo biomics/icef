@@ -73,7 +73,6 @@ public class EngineManager {
         CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program);
 
         if(req.start) {
-            System.out.println("Start execution right away");
             casm.start();
         }
 
@@ -131,7 +130,7 @@ public class EngineManager {
     }
 
     public static boolean receiveMsg(String simId, MessageRequest req) {
-        System.out.println(wrapper.config.port+"Engine Manager receives message");
+        /* System.out.println(wrapper.config.port+"Engine Manager receives message");
         System.out.println(wrapper.config.port+"Simulation: "+req.simulation);
         System.out.println(wrapper.config.port+"Receiver: "+req.toAgent);
         System.out.println(wrapper.config.port+"Sender: "+req.fromAgent);
@@ -139,7 +138,7 @@ public class EngineManager {
         System.out.println(wrapper.config.port+"Type: "+req.type); 
 
         String s = Thread.currentThread().getName();
-        System.out.println("[Thread "+s+"]: Msg from Sender: "+req.fromAgent+"; Body: "+req.body);
+        System.out.println("[Thread "+s+"]: Msg from Sender: "+req.fromAgent+"; Body: "+req.body);*/
             
         // this is an ASIM message and must be 
         // forwarded to the correct ASIM
@@ -158,17 +157,15 @@ public class EngineManager {
                 // check whether this ASIM is managed here
                 String[] names = req.toAgent.split("@");
                 if(names.length != 2) {
-                    System.out.println("EngineManager detects wrong address format in '"+req.toAgent+"'");
+                    System.err.println("EngineManager detects wrong address format in '"+req.toAgent+"'");
                     return false;
                 } else 
                     asim = names[1];
                 
                 if(!simAsims.containsKey(asim)) {
-                    System.out.println("EngineManager does not know this ASIM");
+                    System.err.println("EngineManager does not know this ASIM. Wrong delivery!");
                     return false;
                 }
-
-                System.out.println("KNOW THE ASIM: "+asim);
                 
                 req.toAgent = asim;
             
@@ -183,14 +180,14 @@ public class EngineManager {
             return result;
         }
 
-        System.out.println("EngineManager receives unknown message type. Ignore!");
+        System.err.println("EngineManager receives unknown message type. Ignored!");
 
         return false;
     }
 
     public static boolean register4Updates(String simId, UpdateRegistrationRequest req) {
-        System.out.println("EngineManager.register4Updates");
-        System.out.println("req.target: "+req.target);
+        // System.out.println("EngineManager.register4Updates");
+        // System.out.println("req.target: "+req.target);
         
         // no target asim given
         if(req.target == null)
@@ -225,7 +222,7 @@ public class EngineManager {
                     asim = asimAddress[1];
 
                 if(!simAsims.containsKey(asim)) {
-                    System.out.println("EngineManager does not know this ASIM. Ignore update registration");
+                    System.err.println("EngineManager does not know this ASIM. Ignore update registration.");
                     continue;
                 }
                 CoreASMContainer trg = simAsims.get(asim);
@@ -250,8 +247,6 @@ public class EngineManager {
     }
 
     public static boolean newASIM(String simId, String name) {
-        System.out.println("New ASIM reported");
-
         if(wrapper.config.schedulingMode) {
             // this message is sent to a simulation which
             // is not hosted by this brapper
@@ -262,7 +257,7 @@ public class EngineManager {
                 Map<String, CoreASMContainer> simAsims = asims.get(simId);
                 Set<String> allASIMs = simAsims.keySet();
                 for(String trg : allASIMs) {
-                    System.out.println("PUT new ASIM name '"+name+"' into Scheduling ASIM '"+trg+"'");
+                    System.out.println("[Scheduling ASIM '"+trg+"'] New ASIM '"+name+"' registered.");
                     simAsims.get(trg).newASIM(name);
                 }
             }
@@ -273,8 +268,6 @@ public class EngineManager {
     }
 
     public static boolean receiveUpdate(String simId, MessageRequest req) {
-        System.out.println("** Engine Manager receives update");
-
         String agent = "";
 
         if(wrapper.config.accUpdatesMode) {
@@ -374,6 +367,8 @@ public class EngineManager {
                 .request(MediaType.APPLICATION_JSON)
                 .accept("*/*")
                 .put(Entity.json(json));
+
+            response.close();
         } 
         catch (ProcessingException pe) {
             System.out.println("Problem processing: "+pe);
@@ -424,8 +419,6 @@ public class EngineManager {
 
         String json = "{ \"simulation\" : \"" + simId + "\", " + req.toJSON().substring(1);
 
-        System.out.println("AGENT CREATION REQUEST: "+json);
-
         Response response = null;
         try {
             response = ClientBuilder.newBuilder()
@@ -454,6 +447,9 @@ public class EngineManager {
                 System.err.println("Invalid Response from Manager: '"+strResponse+"'");
                 System.err.println(ioe);
             }
+            
+            response.close();
+
             return res.name;
         }
 
@@ -481,13 +477,14 @@ public class EngineManager {
                 .request(MediaType.APPLICATION_JSON)
                 .accept("*/*")
                 .put(Entity.json(json));
-            System.out.println("response: "+response);
+
+            response.close();
         } 
         catch (ProcessingException pe) {
-            System.out.println("Problem processing: "+pe);
-            System.out.println("Cause: "+pe.getCause());
+            System.err.println("ERROR: Problem processing Update: "+pe);
+            System.err.println("ERROR: Cause: "+pe.getCause());
         } catch (Exception exception) {
-            System.out.println(exception);
+            System.err.println(exception);
         }
     }
     
@@ -509,8 +506,6 @@ public class EngineManager {
     private static void registerWithManager() {
         if(wrapper.config.schedulingMode)
             return;
-
-        System.out.println("Registering ASIM brapper with manager ... ");
             
         String registration = "{ \"host\" : \""+ 
             wrapper.config.getHost() + "\", \"port\" : \"" + 
@@ -531,14 +526,14 @@ public class EngineManager {
             } else {
                 System.err.println("Unable to register brapper.");
             }
+
+            response.close();
         } 
         catch (ProcessingException pe) {
-            System.out.println("Fail.");
-            System.out.println("\tError: Problem registering brapper: "+pe);
-            System.out.println("\tCause: "+pe.getCause());
+            System.err.println("Error: Problem registering brapper: "+pe);
+            System.err.println("Cause: "+pe.getCause());
         } catch (Exception exception) {
-            System.out.println("Fail.");
-            System.out.println("\tError: Problem registering brapper: "+exception);
+            System.err.println("Error: Problem registering brapper: "+exception);
         }
     }
 }

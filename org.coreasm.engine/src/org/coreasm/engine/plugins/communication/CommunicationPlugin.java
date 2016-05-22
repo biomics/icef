@@ -507,8 +507,8 @@ public class CommunicationPlugin extends Plugin implements
 		return VERSION_INFO;
 	}
 
-	public synchronized void aggregateUpdates(PluginAggregationAPI pluginAgg) {
-		//synchronized (this) 
+	public void aggregateUpdates(PluginAggregationAPI pluginAgg) {
+		synchronized (pluginAgg) 
 		{
 			aggregateOutbox(pluginAgg);
 		}
@@ -520,35 +520,43 @@ public class CommunicationPlugin extends Plugin implements
 	 * Aggregate updates for the outbox location.
 	 * @param pluginAgg
 	 */
-	public synchronized void aggregateOutbox(PluginAggregationAPI pluginAgg) {
-		// all locations on which contain print actions
-		Set<Location> locsToAggregate = pluginAgg.getLocsWithAnyAction(MAIL_TO_ACTION);
-		Set<Element> contributingAgents = new HashSet<Element>();
-		Set<ScannerInfo> contributingNodes = new HashSet<ScannerInfo>();
-
-		// for all locations to aggregate
-		for (Location l : locsToAggregate) {
-			if (l.equals(OUTBOX_FUNC_LOC)) {
-				Set<MessageElement> aggregatedOutbox = new HashSet<MessageElement>();
-				//Regular updates should NOT affect this location!
-				// if regular update affects this location
-				if (pluginAgg.regularUpdatesAffectsLoc(l)) {
-					pluginAgg.handleInconsistentAggregationOnLocation(l, this);
-				}
-				else {
-					for (Update update : pluginAgg.getLocUpdates(l)) {
-						if (update.action.equals(MAIL_TO_ACTION)) {
-							aggregatedOutbox.add((MessageElement) update.value);
-							// flag update aggregation as successful for this update
-							pluginAgg.flagUpdate(update, Flag.SUCCESSFUL, this);
-							contributingAgents.addAll(update.agents);
-							contributingNodes.addAll(update.sources);
-						}
-					}
-				}
-				outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement(aggregatedOutbox));
-			}
-		}
+	public void aggregateOutbox(PluginAggregationAPI pluginAgg) {
+        // System.out.println("[Thread "+Thread.currentThread().getName()+"]: >> aggregateOutbox()");
+        
+        // all locations on which contain print actions
+        Set<Location> locsToAggregate = pluginAgg.getLocsWithAnyAction(MAIL_TO_ACTION);
+        Set<Element> contributingAgents = new HashSet<Element>();
+        Set<ScannerInfo> contributingNodes = new HashSet<ScannerInfo>();
+        
+        // for all locations to aggregate
+        for (Location l : locsToAggregate) {
+            if (l.equals(OUTBOX_FUNC_LOC)) {
+                Set<MessageElement> aggregatedOutbox = new HashSet<MessageElement>();
+                //Regular updates should NOT affect this location!
+                // if regular update affects this location
+                if (pluginAgg.regularUpdatesAffectsLoc(l)) {
+                    pluginAgg.handleInconsistentAggregationOnLocation(l, this);
+                }
+                else {
+                    for (Update update : pluginAgg.getLocUpdates(l)) {
+                        if (update.action.equals(MAIL_TO_ACTION)) {
+                            aggregatedOutbox.add((MessageElement) update.value);
+                            // flag update aggregation as successful for this update
+                            pluginAgg.flagUpdate(update, Flag.SUCCESSFUL, this);
+                            contributingAgents.addAll(update.agents);
+                            contributingNodes.addAll(update.sources);
+                        }
+                    }
+                }
+                
+                /* for(MessageElement me : aggregatedOutbox)
+                   System.out.println("AGG> "+me); */
+                
+                outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement(aggregatedOutbox));
+                break;
+            }
+        }
+        // System.out.println("[Thread "+Thread.currentThread().getName()+"]: aggregateOutbox() >>>");
 	}
 	
 	/**
@@ -618,28 +626,37 @@ public class CommunicationPlugin extends Plugin implements
 	
 	public class CommunicationPSI implements PluginServiceInterface {
 		
-		public synchronized void updateInboxLocation(Set<MessageElement> inbox)
+		public void updateInboxLocation(Set<MessageElement> inbox)
 		{
-			//synchronized(pluginPSI)
+			synchronized(pluginPSI)
 			{
-				
 				inboxFunction.setValue(INBOX_FUNC_LOC.args, new SetElement(inbox));
 			}
 		}
 		
-		public synchronized Set<MessageElement> collectOutgoingMessages() 
+		public Set<MessageElement> collectOutgoingMessages() 
 		{
-			//(pluginPSI)
+			synchronized(outboxFunction)
 			{
-				 return outboxFunction.getMessages();
+                // System.out.println("[Thread "+Thread.currentThread().getName()+"]: >> collectOutgoingMessages()");
+            
+                Set<MessageElement> msgs = outboxFunction.getMessages();
+
+                outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement());
+
+                /* for(MessageElement m : msgs) 
+                    System.out.println("OUTBOX m2> "+m);
+                    System.out.println("[Thread "+Thread.currentThread().getName()+"]: collectOutgoingMessages() >>");*/
+                return msgs;
 			}
-			
 		}
 
-		public synchronized void clearOutboxLocation() 
+		public void clearOutboxLocation() 
 		{
-			//outboxFunction.clearValue();
-			outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement());
+			synchronized(outboxFunction)
+			{
+                outboxFunction.setValue(OUTBOX_FUNC_LOC.args, new SetElement());
+            }
 		}
 		
 	}

@@ -175,7 +175,7 @@ public class CoreASMContainer extends Thread {
         Iterator<MessageElement> it = messages.iterator();
         Set<MessageElement> toSend = new HashSet<>();
 
-        System.out.println("[Thread "+getName()+"]: ASIM "+asimName+" handleOutgoingMessages() - messages: "+messages.size());
+        // System.out.println("[Thread "+getName()+"]: ASIM "+asimName+" handleOutgoingMessages() - messages: "+messages.size());
 
         // 1. check all toAgent addresses
         //  + if address has format self, replace it by asim name and put in inbox directly
@@ -205,7 +205,7 @@ public class CoreASMContainer extends Thread {
             counter++;
             MessageElement msg = new MessageElement(it.next());
 
-            System.out.println(counter + ": [Thread "+getName()+", size: "+messages.size()+"]: CoreASMContainer.handleOutgoingMessages: "+msg);
+            // System.out.println(counter + ": [Thread "+getName()+", size: "+messages.size()+"]: CoreASMContainer.handleOutgoingMessages: "+msg);
 
             String toAgent = msg.getToAgent();
             
@@ -280,18 +280,13 @@ public class CoreASMContainer extends Thread {
                 System.err.println("Unable to transform MessageElement into json.");
                 System.err.println(e);
                 e.printStackTrace();
-                
-                System.out.println("----------------------------------");
-                System.out.println("Error Msg: "+msg);
-                System.out.println("Error JSON: "+json);
-                System.out.println("----------------------------------");
             }
 
             
-              System.out.println("\t----------------------------------");
+            /*System.out.println("\t----------------------------------");
               System.out.println("\tMsg: "+msg);
               System.out.println("\tJSON: "+json);
-              System.out.println("\t----------------------------------");
+              System.out.println("\t----------------------------------");*/
             
         }
     }
@@ -305,7 +300,7 @@ public class CoreASMContainer extends Thread {
             if(updateRegistrations.containsKey(update.loc.name)) {
                 Set<String> targets = updateRegistrations.get(update.loc.name);
                 for(String t : targets) {
-                    System.out.println("=> Send "+update.loc.name+" to "+t);
+                    // System.out.println("=> Send "+update.loc.name+" to "+t);
                     if(!map.containsKey(t))
                         map.put(t, new UpdateMultiset());
                     map.get(t).add(update);
@@ -332,11 +327,6 @@ public class CoreASMContainer extends Thread {
                 System.err.println("Unable to transform UpdateSet into json.");
                 System.err.println(e);
                 e.printStackTrace();
-                
-                System.out.println("----------------------------------");
-                System.out.println("Error Update: "+updates);
-                System.out.println("Error JSON: "+json);
-                System.out.println("----------------------------------");
             }
         }
         
@@ -344,7 +334,6 @@ public class CoreASMContainer extends Thread {
     }
 
     public synchronized void newASIM(String name) {
-        System.out.println("Prepare adding new ASIM "+name);
         asimsToAdd.add(name);
     }
 
@@ -365,10 +354,10 @@ public class CoreASMContainer extends Thread {
 
     // TODO: NEEDS TO BE SYNCHRONIZED!!!
     public boolean receiveUpdate(MessageRequest req) {
-        System.out.println("CoreASMContainer receives update");
+        // System.out.println("CoreASMContainer receives update");
 
         String strUpdates = req.body;
-        System.out.println("strUpdates: "+strUpdates);
+        // System.out.println("strUpdates: "+strUpdates);
 
         UpdateMultiset updates = null;
         try {
@@ -381,8 +370,6 @@ public class CoreASMContainer extends Thread {
         Set<Update> updateSet = new HashSet<>();
         Iterator<Update> it = updates.iterator();
 
-        System.out.println("Iterate through all ... "+updates.toString());
-
         // introduce a scope
         for(Update u : updates) {
             // u.loc.args.add(0, new StringElement(req.fromAgent));
@@ -391,7 +378,7 @@ public class CoreASMContainer extends Thread {
             newArgs.addAll(u.loc.args);
             Location newLoc = new Location(u.loc.name, newArgs);
             Update newUpdate = new Update(newLoc, u.value, u.action, (Element)null, null);
-            System.out.println(">>> "+newUpdate.toString()+" <<<");
+            // System.out.println(">>> "+newUpdate.toString()+" <<<");
             updateSet.add(newUpdate);
         }
 
@@ -424,7 +411,7 @@ public class CoreASMContainer extends Thread {
 
             // ugh ... how ugly but the way coreASM works, this is needed
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 if(paused) {
                     Thread.sleep(500);
                     continue;
@@ -469,8 +456,7 @@ public class CoreASMContainer extends Thread {
             engine.waitWhileBusy();
 
 			if (engine.getEngineMode() == EngineMode.emError) {
-                System.out.println("THERE WAS AN ERROR DURING EXECUTION");
-                System.out.println("ERROR: "+engine.getError());
+                System.err.println("[ASIM Execution ERROR]: "+asimName+": "+engine.getError());
             }
 
             // System.out.println("handle outgoing Messages");
@@ -488,8 +474,6 @@ public class CoreASMContainer extends Thread {
 
     public boolean receiveMsg(MessageRequest req) {
         String agentMsg = req.body;
-
-        System.out.println("[Thread "+getName()+"]: CoreASMContainer: Receiving message "+req.fromAgent+"; "+req.body);
 
         MessageElement newMsg = null;
         try {

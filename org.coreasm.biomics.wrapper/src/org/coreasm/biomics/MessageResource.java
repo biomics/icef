@@ -27,14 +27,10 @@ public class MessageResource {
     public Response receiveMsg(@PathParam("simId") String simId, String message) {
         MessageRequest req = MessageRequest.getMessage(message);
 
-        System.out.println("BRAPPER.JAVA receiveMsg1");
-
         boolean result = false;
         if(req != null) {
             result = EngineManager.receiveMsg(simId, req);
         }
-
-        System.out.println("BRAPPER.JAVA receiveMsg2");
 
         if(result) {
             return Response.status(200).build();

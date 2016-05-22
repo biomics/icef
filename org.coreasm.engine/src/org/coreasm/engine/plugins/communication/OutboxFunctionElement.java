@@ -113,7 +113,7 @@ public class OutboxFunctionElement extends FunctionElement {
 		for (Element e:messages.getSet())
 		{
 			
-			theMessages.add((MessageElement) e);
+			theMessages.add(new MessageElement((MessageElement) e));
 		}
 		return theMessages;
 	}
