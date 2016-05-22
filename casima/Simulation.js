@@ -79,7 +79,7 @@ var Simulation = (function() {
         },
 
         report2Scheduler : function(name, command) {
-            console.log("Simulation.report2Scheduler('"+name+"', '"+command+"')");
+            // console.log("Simulation.report2Scheduler('"+name+"', '"+command+"')");
             for(var strScheduler in this.schedulerList) {
                 var scheduler = this.schedulerList[strScheduler];
                 switch(command) {
@@ -93,7 +93,7 @@ var Simulation = (function() {
         },
 
         controlScheduler : function(name, command) {
-            console.log("Simulation.controlScheduler('"+name+"', '"+command+"')");
+            // console.log("Simulation.controlScheduler('"+name+"', '"+command+"')");
 
             var scheduler = this.schedulerList[name];
             if(scheduler == undefined) {
@@ -109,7 +109,7 @@ var Simulation = (function() {
             scheduler.setSimulation(this.id);
             this.schedulerList[scheduler.getName()] = scheduler;
 
-            console.log("Simulation: Scheduler '"+scheduler.getName()+"' added to simulation '" + this.id + "'");
+            // console.log("Simulation: Scheduler '"+scheduler.getName()+"' added to simulation '" + this.id + "'");
             
             return true;
         },
@@ -258,16 +258,16 @@ var Simulation = (function() {
                 return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
             }*/
 
-            console.log("TOAGENT: "+update.toAgent);
+            // console.log("TOAGENT: "+update.toAgent);
             var address = update.toAgent.split("@");
             if(address.length != 2) {
-                console.log("Target '"+update.toAgent+"' has invalid address format\n");
+                // console.log("Target '"+update.toAgent+"' has invalid address format\n");
                 return { success : false, msg : "Invalid address format\n" };
             }
 
             var asim = this.schedulerList[address[1]];
             if(asim != undefined) {
-                console.log("Forwarding update from ASIM '"+update.fromAgent+"' to scheduler ASIM '"+update.toAgent+"'");
+                // console.log("Forwarding update from ASIM '"+update.fromAgent+"' to scheduler ASIM '"+update.toAgent+"'");
                 return asim.recvUpdate(update);
             } else {
                 return { success : false, msg : "Unable to forward update. Scheduler at '"+update.toAgent+"' does not exist.\n" };
@@ -277,8 +277,6 @@ var Simulation = (function() {
         },
 
         recvMsg : function(msg, callback) {
-            console.log("Simulation.recvMsg");
-
             if(msg == undefined || msg == null)
                 callback({ success : false, msg : "Error: Invalid message\n" });
 
@@ -296,7 +294,7 @@ var Simulation = (function() {
 
             var address = msg.toAgent.split("@");
             if(address.length != 2) {
-                console.log("Target '"+msg.toAgent+"' has invalid address format\n");
+                // console.log("Target '"+msg.toAgent+"' has invalid address format\n");
                 callback({ success : false, msg : "Invalid address format\n" });
             }
 
@@ -307,8 +305,7 @@ var Simulation = (function() {
             } else {
                 var scheduler = this.schedulerList[address[1]];
                 if(scheduler != undefined) {
-                    console.log("Forward message from ASIM '"+msg.fromAgent+"' to Scheduler '"+msg.toAgent+"'");
-                    console.log("SIMULATION Body: "+msg.body);
+                    // console.log("Forward message from ASIM '"+msg.fromAgent+"' to Scheduler '"+msg.toAgent+"'");
                     scheduler.recvMsg(msg, callback);
                 } else
                     callback({ success : false, msg : "Unable to forward message. Target does not exist.\n" });

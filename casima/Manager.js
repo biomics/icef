@@ -248,8 +248,6 @@ var Manager = (function() {
 
         recvMsg : function(simulation, msg, callback) {
             var sim = this.simMap[simulation];
-
-            console.log("Manager.recvMsg");
             
             if(sim == undefined || sim == null)
                 callback({ success : false, msg : "Simulation for message does not exist. Ignore." });

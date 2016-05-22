@@ -297,7 +297,6 @@ var ASIM = (function() {
 
         recvMsg : function(msg, callback) {
             if(this.status == ASIMState.RUNNING) {
-                console.log("ASIM.recvMsg");
                 this.brapper.recvMsg(msg, callback);
             } else
                 callback({ success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" });

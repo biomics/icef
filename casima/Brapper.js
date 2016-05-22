@@ -57,15 +57,15 @@ var Brapper = (function() {
             var request = http.request(options, function(res) {
                 res.setEncoding('utf8');
                 res.on('data', function(chunk) {
-                    console.log("Response: "+chunk);
+                    // console.log("Response: "+chunk);
                 });
                 res.on('end', function(chunk) {
-                    console.log("Response: "+chunk);
+                    // console.log("Response: "+chunk);
                 });
             });
 
             request.on('error', function(e) {
-                console.log("Problem: ", e);
+                console.log("[Manager]: Brapper: Error: Problem: ", e);
             });
 
             request.write(data);
@@ -75,7 +75,7 @@ var Brapper = (function() {
         },
 
         recvMsg : function(msg, callback) {
-            console.log("BRAPPER.JS Sending message to brapper at "+this.host+":"+this.port+"\n");
+            // console.log("BRAPPER.JS Sending message to brapper at "+this.host+":"+this.port+"\n");
             
             var data = JSON.stringify(msg);
 
@@ -92,23 +92,24 @@ var Brapper = (function() {
 
             var request = http.request(options, function(res) {
 
-                console.log("BRAPPER.JS res.statusCode == "+res.statusCode+" (host "+options.host+":"+options.port+")");
+                // console.log("BRAPPER.JS res.statusCode == "+res.statusCode+" (host "+options.host+":"+options.port+")");
 
                 res.setEncoding('utf8');
 
                 res.on('data', function(chunk) {
-                    console.log("BRAPPER.JS SOME DATA ARRIVING");
+                    // console.log("BRAPPER.JS SOME DATA ARRIVING");
                 })
 
                 res.on('end', function(chunk) {
-                    console.log("BRAPPER.JS REQUEST FINISHED!!");
+                    // console.log("BRAPPER.JS REQUEST FINISHED!!");
                     // callback({ success : true, msg : "Message forwarded\n" });
                 });
             });
 
             request.on('error', function(e) {
 
-                console.log("BRAPPER.JS: AN ERROR OCCURRED");
+                // console.log("BRAPPER.JS: AN ERROR OCCURRED");
+                console.log("[Manager]: Brapper: ERROR: "+e);
                 // callback({ success : false, msg : "Something went wrong\n" });
             });
 

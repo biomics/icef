@@ -260,8 +260,6 @@ function initApp() {
             express.json(),
             function(req, res) {
                 var simulation = req.params.simulation;
-
-                console.log("server.recvMsg");
          
                 var result = manager.recvMsg(simulation, req.body, function(result) {
                     if(!result.success)
