@@ -1,6 +1,10 @@
 package org.coreasm.biomics;
 
+import java.util.Collection;
+
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.KeepAlive;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -24,9 +28,16 @@ public class Wrapper {
         // search for resources and components in org.coreasm.biomics
         // final ResourceConfig rc = new ResourceConfig().packages("org.coreasm.biomics.wrapper");
         ResourceConfig rc = new ResourceConfig().packages("org.coreasm.biomics");
+        
 
         // create and start a new instance of grizzly http server
         server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://"+config.getHost()+":"+config.getPort()+"/"), rc);
+
+        Collection<NetworkListener> listeners = server.getListeners();
+        for(NetworkListener l : listeners) {
+            KeepAlive ka = l.getKeepAlive();
+            l.getKeepAlive().setMaxRequestsCount(0);
+        }
     }
 
     public void stopServer() {
