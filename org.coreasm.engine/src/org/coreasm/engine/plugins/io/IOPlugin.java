@@ -290,7 +290,7 @@ public class IOPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									PRINT_OUTPUT_FUNC_LOC,
-									new StringElement(pos.getMessage().getValue().toString()),
+									new StringElement(capi.getSelfAgentName()+"> "+pos.getMessage().getValue().toString()),
 									PRINT_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()

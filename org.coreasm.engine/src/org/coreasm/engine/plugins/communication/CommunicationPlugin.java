@@ -329,9 +329,14 @@ public class CommunicationPlugin extends Plugin implements
 		}
 		else{
 		
-				capi.getAgentsToDelete().add(pos.getAgentName().getValue().toString());		
+				capi.getAgentsToDelete().add(pos.getAgentName().getValue().toString());
+				pos.setNode(
+						null, 
+						new UpdateMultiset(), 
+						new TriggerMultiset(),
+						null);
+				return pos;
 		}
-		return pos;
 	}
 
 

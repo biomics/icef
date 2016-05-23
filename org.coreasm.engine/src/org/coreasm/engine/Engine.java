@@ -1416,6 +1416,9 @@ public class Engine implements ControlAPI {
 
 				case ecAggregate:
 					agentsToCreate.clear();
+					agentsToDelete.clear();
+					agentsToDeregister.clear();
+					agentsToRegister.clear();
 					next(EngineMode.emAggregation);
 					break;
 
