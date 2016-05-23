@@ -3,6 +3,7 @@ package org.coreasm.biomics;
 import java.util.List;
 
 import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -46,6 +47,21 @@ public class UpdateResource {
         boolean result = false;
         
         result = EngineManager.newASIM(simId, name);
+
+        if(result) {
+            return Response.status(201).build();
+        } else {
+            return Response.status(403).build();
+        }
+    }
+
+    @DELETE
+    @Path("/{simId}/asim/{name}")
+    @Consumes("application/json")
+    public Response removeASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
+        boolean result = false;
+        
+        result = EngineManager.delASIM(simId, name);
 
         if(result) {
             return Response.status(201).build();

@@ -90,6 +90,7 @@ public class CoreASMContainer extends Thread {
     private ObjectMapper mapper = null;
 
     private HashSet<String> asimsToAdd = null;
+    private HashSet<String> asimsToDel = null;
     private HashSet<MessageElement> inBox = null;
     private HashMap<String, HashSet<String>> updateRegistrations = null;
     private HashSet<String> requiredLocs = null;
@@ -108,6 +109,7 @@ public class CoreASMContainer extends Thread {
 
         inBox = new HashSet<MessageElement>();
         asimsToAdd = new HashSet<String>();
+        asimsToDel = new HashSet<String>();
         updateRegistrations = new HashMap<>();
 
         initEngine();
@@ -340,10 +342,19 @@ public class CoreASMContainer extends Thread {
         asimsToAdd.add(name);
     }
 
+    public synchronized void delASIM(String name) {
+        asimsToDel.add(name);
+    }
+
     public synchronized void injectASIMs() {
         for(String asim : asimsToAdd) 
             System.out.println("***** CoreASMContainer: Adding ASIM: "+asim+" *****");
+        for(String asim : asimsToDel) 
+            System.out.println("***** CoreASMContainer: Deleting ASIM: "+asim+" *****");
         engine.addASIMs(asimsToAdd);
+        engine.deleteASIMs(asimsToDel);
+
+        asimsToDel.clear();
         asimsToAdd.clear();
     }
 

@@ -263,6 +263,26 @@ public class EngineManager {
             }
         } else
             return false;
+        return true;
+    }
+
+    public static boolean delASIM(String simId, String name) {
+        if(wrapper.config.schedulingMode) {
+            // this message is sent to a simulation which
+            // is not hosted by this brapper
+            if(!asims.containsKey(simId))
+                return false;
+
+            synchronized(asims) {
+                Map<String, CoreASMContainer> simAsims = asims.get(simId);
+                Set<String> allASIMs = simAsims.keySet();
+                for(String trg : allASIMs) {
+                    System.out.println("[Scheduling ASIM '"+trg+"'] ASIM '"+name+"' deregistered.");
+                    simAsims.get(trg).delASIM(name);
+                }
+            }
+        } else
+            return false;
 
         return true;
     }
