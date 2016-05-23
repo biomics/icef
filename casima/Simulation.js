@@ -276,39 +276,39 @@ var Simulation = (function() {
             return true;
         },
 
-        recvMsg : function(msg, callback) {
+        recvMsg : function(msg) {
             if(msg == undefined || msg == null)
-                callback({ success : false, msg : "Error: Invalid message\n" });
+                return { success : false, msg : "Error: Invalid message\n" };
 
             if(msg.type != "msg") {
-                callback({ success : false, msg : "Cannot forward messages without type 'msg'.\n" });
+                return { success : false, msg : "Cannot forward messages without type 'msg'.\n" };
             }
 
             if(msg.toAgent == undefined || msg.toAgent == null) {
-                callback({ success : false, msg : "Message specifies no or invalid target.\n" });
+                return { success : false, msg : "Message specifies no or invalid target.\n" };
             }
 
             if(msg.fromAgent == undefined || msg.fromAgent == null) {
-                callback({ success : false, msg : "Message specifies no or invalid source.\n" });
+                return { success : false, msg : "Message specifies no or invalid source.\n" };
             }
 
             var address = msg.toAgent.split("@");
             if(address.length != 2) {
                 // console.log("Target '"+msg.toAgent+"' has invalid address format\n");
-                callback({ success : false, msg : "Invalid address format\n" });
+                return { success : false, msg : "Invalid address format\n" };
             }
 
             var asim = this.asimList[address[1]];
             if(asim != undefined) {
                 // console.log("Forward message from ASIM '"+msg.fromAgent+"' to ASIM '"+msg.toAgent+"'");
-                asim.recvMsg(msg, callback);
+                return asim.recvMsg(msg);
             } else {
                 var scheduler = this.schedulerList[address[1]];
                 if(scheduler != undefined) {
                     // console.log("Forward message from ASIM '"+msg.fromAgent+"' to Scheduler '"+msg.toAgent+"'");
-                    scheduler.recvMsg(msg, callback);
+                    return scheduler.recvMsg(msg);
                 } else
-                    callback({ success : false, msg : "Unable to forward message. Target does not exist.\n" });
+                    return { success : false, msg : "Unable to forward message. Target does not exist.\n" };
             }
         }
     };

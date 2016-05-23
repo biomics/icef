@@ -295,11 +295,11 @@ var ASIM = (function() {
             request.end();
         },
 
-        recvMsg : function(msg, callback) {
+        recvMsg : function(msg) {
             if(this.status == ASIMState.RUNNING) {
-                this.brapper.recvMsg(msg, callback);
+                return this.brapper.recvMsg(msg);
             } else
-                callback({ success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" });
+                return { success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" };
         },
 
         recvUpdate : function(msg) {

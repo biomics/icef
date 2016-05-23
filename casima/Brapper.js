@@ -13,6 +13,8 @@ var Brapper = (function() {
         this.type = type ? type : "asim";
         this.asims = {};
         this.load = 0;
+
+        this.connections = 0;
     };
 
     cls.prototype = {
@@ -74,7 +76,7 @@ var Brapper = (function() {
             return { success : true, msg : "Update forwarded\n" };
         },
 
-        recvMsg : function(msg, callback) {
+        recvMsg : function(msg) {
             // console.log("BRAPPER.JS Sending message to brapper at "+this.host+":"+this.port+"\n");
             
             var data = JSON.stringify(msg);
@@ -84,15 +86,19 @@ var Brapper = (function() {
                 port: this.port,
                 path: '/message/'+msg.simulation,
                 method: 'PUT',
+                agent : false,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
+                    'Content-Length': Buffer.byteLength(data),
+                    'Connection' : 'Close',
                 }
             };
 
-            var request = http.request(options, function(res) {
+            this.connections++;
 
-                // console.log("BRAPPER.JS res.statusCode == "+res.statusCode+" (host "+options.host+":"+options.port+")");
+            var self = this;
+            var connection = this.connections;
+            var request = http.request(options, function(res) {
 
                 res.setEncoding('utf8');
 
@@ -101,20 +107,22 @@ var Brapper = (function() {
                 })
 
                 res.on('end', function(chunk) {
-                    // console.log("BRAPPER.JS REQUEST FINISHED!!");
-                    // callback({ success : true, msg : "Message forwarded\n" });
+                    return { success : true, msg : "Message forwarded\n" };
                 });
             });
 
-            request.on('error', function(e) {
+            request.setNoDelay(true);
 
+            request.on('error', function(e) {
                 // console.log("BRAPPER.JS: AN ERROR OCCURRED");
                 console.log("[Manager]: Brapper: ERROR: "+e);
                 // callback({ success : false, msg : "Something went wrong\n" });
             });
 
-            // request.write(data);
-            request.end(data);
+            request.write(data);
+            request.end();
+
+            return { success : true, msg : "Message forwarded" };
         }
     };
 

@@ -246,13 +246,13 @@ var Manager = (function() {
                 return this.asimBrapperMap[minId];
         },
 
-        recvMsg : function(simulation, msg, callback) {
+        recvMsg : function(simulation, msg) {
             var sim = this.simMap[simulation];
             
             if(sim == undefined || sim == null)
-                callback({ success : false, msg : "Simulation for message does not exist. Ignore." });
+                return { success : false, msg : "Simulation for message does not exist. Ignore." };
             
-            sim.recvMsg(msg, callback);
+            return sim.recvMsg(msg);
         },
 
         // TODO also send the updates to some internal 
