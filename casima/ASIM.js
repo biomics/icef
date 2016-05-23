@@ -374,6 +374,41 @@ var ASIM = (function() {
             return error;
         },
 
+        reportRemovedASIM : function(name, command) {
+            var options = {
+                host: this.brapper.host,
+                port: this.brapper.port,
+                path: '/updates/'+this.simulation+'/asim/'+name,
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': 0
+                }
+            };
+            
+            var self = this;
+            var error = null;
+
+            var request = http.request(options, function(res) {
+                var resData = "";
+                res.setEncoding('utf8');
+                
+                if(res.statusCode != 201) 
+                    error = { success : false, msg : "Unable to report removed ASIM '"+this.name+"'\n" };
+            });
+            
+            request.on('error', function(e) {
+                error = { success : false, msg : "Unable to report removed ASIM '"+this.name+"'\n" };
+            });
+            
+            request.write("");
+            request.end();
+
+            error = { success : true, msg : "ASIM '"+this.name+"' removal reported successfully.\n" };
+
+            return error;
+        },
+
         register4Updates : function(simId, reg) {
             this.brapper.register4Updates(simId, reg);
         },
