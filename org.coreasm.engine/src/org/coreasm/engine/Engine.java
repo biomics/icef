@@ -229,7 +229,9 @@ public class Engine implements ControlAPI {
 	 * @return the agentsToDelete
 	 */
 	public Set<String> getAgentsToDelete() {
-		return agentsToDelete;
+        HashSet<String> toDelete = new HashSet<String>();
+        toDelete.addAll(agentsToDelete);
+		return toDelete;
 	}
 
 	/**

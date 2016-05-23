@@ -2,6 +2,7 @@ package org.coreasm.biomics;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -70,6 +71,16 @@ public class ASIMResource {
         }
 
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+
+    @DELETE
+    @Path("/{simId}/{asimName}")
+    @Consumes("application/json")
+    public Response destroyASIM(@PathParam("simId") String simId, @PathParam("asimName") String asimName) {
+        if(EngineManager.destroyASIM(simId, asimName))
+            return Response.status(200).build();
+        else
+            return Response.status(406).build();
     }
 
     @GET

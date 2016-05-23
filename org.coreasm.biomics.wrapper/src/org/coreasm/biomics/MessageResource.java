@@ -23,7 +23,6 @@ public class MessageResource {
     @PUT
     @Path("/{simId}")
     @Consumes("application/json")    
-    @Produces("application/json")
     public Response receiveMsg(@PathParam("simId") String simId, String message) {
         MessageRequest req = MessageRequest.getMessage(message);
 
@@ -33,7 +32,7 @@ public class MessageResource {
         }
 
         if(result) {
-            return Response.status(200).build();
+            return Response.status(204).build();
         } else {
             return Response.status(403).build();
         }

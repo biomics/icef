@@ -25,6 +25,8 @@ import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.scheduler.Scheduler;
 import org.coreasm.engine.mailbox.Mailbox;
 
+import org.coreasm.engine.parser.Parser;
+
 import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
@@ -637,9 +639,11 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 */
 	public Set<? extends Element> getASIMSet();
 
-	void addASIMs(Set<String> asims);
+	public void addASIMs(Set<String> asims);
 
-	void deleteASIMs(Set<String> asims);
+	public void deleteASIMs(Set<String> asims);
+
+    public Parser getParser();
 
 	public void clearOutboxLocation();
 

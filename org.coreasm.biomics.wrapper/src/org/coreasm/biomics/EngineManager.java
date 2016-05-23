@@ -186,8 +186,8 @@ public class EngineManager {
     }
 
     public static boolean register4Updates(String simId, UpdateRegistrationRequest req) {
-        // System.out.println("EngineManager.register4Updates");
-        // System.out.println("req.target: "+req.target);
+        System.out.println("EngineManager.register4Updates");
+        System.out.println("req.target: "+req.target);
         
         // no target asim given
         if(req.target == null)
@@ -501,6 +501,114 @@ public class EngineManager {
         synchronized(asims) {
             asims.clear();
         }
+    }
+    
+    // regitser locations of scheduler with the simulation it 
+    public static boolean registerLocations(String asim, String simulation, Set<String> locs) {
+        boolean success = false;
+
+        if(wrapper.config.schedulingMode) {
+
+            String registrations = "{ \"target\" : \""+asim+"\",";
+            registrations += " \"registrations\" : [ ";
+            
+            boolean comma = false;
+            for(String l : locs ) {
+                if(comma)
+                    registrations += ",";
+                registrations += " { \"location\" : \"" + l + "\" } ";
+                comma = true;
+            }
+
+            registrations += "] }";
+
+            System.out.println("toSend: "+registrations);
+
+            try {
+                Response response = ClientBuilder.newBuilder()
+                    .build()
+                    .target(wrapper.commUrl)
+                    .path("updates/"+simulation+"/register")
+                    .request(MediaType.APPLICATION_JSON)
+                    .accept("*/*")
+                    .put(Entity.json(registrations));
+                int status = response.getStatus(); 
+                if(status == 200) {
+                    success = true;
+                } else {
+                    success = false;
+                    System.err.println("Unable to register locations for updates.");
+                    System.err.println("Response: "+response.readEntity(String.class));
+                }
+                
+                response.close();
+            } 
+            catch (ProcessingException pe) {
+                System.err.println("Error: Problem registering brapper: "+pe);
+                System.err.println("Cause: "+pe.getCause());
+            } catch (Exception exception) {
+                System.err.println("Error: Problem registering brapper: "+exception);
+            }
+        }
+
+        return success;
+    }
+
+    public static boolean requestASIMDeletion(String simId, Set<String> asims) {
+        boolean success = true;
+
+        for(String name : asims) {
+            System.out.println("ENGINEMANAGER: DEL ASIM "+name);
+            try {
+                Response response = ClientBuilder.newBuilder()
+                    .build()
+                    .target(wrapper.commUrl)
+                    .path("asims/"+simId+"/"+name)
+                    .request(MediaType.APPLICATION_JSON)
+                    .accept("*/*")
+                    .delete();
+                int status = response.getStatus(); 
+                if(status == 200) {
+                    System.out.println(response.readEntity(String.class));
+                } else {
+                    System.err.println("Unable to delete ASIM '"+name+"'.");
+                    success = false;
+                }
+                
+                response.close();
+            } 
+            catch (ProcessingException pe) {
+                System.err.println("Error: Problem registering brapper: "+pe);
+                System.err.println("Cause: "+pe.getCause());
+            } catch (Exception exception) {
+                System.err.println("Error: Problem registering brapper: "+exception);
+            }
+        }
+
+        return success;
+    }
+
+    public static boolean destroyASIM(String simId, String name) {
+        CoreASMContainer casm = null;
+
+        synchronized(asims) {
+            if(!asims.containsKey(simId))
+                return false;
+
+            casm = asims.get(simId).get(name);
+            asims.get(simId).remove(name);
+        }
+
+        if(casm != null) {
+            synchronized(casm) {
+                casm.pauseASIM();
+                casm.destroy();
+                casm.interrupt();
+                casm = null;
+            }
+        }
+
+        return true;
     }
 
     private static void registerWithManager() {

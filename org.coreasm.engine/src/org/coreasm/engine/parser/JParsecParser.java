@@ -62,6 +62,8 @@ public class JParsecParser implements Parser {
 	private PositionMap positionMap = null;
 	
 	private boolean headerParsed = false;
+
+    private Set<String> requiredLocations = null;
 	
 	/** the actual parser -- a JParsec parser */ 
 	private org.codehaus.jparsec.Parser<Node> parser;
@@ -105,6 +107,10 @@ public class JParsecParser implements Parser {
 	public ASTNode getRootNode() {
 		return rootNode;
 	}
+
+    public Set<String> getRequiredLocations() {
+        return requiredLocations;
+    }
 
 	/**
 	 * Plugins to be used for the specification are specified with "use"
@@ -349,11 +355,13 @@ public class JParsecParser implements Parser {
             } else {
                 if(!visited.contains(nodeId)) {
                     // check if parent node is a declaration
-                    if(node.getParent().getGrammarClass().equals(ASTNode.DECLARATION_CLASS)) {
-                        // System.out.println("==> no location as parent is declaration (assume variable)");
+                    if(node.getParent().getGrammarClass().equals(ASTNode.DECLARATION_CLASS) ||
+                       (node.getParent().getGrammarClass().equals(ASTNode.POLICY_CLASS))) {
+                        System.out.println("==> no location as parent is declaration or policy");
+                        System.out.println("\ttoken: "+node.getToken());
                         variables.add(node.getToken());
                     } else if(!variables.contains(nodeId)) {
-                        System.out.println("==> *** " + nodeId + " is probably a location ***");
+                        // System.out.println("==> *** " + nodeId + " is probably a location ***");
                         locations.add(nodeId);
                     }
                 }
@@ -361,6 +369,11 @@ public class JParsecParser implements Parser {
         } else {
             ASTNode cur = node.getFirst();
 
+            if(gr.equals("SchedulePrimitive")) {
+                ASTNode search = cur = cur.getNext().getNext();
+                if(cur != null)
+                    visited.add(cur.toString());
+            }            
             if(gr.equals("LetPolicy") || gr.equals("ChoosePolicy") || gr.equals("ForallPolicy")) {
                 /* System.out.println("\tCur '"+cur+"' is exists expression");
                    System.out.println("\tAdd '"+cur.getToken()+"' as variable"); 
@@ -401,12 +414,12 @@ public class JParsecParser implements Parser {
         return locations;
     }
 
-    public Set<String> getLocations(ASTNode node) {
+    public Set<String> computeRequiredLocations(ASTNode n) {
         Set<String> visited = getFunctionNames();
         HashSet<String> variables = new HashSet<String>();
         Map<String, ASTNode> declared = getDeclarations(rootNode);
 
-        return getUndeclaredRec(node, declared, visited, variables);
+        return getUndeclaredRec(n, declared, visited, variables);
     }
 
 	/* (non-Javadoc)
@@ -424,26 +437,14 @@ public class JParsecParser implements Parser {
                                         
 					rootNode = (ASTNode) _parser.parse(specification.getText());
 
-                    System.out.println("parseSpecification():");
                     for(Node n : rootNode.getChildNodes()) {
                         if(n instanceof ASTNode) {
                             ASTNode an = (ASTNode) n;
                             // Check if Grammarrule is scheduling then find policy name
                             if(an.getGrammarRule().equals(Kernel.GR_SCHEDULING)) {
-                                Set<String> locations = getLocations(an);
-                                System.out.println("Locations required for scheduler: ");
-                                for(String l : locations) {
-                                    System.out.println("\t"+l);
-                                }
+                                requiredLocations = computeRequiredLocations(an);
                                 break;
                             }
-                            
-                            /* .getNext();
-                            while(an != null) {
-                                System.out.println("ASTNode: "+an.toString());
-                                
-                                an = rootNode.getNext();
-                                }*/
                         }
                     }
 

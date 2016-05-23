@@ -53,6 +53,8 @@ import org.coreasm.engine.EngineProperties;
 import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.CoreASMError;
 
+import org.coreasm.engine.parser.JParsecParser;
+
 import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Element;
@@ -90,6 +92,7 @@ public class CoreASMContainer extends Thread {
     private HashSet<String> asimsToAdd = null;
     private HashSet<MessageElement> inBox = null;
     private HashMap<String, HashSet<String>> updateRegistrations = null;
+    private HashSet<String> requiredLocs = null;
 
     private boolean paused = false;
 
@@ -110,10 +113,10 @@ public class CoreASMContainer extends Thread {
         initEngine();
 
         if(!loadSpec(newProgram)) {
-            System.err.println("[ASIM "+newName+"]: Error while loading program.");
+            System.err.println("[ASIM "+newName+"]: Error while loading BSL specification.");
             System.err.println("[ASIM "+newName+"]: "+getError());
         } else {
-            System.err.println("[ASIM "+newName+"]: Programm successfully loaded.");
+            System.out.println("[ASIM "+newName+"]: BSL specification successfully loaded.");
         }
 
         prepareMapper();
@@ -409,6 +412,12 @@ public class CoreASMContainer extends Thread {
 
         do {
 
+            if(engine == null || engine.getEngineMode().equals(EngineMode.emTerminated)) {
+                System.out.println("ASIM "+asimName+" terminates");
+                engine = null;
+                break;
+            }
+
             // ugh ... how ugly but the way coreASM works, this is needed
             try {
                 Thread.sleep(100);
@@ -462,6 +471,8 @@ public class CoreASMContainer extends Thread {
             // System.out.println("handle outgoing Messages");
 
             handleOutgoingMessages();
+
+            deleteASIMs();
                 
             /* System.out.println(" + ----- end of STEP " + currentStep + " ----- + \n");                
             System.out.println("\tUpdates after step " + currentStep + " are : " + engine.getUpdateSet(0));
@@ -469,7 +480,15 @@ public class CoreASMContainer extends Thread {
 
 			currentStep++;
             
-		} while(true || engine.getEngineMode().equals(EngineMode.emTerminated));
+		} while(true);
+    }
+
+    public void deleteASIMs() {
+        System.out.println("deleteASIMs: "+engine.getAgentsToDelete().size());
+        for(String s : engine.getAgentsToDelete())
+            System.out.println("Delete "+s);
+
+        EngineManager.requestASIMDeletion(simId, engine.getAgentsToDelete());
     }
 
     public boolean receiveMsg(MessageRequest req) {
@@ -547,8 +566,11 @@ public class CoreASMContainer extends Thread {
 
             if(engine.getEngineMode() == EngineMode.emError)
                 return false;
-            else
+            else {
+                requiredLocs = new HashSet<>(((JParsecParser)engine.getParser()).getRequiredLocations());
+                EngineManager.registerLocations(asimName, simId, requiredLocs);
                 return true;
+            }
         } else 
             return false;
     }
@@ -557,7 +579,6 @@ public class CoreASMContainer extends Thread {
         if(engine != null) {
             engine.terminate();
             engine.waitWhileBusy();
-            engine = null;
         }
     }
 }

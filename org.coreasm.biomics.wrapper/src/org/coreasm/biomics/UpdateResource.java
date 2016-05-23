@@ -57,7 +57,7 @@ public class UpdateResource {
     @PUT
     @Path("/{simId}/register")
     @Consumes("application/json")
-    public Response resgiter(@PathParam("simId") String simId, String update) {
+    public Response register4Updates(@PathParam("simId") String simId, String update) {
         UpdateRegistrationRequest req = UpdateRegistrationRequest.getUpdateRegistrationRequest(update);
 
         List<UpdateLocation> list = req.registrations;
