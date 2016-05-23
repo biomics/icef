@@ -49,6 +49,7 @@ import org.coreasm.engine.interpreter.SelfAgent;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.SchedulerPlugin;
 import org.coreasm.engine.plugins.schedulingpolicies.SchedulingPoliciesPlugin;
+import org.coreasm.engine.plugins.string.StringElement;
 import org.coreasm.engine.scheduler.DefaultSchedulingPolicy.DefaultIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -220,6 +221,10 @@ public class SchedulerImp implements Scheduler {
 			// pick only those that have a non-null program
 			for (Element asims : ((Enumerable) asimsSetFlat).enumerate()) {				
 				ASIMSet.add(asims);
+//				if (asims instanceof StringElement)
+//					System.out.println("Test! ASIMs has the StringElement"+asims.toString());
+//				else
+//					System.out.println("Test! Something's broken");
 			}
 		}
 		else {

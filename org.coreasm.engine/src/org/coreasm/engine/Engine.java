@@ -914,8 +914,8 @@ public class Engine implements ControlAPI {
 		//find the asim in the set of known ASIMs
 			for (Element e: knownASIMs)
 			{
-				EnumerationElement knownASIM = (EnumerationElement)e;
-				if (knownASIM.getName().equals(asimName))
+				StringElement knownASIM = (StringElement)e;
+				if (knownASIM.toString().equals(asimName))
 				{
 					//found it! Remove from universe and list of known asims
 					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
