@@ -1088,6 +1088,9 @@ public class Engine implements ControlAPI {
 								throw new EngineError("Engine cannot make a step " +
 										"before the specification is properly loaded.");
 							warnings.clear();
+							agentsToDelete.clear();
+							agentsToDeregister.clear();
+							agentsToRegister.clear();
 							scheduler.startStep();
 							scheduler.retrieveAgents();
 							scheduler.retrieveASIMs();
@@ -1175,6 +1178,9 @@ public class Engine implements ControlAPI {
 							mailbox.endStep();
 							notifySuccess();
 							next(EngineMode.emIdle);
+							for (String a:agentsToDelete){
+								System.out.println("DestroyASIM "+a+"made it to the emStepSucceeded engine mode");
+							}
 							break;
 
 						case emStepFailed:
@@ -1416,9 +1422,6 @@ public class Engine implements ControlAPI {
 
 				case ecAggregate:
 					agentsToCreate.clear();
-					agentsToDelete.clear();
-					agentsToDeregister.clear();
-					agentsToRegister.clear();
 					next(EngineMode.emAggregation);
 					break;
 

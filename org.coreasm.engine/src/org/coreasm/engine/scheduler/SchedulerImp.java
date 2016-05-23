@@ -106,6 +106,7 @@ public class SchedulerImp implements Scheduler {
 		selectedAgentSet = new HashSet<Element>();
 		lastSelectedAgents = null;
 		agentContextMap = new AgentContextMap();
+		ASIMSet = new HashSet<Element>();
 	}
 
 	public void prepareInitialState() throws InvalidSpecificationException {
