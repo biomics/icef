@@ -4,6 +4,7 @@ var http = require('http');
 
 var sys = require('sys');
 var spawn = require('child_process').spawn;
+var exec = require('child_process').exec;
 
 var app = null;
 var server = null;
@@ -24,6 +25,10 @@ function init(_config, mng) {
 function initServer() {
     server = http.createServer(function(req, res) { app(req,res); });
     server.setMaxListeners(0);
+
+    server.on('connection', function(socket) {
+        socket.setNoDelay(true);
+    })
 
     server.on('error', function(err) {
     });
@@ -81,6 +86,11 @@ function startScheduler() {
 
 function initApp() {
     app = express();
+
+    app.use(function(req,res,next){
+        req.connection.setNoDelay(true);
+        next();
+    });
 
     // ****************** SIMULATIONS ****************** 
 
@@ -244,8 +254,11 @@ function initApp() {
              function(req, res) {
                  var simulation = req.params.simulation;
                  var name = req.params.name;
+
+                 console.log("Request deletion of ASIM: "+name);
+
                  if(manager.delASIM(simulation, name)) 
-                     res.send(200, "ASIM deleted.");
+                     res.send(200);
                  else
                      res.send(404);
              }, 
@@ -261,16 +274,20 @@ function initApp() {
             function(req, res) {
                 var simulation = req.params.simulation;
          
-                var result = manager.recvMsg(simulation, req.body, function(result) {
-                    if(!result.success)
-                        console.log("ERROR: "+result.msg);
-                });
+                var result = manager.recvMsg(simulation, req.body);
 
-                res.send(200);
+                if(!result.success) 
+                    console.log("ERROR: "+result.msg);
+
+                res.set("Connection", "close");
+                res.send(204);
+                res.end();
             },
             function(error, req, res, next) {
+                res.set("Connection", "close");
                 console.log("Error: Invalid message request. "+error);
                 res.send(400, "Invalid message request. Check format!\n");
+                res.end();
             }
             );
     
@@ -407,17 +424,39 @@ function initApp() {
              },
              function(error, req, res, next) {
                  console.log("Error: Invalid update request. "+error);
-                 res.send(400, "Invalid update request. Check format!\n");
+                 res.send(500, "Invalid update request. Check format!\n");
              }
             );
 
-    app.put("/updates/register",
+    app.put("/updates/:simulation/register",
              express.json(),
              function(req, res) {
-                 res.send(501);
+                 var simulation = req.params.simulation;
+                
+                 console.log("Try to register the following locations in simulation: "+simulation);
+                 console.log("Target for updates: "+req.body.target);
+                 for(var r in req.body.registrations) {
+                     console.log("\tloc> "+req.body.registrations[r].location+"; asim> "+req.body.registrations[r].asim);
+                 }
+                 console.log("req.body: "+JSON.stringify(req.body));
+
+                 var result = manager.register4Updates(simulation, req.body);
+
+                 console.log("RESULT: ",result);
+                 
+                 if(result.success) 
+                     res.send(200);
+                 else {
+                     res.send(403, result.msg);
+                 }
+                         
+                 res.end();
+                 
              },
              function(error, req, res, next) {
-                 res.send(501);
+                 res.set("Connection", "close");
+                 res.send(500, "Unable to register locations: "+error);
+                 res.end();
              }
             );
 };

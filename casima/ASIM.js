@@ -40,6 +40,7 @@ var ASIM = (function() {
         else 
             this.simulation = null;
 
+        this.registeredLocations = null;
         this.brapper = null;
         this.status = ASIMState.EMPTY;
     };
@@ -167,6 +168,28 @@ var ASIM = (function() {
             request.end();
 
             return { success : true, msg : "Resuming of ASIM '"+this.name+"' successfully triggered\n" };
+        },
+
+        setRegisteredLocations : function(reg) {
+            this.registeredLocations = reg;
+        },
+
+        registerLocations : function() {
+            /* var localReg = {};
+            for(var location in this.registeredLocations) {
+                var targets =  this.registeredLocations[location].targets;
+                for(var t in targets) {
+                    var newReg = { target : targets[t], registrations : [] };
+                    for(var a in this.registeredLocations[location].asims) {
+                        var asim =  this.registeredLocations[location].asims[a];
+                        newReg.registrations.push({ location : location, asim : asim });
+                    }
+
+                    if(newReg.registrations.size == 0) {
+                        newReg.registrations.push({ location : location });
+                    }
+                }
+            }*/
         },
 
         run : function() {
@@ -351,7 +374,12 @@ var ASIM = (function() {
             return error;
         },
 
-        removeASIM : function() {
+        register4Updates : function(simId, reg) {
+            this.brapper.register4Updates(simId, reg);
+        },
+
+        destroy : function(simId, name) {
+            return this.brapper.destroyASIM(simId, name);
         },
 
         getName : function() {

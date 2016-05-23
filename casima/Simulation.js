@@ -13,6 +13,8 @@ var Simulation = (function() {
         this.channelList = {};
         this.schedulerList = {};
         this.id = uuid.v4();
+
+        this.registeredLocations = {};
     }
 
     // TODO REMOVE AND UNLOAD ALL ASIMS BEFORE RESETTING OR DELETION
@@ -44,15 +46,24 @@ var Simulation = (function() {
                 return false;
             
             asim.setSimulation(this.id);
+            asim.setRegisteredLocations(this.registeredLocations);
+
             this.asimList[asim.getName()] = asim;
             
             return true;
         },
 
         delASIM : function(name) {
-            if(this.asimList[name])
-                return delete this.asimList[name];
-            else 
+            console.log("SIMULATION: delASIM: "+name);
+            if(this.asimList[name]) {
+                if(this.asimList[name].destroy(this.id, name)) {
+                    delete this.asimList[name];
+                    return true;
+                } else {
+                    console.log("Simulation cannot destroy ASIM");
+                    return false;
+                }
+            } else 
                 return false;
         },
 
@@ -310,6 +321,33 @@ var Simulation = (function() {
                 } else
                     return { success : false, msg : "Unable to forward message. Target does not exist.\n" };
             }
+        },
+
+        getASIM : function(fullAddress) {
+            var address = fullAddress.split("@");
+            if(address.length != 2)
+                return null;
+            return address[1];
+        },
+
+        registerLocations : function(reg) {
+            if(reg.target == undefined || reg.target == null) {
+                return { success : false, msg : "Registration does not specify a target for updates" };
+            }
+
+            if(this.registeredLocations[reg.target] == undefined)
+                this.registeredLocations[reg.target] = [];
+            
+            for(var l in reg.registrations) {
+                this.registeredLocations[reg.target].push(reg.registrations[l]);
+            }
+
+            console.log("Registrations: ");
+            for(var l in this.registeredLocations) {
+                console.log("REG: "+l+": "+JSON.stringify(this.registeredLocations[l]));
+            }
+
+            return true;
         }
     };
 

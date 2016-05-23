@@ -194,10 +194,12 @@ var Manager = (function() {
         },
 
         delASIM : function(simulation, name) {
+            console.log("Manager: delASIM");
             var sim = this.simMap[simulation];
-            if(sim)
+            if(sim) {
+                console.log("MANAGER: delASIM");
                 return sim.delASIM(name);
-            else
+            } else
                 return false;
         },
 
@@ -267,7 +269,31 @@ var Manager = (function() {
             }
 
             return sim.recvUpdate(update);
-        }, 
+        },
+
+        register4Updates : function(simulation, registration) {
+            var sim = this.simMap[simulation];
+
+            if(sim == undefined || sim == null)
+                return { success : false, msg : "Simulation for updates does not exist. Ignore." };
+
+            // register locations inside the simulation 
+            // such that the locations in new asims are 
+            // automatically registered
+            sim.registerLocations(registration);
+
+            var success = true;
+            var msg = "";
+            for(var b in this.asimBrapperMap) {
+                var result = this.asimBrapperMap[b].register4Updates(simulation, registration);
+                success = success && result.success;
+            }
+
+            if(success)
+                return { success : true, msg : "Registration successful" };
+            else
+                return { success : false, msg : "Unable to register all locations in brapper '"+this.id+"'" };
+        },
 
         sendUpdate : function(update) {
         }
