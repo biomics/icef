@@ -16,6 +16,7 @@
 package org.coreasm.engine;
 
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterListener;
@@ -182,5 +183,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	public String getSelfAgentName();
 
 	public int getCounter();
+
+	public Set<String> getAgentsToDestroy();
 }
 

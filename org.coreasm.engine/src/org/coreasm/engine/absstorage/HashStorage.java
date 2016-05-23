@@ -242,7 +242,7 @@ public class HashStorage implements AbstractStorage {
 						}
 						else
 						{
-							capi.getAgentsToDelete().add("self");
+							capi.getAgentsToDestroy().add("self");
 						}
 						agents.setValue(u.loc.args, BooleanElement.FALSE);
 					}
