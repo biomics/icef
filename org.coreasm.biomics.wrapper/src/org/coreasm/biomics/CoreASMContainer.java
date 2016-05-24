@@ -343,6 +343,7 @@ public class CoreASMContainer extends Thread {
     }
 
     public synchronized void delASIM(String name) {
+        System.out.println("*** CoreASMContainer delASIM "+name+" ***");
         asimsToDel.add(name);
     }
 
@@ -410,10 +411,10 @@ public class CoreASMContainer extends Thread {
     }
 
     public synchronized boolean register4Update(String target, String location) {
-        if(!updateRegistrations.containsKey(location))
+        /*if(!updateRegistrations.containsKey(location))
             updateRegistrations.put(location, new HashSet<String>());
         
-        updateRegistrations.get(location).add(target);
+            updateRegistrations.get(location).add(target);*/
         
         return true;
     }
@@ -496,8 +497,9 @@ public class CoreASMContainer extends Thread {
 
     public void deleteASIMs() {
         System.out.println("deleteASIMs: "+engine.getAgentsToDelete().size());
-        for(String s : engine.getAgentsToDelete())
-            System.out.println("Delete "+s);
+        /* for(String s : engine.getAgentsToDelete())
+           System.out.println("Delete "+s);
+        */
 
         EngineManager.requestASIMDeletion(simId, engine.getAgentsToDelete());
     }

@@ -578,7 +578,7 @@ public class EngineManager {
         boolean success = true;
 
         for(String name : asims) {
-            System.out.println("ENGINEMANAGER: DEL ASIM "+name);
+            System.out.println("ENGINEMANAGER: REQ DEL ASIM "+name);
             try {
                 Response response = ClientBuilder.newBuilder()
                     .build()

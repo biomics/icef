@@ -60,6 +60,8 @@ public class UpdateResource {
     @Consumes("application/json")
     public Response removeASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
         boolean result = false;
+
+        System.out.println("UpdateResource.removeASIM");
         
         result = EngineManager.delASIM(simId, name);
 
@@ -75,12 +77,6 @@ public class UpdateResource {
     @Consumes("application/json")
     public Response register4Updates(@PathParam("simId") String simId, String update) {
         UpdateRegistrationRequest req = UpdateRegistrationRequest.getUpdateRegistrationRequest(update);
-
-        List<UpdateLocation> list = req.registrations;
-        for(UpdateLocation loc : list) {
-            System.out.println("location: "+loc.location);
-            System.out.println("asim: "+loc.asim);
-        }
 
         boolean result = false;
         if(req != null && req.target != null) {
