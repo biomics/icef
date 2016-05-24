@@ -89,6 +89,7 @@ public class CoreASMContainer extends Thread {
 	private UpdateMultiset lastUpdateSet = null;
     private ObjectMapper mapper = null;
 
+    private HashSet<Update> updateSet = null;
     private HashSet<String> asimsToAdd = null;
     private HashSet<String> asimsToDel = null;
     private HashSet<MessageElement> inBox = null;
@@ -110,6 +111,7 @@ public class CoreASMContainer extends Thread {
         inBox = new HashSet<MessageElement>();
         asimsToAdd = new HashSet<String>();
         asimsToDel = new HashSet<String>();
+        updateSet = new HashSet<Update>();
         updateRegistrations = new HashMap<>();
 
         initEngine();
@@ -364,8 +366,17 @@ public class CoreASMContainer extends Thread {
 
     // TODO: NEEDS TO BE SYNCHRONIZED!!!
     public boolean injectUpdates() {
-        /* engine.updateState(updateSet);
-           updateSet.clear(); */
+        try {
+            engine.updateState(updateSet);
+        } 
+        catch(InconsistentUpdateSetException incUpdate) {
+            System.err.println("Refuse update as it is inconsistent.");
+        } 
+        catch(InvalidLocationException invalidLoc) {
+            System.err.println("Refuse update as a location is invalid.");
+        }
+
+        updateSet.clear();
 
         return true;
     }
@@ -384,8 +395,6 @@ public class CoreASMContainer extends Thread {
             System.err.println("Unable to transform JSON '"+strUpdates+"' into UpdateMultiset.");
             System.err.println(ioe);
         }
-        // updateSet.add(updates);
-        Set<Update> updateSet = new HashSet<>();
         Iterator<Update> it = updates.iterator();
 
         // introduce a scope
@@ -400,30 +409,24 @@ public class CoreASMContainer extends Thread {
             updateSet.add(newUpdate);
         }
 
-        try {
-            engine.updateState(updateSet);
-        } 
-        catch(InconsistentUpdateSetException incUpdate) {
-            System.err.println("Refuse update as it is inconsistent.");
-        } 
-        catch(InvalidLocationException invalidLoc) {
-            System.err.println("Refuse update as a location is invalid.");
-        }
-
         return true;
     }
 
     public synchronized boolean register4Update(String target, String location) {
-        /*if(!updateRegistrations.containsKey(location))
+        // System.out.println("[ASIM "+asimName+"]: register4Update "+location);
+        
+        if(!updateRegistrations.containsKey(location))
             updateRegistrations.put(location, new HashSet<String>());
         
-            updateRegistrations.get(location).add(target);*/
+        updateRegistrations.get(location).add(target);
         
         return true;
     }
 
     public void run() {
         int currentStep = 1;
+
+        EngineManager.updateLocationRegistrations(asimName);
 
         do {
 
@@ -499,7 +502,7 @@ public class CoreASMContainer extends Thread {
     }
 
     public void deleteASIMs() {
-        System.out.println("deleteASIMs: "+engine.getAgentsToDelete().size());
+        // System.out.println("deleteASIMs: "+engine.getAgentsToDelete().size());
         /* for(String s : engine.getAgentsToDelete())
            System.out.println("Delete "+s);
         */
@@ -584,7 +587,7 @@ public class CoreASMContainer extends Thread {
                 return false;
             else {
                 requiredLocs = new HashSet<>(((JParsecParser)engine.getParser()).getRequiredLocations());
-                EngineManager.registerLocations(asimName, simId, requiredLocs);
+                EngineManager.registerLocations(asimName+"@"+asimName, simId, requiredLocs);
                 return true;
             }
         } else 

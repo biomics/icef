@@ -34,6 +34,8 @@ public class EngineManager {
 
     private static final HashMap<String, HashMap<String, CoreASMContainer>> asims = new HashMap<>();
 
+    private static final HashMap<String, UpdateRegistrationRequest> registrationRequests = new HashMap<>();
+
     public static CoreASMError createASIM(ASIMCreationRequest req) {
         asimCounter++;
 
@@ -186,8 +188,8 @@ public class EngineManager {
     }
 
     public static boolean register4Updates(String simId, UpdateRegistrationRequest req) {
-        System.out.println("EngineManager.register4Updates");
-        System.out.println("req.target: "+req.target);
+        /*if(req != null)
+          System.out.println("req.target: "+req.target);*/
         
         // no target asim given
         if(req.target == null)
@@ -205,6 +207,8 @@ public class EngineManager {
         
         if(simAsims == null)
             return false;
+
+        registrationRequests.put(simId, req);
         
         List<UpdateLocation> registrations = req.registrations;
         for(UpdateLocation reg : registrations) {
@@ -398,6 +402,14 @@ public class EngineManager {
         }
     }
 
+    // TODO: Registration only needs to be once with each brapper 
+    // if the brapper starts running some asim it can put the registrations in the ASIM
+    public static void updateLocationRegistrations(String asim) {
+        for(String sim : registrationRequests.keySet()) {
+            register4Updates(sim, registrationRequests.get(sim));
+        }
+    }
+
     public static String requestASIMCreation(AgentCreationElement req, String simId) {
         if(wrapper == null) {
             System.err.println("FATAL: EngineManager cannot access Brapper!");
@@ -499,6 +511,8 @@ public class EngineManager {
                 .put(Entity.json(json));
 
             response.close();
+
+            // System.out.println("Update sent");
         } 
         catch (ProcessingException pe) {
             System.err.println("ERROR: Problem processing Update: "+pe);
@@ -523,7 +537,7 @@ public class EngineManager {
         }
     }
     
-    // regitser locations of scheduler with the simulation it 
+    // regitser locations of scheduler with the simulation 
     public static boolean registerLocations(String asim, String simulation, Set<String> locs) {
         boolean success = false;
 

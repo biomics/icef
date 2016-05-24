@@ -21,8 +21,6 @@ public class UpdateMultisetSerializer extends JsonSerializer<UpdateMultiset> {
     public void serialize(UpdateMultiset set, JsonGenerator jgen, SerializerProvider provider) 
         throws IOException, JsonProcessingException {
 
-        System.out.println("Serialize UpdateMultiSet");
-
         jgen.writeStartObject();
 
         jgen.writeArrayFieldStart("updates");

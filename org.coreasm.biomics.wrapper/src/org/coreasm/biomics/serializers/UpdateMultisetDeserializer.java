@@ -26,8 +26,6 @@ public class UpdateMultisetDeserializer extends JsonDeserializer<UpdateMultiset>
 
         JsonNode node = oc.readTree(jsonParser);
 
-        System.out.println("Deserialize UpdateMultiSet");
-
         JsonNode updatesNode = node.get("updates");
 
         Set<Update> s = new HashSet<Update>();
