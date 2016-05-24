@@ -194,10 +194,8 @@ var Manager = (function() {
         },
 
         delASIM : function(simulation, name) {
-            console.log("Manager: delASIM");
             var sim = this.simMap[simulation];
             if(sim) {
-                console.log("MANAGER: delASIM");
                 return sim.delASIM(name);
             } else
                 return false;

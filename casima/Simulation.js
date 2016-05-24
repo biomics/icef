@@ -54,17 +54,25 @@ var Simulation = (function() {
         },
 
         delASIM : function(name) {
-            console.log("SIMULATION: delASIM: "+name);
-            if(this.asimList[name]) {
-                if(this.asimList[name].destroy(this.id, name)) {
-                    delete this.asimList[name];
-                    return true;
-                } else {
-                    console.log("Simulation cannot destroy ASIM");
-                    return false;
+            console.log("SIMULATION::: delASIM: "+name);
+            if(this.asimList[name] != undefined) {
+                console.log("ASIM is in simulation ...");
+                var asim = this.asimList[name];
+                
+                // inform all schedulers
+                for(var strScheduler in this.schedulerList) {
+                    console.log("report to "+scheduler.getName());
+                    var scheduler = this.schedulerList[strScheduler];
+                    scheduler.reportRemovedASIM(name, "delete");
                 }
-            } else 
+                
+                var result = this.asimList[name].destroy(this.id, name);
+                delete this.asimList[name];
+                return result;
+            } else {
+                console.log("ASIM is not in this simulation");
                 return false;
+            }
         },
 
         getASIM : function(name) {
@@ -97,7 +105,7 @@ var Simulation = (function() {
                     case "start" :
                     case "resume" : scheduler.reportNewASIM(name, command); break;
                     case "pause" : 
-                    case "stop" : scheduler.removeASIM(name, command); break;
+                    case "stop" : scheduler.reportRemovedASIM(name, command); break;
                     default : console.log("Unknown command");
                 }
             }

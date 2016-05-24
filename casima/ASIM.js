@@ -375,6 +375,8 @@ var ASIM = (function() {
         },
 
         reportRemovedASIM : function(name, command) {
+            console.log("ASIM: reportRemovedASIM");
+            
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,

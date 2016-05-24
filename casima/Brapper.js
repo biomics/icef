@@ -42,6 +42,10 @@ var Brapper = (function() {
         destroyASIM : function(simId, name) {
             console.log("Brapper.js: Destroy ASIM '"+name+"' in simulation '"+simId+"'");
 
+            var asim = this.asims[name];
+            if(asim == undefined)
+                return false;
+
             var options = {
                 host: this.host,
                 port: this.port,
@@ -66,6 +70,8 @@ var Brapper = (function() {
             });
 
             request.end();
+
+            console.log("RETURN TRUE");
 
             return true;
         },
