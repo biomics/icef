@@ -261,10 +261,12 @@ function initApp() {
 
                  console.log("Request deletion of ASIM: "+name);
 
-                 if(manager.delASIM(simulation, name)) 
+                 if(manager.delASIM(simulation, name))
                      res.send(200);
-                 else
+                 else {
+                     console.log("Unable to delete ASIM: "+name);
                      res.send(404);
+                 }
              }, 
              function(req, res) {
                  res.send(500, "Unable to delte ASIM.");

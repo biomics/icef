@@ -63,13 +63,13 @@ var Simulation = (function() {
         },
 
         delASIM : function(name) {
-            console.log("- SIMULATION: delASIM: "+name);
-            if(this.asimList[name]) {
-                console.log("ASIM "+name+" is in simulation");
+            var address = name.split("@");
+            if(address.length == 2)
+                name = address[1];
+
+            if(this.asimList[name] != undefined) {
                 if(this.asimList[name].destroy(this.id, name)) {
-                    console.log("Destruction successful");
                     for(var scheduler in this.schedulerList) {
-                        console.log("Inform scheduler "+this.schedulerList[scheduler]);
                         this.schedulerList[scheduler].reportRemovedASIM(name);
                     }
                     delete this.asimList[name];
