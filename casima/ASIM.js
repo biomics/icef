@@ -336,7 +336,7 @@ var ASIM = (function() {
             // TODO: unload a loaded ASIM from brapper
         },
 
-        reportNewASIM : function(name, command) {
+        reportNewASIM : function(name) {
             if(this.status == ASIMState.ERROR)
                 return { success : true, msg : "ERROR: ASIM '"+this.name+"' is in error state\n" };
 
@@ -374,7 +374,7 @@ var ASIM = (function() {
             return error;
         },
 
-        reportRemovedASIM : function(name, command) {
+        reportRemovedASIM : function(name) {
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,

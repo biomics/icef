@@ -54,9 +54,15 @@ var Simulation = (function() {
         },
 
         delASIM : function(name) {
-            console.log("SIMULATION: delASIM: "+name);
+            console.log("- SIMULATION: delASIM: "+name);
             if(this.asimList[name]) {
+                console.log("ASIM "+name+" is in simulation");
                 if(this.asimList[name].destroy(this.id, name)) {
+                    console.log("Destruction successful");
+                    for(var scheduler in this.schedulerList) {
+                        console.log("Inform scheduler "+this.schedulerList[scheduler]);
+                        this.schedulerList[scheduler].reportRemovedASIM(name);
+                    }
                     delete this.asimList[name];
                     return true;
                 } else {
@@ -95,9 +101,9 @@ var Simulation = (function() {
                 var scheduler = this.schedulerList[strScheduler];
                 switch(command) {
                     case "start" :
-                    case "resume" : scheduler.reportNewASIM(name, command); break;
+                    case "resume" : scheduler.reportNewASIM(name); break;
                     case "pause" : 
-                    case "stop" : scheduler.removeASIM(name, command); break;
+                    case "stop" : scheduler.reportRemovedASIM(name); break;
                     default : console.log("Unknown command");
                 }
             }
