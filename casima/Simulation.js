@@ -69,8 +69,14 @@ var Simulation = (function() {
                     console.log("Simulation cannot destroy ASIM");
                     return false;
                 }
-            } else 
+                
+                var result = this.asimList[name].destroy(this.id, name);
+                delete this.asimList[name];
+                return result;
+            } else {
+                console.log("ASIM is not in this simulation");
                 return false;
+            }
         },
 
         getASIM : function(name) {
