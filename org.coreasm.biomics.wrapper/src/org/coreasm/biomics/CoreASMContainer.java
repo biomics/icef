@@ -352,6 +352,9 @@ public class CoreASMContainer extends Thread {
         for(String asim : asimsToDel) 
             System.out.println("***** CoreASMContainer: Deleting ASIM: "+asim+" *****");
         engine.addASIMs(asimsToAdd);
+
+        HashSet<String> copy = new HashSet<String>();
+        copy.addAll(asimsToDel);
         engine.deleteASIMs(asimsToDel);
 
         asimsToDel.clear();
