@@ -8,7 +8,7 @@ var uuid = require("node-uuid");
 
 var Manager = (function() {
 
-    var cls = function() {
+    var cls = function(socket) {
         this.schedulerList = {};
         this.schedulerMap = {};
 
@@ -21,6 +21,8 @@ var Manager = (function() {
         this.schedulerBrapperMap = {};
 
         this.simMap = {};
+
+        this.socket = socket;
     };
 
     cls.prototype = {

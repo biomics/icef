@@ -1,4 +1,7 @@
 var Config = {
+    socket : {
+        port : 3000
+    },
     httpServer : {
         port : 9090,
         host : 'localhost',

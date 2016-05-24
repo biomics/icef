@@ -15,7 +15,9 @@ var Simulation = (function() {
         this.id = uuid.v4();
 
         this.registeredLocations = {};
-    }
+
+        this.locationUpdates = {};
+    };
 
     // TODO REMOVE AND UNLOAD ALL ASIMS BEFORE RESETTING OR DELETION
 
@@ -24,6 +26,10 @@ var Simulation = (function() {
             this.asimList = {};
             this.schedulerList = {};
             this.channelList = {};
+        },
+
+        getUpdates : function() {
+            return this.locationUpdates;
         },
 
         getId : function() {
@@ -49,6 +55,9 @@ var Simulation = (function() {
             asim.setRegisteredLocations(this.registeredLocations);
 
             this.asimList[asim.getName()] = asim;
+
+            // TODO DO SOMETHING SIMILAR FOR UPDATES, ACCUMULATE THEM AND THEN DISPLAY
+            // this.manager.socket.addASIM(asim);
             
             return true;
         },
@@ -291,12 +300,32 @@ var Simulation = (function() {
             var asim = this.schedulerList[address[1]];
             if(asim != undefined) {
                 // console.log("Forwarding update from ASIM '"+update.fromAgent+"' to scheduler ASIM '"+update.toAgent+"'");
+                var updates = JSON.parse(update.body).updates;
+
+                this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));
+
                 return asim.recvUpdate(update);
             } else {
                 return { success : false, msg : "Unable to forward update. Scheduler at '"+update.toAgent+"' does not exist.\n" };
             } 
 
             return true;
+        },
+
+        updateLocation : function(name, updates) {
+            for(var location in updates) {   
+                var update = {};
+                if(this.locationUpdates[name] == undefined)
+                    this.locationUpdates[name] = {};
+                
+                var value = undefined;
+                if(updates[location].value.NumberElement != undefined)
+                    value = updates[location].value.NumberElement.value;
+
+                (this.locationUpdates[name])[updates[location].location.name] = value;
+            }
+
+            this.manager.socket.putUpdates(this.locationUpdates);
         },
 
         recvMsg : function(msg) {
@@ -354,10 +383,11 @@ var Simulation = (function() {
                 this.registeredLocations[reg.target].push(reg.registrations[l]);
             }
 
-            console.log("Registrations: ");
-            for(var l in this.registeredLocations) {
-                console.log("REG: "+l+": "+JSON.stringify(this.registeredLocations[l]));
-            }
+            /* console.log("Registrations: ");
+             for(var l in this.registeredLocations) {
+             console.log("REG: "+l+": "+JSON.stringify(this.registeredLocations[l]));
+             }
+             */
 
             return true;
         }

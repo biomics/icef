@@ -11,13 +11,17 @@ var server = null;
 var manager = null;
 var config = null;
 
+var connections = [];
+
 function init(_config, mng) {
     config = _config;
     manager = mng;
-    
+
     initApp();
     initServer();
     startScheduler();
+
+    manager.socket.start();
 
     console.log("Manager up and running at http://"+config.httpServer.host+":"+config.httpServer.port);
 };
@@ -28,7 +32,7 @@ function initServer() {
 
     server.on('connection', function(socket) {
         socket.setNoDelay(true);
-    })
+    });
 
     server.on('error', function(err) {
     });
@@ -413,7 +417,6 @@ function initApp() {
              express.json(),
              function(req, res) {
                 var simulation = req.params.simulation;
-                 console.log("simulation: "+simulation);
                  var result = manager.recvUpdate(simulation, req.body);
                  if(!result.success) {
                      console.log("ERROR: "+result.msg);

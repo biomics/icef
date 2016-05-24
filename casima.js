@@ -1,9 +1,10 @@
 var Manager = require("./casima/Manager");
-// var Channeler = require("./casima/Channeler");
-// var Updater = require("./casima/Updater");
 
 var server = require("./server/server");
+var Socket = require("./server/Socket");
 var config = require("./config");
 
-var manager = new Manager();
+var socket = new Socket();
+var manager = new Manager(socket);
+
 server.init(config, manager);
