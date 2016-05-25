@@ -101,7 +101,7 @@ var Brapper = (function() {
             });
 
             request.on('error', function(e) {
-                console.log("[Manager]: Brapper: Error: Problem: ", e);
+                console.log("[Manager]: Brapper: Error: Unable to send update to '"+this.host+":"+this.port+"'.Problem: ", e);
             });
 
             request.write(data);
@@ -158,6 +158,8 @@ var Brapper = (function() {
         register4Updates : function(simId, reg) {
             var data = JSON.stringify(reg);
 
+            console.log("[Manager]: Send registrations to '"+this.host+":"+this.port+"'");
+
             var options = {
                 host: this.host,
                 port: this.port,
@@ -169,20 +171,20 @@ var Brapper = (function() {
                 }
             };
 
+            var self = this;
             var request = http.request(options, function(res) {
 
                 res.setEncoding('utf8');
 
                 res.on('data', function(chunk) {
                     // console.log("BRAPPER.JS SOME DATA ARRIVING");
-                })
+                });
 
                 res.on('end', function(chunk) {
-                    return { success : true, msg : "Message forwarded\n" };
+                    console.log("[Manager]: Registration ended for '"+self.host+":"+self.port+"'");
+                    // return { success : true, msg : "Message forwarded\n" };
                 });
             });
-
-            request.setNoDelay(true);
 
             request.on('error', function(e) {
                 // console.log("BRAPPER.JS: AN ERROR OCCURRED");

@@ -305,7 +305,7 @@ var Simulation = (function() {
             }*/
 
             if(update.toAgent == "@UI@") {
-                // console.log("UI UPDATE: "+update.body);
+                console.log("UI UPDATE: "+update.body);
                 var updates = JSON.parse(update.body).updates;
                 this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));
                 return { success : true, msg : "" };

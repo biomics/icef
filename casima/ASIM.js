@@ -316,16 +316,6 @@ var ASIM = (function() {
             
             request.write(data);
             request.end();
-            
-            console.log("this.registeredLocations: ", this.registeredLocations);
-            for(var reg in this.registeredLocations)
-                console.log("REG: "+reg);
-
-            for(var trg in this.registeredLocations) {
-                var newRegRequest = { target : trg, registrations : this.registeredLocations[trg] };
-                console.log("REGISTRATION REQUEST: " + JSON.stringify(newRegRequest));
-                this.brapper.register4Updates(this.simulation, newRegRequest);
-            }
         },
 
         recvMsg : function(msg) {

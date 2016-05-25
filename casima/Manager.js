@@ -74,6 +74,8 @@ var Manager = (function() {
             var newBrapper = new Brapper(descr.host, descr.port);
             var id = newBrapper.getId();
 
+            console.log("[Manager] Register brapper '"+id+"' at '"+descr.host+":"+descr.port+"'");
+
             if(this.asimBrapperMap[id] != undefined) {
                 return { success : false, msg : "Unable to register new brapper. Brapper already exists!\n" };
             } else {
@@ -277,14 +279,10 @@ var Manager = (function() {
             if(sim == undefined || sim == null)
                 return { success : false, msg : "Simulation for updates does not exist. Ignore." };
 
-            // register locations inside the simulation 
-            // such that the locations in new asims are 
-            // automatically registered
-            sim.registerLocations(registration);
-
             var success = true;
             var msg = "";
             for(var b in this.asimBrapperMap) {
+                console.log("SEND REGISTRATIONS TO "+b);
                 var result = this.asimBrapperMap[b].register4Updates(simulation, registration);
                 success = success && result.success;
             }

@@ -4,7 +4,7 @@ var Config = {
     },
     httpServer : {
         port : 9090,
-        host : '192.168.1.100',
+        host : 'localhost',
         path : '/'
     },
 
