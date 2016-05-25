@@ -23,6 +23,9 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasm.engine.CoreASMEngine.EngineMode;
 import org.coreasm.engine.CoreASMError;
+import org.coreasm.engine.Specification.FunctionInfo;
+import org.coreasm.engine.Specification.PolicyInfo;
+import org.coreasm.engine.Specification.RuleInfo;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.BackgroundElement;
@@ -133,6 +136,8 @@ public class CommunicationPlugin extends Plugin implements
 
 	private final String[] keywords = { SEND_KEYWORD, TO_KEYWORD, WITH_KEYWORD, SUBJECT_KEYWORD, CREATE_KEYWORD, INITIALIZED_KEYWORD, PROGRAM_KEYWORD, POLICY_KEYWORD, DESTROY_KEYWORD};
 	private final String[] operators = { };
+
+	private String signature;
 	
 	/**
 	 * 
@@ -308,7 +313,9 @@ public class CommunicationPlugin extends Plugin implements
 		else{
 			
 			try {
-				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?pos.getAgentName().toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue(),  ((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions(),pos.getAgentLocation().getLocation(),pos.getScannerInfo());
+				//System.out.println("Signaturessss!!! "+extractSignature());
+				
+				AgentCreationElement ace = new AgentCreationElement(new StringElement((pos.getAgentName()!= null)?pos.getAgentName().toString():""),pos.getAgentInit().getValue(),pos.getAgentProgram().getValue(), pos.getAgentPolicy().getValue(), extractSignature() ,pos.getAgentLocation().getLocation(),pos.getScannerInfo());
 				capi.getAgentsToCreate().put(pos.getAgentLocation().getLocation().toString(), ace);
 				pos.setNode(
 						null, 
@@ -321,6 +328,60 @@ public class CommunicationPlugin extends Plugin implements
 			}
 		}
 		return pos;
+	}
+
+
+	private String extractSignature() {
+	if (signature == null) 
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions());
+		sb.append("\n");
+		Set<RuleInfo> definedRules = capi.getSpec().getDefinedRules();
+		
+		for (RuleInfo ruleInfo : definedRules)
+		{
+			sb.append("rule ");
+			sb.append(ruleInfo.ruleElement.getName());
+			if (ruleInfo.ruleElement.getParam().size() > 0) {
+				sb.append("(");
+				int i = 0;
+				for (; i < ruleInfo.ruleElement.getParam().size() - 1; i++) {
+					sb.append(ruleInfo.ruleElement.getParam().get(i));
+					sb.append(",");
+				}
+				sb.append(ruleInfo.ruleElement.getParam().get(i));
+				sb.append(")");
+			}
+			sb.append(" = ");
+			sb.append(ruleInfo.ruleElement.getBody().unparseTree());
+			sb.append("\n");
+			
+		}
+		
+		Set<PolicyInfo> definedPolicies = capi.getSpec().getDefinedPolicies();
+		
+		for (PolicyInfo policyInfo : definedPolicies)
+		{
+			sb.append("policy ");
+			sb.append(policyInfo.policyElement.getName());
+			if (policyInfo.policyElement.getParam().size() > 0) {
+				sb.append("(");
+				int i = 0;
+				for (; i < policyInfo.policyElement.getParam().size() - 1; i++) {
+					sb.append(policyInfo.policyElement.getParam().get(i));
+					sb.append(",");
+				}
+				sb.append(policyInfo.policyElement.getParam().get(i));
+				sb.append(")");
+			}
+			sb.append(" = ");
+			sb.append(policyInfo.policyElement.getBody().unparseTree());
+			sb.append("\n");
+			signature = sb.toString();
+		}
+	}
+		return signature;
 	}
 	
 	private ASTNode interpretDestroyAgent(Interpreter interpreter, DestroyAgentRuleNode pos) {
