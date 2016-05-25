@@ -35,7 +35,7 @@ var Socket = (function() {
 
         var self = this;
 
-        setTimeout(function() { self.send2Clients(); }, 250);
+        setTimeout(function() { self.send2Clients(); }, 100);
 
         this.socket = new WebSocketServer({port :3000 });
 
@@ -322,14 +322,26 @@ var Socket = (function() {
     cls.prototype.addASIM = function(asim) {
         var msg = {};
         msg.cmd = "add";
-        msg.id = asim.id;
+        msg.id = asim.name;
         msg.type = "A";
-        
+
+        this.updateClients(msg);
+    };
+
+    cls.prototype.delASIM = function(asim) {
+        var msg = {};
+        msg.cmd = "del";
+        msg.id = asim;
+        msg.type = "A";
+
         this.updateClients(msg);
     };
     
     cls.prototype.putUpdates = function(updates) {
+        this.ASIMupdates = {};
+        
         for(var asim in updates) {
+            // console.log("UPDATES FOR ASIM "+asim);
             for(var location in updates[asim]) {
                 if(this.ASIMupdates[asim] == undefined)
                     this.ASIMupdates[asim] = {};

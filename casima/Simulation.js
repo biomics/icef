@@ -56,8 +56,10 @@ var Simulation = (function() {
 
             this.asimList[asim.getName()] = asim;
 
+            console.log("SIMULATION: ADD "+asim.getName());
+
             // TODO DO SOMETHING SIMILAR FOR UPDATES, ACCUMULATE THEM AND THEN DISPLAY
-            // this.manager.socket.addASIM(asim);
+            this.manager.socket.addASIM(asim);
             
             return true;
         },
@@ -73,15 +75,24 @@ var Simulation = (function() {
                         this.schedulerList[scheduler].reportRemovedASIM(name);
                     }
                     delete this.asimList[name];
+                    this.manager.socket.delASIM(name);
+                    
+                    console.log("DELETE LOCATION UPDATES FOR ASIM? '"+name+"'");
+                    if(this.locationUpdates[name] != undefined) {
+                        console.log("DELETE LOCATION UPDATES FOR ASIM '"+name+"'");
+                        delete this.locationUpdates[name]; 
+
+                        for(var trg in this.locationUpdates) {
+                            console.log("REMAINING: "+trg);
+                        }
+                    }
+
                     return true;
                 } else {
                     console.log("Simulation cannot destroy ASIM");
                     return false;
                 }
                 
-                var result = this.asimList[name].destroy(this.id, name);
-                delete this.asimList[name];
-                return result;
             } else {
                 console.log("ASIM is not in this simulation");
                 return false;
@@ -282,6 +293,9 @@ var Simulation = (function() {
                 return { success : false, msg : "Update message does not specify the agent for which the update should take place\n" };
             }
 
+            if(this.asimList[update.fromAgent] == undefined)
+                return { success : false, msg : "Old update from ASIM that does not exist anymore.\n" };
+
             if(update.body == undefined || update.body == null) {
                 return { success : false, msg : "Update set is not specified in received update!\n" };
             }
@@ -290,7 +304,13 @@ var Simulation = (function() {
                 return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
             }*/
 
-            // console.log("TOAGENT: "+update.toAgent);
+            if(update.toAgent == "@UI@") {
+                // console.log("UI UPDATE: "+update.body);
+                var updates = JSON.parse(update.body).updates;
+                this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));
+                return { success : true, msg : "" };
+            }
+            
             var address = update.toAgent.split("@");
             if(address.length != 2) {
                 // console.log("Target '"+update.toAgent+"' has invalid address format\n");
@@ -309,18 +329,22 @@ var Simulation = (function() {
                 return { success : false, msg : "Unable to forward update. Scheduler at '"+update.toAgent+"' does not exist.\n" };
             } 
 
-            return true;
+            return { success : true, msg : "" };
         },
 
         updateLocation : function(name, updates) {
+            if(this.locationUpdates[name] == undefined)
+                this.locationUpdates[name] = {};
+            
             for(var location in updates) {   
                 var update = {};
-                if(this.locationUpdates[name] == undefined)
-                    this.locationUpdates[name] = {};
                 
                 var value = undefined;
                 if(updates[location].value.NumberElement != undefined)
                     value = updates[location].value.NumberElement.value;
+                
+                if(updates[location].value.EnumerationElement != undefined)
+                    value = updates[location].value.EnumerationElement.name;
 
                 (this.locationUpdates[name])[updates[location].location.name] = value;
             }
@@ -382,12 +406,6 @@ var Simulation = (function() {
             for(var l in reg.registrations) {
                 this.registeredLocations[reg.target].push(reg.registrations[l]);
             }
-
-            /* console.log("Registrations: ");
-             for(var l in this.registeredLocations) {
-             console.log("REG: "+l+": "+JSON.stringify(this.registeredLocations[l]));
-             }
-             */
 
             return true;
         }
