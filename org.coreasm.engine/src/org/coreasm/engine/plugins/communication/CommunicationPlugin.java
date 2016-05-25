@@ -336,12 +336,12 @@ public class CommunicationPlugin extends Plugin implements
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(((SignaturePluginPSI)capi.getPluginInterface(SignaturePlugin.PLUGIN_NAME)).getDerivedFunctionsDefinitions());
-		sb.append("\n");
+		//sb.append("\n");
 		Set<RuleInfo> definedRules = capi.getSpec().getDefinedRules();
 		
 		for (RuleInfo ruleInfo : definedRules)
 		{
-			sb.append("rule ");
+			sb.append(" rule ");
 			sb.append(ruleInfo.ruleElement.getName());
 			if (ruleInfo.ruleElement.getParam().size() > 0) {
 				sb.append("(");
@@ -355,7 +355,7 @@ public class CommunicationPlugin extends Plugin implements
 			}
 			sb.append(" = ");
 			sb.append(ruleInfo.ruleElement.getBody().unparseTree());
-			sb.append("\n");
+			//sb.append("\n");
 			
 		}
 		
@@ -363,7 +363,7 @@ public class CommunicationPlugin extends Plugin implements
 		
 		for (PolicyInfo policyInfo : definedPolicies)
 		{
-			sb.append("policy ");
+			sb.append(" policy ");
 			sb.append(policyInfo.policyElement.getName());
 			if (policyInfo.policyElement.getParam().size() > 0) {
 				sb.append("(");
@@ -377,7 +377,7 @@ public class CommunicationPlugin extends Plugin implements
 			}
 			sb.append(" = ");
 			sb.append(policyInfo.policyElement.getBody().unparseTree());
-			sb.append("\n");
+			//sb.append("\n");
 			signature = sb.toString();
 		}
 	}

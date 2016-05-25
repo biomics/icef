@@ -1209,7 +1209,7 @@ public class SignaturePluginPSI implements PluginServiceInterface {
 				StringBuilder result = new StringBuilder();
 				Set<DerivedFunctionElement> dfunctions = getDerivedFunctions();
 				for (DerivedFunctionElement f : dfunctions) {
-					result.append("derived ");
+					result.append(" derived ");
 					result.append(f.name);
 					if (f.params.size() > 0) {
 						result.append("(");
@@ -1223,7 +1223,7 @@ public class SignaturePluginPSI implements PluginServiceInterface {
 					}
 					result.append(" = ");
 					result.append(f.getExpr().toString());
-					result.append("\n");
+					//result.append("\n");
 				}
 				//FIXME BSL remove the following line: used for testing!
 				//setDerivedFunctionsDefinitions(result.toString());

@@ -146,15 +146,15 @@ public class AgentCreationElement extends Element {
         String result = "{";
         if(!name.toString().equals(""))
             result += "\"name\" : \"" + name.toString().replace("\"", "\\\"") + "\",";
-        result += "\"signature\" : \"" + signature.replace("\"", "\\\"") + "\\n\\n";
-        result += initRule.getDeclarationNode().unparseTree().replace("\"", "\\\"") + "\\n\\n";
-        result += program.getDeclarationNode().unparseTree().replace("\"", "\\\"") + "\\n\\n";
-        result += policy.getDeclarationNode().unparseTree().replace("\"", "\\\"") + "\",";
+        result += "\"signature\" : \"" + signature.replace("\"", "\\\"") + "\",";//"\\n\\n";
+        //result += initRule.getDeclarationNode().unparseTree().replace("\"", "\\\"") + "\\n\\n";
+        //result += program.getDeclarationNode().unparseTree().replace("\"", "\\\"") + "\\n\\n";
+        //result += policy.getDeclarationNode().unparseTree().replace("\"", "\\\"") + "\",";
         result += "\"init\" : \""+ initRule.getName() + "\",";
         result += "\"program\" : \""+ program.getName() + "\",";
         result += "\"policy\" : \""+ policy.getName() + "\",";
         result += "\"start\" : true }";
-
+//System.out.println("THE RESULT> "+result+" <END RESULT");
         return result;
     }
 	
