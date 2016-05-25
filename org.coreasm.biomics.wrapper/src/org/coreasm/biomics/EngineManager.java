@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.List;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
@@ -34,9 +35,10 @@ public class EngineManager {
 
     private static final HashMap<String, HashMap<String, CoreASMContainer>> asims = new HashMap<>();
 
-    private static final HashMap<String, UpdateRegistrationRequest> registrationRequests = new HashMap<>();
+    private static final HashMap<String, ArrayList<UpdateRegistrationRequest>> registrationRequests = new HashMap<>();
 
     public static CoreASMError createASIM(ASIMCreationRequest req) {
+        System.out.println("CreateASIM");
         asimCounter++;
 
         if(req.simulation == null || req.simulation.equals(""))
@@ -72,11 +74,11 @@ public class EngineManager {
 
         System.out.println("Program to execute:\n"+program);
 
-        CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program);
-
-        if(req.start) {
-            casm.start();
-        }
+        int delay = 400;
+        if(wrapper.config.schedulingMode)
+            delay = 50;
+        
+        CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program, delay);
 
         synchronized(asims) {
             if(asims.containsKey(req.simulation))
@@ -85,6 +87,13 @@ public class EngineManager {
                 asims.put(req.simulation, new HashMap<String, CoreASMContainer>());
                 asims.get(req.simulation).put(req.name, casm);
             }
+        }
+
+        System.out.println("Update location registrations");
+        updateLocationRegistrations();
+
+        if(req.start) {
+            casm.start();
         }
 
         CoreASMError error = null;
@@ -195,10 +204,15 @@ public class EngineManager {
         if(req.target == null)
             return false;
 
+        if(registrationRequests.get(simId) == null)
+            registrationRequests.put(simId, new ArrayList<UpdateRegistrationRequest>());
+        registrationRequests.get(simId).add(req);
+
         // this message is sent to a simulation which
-        // is not hosted by this brapper
-        if(!asims.containsKey(simId))
-            return false;
+        // is not hosted by this brapper - store for later
+        if(!asims.containsKey(simId)) {
+            return true;
+        }
    
         Map<String, CoreASMContainer> simAsims = null;
         synchronized(asims) {
@@ -207,11 +221,11 @@ public class EngineManager {
         
         if(simAsims == null)
             return false;
-
-        registrationRequests.put(simId, req);
         
         List<UpdateLocation> registrations = req.registrations;
         for(UpdateLocation reg : registrations) {
+            System.out.println("* Register locations: "+reg.location);
+
             if(reg.location == null)
                 continue;
 
@@ -402,11 +416,32 @@ public class EngineManager {
         }
     }
 
-    // TODO: Registration only needs to be once with each brapper 
-    // if the brapper starts running some asim it can put the registrations in the ASIM
-    public static void updateLocationRegistrations(String asim) {
+    public static void updateLocationRegistrations() {
+        // System.out.println("XX updateLocationRegistrations");
         for(String sim : registrationRequests.keySet()) {
-            register4Updates(sim, registrationRequests.get(sim));
+            // System.out.println("XX Simulation: sim");
+            ArrayList<UpdateRegistrationRequest> urs = registrationRequests.get(sim);
+
+            for(UpdateRegistrationRequest ur : urs) {
+                // System.out.println("XX UpdateRegistration ... ");
+                List<UpdateLocation> registrations = ur.registrations;
+                for(UpdateLocation reg : registrations) {
+                    
+                    // System.out.println("XX [Brapper] Renew update registration for location "+reg.location+" in simulation '"+sim+"'");
+                    
+                    if(reg.location == null)
+                        continue;
+                    
+                    HashMap<String, CoreASMContainer> simAsims = asims.get(sim);
+                    Set<String> allAsims = simAsims.keySet();
+                    for(String asimName : allAsims) {
+                        CoreASMContainer trg = simAsims.get(asimName);
+                        synchronized(trg) {
+                            trg.register4Update(ur.target, reg.location);
+                        }
+                    }
+                }
+            }    
         }
     }
 
@@ -512,7 +547,7 @@ public class EngineManager {
 
             response.close();
 
-            // System.out.println("Update sent");
+            System.out.println("- Update sent");
         } 
         catch (ProcessingException pe) {
             System.err.println("ERROR: Problem processing Update: "+pe);

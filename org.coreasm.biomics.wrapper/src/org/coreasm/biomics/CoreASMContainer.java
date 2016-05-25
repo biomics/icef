@@ -84,6 +84,7 @@ public class CoreASMContainer extends Thread {
     protected String simId;
     protected String asimName;
     protected String asimProgram;
+    protected int delay;
 
 	private CoreASMEngine engine = null;
 	private UpdateMultiset lastUpdateSet = null;
@@ -103,7 +104,7 @@ public class CoreASMContainer extends Thread {
         asimProgram = req.program;
     }
 
-    public CoreASMContainer(String simulation, String newName, String newProgram) {
+    public CoreASMContainer(String simulation, String newName, String newProgram, int rate) {
         asimName = newName;
         asimProgram = newProgram;
         simId = simulation;
@@ -113,6 +114,9 @@ public class CoreASMContainer extends Thread {
         asimsToDel = new HashSet<String>();
         updateMap = new HashMap<Location, Update>();
         updateRegistrations = new HashMap<>();
+
+        delay = rate;
+        delay = 100;
 
         initEngine();
 
@@ -319,8 +323,6 @@ public class CoreASMContainer extends Thread {
     }
 
     public void distributeUpdateSet(UpdateMultiset updates) {
-        // System.out.println("+++ handleUpdateSet +++ ");
-
         Map<String, UpdateMultiset> toSend = prepareUpdates(updates);
         Set<String> targets = toSend.keySet();
 
@@ -331,8 +333,8 @@ public class CoreASMContainer extends Thread {
                 MessageRequest req = new MessageRequest("update", simId, asimName, target, json);
                 EngineManager.sendUpdate(simId, req);
             } catch (Exception e) {
-                System.err.println("Unable to transform UpdateSet into json.");
-                System.err.println(e);
+                System.err.println("[ASIM "+asimName+"] Unable to transform UpdateSet into json.");
+                System.err.println("[ASIM "+asimName+"] "+e);
                 e.printStackTrace();
             }
         }
@@ -416,8 +418,6 @@ public class CoreASMContainer extends Thread {
     }
 
     public synchronized boolean register4Update(String target, String location) {
-        // System.out.println("[ASIM "+asimName+"]: register4Update "+location);
-        
         if(!updateRegistrations.containsKey(location))
             updateRegistrations.put(location, new HashSet<String>());
         
@@ -429,7 +429,7 @@ public class CoreASMContainer extends Thread {
     public void run() {
         int currentStep = 1;
 
-        EngineManager.updateLocationRegistrations(asimName);
+        // EngineManager.updateLocationRegistrations(asimName);
 
         do {
 
@@ -440,7 +440,7 @@ public class CoreASMContainer extends Thread {
             }
 
             try {
-                Thread.sleep(400);
+                Thread.sleep(delay);
                 if(paused) {
                     Thread.sleep(500);
                     continue;
@@ -451,10 +451,6 @@ public class CoreASMContainer extends Thread {
 
 			if (currentStep == 1)
 				lastUpdateSet = new UpdateMultiset();
-			else
-				lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
-
-            distributeUpdateSet(lastUpdateSet);
 
             injectUpdates();
             injectASIMs();
@@ -479,6 +475,7 @@ public class CoreASMContainer extends Thread {
                     String loc = it.next();
                     String name = EngineManager.requestASIMCreation(loc2Agent.get(loc), simId);
                     agents.put(loc, name);
+                    System.out.println("["+asimName+"]: Agent "+name+" created.");
                 }
                 engine.reportNewAgents(agents);
             }
@@ -491,12 +488,14 @@ public class CoreASMContainer extends Thread {
             // System.out.println("handle outgoing Messages");
 
             handleOutgoingMessages();
-
             deleteASIMs();
                 
             /* System.out.println(" + ----- end of STEP " + currentStep + " ----- + \n");                
             System.out.println("\tUpdates after step " + currentStep + " are : " + engine.getUpdateSet(0));
             System.out.println();*/
+
+            lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
+            distributeUpdateSet(lastUpdateSet);
 
 			currentStep++;
             

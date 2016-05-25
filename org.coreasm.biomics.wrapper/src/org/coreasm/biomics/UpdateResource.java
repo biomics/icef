@@ -78,6 +78,8 @@ public class UpdateResource {
     public Response register4Updates(@PathParam("simId") String simId, String update) {
         UpdateRegistrationRequest req = UpdateRegistrationRequest.getUpdateRegistrationRequest(update);
 
+        System.out.println("register4Updates");
+
         boolean result = false;
         if(req != null && req.target != null) {
             result = EngineManager.register4Updates(simId, req);
