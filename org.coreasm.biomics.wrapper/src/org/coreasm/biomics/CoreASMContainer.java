@@ -89,7 +89,7 @@ public class CoreASMContainer extends Thread {
 	private UpdateMultiset lastUpdateSet = null;
     private ObjectMapper mapper = null;
 
-    private HashSet<Update> updateSet = null;
+    private HashMap<Location, Update> updateMap = null;
     private HashSet<String> asimsToAdd = null;
     private HashSet<String> asimsToDel = null;
     private HashSet<MessageElement> inBox = null;
@@ -111,7 +111,7 @@ public class CoreASMContainer extends Thread {
         inBox = new HashSet<MessageElement>();
         asimsToAdd = new HashSet<String>();
         asimsToDel = new HashSet<String>();
-        updateSet = new HashSet<Update>();
+        updateMap = new HashMap<Location, Update>();
         updateRegistrations = new HashMap<>();
 
         initEngine();
@@ -367,7 +367,8 @@ public class CoreASMContainer extends Thread {
     // TODO: NEEDS TO BE SYNCHRONIZED!!!
     public boolean injectUpdates() {
         try {
-            engine.updateState(updateSet);
+            engine.updateState(new HashSet<Update>(updateMap.values()));
+            updateMap.clear();
         } 
         catch(InconsistentUpdateSetException incUpdate) {
             System.err.println("Refuse update as it is inconsistent.");
@@ -376,14 +377,11 @@ public class CoreASMContainer extends Thread {
             System.err.println("Refuse update as a location is invalid.");
         }
 
-        updateSet.clear();
-
         return true;
     }
 
-    // TODO: NEEDS TO BE SYNCHRONIZED!!!
     public boolean receiveUpdate(MessageRequest req) {
-        // System.out.println("CoreASMContainer receives update");
+        System.out.println("CoreASMContainer receives update");
 
         String strUpdates = req.body;
         // System.out.println("strUpdates: "+strUpdates);
@@ -405,8 +403,13 @@ public class CoreASMContainer extends Thread {
             newArgs.addAll(u.loc.args);
             Location newLoc = new Location(u.loc.name, newArgs);
             Update newUpdate = new Update(newLoc, u.value, u.action, (Element)null, null);
-            // System.out.println(">>> "+newUpdate.toString()+" <<<");
-            updateSet.add(newUpdate);
+            Update oldUpdate = updateMap.get(newLoc);
+            if(oldUpdate != null) {
+                System.out.println("OVERWRITING OLD UPDATE IN LOCATION "+newLoc);
+                System.out.println("New value of "+newLoc+": "+newUpdate.value);
+                System.out.println("Old value of "+newLoc+": "+oldUpdate.value);
+            }
+            updateMap.put(newLoc, newUpdate);
         }
 
         return true;
@@ -436,9 +439,8 @@ public class CoreASMContainer extends Thread {
                 break;
             }
 
-            // ugh ... how ugly but the way coreASM works, this is needed
             try {
-                Thread.sleep(100);
+                Thread.sleep(400);
                 if(paused) {
                     Thread.sleep(500);
                     continue;
