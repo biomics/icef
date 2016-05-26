@@ -74,9 +74,9 @@ public class EngineManager {
 
         System.out.println("Program to execute:\n"+program);
 
-        int delay = 400;
+        int delay = 200;
         if(wrapper.config.schedulingMode)
-            delay = 50;
+            delay = 200;
         
         CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program, delay);
 
