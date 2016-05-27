@@ -33,11 +33,12 @@ var Manager = (function() {
         setScheduler : function() {
         },
 
-        getSimulations : function() {
+        // retrieve the set of all simulation ids
+        getSimulations : function(callback) {
             var ids = [];
             for(var id in this.simMap) 
                 ids.push(id);
-            return ids;
+            callback({ data : ids});
         },
 
         loadSimulation : function(spec) {

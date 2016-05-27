@@ -98,9 +98,14 @@ function initApp() {
 
     // ****************** SIMULATIONS ****************** 
 
+    // send an array of simulation identifiers
     app.get("/simulations", function(req, res) {
-        var simus = manager.getSimulations();
-        res.send(simus);
+        manager.getSimulations(function(success, error) {
+            if(error == null)
+                res.send(200, success.data);
+            else
+                res.send(500, error);
+        });
     });
 
     app.put("/simulations",
