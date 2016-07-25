@@ -1,3 +1,17 @@
+/*
+ * Brapper.js v1.0
+ *
+ * This file contains source code developed by the European
+ * FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling
+ *
+ * Licensed under the Academic Free License version 3.0
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ *
+ */
+
+
 var ASIM = require("./ASIM");
 var http = require("http");
 var uuid = require("node-uuid");
@@ -11,7 +25,7 @@ var Brapper = (function() {
         this.port = port;
 
         this.type = type ? type : "asim";
-        this.asims = {};
+        this.asims = [];
         this.load = 0;
     };
 
@@ -29,7 +43,7 @@ var Brapper = (function() {
         },
 
         addASIM : function(asim) {
-            this.asims[asim.getName()] = asim;
+            this.asims.push(asim.getName());
             this.load++;
 
             asim.setBrapper(this);
@@ -40,8 +54,6 @@ var Brapper = (function() {
         },
 
         destroyASIM : function(simId, name) {
-            console.log("Brapper.js: Destroy ASIM '"+name+"' in simulation '"+simId+"'");
-
             var asim = this.asims[name];
             if(asim == undefined)
                 return false;
@@ -58,8 +70,6 @@ var Brapper = (function() {
             };
 
             var request = http.request(options, function(res) {
-                if(res.statusCode)
-                    console.log("Response: "+res.statusCode);
                 res.setEncoding('utf8');
             });
 
@@ -70,8 +80,6 @@ var Brapper = (function() {
             });
 
             request.end();
-
-            console.log("RETURN TRUE");
 
             return true;
         },
@@ -110,9 +118,7 @@ var Brapper = (function() {
             return { success : true, msg : "Update forwarded\n" };
         },
 
-        recvMsg : function(msg) {
-            // console.log("BRAPPER.JS Sending message to brapper at "+this.host+":"+this.port+"\n");
-            
+        recvMsg : function(msg, callback) {            
             var data = JSON.stringify(msg);
 
             var options = {
@@ -137,16 +143,14 @@ var Brapper = (function() {
                 })
 
                 res.on('end', function(chunk) {
-                    return { success : true, msg : "Message forwarded\n" };
+                    callback({ code : 200, msg : "Message delivered\n" }, null);
                 });
             });
 
             request.setNoDelay(true);
 
             request.on('error', function(e) {
-                // console.log("BRAPPER.JS: AN ERROR OCCURRED");
-                console.log("[Manager]: Brapper: ERROR: "+e);
-                // callback({ success : false, msg : "Something went wrong\n" });
+                callback(null, { code : 400, msg : "Something went wrong in brapper.\n" });
             });
 
             request.write(data);
@@ -155,7 +159,7 @@ var Brapper = (function() {
             return { success : true, msg : "Message forwarded" };
         },
 
-        register4Updates : function(simId, reg) {
+        register4Updates : function(simId, reg, callback) {
             var data = JSON.stringify(reg);
 
             console.log("[Manager]: Send registrations to '"+this.host+":"+this.port+"'");
@@ -177,25 +181,22 @@ var Brapper = (function() {
                 res.setEncoding('utf8');
 
                 res.on('data', function(chunk) {
-                    // console.log("BRAPPER.JS SOME DATA ARRIVING");
+                    // nothing to do
                 });
 
                 res.on('end', function(chunk) {
                     console.log("[Manager]: Registration ended for '"+self.host+":"+self.port+"'");
-                    // return { success : true, msg : "Message forwarded\n" };
+                    callback({ success : true, msg : "Message forwarded\n" });
                 });
             });
 
             request.on('error', function(e) {
-                // console.log("BRAPPER.JS: AN ERROR OCCURRED");
                 console.log("[Manager]: Brapper: ERROR: "+e);
-                // callback({ success : false, msg : "Something went wrong\n" });
+                callback({ success : false, msg : "Something went wrong\n" });
             });
 
             request.write(data);
             request.end();
-
-            return { success : true, msg : "Message forwarded" };
         }
     };
 
