@@ -31,6 +31,10 @@ import org.coreasm.engine.plugins.string.StringElement;
  */
 public class OutputFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7050130799515405462L;
 	private Set<Location> locations;
 	private StringElement outputValues;
 	

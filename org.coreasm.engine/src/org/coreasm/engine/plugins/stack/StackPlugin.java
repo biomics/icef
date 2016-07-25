@@ -24,6 +24,7 @@ import org.codehaus.jparsec.Parsers;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -202,7 +203,7 @@ public class StackPlugin extends Plugin implements ParserPlugin,
 									interpreter.getSelf(),
 									pos.getScannerInfo());
 							
-							pos.setNode(null, new UpdateMultiset(u1, u2), null);
+							pos.setNode(null, new UpdateMultiset(u1, u2), null, null);
 						} else
 							capi.error("Cannot pop into a non-location.", pos, interpreter);
 					} else
@@ -240,7 +241,7 @@ public class StackPlugin extends Plugin implements ParserPlugin,
 									Update.UPDATE_ACTION, 
 									interpreter.getSelf(),
 									pos.getScannerInfo());
-							pos.setNode(null, new UpdateMultiset(u1), null);
+							pos.setNode(null, new UpdateMultiset(u1), null, null);
 						} else 
 							capi.error("There is no value to push into stack", eNode, interpreter);
 					} else
@@ -317,6 +318,18 @@ public class StackPlugin extends Plugin implements ParserPlugin,
 	 */
 	public VersionInfo getVersionInfo() {
 		return VERSION_INFO;
+	}
+
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 }

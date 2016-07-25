@@ -38,7 +38,7 @@ import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.interpreter.Node.NameNodeTuple;
-import org.coreasm.engine.kernel.FunctionRuleTermParseMap;
+import org.coreasm.engine.kernel.FunctionRulePolicyTermParseMap;
 import org.coreasm.engine.kernel.KernelServices;
 import org.coreasm.engine.parser.GrammarRule;
 import org.coreasm.engine.parser.ParserTools;
@@ -63,7 +63,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 
 	public static final String PLUGIN_NAME = KernelExtensionsPlugin.class.getSimpleName();
 
-	public static final String EXTENDED_FUNC_RULE_TERM_NAME = "ExtendedFunctionRuleTermNode";
+	public static final String EXTENDED_FUNC_RULE_POLICY_TERM_NAME = "ExtendedFunctionRulePolicyTermNode";
 
 	public static final String EXTENDED_RULE_CALL_NAME = "ExtendedRullCall";
 
@@ -135,7 +135,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 			ParserTools pTools = ParserTools.getInstance(capi);
 			Parser<Node> idParser = pTools.getIdParser();
 			
-			// ExtendedFunctionRuleTerm1: ID TupleTerm TupleTerm
+			// ExtendedFunctionRulePolicyTerm1: ID TupleTerm TupleTerm
 			Parser<Node> extFuncRuleTermParser1 = Parsers.array(
 	       			new Parser[] {
        				idParser,
@@ -144,8 +144,8 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
        				}).map( new ParserTools.ArrayParseMap(PLUGIN_NAME) {
 
 						public Node map(Object[] vals) {
-							Node node = new ExtendedFunctionRuleTermNode(((Node)vals[0]).getScannerInfo());
-							addChild(node, (new FunctionRuleTermParseMap()).map((Node)vals[0], (Node)vals[1]));
+							Node node = new ExtendedFunctionRulePolicyTermNode(((Node)vals[0]).getScannerInfo());
+							addChild(node, (new FunctionRulePolicyTermParseMap()).map((Node)vals[0], (Node)vals[1]));
 							for (Node n: ((Node)vals[2]).getChildNodes())
 								if (n instanceof ASTNode) 
 									node.addChild("lambda", n);
@@ -156,7 +156,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 				
 					});
 
-			// ExtendedFunctionRuleTerm2: '(' Term ')' TupleTerm
+			// ExtendedFunctionRulePolicyTerm2: '(' Term ')' TupleTerm
 			Parser<Node> extFuncRuleTermParser2 = Parsers.array(
 	       			new Parser[] {
        				pTools.getOprParser("("),
@@ -165,7 +165,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
        				tupleTermParser
        				}).map( new ParserTools.ArrayParseMap(PLUGIN_NAME) {
 						public Node map(Object[] vals) {
-							Node node = new ExtendedFunctionRuleTermNode(((Node)vals[0]).getScannerInfo());
+							Node node = new ExtendedFunctionRulePolicyTermNode(((Node)vals[0]).getScannerInfo());
 							for (int i = 0; i < 3; i++)
 								if (vals[i] != null)
 									addChild(node, (Node)vals[i]);
@@ -182,7 +182,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 			Parser<Node> extendedFuncRuleTermParser = Parsers.longest(
 					extFuncRuleTermParser1, extFuncRuleTermParser2);
 			
-			// ExtendedRuleCall: 'call' ExtendedFunctionRuleTerm
+			// ExtendedRuleCall: 'call' ExtendedFunctionRulePolicyTerm
 			Parser<Node> extRuleCallParser = Parsers.array(
 					new Parser[] {
 					pTools.getKeywParser("call", PLUGIN_NAME),
@@ -209,15 +209,15 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 					new GrammarRule(extFuncRuleTermParser2.toString(), 
 							"'(' Term ')' TupleTerm", extFuncRuleTermParser2, PLUGIN_NAME));
 
-			parsers.put("FunctionRuleTerm",
-					new GrammarRule(EXTENDED_FUNC_RULE_TERM_NAME,
-							EXTENDED_FUNC_RULE_TERM_NAME + "1 | " + EXTENDED_FUNC_RULE_TERM_NAME + "2",
+			parsers.put("FunctionRulePolicyTerm",
+					new GrammarRule(EXTENDED_FUNC_RULE_POLICY_TERM_NAME,
+							EXTENDED_FUNC_RULE_POLICY_TERM_NAME + "1 | " + EXTENDED_FUNC_RULE_POLICY_TERM_NAME + "2",
 							extendedFuncRuleTermParser, 
 							PLUGIN_NAME));
 			
 			parsers.put("Rule", 
 					new GrammarRule(EXTENDED_RULE_CALL_NAME,
-							"'call' " + EXTENDED_FUNC_RULE_TERM_NAME, 
+							"'call' " + EXTENDED_FUNC_RULE_POLICY_TERM_NAME, 
 							extRuleCallParser,
 							PLUGIN_NAME));
 		}
@@ -227,8 +227,8 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 	@Override
 	public ASTNode interpret(Interpreter interpreter, ASTNode pos)
 			throws InterpreterException {
-		if (pos instanceof ExtendedFunctionRuleTermNode) {
-			ExtendedFunctionRuleTermNode pnode = (ExtendedFunctionRuleTermNode)pos;
+		if (pos instanceof ExtendedFunctionRulePolicyTermNode) {
+			ExtendedFunctionRulePolicyTermNode pnode = (ExtendedFunctionRulePolicyTermNode)pos;
 			
 			// 1. evaluate the term part
 			if (!pnode.getTerm().isEvaluated()) {
@@ -259,7 +259,7 @@ public class KernelExtensionsPlugin extends Plugin implements ParserPlugin, Inte
 							}
 						} else
 							value = fe.getValue(vList);
-						pos.setNode(loc, null, value);
+						pos.setNode(loc, null, null, value);
 					} else
 						pos = toBeEvaluated;
 				} else { 

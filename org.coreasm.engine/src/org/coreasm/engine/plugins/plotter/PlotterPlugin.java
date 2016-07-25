@@ -30,6 +30,7 @@ import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MapFunction;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -198,7 +199,7 @@ public class PlotterPlugin extends Plugin implements
 					/* create an update of the form: 'nextPlotFunctions(window, function) := true' */
 					l = new Location(PLOT_LOCATION_NAME, ElementList.create(window, functionNode.getValue(), getStringRep(functionNode)));
 					Update update = new Update(l, BooleanElement.TRUE, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo());
-					pos.setNode(null, new UpdateMultiset(update), null);
+					pos.setNode(null, new UpdateMultiset(update), null, null);
 				} else
 					capi.error("Cannot plot a non-function value.", functionNode, interpreter);
 			}
@@ -316,6 +317,17 @@ public class PlotterPlugin extends Plugin implements
 
 	public Map<String, RuleElement> getRules() {
 		return null;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 }

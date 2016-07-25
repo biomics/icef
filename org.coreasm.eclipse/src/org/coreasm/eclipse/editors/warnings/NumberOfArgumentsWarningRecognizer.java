@@ -17,7 +17,7 @@ import org.coreasm.eclipse.editors.ASMDocument;
 import org.coreasm.eclipse.editors.ASMEditor;
 import org.coreasm.engine.EngineException;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.MacroCallRuleNode;
 import org.coreasm.engine.plugins.chooserule.ChooseRuleNode;
@@ -31,7 +31,7 @@ import org.coreasm.engine.plugins.predicatelogic.ForallExpNode;
 import org.coreasm.engine.plugins.set.SetCompNode;
 import org.coreasm.engine.plugins.signature.DerivedFunctionNode;
 import org.coreasm.engine.plugins.turboasm.LocalRuleNode;
-import org.coreasm.engine.plugins.turboasm.ReturnRuleNode;
+import org.coreasm.engine.plugins.turboasm.ReturnTermNode;
 
 public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 	private final ASMEditor parentEditor;
@@ -58,10 +58,10 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 					fringe.add(declarationNode);
 					while (!fringe.isEmpty()) {
 						ASTNode node = fringe.pop();
-						if (ASTNode.FUNCTION_RULE_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRuleTermNode) {
+						if (ASTNode.FUNCTION_RULE_POLICY_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRulePolicyTermNode) {
 							if (node.getParent() instanceof MacroCallRuleNode)	// Wrong number of arguments for rules cause an error
 								break;
-							FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+							FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 							if (frNode.hasName()) {
 								Declaration declaration = declarations.get(frNode.getName());
 								if (declaration instanceof FunctionDeclaration) {
@@ -99,7 +99,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return warnings;
 	}
 
-	private boolean isEnvironmentVariable(FunctionRuleTermNode frNode) {
+	private boolean isEnvironmentVariable(FunctionRulePolicyTermNode frNode) {
 		if (isParam(frNode))
 			return true;
 		if (isInLetVariableMap(frNode))
@@ -125,7 +125,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return false;
 	}
 	
-	private boolean isParam(FunctionRuleTermNode frNode) {
+	private boolean isParam(FunctionRulePolicyTermNode frNode) {
 		final ASTNode ruleNode = getParentRuleNode(frNode);
 		if (ruleNode != null) {
 			final ASTNode idNode = ruleNode.getFirst().getFirst();
@@ -144,7 +144,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return parentRuleNode;
 	}
 	
-	private boolean isInLetVariableMap(FunctionRuleTermNode frNode) {
+	private boolean isInLetVariableMap(FunctionRulePolicyTermNode frNode) {
 		for (LetRuleNode letRuleNode = getParentLetRuleNode(frNode); letRuleNode != null; letRuleNode = getParentLetRuleNode(letRuleNode)) {
 			try {
 				if (letRuleNode.getVariableMap().containsKey(frNode.getName()))
@@ -164,12 +164,12 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isLocalFunction(FunctionRuleTermNode frNode) {
+	private boolean isLocalFunction(FunctionRulePolicyTermNode frNode) {
 		for (LocalRuleNode localRuleNode = getParentLocalRuleNode(frNode); localRuleNode != null; localRuleNode = getParentLocalRuleNode(localRuleNode)) {
 			if (localRuleNode.getFunctionNames().contains(frNode.getName()))
 				return true;
 		}
-		if (isReturnRuleExpression(frNode))
+		if (isReturnTermExpression(frNode))
 			return true;
 		return false;
 	}
@@ -183,7 +183,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isForallRuleVariable(FunctionRuleTermNode frNode) {
+	private boolean isForallRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ForallRuleNode forallRuleNode = getParentForallRuleNode(frNode); forallRuleNode != null; forallRuleNode = getParentForallRuleNode(forallRuleNode)) {
 			if (forallRuleNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -200,7 +200,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isForallExpVariable(FunctionRuleTermNode frNode) {
+	private boolean isForallExpVariable(FunctionRulePolicyTermNode frNode) {
 		for (ForallExpNode forallExpNode = getParentForallExpNode(frNode); forallExpNode != null; forallExpNode = getParentForallExpNode(forallExpNode)) {
 			if (forallExpNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -217,7 +217,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isExistsExpVariable(FunctionRuleTermNode frNode) {
+	private boolean isExistsExpVariable(FunctionRulePolicyTermNode frNode) {
 		for (ExistsExpNode existsExpNode = getParentExistsExpNode(frNode); existsExpNode != null; existsExpNode = getParentExistsExpNode(existsExpNode)) {
 			if (existsExpNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -234,7 +234,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isChooseVariable(FunctionRuleTermNode frNode) {
+	private boolean isChooseVariable(FunctionRulePolicyTermNode frNode) {
 		for (ChooseRuleNode chooseRuleNode = getParentChooseRuleNode(frNode); chooseRuleNode != null; chooseRuleNode = getParentChooseRuleNode(chooseRuleNode)) {
 			if (chooseRuleNode.getVariableMap().containsKey(frNode.getName()))
 				return true;
@@ -251,7 +251,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isPickExpVariable(FunctionRuleTermNode frNode) {
+	private boolean isPickExpVariable(FunctionRulePolicyTermNode frNode) {
 		for (PickExpNode pickExpNode = getParentPickExpNode(frNode); pickExpNode != null; pickExpNode = getParentPickExpNode(pickExpNode)) {
 			if (pickExpNode.getVariable().getToken().equals(frNode.getName()))
 				return true;
@@ -268,7 +268,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isExtendRuleVariable(FunctionRuleTermNode frNode) {
+	private boolean isExtendRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ExtendRuleNode extendRuleNode = getParentExtendRuleNode(frNode); extendRuleNode != null; extendRuleNode = getParentExtendRuleNode(extendRuleNode)) {
 			if (extendRuleNode.getIdNode().getToken().equals(frNode.getName()))
 				return true;
@@ -285,7 +285,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isSetComprehensionConstrainerVariable(FunctionRuleTermNode frNode) {
+	private boolean isSetComprehensionConstrainerVariable(FunctionRulePolicyTermNode frNode) {
 		for (SetCompNode setCompNode = getParentSetCompNode(frNode); setCompNode != null; setCompNode = getParentSetCompNode(setCompNode)) {
 			try {
 				if (setCompNode.getVarBindings().containsKey(frNode.getName()))
@@ -307,7 +307,7 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isListComprehensionVariable(FunctionRuleTermNode frNode) {
+	private boolean isListComprehensionVariable(FunctionRulePolicyTermNode frNode) {
 		for (ListCompNode listCompNode = getParentListCompNode(frNode); listCompNode != null; listCompNode = getParentListCompNode(listCompNode)) {
 			try {
 				if (listCompNode.getVarBindings().containsKey(frNode.getName()))
@@ -329,25 +329,25 @@ public class NumberOfArgumentsWarningRecognizer implements IWarningRecognizer {
 		return null;
 	}
 	
-	private boolean isReturnRuleExpression(FunctionRuleTermNode frNode) {
-		for (ReturnRuleNode returnRuleNode = getParentReturnRuleNode(frNode); returnRuleNode != null; returnRuleNode = getParentReturnRuleNode(returnRuleNode)) {
-			ASTNode expression = returnRuleNode.getExpressionNode();
-			if (expression instanceof FunctionRuleTermNode && ((FunctionRuleTermNode)expression).getName().equals(frNode.getName()))
+	private boolean isReturnTermExpression(FunctionRulePolicyTermNode frNode) {
+		for (ReturnTermNode returnTermNode = getParentReturnTermNode(frNode); returnTermNode != null; returnTermNode = getParentReturnTermNode(returnTermNode)) {
+			ASTNode expression = returnTermNode.getExpressionNode();
+			if (expression instanceof FunctionRulePolicyTermNode && ((FunctionRulePolicyTermNode)expression).getName().equals(frNode.getName()))
 				return true;
 		}
 		return false;
 	}
 	
-	private ReturnRuleNode getParentReturnRuleNode(ASTNode node) {
-		ASTNode returnRuleNode = node.getParent();
-		while (returnRuleNode != null && !(returnRuleNode instanceof ReturnRuleNode))
-			returnRuleNode = returnRuleNode.getParent();
-		if (returnRuleNode instanceof ReturnRuleNode)
-			return (ReturnRuleNode)returnRuleNode;
+	private ReturnTermNode getParentReturnTermNode(ASTNode node) {
+		ASTNode returnTermNode = node.getParent();
+		while (returnTermNode != null && !(returnTermNode instanceof ReturnTermNode))
+			returnTermNode = returnTermNode.getParent();
+		if (returnTermNode instanceof ReturnTermNode)
+			return (ReturnTermNode)returnTermNode;
 		return null;
 	}
 	
-	private boolean isImportRuleVariable(FunctionRuleTermNode frNode) {
+	private boolean isImportRuleVariable(FunctionRulePolicyTermNode frNode) {
 		for (ASTNode importRuleNode = getParentImportRuleNode(frNode); importRuleNode != null; importRuleNode = getParentImportRuleNode(importRuleNode)) {
 			if (importRuleNode.getFirst().getToken().equals(frNode.getName()))
 				return true;

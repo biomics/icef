@@ -30,6 +30,10 @@ import org.coreasm.engine.plugins.set.SetElement;
 public class FunctionRangeFunctionElement extends FunctionElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7098417622428801883L;
+	/**
 	 * Suggested name of this function
 	 */
 	public static final String FUNCTION_NAME = "range";

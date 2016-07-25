@@ -1,4 +1,4 @@
-/*	
+/*	OLD BEFORE CHECKOUT
  * Kernel.java 	1.0 	$Revision: 243 $
  * 
  *
@@ -44,6 +44,8 @@ import org.coreasm.engine.absstorage.MapFunction;
 import org.coreasm.engine.absstorage.PluginAggregationAPI;
 import org.coreasm.engine.absstorage.PluginAggregationAPI.Flag;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
+import org.coreasm.engine.absstorage.PolicyBackgroundElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleBackgroundElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
@@ -95,11 +97,13 @@ public class Kernel extends Plugin
 	public static final String GR_NOSIGNATURE = "NoSignature";
 	public static final String GR_ID = "ID";
 	public static final String GR_INITIALIZATION = "Initialization";
+	public static final String GR_SCHEDULING = "Scheduling";
 	public static final String GR_RULEDECLARATION = "RuleDeclaration";
 	public static final String GR_RULEDECLARATION_LIST = "RuleDeclarationList";
 	public static final String GR_BOOLEAN_TERM = "BooleanTerm";
-	public static final String GR_SKIP = "SkipRule";
-	public static final String GR_FUNCTION_RULE_TERM = "FunctionRuleTerm";
+	public static final String GR_SKIP = "Skip";
+	//public static final String GR_NONE = "None";
+	public static final String GR_FUNCTION_RULE_POLICY_TERM = "FunctionRulePolicyTerm";
 	public static final String GR_TUPLE_TERM = "TupleTerm";
 	public static final String GR_RULEELEMENT_TERM = "RuleElementTerm";
 	public static final String GR_RULE_OR_FUNCTION_ELEMENT_TERM = "RuleOrFunctionElementTerm";
@@ -107,21 +111,33 @@ public class Kernel extends Plugin
 	public static final String GR_EXPRESSION = "Expression";
 	public static final String GR_TERM = "Term";
 	public static final String GR_GUARD = "Guard";
+	public static final String GR_FUNCTION_POLICY_TERM = "FunctionPolicyTerm";
+	public static final String GR_POLICYDECLARATION = "PolicyDeclaration";
+	public static final String GR_POLICYDECLARATION_LIST = "PolicyDeclarationList";
+	public static final String GR_POLICYELEMENT_TERM = "PolicyElementTerm";
+	public static final String GR_POLICY_OR_FUNCTION_ELEMENT_TERM = "PolicyOrFunctionElementTerm";
 	
 	/** keywords */
 	public static final String KW_COREASM = "CoreASM";
 	public static final String KW_USE = "use";
 	public static final String KW_INIT = "init";
-	public static final String KW_SKIP = "skip"; 
+	public static final String KW_SKIP = "skip";
+	//public static final String KW_NONE = "none"; 
 	public static final String KW_TRUE = "true";
 	public static final String KW_FALSE = "false";
 	public static final String KW_UNDEF = "undef";
 	public static final String KW_SELF = "self";
 	public static final String KW_RULEELEMENT = "ruleelement";
 	public static final String KW_NOSIGNATURE = "nosignature";
+	public static final String KW_SCHEDULING = "scheduling";
+	public static final String KW_POLICYELEMENT = "policyelement";
+	public static final String KW_SCHEDULE = "schedule";
+	public static final String KW_WITH = "with";
+	public static final String KW_IN = "in";
     
 	/** operators */
 	public static final String OP_RULE_OR_FUNCTION_ELEMENT = "@";
+	public static final String OP_POLICY_OR_FUNCTION_ELEMENT = "#";
     private static final String EQUALITY_OP = "=";
 	
 	/** List of kernel parsers */
@@ -134,6 +150,7 @@ public class Kernel extends Plugin
 	
 	private Map<String,BackgroundElement> backgroundElements = null;
 	private Map<String,RuleElement> ruleElements = null;
+	private Map<String,PolicyElement> policyElements = null;
 	
     /** List of update actions provided by this plugin (empty). */
     public static final String[] UPDATE_ACTIONS = {};
@@ -152,26 +169,31 @@ public class Kernel extends Plugin
     //private final Parser<Node>[] basicTermParserArray = new Parser[1];
     //private final Parser<Node> basicTermParser = ParserTools.lazy("BasicTerm", basicTermParserArray);
     //private final Parser<Node>[] funcRuleTermParserArray = new Parser[1];
-    //private final Parser<Node> funcRuleTermParser = ParserTools.lazy("FunctionRuleTerm", funcRuleTermParserArray);
+    //private final Parser<Node> funcRuleTermParser = ParserTools.lazy("FunctionRulePolicyTerm", funcRuleTermParserArray);
     //private final Parser<Node>[] headerParserArray = new Parser[1];
     //private final Parser<Node> headerParser = ParserTools.lazy("Header", headerParserArray);
     //private final Parser<Node>[] ruleSignatureParserArray = new Parser[1];
     //private final Parser<Node> ruleSignatureParser = ParserTools.lazy("RuleSignature", ruleSignatureParserArray);
 
     private final String[] keywords = {"CoreASM", "nosignature", "use", "init", "rule", 
-    		"ruleelement", "skip", "import", "do", "undef", "true", "false", "self"};
-    private final String[] operators = {"=", "(", ")", ",", "@", ":=", "!!"};
+    		"ruleelement", "skip", "import", "do", "undef", "true", "false", "self", 
+    		"scheduling", "policy", "policyelement", "schedule", "with", "in"};
+    private final String[] operators = {"=", "(", ")", ",", "@", ":=", "!!", "#"};
          
     private final Parser.Reference<Node> refTupleTermParser = Parser.newReference();
-    private final Parser.Reference<Node> refRuleParser = Parser.newReference();
+
     private final Parser.Reference<Node> refHeaderParser = Parser.newReference();
     private final Parser.Reference<Node> refTermParser = Parser.newReference();
-    private final Parser.Reference<Node> refFuncRuleTermParser = Parser.newReference();
+    private final Parser.Reference<Node> refBasicExprParser = Parser.newReference();
     private final Parser.Reference<Node> refConstantTermParser = Parser.newReference();
     private final Parser.Reference<Node> refBasicTermParser = Parser.newReference();
-    private final Parser.Reference<Node> refRuleSignatureParser = Parser.newReference();
-    private final Parser.Reference<Node> refBasicExprParser = Parser.newReference();
+    private final Parser.Reference<Node> refRuleParser = Parser.newReference();
+    private final Parser.Reference<Node> refSignatureParser = Parser.newReference();
     private final Parser.Reference<Node> refRuleDeclarationParser = Parser.newReference();
+    private final Parser.Reference<Node> refFuncRulePolicyTermParser = Parser.newReference();
+    private final Parser.Reference<Node> refPolicyParser = Parser.newReference();
+    private final Parser.Reference<Node> refPolicyDeclarationParser = Parser.newReference();
+   
     
     //compiler plugin
     private final CompilerPlugin compilerPlugin = new CompilerKernelPlugin(this);
@@ -182,11 +204,12 @@ public class Kernel extends Plugin
     public Kernel() {
     	universeNames = new HashSet<String>();
 		universeNames.add(AbstractStorage.AGENTS_UNIVERSE_NAME);
-
+		universeNames.add(AbstractStorage.ASIMS_UNIVERSE_NAME);
     	backgroundNames = new HashSet<String>();
 		backgroundNames.add(BooleanBackgroundElement.BOOLEAN_BACKGROUND_NAME);
 		backgroundNames.add(FunctionBackgroundElement.FUNCTION_BACKGROUND_NAME);
 		backgroundNames.add(RuleBackgroundElement.RULE_BACKGROUND_NAME);
+		backgroundNames.add(PolicyBackgroundElement.POLICY_BACKGROUND_NAME);
     }
  
 	@Override
@@ -237,24 +260,26 @@ public class Kernel extends Plugin
 	 * Exposes some of the kernel grammar rule parsers to other plug-ins. 
 	 * The following non-terminals are accepted:
 	 * <p>
-	 * Rule, Term, ConstantTerm, BasicTerm, FunctionRuleTerm,
-	 * Header, RuleSignature
+	 * Rule, Term, ConstantTerm, BasicTerm, FunctionRulePolicyTerm,
+	 * Header, RuleSignature, and now Policy others for BSL
 	 * 
 	 * @see org.coreasm.engine.plugin.ParserPlugin#getParser(java.lang.String)
 	 */
 	public Parser<Node> getParser(String nonterminal) {
 		if (exposedParsers == null) {
 			exposedParsers = new HashMap<String, Parser<Node>>();
-			exposedParsers.put("Rule", refRuleParser.lazy());
 			exposedParsers.put("Term", refTermParser.lazy());
 			exposedParsers.put("ConstantTerm", refConstantTermParser.lazy());
 			exposedParsers.put("BasicTerm", refBasicTermParser.lazy());
-			exposedParsers.put("FunctionRuleTerm", refFuncRuleTermParser.lazy());
 			exposedParsers.put("Header", refHeaderParser.lazy());
-			exposedParsers.put("RuleSignature", refRuleSignatureParser.lazy());
 			exposedParsers.put("TupleTerm", refTupleTermParser.lazy());
 			exposedParsers.put("BasicExpr", refBasicExprParser.lazy());
+			exposedParsers.put("Rule", refRuleParser.lazy());
+			exposedParsers.put("RuleSignature", refSignatureParser.lazy());
 			exposedParsers.put("RuleDeclaration", refRuleDeclarationParser.lazy());
+			exposedParsers.put("FunctionRulePolicyTerm", refFuncRulePolicyTermParser.lazy());
+			exposedParsers.put("Policy", refPolicyParser.lazy());
+			exposedParsers.put("PolicyDeclaration", refPolicyDeclarationParser.lazy());
 		}
 		return exposedParsers.get(nonterminal);
 	}
@@ -303,7 +328,7 @@ public class Kernel extends Plugin
 			// TODO this can be done in a nicer way
 			// Here we have to call getLexer() so that the 
 			// ParserTools also gets initialized
-			// jetzt �berfl�ssig?
+			// jetzt ?berfl?ssig?
 			 getLexers();
 			
 			// Ignore-Parser
@@ -357,6 +382,27 @@ public class Kernel extends Plugin
 	    			});
 	    	parsers.put("Initialization", new GrammarRule("Initialization", "'init' ID", initializationParser, this.getName()));
 	    	
+	    	// Scheduling: 'scheduling' ID
+	    	Parser<Node> schedulingParser = Parsers.sequence(
+	    			parserTools.getKeywParser("scheduling", this.getName()),
+	    			idParser,
+	    			new ParseMap2(getName()) {
+	
+						public Node map(Node a, Node b) {
+							Node node = new ASTNode(
+									null,
+									null,
+									Kernel.GR_SCHEDULING,
+									null,
+									a.getScannerInfo()
+									);
+							node.addChild(a);
+							node.addChild(b);
+							return node;
+						}
+	    				
+	    			});
+	    	parsers.put("Scheduling", new GrammarRule("Scheduling", "'scheduling' ID", schedulingParser, this.getName()));
 	    	
 	    	// RuleSignature : ID ( '(' ID (',' ID)* ')' )?
 	    	Parser<Node> rulesignParser = Parsers.array(new Parser[] {
@@ -367,17 +413,34 @@ public class Kernel extends Plugin
 	    					parserTools.getOprParser(")")
 	    					).optional(),
 	    			}).map(new ParserTools.RuleSignatureParseMap());
-	    	refRuleSignatureParser.set(rulesignParser);
-	    	parsers.put("RuleSignature", new GrammarRule("RuleSignature", "ID ( '(' ID (',' ID)* ')' )?", refRuleSignatureParser.lazy(), this.getName()));
-	    	 
+	    	refSignatureParser.set(rulesignParser);
+	    	parsers.put("RuleSignature", new GrammarRule("RuleSignature", "ID ( '(' ID (',' ID)* ')' )?", refSignatureParser.lazy(), this.getName()));
+	    	parsers.put("PolicySignature", new GrammarRule("RuleSignature", "ID ( '(' ID (',' ID)* ')' )?", refSignatureParser.lazy(), this.getName()));
+	    	
+	    	 // Term : ...
+	    	createTermParser(parsers);
 	
 	    	// Rule : ...
 	    	createRuleParser(parsers);
 	    	
+	    	// Policy : ...
+	    	createPolicyParser(parsers);
+	    	
+	    	// PolicyDeclaration : 'policy' PolicySignature '=' Policy
+	    	Parser<Node> policyDeclarationParser = Parsers.array(new Parser[] {
+	    			parserTools.getKeywParser("policy", this.getName()),
+	    			refSignatureParser.lazy(),
+	    			parserTools.getOprParser("="),
+	    			refPolicyParser.lazy()}
+	    			
+	    			).map(new ParserTools.PolicyDeclarationParseMap());
+	    	refPolicyDeclarationParser.set(policyDeclarationParser);
+	    	parsers.put("PolicyDeclaration", new GrammarRule("PolicyDeclaration", "'policy' PolicySignature '=' Policy", refPolicyDeclarationParser.lazy(), this.getName()));
+	    	
 	    	// RuleDeclaration : 'rule' RuleSignature '=' Rule
 	    	Parser<Node> ruleDeclarationParser = Parsers.array(new Parser[] {
 	    			parserTools.getKeywParser("rule", this.getName()),
-	    			refRuleSignatureParser.lazy(),
+	    			refSignatureParser.lazy(),
 	    			parserTools.getOprParser("="),
 	    			refRuleParser.lazy()}
 	    			
@@ -385,7 +448,7 @@ public class Kernel extends Plugin
 	    	refRuleDeclarationParser.set(ruleDeclarationParser);
 	    	parsers.put("RuleDeclaration", new GrammarRule("RuleDeclaration", "'rule' RuleSignature '=' Rule", refRuleDeclarationParser.lazy(), this.getName()));
 	
-	    	// CoreASM : 'CoreASM' ID ( UseClause | Header | 'init' ID | RuleDeclaration)*
+	    	// CoreASM : 'CoreASM' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration)*
 	    	Parser<Node> coreASMParser = Parsers.array(new Parser[] {
 	    			parserTools.getKeywParser("CoreASM", this.getName()),
 	    			idParser,
@@ -394,13 +457,15 @@ public class Kernel extends Plugin
 	    							useClauseParser,
 	    							refHeaderParser.lazy(),
 	    							initializationParser,
-	    							ruleDeclarationParser
+	    							schedulingParser,
+	    							ruleDeclarationParser,
+	    							policyDeclarationParser
 	    						)
 	    				)
 	    			}).map(new ParserTools.CoreASMParseMap())
 	    			.followedBy(Parsers.EOF);
 	    	parsers.put("CoreASM", new GrammarRule("CoreASM", 
-	    			"'CoreASM' ID ( UseClause | Header | 'init' ID | RuleDeclaration)*", 
+	    			"'BSL' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration )*", 
 	    			coreASMParser, this.getName()));
 		}
     	
@@ -457,21 +522,22 @@ public class Kernel extends Plugin
     	parsers.put("SkipRule", new GrammarRule("SkipRule", "'skip'", skipRuleParser, PLUGIN_NAME));
     	rules.add(skipRuleParser);
     	
-    	createTermParser(parsers);
 
-       	// UpdateRule : FunctionRuleTerm ':=' Term
+
+       	// UpdateRule : FunctionRulePolicyTerm ':=' Term
        	Parser<Node> updateRuleParser = Parsers.array(
-       			refFuncRuleTermParser.lazy(),
+       			refFuncRulePolicyTermParser.lazy(),
        			parserTools.getOprParser(":="),
        			refTermParser.lazy()
        			).map(new UpdateRuleParseMap());
        	parsers.put("UpdateRule", 
        			new GrammarRule("UpdateRule",
-       					"FunctionRuleTerm ':=' Term", updateRuleParser, PLUGIN_NAME));
+       					"FunctionRulePolicyTerm ':=' Term", updateRuleParser, PLUGIN_NAME));
        	rules.add(updateRuleParser);
+
        	
-       	// MacroCallRule : FunctionRuleTerm
-       	Parser<Node> macroCallRule = Parsers.array(refFuncRuleTermParser.lazy()).map(
+       	// MacroCallRule : FunctionRulePolicyTerm
+       	Parser<Node> macroCallRule = Parsers.array(refFuncRulePolicyTermParser.lazy()).map(
        			new ParseMap<Object[], Node>(PLUGIN_NAME) {
 
 					public Node map(Object[] vals) {
@@ -482,7 +548,7 @@ public class Kernel extends Plugin
        				
        			});
        	parsers.put("MacroCallRule",
-       			new GrammarRule("MacroCallRule", "FunctionRuleTerm", macroCallRule, PLUGIN_NAME));
+       			new GrammarRule("MacroCallRule", "FunctionRulePolicyTerm", macroCallRule, PLUGIN_NAME));
        	
        	// ImportRule : 'import' ID 'do' Rule 
        	Parser<Node> importRuleParser = Parsers.array(
@@ -514,6 +580,60 @@ public class Kernel extends Plugin
 
     }
     
+    /*
+     * Creates a parser to parse ASM Rules. It gathers all 
+     * the pieces from other plug-ins and creates the Rule parser.
+     * 
+     */
+    private void createPolicyParser(Map<String, GrammarRule> parsers) {
+    	List<Parser<Node>> policies = new ArrayList<Parser<Node>>();
+    	
+    	ParserTools parserTools = ParserTools.getInstance(capi);
+    	Parser<Node> idParser = parserTools.getIdParser();
+    	// Policy : ... // open for future extensions
+    	parsers.put("Policy", 
+    			new GrammarRule("Policy", "", refPolicyParser.lazy(), PLUGIN_NAME));
+    	
+    	// Policy : 'skip'
+    	Parser<Node> skipPolicyParser = parserTools.getKeywParser("skip", PLUGIN_NAME).map(
+    			new ParseMap<Node, Node>(PLUGIN_NAME) {
+					public Node map(Node v) {
+						return new SkipPolicyNode(v.getScannerInfo());
+					}});
+    	parsers.put("SkipPolicy", new GrammarRule("SkipPolicy", "'skip'", skipPolicyParser, PLUGIN_NAME));
+    	policies.add(skipPolicyParser);
+       	
+     // SchedulePrimitive : schedule Term with Term in Term
+       	Parser<Node> schedulePrimitiveParser = Parsers.array(
+       			parserTools.getKeywParser("schedule", PLUGIN_NAME),
+       			refTermParser.lazy(),
+       			parserTools.seq(
+       			parserTools.getKeywParser("with", PLUGIN_NAME),
+       			refTermParser.lazy(),
+       			parserTools.getKeywParser("in", PLUGIN_NAME),
+       			refFuncRulePolicyTermParser.lazy()).optional()
+       			).map(new SchedulePrimitiveParseMap());
+       	parsers.put("SchedulePrimitive", 
+       			new GrammarRule("SchedulePrimitive",
+       					"'schedule' Term ('with' Term 'in' Term)?", schedulePrimitiveParser, PLUGIN_NAME));
+       	policies.add(schedulePrimitiveParser);
+
+       	
+       	// Getting policy parsers from all the plugins
+       	Set<Plugin> plugins = capi.getPlugins();
+       	for (Plugin p: plugins) 
+       		if (p instanceof ParserPlugin && p != this) {
+       			GrammarRule gRule = ((ParserPlugin)p).getParsers().get("Policy");
+       			if (gRule != null) {
+       				policies.add(gRule.parser);
+       			}
+       		}
+       	
+       	Parser<Node> policyParser = Parsers.longest(policies);
+       	refPolicyParser.set(policyParser);
+
+    }
+    
     
     /*
      * Creates a parser to parse terms.
@@ -539,9 +659,9 @@ public class Kernel extends Plugin
     			new GrammarRule("TupleTerm",
     					"'(' ( Term  ( ',' Term )* )? ')'", refTupleTermParser.lazy(), PLUGIN_NAME));
 
-    	// FunctionRuleTerm : ID ( TupleTerm )?
-       	createFunctionRuleTermParser();
-    	
+    	// FunctionRulePolicyTerm : ID ( TupleTerm )?
+       	createFunctionRulePolicyTermParser();
+       	
        	// Term : Expression | ExtendedTerm
        	refTermParser.set( createExpressionParser() );
        	
@@ -551,45 +671,55 @@ public class Kernel extends Plugin
     /*
      * Creates a parser to parse function/rule terms
      */
-    private void createFunctionRuleTermParser() {
+    private void createFunctionRulePolicyTermParser() {
 
     	ParserTools parserTools = ParserTools.getInstance(capi);
     	Parser<Node> idParser = parserTools.getIdParser();
     	
     	List<Parser<Node>> frterms = new ArrayList<Parser<Node>>();
-    	String grammarRule = "BasicFunctionRuleTerm";
+    	String grammarRule = "BasicFunctionRulePolicyTerm";
 
-    	// BasicFunctionRuleTerm : ID ( TupleTerm )?
-       	Parser<Node> basicFunctionRuleTermParser = Parsers.array(
+    	// BasicFunctionRulePolicyTerm : ID ( TupleTerm )?
+       	Parser<Node> basicFunctionRulePolicyTermParser = Parsers.array(
        			new Parser[] {
        				idParser,
        				refTupleTermParser.lazy().optional()
-       				}).map(new ParserTools.FunctionRuleTermParseMap());
-       	parsers.put("BasicFunctionRuleTerm", 
-       			new GrammarRule("BasicFunctionRuleTerm",
-       					"ID ( TupleTerm )?", basicFunctionRuleTermParser, PLUGIN_NAME));
-       	frterms.add(basicFunctionRuleTermParser);
+       				}).map(new ParserTools.FunctionRulePolicyTermParseMap());
+       	parsers.put("BasicFunctionRulePolicyTerm", 
+       			new GrammarRule("BasicFunctionRulePolicyTerm",
+       					"ID ( TupleTerm )?", basicFunctionRulePolicyTermParser, PLUGIN_NAME));
+       	frterms.add(basicFunctionRulePolicyTermParser);
 
        	// Getting other function rule parsers from all other plugins
        	Set<Plugin> plugins = capi.getPlugins();
        	for (Plugin p: plugins) 
        		if (p instanceof ParserPlugin && p != this) {
-       			GrammarRule gRule = ((ParserPlugin)p).getParsers().get(GR_FUNCTION_RULE_TERM);
+       			GrammarRule gRule = ((ParserPlugin)p).getParsers().get(GR_FUNCTION_RULE_POLICY_TERM);
+       			if (gRule != null) {
+       				frterms.add(gRule.parser);
+       				grammarRule = grammarRule + " | " + gRule.name;
+       			}
+       		}
+     // Getting other function policy parsers from all other plugins
+       	for (Plugin p: plugins) 
+       		if (p instanceof ParserPlugin && p != this) {
+       			GrammarRule gRule = ((ParserPlugin)p).getParsers().get(GR_FUNCTION_POLICY_TERM);
        			if (gRule != null) {
        				frterms.add(gRule.parser);
        				grammarRule = grammarRule + " | " + gRule.name;
        			}
        		}
        	
-    	// FunctionRuleTerm : BasicFunctionRuleTerm | ...
+    	// FunctionRulePolicyTerm : BasicFunctionRulePolicyTerm | ...
        	Parser<Node> frtParser = Parsers.longest(frterms);
-       	refFuncRuleTermParser.set(frtParser);
+       	refFuncRulePolicyTermParser.set(frtParser);
        	
-       	parsers.put(GR_FUNCTION_RULE_TERM,
-    			new GrammarRule(GR_FUNCTION_RULE_TERM, 
+       	parsers.put(GR_FUNCTION_RULE_POLICY_TERM,
+    			new GrammarRule(GR_FUNCTION_RULE_POLICY_TERM, 
     					grammarRule, 
-    					refFuncRuleTermParser.lazy(), PLUGIN_NAME));
+    					refFuncRulePolicyTermParser.lazy(), PLUGIN_NAME));
     }
+    
     
     /*
      * Creates a parser to parse expressions. 
@@ -603,7 +733,7 @@ public class Kernel extends Plugin
     	// Expression : ... // Open for future extensions
     	Parser.Reference<Node> refExpParser = Parser.newReference();
     	
-    	Parser<Node> funcRuleTermParser = parsers.get("FunctionRuleTerm").parser;
+    	Parser<Node> funcRulePolicyTermParser = parsers.get("FunctionRulePolicyTerm").parser;
     	
     	// Guard : Term
     	Parser<Node> guardParser = refTermParser.lazy();
@@ -651,7 +781,8 @@ public class Kernel extends Plugin
     	
     	createConstantTerm(booleanTermParser, kernelTermsParser);
  
-    	createBasicTerm(funcRuleTermParser);
+    	createBasicTerm(funcRulePolicyTermParser);
+    	
     	
     	// BasicExpr : BasicTerm | '(' Term ')'
     	Parser<Node> beParser = Parsers.or(refBasicTermParser.lazy(), 
@@ -724,14 +855,14 @@ public class Kernel extends Plugin
     /*
      * Creates BasicTerm gathering pieces from other plugins
      */
-    private void createBasicTerm(Parser<Node> functionRuleTermParser) {
+    private void createBasicTerm(Parser<Node> functionRulePolicyTermParser) {
 
+    	String grammarRule = "FunctionRulePolicyTerm |ConstantTerm";
     	ParserTools parserTools = ParserTools.getInstance(capi);
     	Parser<Node> idParser = parserTools.getIdParser();
     	
     	List<Parser<Node>> bterms = new ArrayList<Parser<Node>>();
-    	String grammarRule = "FunctionRuleTerm | ConstantTerm";
-       	bterms.add(functionRuleTermParser);
+       	bterms.add(functionRulePolicyTermParser);
        	bterms.add(refConstantTermParser.lazy());
     	
     	// RuleElementTerm : 'ruleelement' ID
@@ -781,8 +912,56 @@ public class Kernel extends Plugin
 
        	bterms.add(ruleElementParser);
        	bterms.add(ruleOrFunctionElementParser);
-     
-       	// Getting basic term parsers from all the plugins
+        // PolicyElementTerm : 'policyelement' ID
+    	Parser<Node> policyElementParser = Parsers.sequence(
+    			parserTools.getKeywParser("policyelement", PLUGIN_NAME),
+    			idParser,
+    			
+    			new ParseMap2(PLUGIN_NAME) {
+
+					public Node map(Node a, Node b) {
+						Node node = new ASTNode(
+								pluginName,
+								ASTNode.EXPRESSION_CLASS,
+								Kernel.GR_POLICYELEMENT_TERM,
+								null,
+								a.getScannerInfo()
+								);
+						node.addChild(a);
+						node.addChild("alpha", b);
+						return node;
+					}
+    				
+    			}
+    	);
+       	parsers.put("PolicyElementTerm", 
+       			new GrammarRule("PolicyElementTerm", 
+       					"'policyelement' ID", policyElementParser, PLUGIN_NAME));
+       	
+    	// PolicyOrFunctionElementTerm : '#' ID
+    	Parser<Node> policyOrFunctionElementParser = Parsers.sequence(
+    			parserTools.getOprParser("#"),
+    			idParser,
+    			new ParseMap2(PLUGIN_NAME) {
+
+					public Node map(Node a, Node d) {
+						Node node = new PolicyOrFuncElementNode(a.getScannerInfo());
+						node.addChild(a);
+						node.addChild("alpha", d);
+						return node;
+					}
+    				
+    			}
+    	);
+       	parsers.put("PolicyOrFunctionElementTerm", 
+       			new GrammarRule("PolicyOrFunctionElementTerm", 
+       					"'#' ID", policyOrFunctionElementParser, PLUGIN_NAME));
+
+       	bterms.add(policyElementParser);
+       	bterms.add(policyOrFunctionElementParser);
+       	
+       	
+     // Getting basic term parsers from all the plugins
        	Set<Plugin> plugins = capi.getPlugins();
        	for (Plugin p: plugins) 
        		if (p instanceof ParserPlugin && p != this) {
@@ -793,7 +972,7 @@ public class Kernel extends Plugin
        			}
        		}
        	
-    	// BasicTerm : FunctionRuleTerm | ConstantTerm | ...
+    	// BasicTerm : FunctionRulePolicyTerm | ConstantTerm | ...
        	Parser<Node> btParser = Parsers.longest(bterms);
        	refBasicTermParser.set(btParser);
     	
@@ -801,6 +980,7 @@ public class Kernel extends Plugin
     			new GrammarRule("BasicTerm", grammarRule, refBasicTermParser.lazy(), PLUGIN_NAME));
     	
     }
+    
     
     @Deprecated
 	public List<GrammarRule> getGrammar() {
@@ -925,27 +1105,21 @@ public class Kernel extends Plugin
 		UpdateMultiset updateSet2 = compAPI.getAllUpdates(2);
 		
 		for (Update ui1: updateSet1) {
-			if (!locUpdated(updateSet2, ui1.loc) && isBasicUpdate(updateSet1, ui1))
+			if (!compAPI.isLocationUpdated(2, ui1.loc) && isBasicUpdate(compAPI, 1, ui1))
 				compAPI.addComposedUpdate(ui1, this);
 		}
 		
 		for (Update ui2: updateSet2) {
-			if (isBasicUpdate(updateSet2, ui2))
+			if (isBasicUpdate(compAPI, 2, ui2))
 				compAPI.addComposedUpdate(ui2, this);
 		}
 	}
 	
-	private boolean locUpdated(UpdateMultiset uMset, Location l) {
-		for (Update u: uMset) 
-			if (u.loc.equals(l))
-				return true;
-		return false;
-	}
-
-	private boolean isBasicUpdate(UpdateMultiset uMset, Update u) {
-		for (Update update: uMset) 
-			if (update.loc.equals(u.loc) && !update.action.equals(Update.UPDATE_ACTION))
+	private boolean isBasicUpdate(PluginCompositionAPI compAPI, int setIndex, Update u) {
+		for (Update update : compAPI.getLocUpdates(setIndex, u.loc)) {
+			if (!update.action.equals(Update.UPDATE_ACTION))
 				return false;
+		}
 		return true;
 	}
 	
@@ -963,6 +1137,7 @@ public class Kernel extends Plugin
 			// self is not a function anymore
 			// functions.put(SelfFunctionElement.NAME, new SelfFunctionElement());
 			functions.put(AbstractStorage.PROGRAM_FUNCTION_NAME, new MapFunction(Element.UNDEF));
+			functions.put(AbstractStorage.POLICY_FUNCTION_NAME, new MapFunction(Element.UNDEF));
 		}
 		return functions;
 	}
@@ -973,7 +1148,7 @@ public class Kernel extends Plugin
 	public Map<String,UniverseElement> getUniverses() {
 		if (universes == null) {
 			universes = new HashMap<String, UniverseElement>();
-			
+			universes.put(AbstractStorage.ASIMS_UNIVERSE_NAME, new UniverseElement());
 			universes.put(AbstractStorage.AGENTS_UNIVERSE_NAME, new UniverseElement());
 		}
 		return universes;
@@ -1060,6 +1235,64 @@ public class Kernel extends Plugin
 			}
 		}
 		return ruleElements;
+	}
+	
+	/**
+	 * The kernel plug-in goes over all the rule declarations in the specification,
+	 * creates a rule element (see {@link RuleElement}) for every one of those rules
+	 * and provides the results to be added to the list of rules in the state.
+	 * 
+	 * @see VocabularyExtender#getRules()
+	 */
+	public Map<String, PolicyElement> getPolicies() {
+		if (policyElements == null) {
+			policyElements = new HashMap<String, PolicyElement>();
+			
+			// get root of tree
+			ASTNode root = capi.getParser().getRootNode();
+			
+			List<ASTNode> policyDeclarations = new ArrayList<ASTNode>();
+			
+			for (ASTNode child: root.getAbstractChildNodes())
+				if (child.getGrammarRule().equals(Kernel.GR_POLICYDECLARATION))
+					policyDeclarations.add(child);
+			
+			// while there is a rule declaration to process
+			for (ASTNode currentPolicyDeclaration: policyDeclarations)
+			{
+				// get name (ID) node of rule
+				final ASTNode idNode = currentPolicyDeclaration.getFirst().getFirst();
+				final String policyName = idNode.getToken();
+				
+				if (policyElements.get(policyName) != null) 
+					throw new CoreASMError(
+							"Policy '" + policyName + "' is defined more than once.", idNode);
+				
+				// create structure for all parameters
+				ArrayList<String> params = new ArrayList<String>();
+				ASTNode currentParams = idNode.getNext();
+				// while there are parameters to add to the list
+				while (currentParams != null)
+				{
+					// add parameters to the list
+					params.add(currentParams.getToken());
+					
+					// get next parameter
+					currentParams = currentParams.getNext();
+				}
+				
+				// get root node of policy body
+				ASTNode bodyNode = currentPolicyDeclaration.getFirst().getNext();
+
+				// create a copy of the body
+				bodyNode = (ASTNode)capi.getInterpreter().copyTree(bodyNode);
+				
+				// create rule element
+				policyElements.put(policyName, 
+						new PolicyElement(currentPolicyDeclaration, idNode.getToken(), params,bodyNode));
+			}
+		}
+		return policyElements;
 	}
 
 	/**
@@ -1164,6 +1397,11 @@ public class Kernel extends Plugin
 	@Override
 	public CompilerPlugin getCompilerPlugin(){
 		return compilerPlugin;
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return getPolicies().keySet();
 	}
 }
 

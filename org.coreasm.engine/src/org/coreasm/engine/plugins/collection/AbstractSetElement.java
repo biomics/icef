@@ -32,6 +32,11 @@ import org.coreasm.engine.absstorage.Element;
 public abstract class AbstractSetElement extends AbstractBagElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4252967322649067460L;
+
+	/**
 	 * Creates a new instance of this element loaded with the given
 	 * set of elements.
 	 */

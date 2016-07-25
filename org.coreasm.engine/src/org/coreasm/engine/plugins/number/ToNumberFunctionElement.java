@@ -26,6 +26,10 @@ import org.coreasm.engine.absstorage.FunctionElement;
  */
 public class ToNumberFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1190164168214278385L;
 	/** name of the 'toNumber' function */
 	public static final String TONUMBER_FUNC_NAME = "toNumber";
 	

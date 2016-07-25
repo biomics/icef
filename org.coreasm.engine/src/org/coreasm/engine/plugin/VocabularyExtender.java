@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 
@@ -52,6 +53,14 @@ public interface VocabularyExtender {
 	 * @return mapping of rule names to rule elements.
 	 */
 	public Map<String,RuleElement> getRules();
+	
+	/**
+	 * If extending the vocabulary with policies, initialize and return corresponding policy elements. 
+	 * Otherwise return null.
+	 * 
+	 * @return mapping of policy names to rule elements.
+	 */
+	public Map<String,PolicyElement> getPolicies();
 	
 	/**
 	 * If extending the vocabulary with background, initialize and return corresponding background elements. 
@@ -101,5 +110,15 @@ public interface VocabularyExtender {
 	 * Hint: use {@link Collections#emptySet()}. 
 	 */
 	public Set<String> getRuleNames();
+	
+	/**
+	 * Returns the names of the rules that 
+	 * are provided by this plugin.
+	 * <p>
+	 * The returned value should NOT be <code>null</code>.
+	 * Plug-ins should return an empty set if they are not providing any rule.
+	 * Hint: use {@link Collections#emptySet()}. 
+	 */
+	public Set<String> getPolicyNames();
 	
 }

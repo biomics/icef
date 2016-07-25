@@ -13,12 +13,15 @@
  
 package org.coreasm.engine.plugins.turboasm;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import org.coreasm.engine.CoreASMError;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.interpreter.ScannerInfo;
 
 /** 
@@ -31,7 +34,7 @@ public class LocalRuleNode extends ASTNode {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<String> functionNames = null;
+	private Set<String> functionNames = null;
 	
 	/**
 	 */
@@ -57,12 +60,37 @@ public class LocalRuleNode extends ASTNode {
 	 */
 	public Collection<String> getFunctionNames() {
 		if (functionNames == null) {
-			functionNames = new ArrayList<String>();
-			for (Node n: getAbstractChildNodes("lambda"))
-				functionNames.add(n.getToken());
+			try {
+				functionNames = new HashSet<String>(getFunctionMap().keySet());
+			} catch (CoreASMError e) {
+				functionNames = Collections.emptySet();
+			}
 		}
 		return functionNames;
 	}
+	
+	/**
+     * Returns a map of the function names to the nodes which
+     * represent the terms that will be evaluated
+     */
+    public Map<String,ASTNode> getFunctionMap() throws CoreASMError {
+    	Map<String,ASTNode> functionMap = new HashMap<String,ASTNode>();
+        
+        ASTNode current = getFirst();
+        
+        while (current != null && current.getNextCSTNode() != null) {
+        	if (TurboASMPlugin.LOCAL_INIT_OPERATOR.equals(current.getNextCSTNode().getToken())) {
+        		if (functionMap.put(current.getToken(),current.getNext()) != null)
+        			throw new CoreASMError("There must not be multiple initializations for the same function.", current);
+        		current = current.getNext().getNext();
+        	}
+        	else {
+        		functionMap.put(current.getToken(), null);
+        		current = current.getNext();
+        	}
+        }
+        return functionMap;
+    }
 	
 	/** 
 	 * Returns the sub-rule part of this rule

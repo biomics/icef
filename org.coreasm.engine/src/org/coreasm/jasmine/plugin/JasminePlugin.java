@@ -49,6 +49,7 @@ import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.PluginAggregationAPI;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -358,7 +359,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 			
 			parsers.put(importRuleParser.toString(),
 					new GrammarRule(importRuleParser.toString(),
-							"'import' 'native' FunctionRuleTerm 'into' Term", importRuleParser, PLUGIN_NAME));
+							"'import' 'native' FunctionRulePolicyTerm 'into' Term", importRuleParser, PLUGIN_NAME));
 
 			Parser<Node> storeRuleParser = Parsers.array(
 					new Parser[] {
@@ -553,7 +554,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 						v = ((JObjectElement)v).object;
 					*/
 					Update u = createDefUpdate(Type.Store, interpreter.getSelf(), pos.getScannerInfo(), jobj, fieldName, v);
-					pos.setNode(null, new UpdateMultiset(u), null);
+					pos.setNode(null, new UpdateMultiset(u), null, null);
 				}
 				
 			} else 
@@ -622,7 +623,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 				}
 				
 				Update u = createDefUpdate(Type.Invoke, interpreter.getSelf(), pos.getScannerInfo(), loc, jobj, methodName, argsInJava);
-				pos.setNode(null, new UpdateMultiset(u), null);
+				pos.setNode(null, new UpdateMultiset(u), null, null);
 			} else 
 				capi.error("Not a Java object.", jnode, interpreter);
 				
@@ -759,7 +760,7 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 		}
 		*/
 		Update u = createDefUpdate(Type.Create, self, sinfo, l, className, arguments, self);
-		pos.setNode(null, new UpdateMultiset(u), null);
+		pos.setNode(null, new UpdateMultiset(u), null, null);
 	}
 	
 	/*
@@ -1469,6 +1470,16 @@ public class JasminePlugin extends Plugin implements ParserPlugin,
 			targetModes.put(EngineMode.emParsingSpec, ExtensionPointPlugin.DEFAULT_PRIORITY);
 		}
 		return targetModes;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 

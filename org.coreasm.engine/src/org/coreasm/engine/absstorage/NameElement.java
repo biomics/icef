@@ -21,6 +21,11 @@ package org.coreasm.engine.absstorage;
  */
 public class NameElement extends Element {
 
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 788779260042307559L;
 	/** name of this element */
 	public final String name;
 	

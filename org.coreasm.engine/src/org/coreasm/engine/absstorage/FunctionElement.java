@@ -27,6 +27,12 @@ import java.util.Set;
  */
 public abstract class FunctionElement extends Element {
 
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5260755552612375294L;
+
 	/**
 	 * Different classes of ASM functions.
 	 */

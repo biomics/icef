@@ -41,6 +41,10 @@ import org.coreasm.engine.plugins.collection.ModifiableCollection;
  */
 public class SetElement extends AbstractSetElement implements ModifiableCollection {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4587681701092521329L;
 	protected static final Set<Element> falseValues;
 	protected static final Set<Element> booleanValues;
 	protected final Set<Element> members;

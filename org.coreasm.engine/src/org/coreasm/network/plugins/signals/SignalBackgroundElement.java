@@ -23,6 +23,11 @@ import org.coreasm.engine.absstorage.NameElement;
  */
 public class SignalBackgroundElement extends BackgroundElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1090457503129710062L;
+
 	/** Name of the Signal background */
 	public static final String SIGNAL_BACKGROUND_NAME = "SIGNAL";
 	

@@ -31,11 +31,12 @@ import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Interpreter.CallStackElement;
 import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.InterpreterListener;
@@ -66,7 +67,7 @@ import org.eclipse.swt.widgets.Display;
 public class EngineDebugger extends EngineDriver implements InterpreterListener {
 	
 	private ControlAPI capi = (ControlAPI)engine;
-	private WatchExpressionAPI wapi = new WatchExpressionAPI(capi);
+	private WatchExpressionAPI wapi;
 	private Stack<ASMStorage> states = new Stack<ASMStorage>();
 	private ASMDebugTarget debugTarget;
 	private String sourceName;
@@ -78,6 +79,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	private ASTNode stepReturnPos;
 	private ASTNode prevPos;
 	private Stack<Map<ASTNode, String>> ruleArgs = new Stack<Map<ASTNode, String>>();
+	private Stack<Map<ASTNode, String>> policyArgs = new Stack<Map<ASTNode, String>>();
 	private Set<ASMUpdate> updates = new HashSet<ASMUpdate>();
 	private IBreakpoint prevWatchpoint;
 	private boolean stepSucceeded = false;
@@ -252,11 +254,29 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	@Override
 	protected void preExecutionCallback() {
 		debugTarget.fireCreationEvent();
+		wapi = new WatchExpressionAPI(capi);
 	};
 	
 	@Override
 	protected void postExecutionCallback() {
+		cleanUp();
+	}
+	
+	private void cleanUp() {
+		for (ASMStorage storage : states)
+			storage.clearState();
+		debugTarget.fireTerminateEvent();
+		debugTarget.cleanUp();
 		states.clear();
+		updates.clear();
+		ruleArgs.clear();
+		wapi.dispose();
+		capi = null;
+		prevPos = null;
+		stepOverPos = null;
+		stepReturnPos = null;
+		stateToDropTo = null;
+		System.gc();
 	}
 	
 	@Override
@@ -332,6 +352,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 							capi.getState().setValue(update.getLocation(), Element.UNDEF);
 					}
 				}
+				state.clearState();
 			}
 			ASTNode pos = stateToDropTo.getPosition();
 			if (pos == null) {
@@ -445,7 +466,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 			if (!states.isEmpty() && capi.getStepCount() == states.peek().getStep())
 				return;
 			while (!states.isEmpty() && states.peek().getStep() < 0)
-				states.pop();
+				states.pop().clearState();
 			state = new ASMStorage(wapi, capi.getStorage(), capi.getStepCount(), capi.getLastSelectedAgents(), envVars, updates, capi.getAgentSet(), callStack, sourceName, lineNumber);
 		}
 		else {
@@ -509,7 +530,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	 * @param frNode ASTNode to test
 	 * @return whether frNode hits a breakpoint
 	 */
-	private boolean isWatchpointHit(FunctionRuleTermNode frNode) {
+	private boolean isWatchpointHit(FunctionRulePolicyTermNode frNode) {
 		if (!DebugPlugin.getDefault().getBreakpointManager().isEnabled())
 			return false;
 		ASTNode parent = frNode.getParent();
@@ -548,6 +569,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 
 	@Override
 	public void beforeNodeEvaluation(ASTNode pos) {
+		System.out.println("before: " + pos + ": " + pos.getValue() + " " + pos.getUpdates() + " " + pos.getLocation());
 		if (isUnvisited(pos)) {
 			sourceName = ASMDebugUtils.getFileName(pos, capi);
 			lineNumber = ASMDebugUtils.getLineNumber(pos, capi);
@@ -565,8 +587,8 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 			}
 			
 //			handle watchpoints (access)
-			if (Kernel.GR_FUNCTION_RULE_TERM.equals(pos.getGrammarRule())) {
-				FunctionRuleTermNode frNode = (FunctionRuleTermNode) pos;
+			if (Kernel.GR_FUNCTION_RULE_POLICY_TERM.equals(pos.getGrammarRule())) {
+				FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode) pos;
 				if (frNode.hasName()) {
 					if (isWatchpointHit(frNode)) {
 						onBreakpointHit(frNode);
@@ -599,6 +621,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 
 	@Override
 	public void afterNodeEvaluation(ASTNode pos) {
+		System.out.println("after: " + pos + ": " + pos.getValue() + " " + pos.getUpdates() + " " + pos.getLocation());
 		if (pos == stepReturnPos) {
 			shouldStepReturn = false;
 			stepReturnPos = null;
@@ -696,5 +719,59 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	@Override
 	public void initProgramExecution(Element agent, RuleElement program) {
 		onRuleCall(program, null, program.getDeclarationNode(), agent);
+	}
+
+	@Override
+	public void initPolicyExecution(Element agent, PolicyElement policy) {
+		onPolicyCall(policy, null, policy.getDeclarationNode(), agent);
+		
+	}
+
+	@Override
+	public void onPolicyCall(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent) {
+		currentAgent = agent;
+		if (DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
+			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+				try {
+					if (!breakpoint.isEnabled())
+						continue;
+					if (breakpoint instanceof ASMMethodBreakpoint && ((ASMMethodBreakpoint) breakpoint).getPolicyName().equals(policy.getName())) {
+						try {
+							String policySourceName = ASMDebugUtils.getFileName(pos, capi);
+							
+							if (!policySourceName.equals(((ASMLineBreakpoint)breakpoint).getSpecName()))
+								continue;
+							
+							sourceName = policySourceName;
+							lineNumber = ASMDebugUtils.getLineNumber(pos, capi);
+							if (sourceName == null || lineNumber < 0) {
+								sourceName = ((ASMLineBreakpoint)breakpoint).getSpecName();
+								lineNumber = ((ASMLineBreakpoint)breakpoint).getLineNumber();
+							}
+							onBreakpointHit(pos);
+							break;
+						} catch (CoreException e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (CoreException e) {
+				}
+			}
+		}
+		Map<ASTNode, String> policyArgs = new IdentityHashMap<ASTNode, String>();
+		this.policyArgs.push(policyArgs);
+		if (policy.getParam() != null) {
+			int i = 0;
+			for (String param : policy.getParam())
+				policyArgs.put(args.get(i++), param);
+		}
+		
+	}
+
+	@Override
+	public void onPolicyExit(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent){
+		currentAgent = agent;
+	if (!policyArgs.isEmpty())
+		policyArgs.pop();
 	}
 }

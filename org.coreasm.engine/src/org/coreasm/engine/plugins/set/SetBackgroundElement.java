@@ -25,6 +25,10 @@ import org.coreasm.engine.absstorage.Element;
 public class SetBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8526872175973915872L;
+	/**
 	 * Name of the set background
 	 */
 	public static final String SET_BACKGROUND_NAME = "SET";

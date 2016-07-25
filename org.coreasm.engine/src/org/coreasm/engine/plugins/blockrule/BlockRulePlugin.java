@@ -101,7 +101,7 @@ public class BlockRulePlugin extends Plugin
             }
             
             // set the UpdateMultiset for this node
-            pos.setNode(null,updates,null);
+            pos.setNode(null,updates, null, null);
             return pos;
         }
         else {

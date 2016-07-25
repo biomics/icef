@@ -22,6 +22,11 @@ import org.coreasm.engine.absstorage.Element;
  */
 public class EnumerationElement extends Element {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8601292219146912662L;
+
 	/** name of this element */
     private String name;
     

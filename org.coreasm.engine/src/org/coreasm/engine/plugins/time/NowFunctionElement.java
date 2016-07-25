@@ -27,6 +27,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class NowFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2910086078546575439L;
 	/** Name of this function */
 	public static final String NOW_FUNC_NAME = "now";
 	

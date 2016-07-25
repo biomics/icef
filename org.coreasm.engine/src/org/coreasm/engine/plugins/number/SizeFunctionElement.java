@@ -28,6 +28,10 @@ import org.coreasm.engine.absstorage.FunctionElement;
  */
 public class SizeFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8981403715177185627L;
 	public static final String NAME = "size";
 	
 	public SizeFunctionElement() {

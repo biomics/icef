@@ -8,7 +8,7 @@ import org.coreasm.compiler.components.preprocessor.Preprocessor;
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.compiler.interfaces.CompilerCodeHandler;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.kernel.MacroCallRuleNode;
 
 /**
@@ -32,7 +32,7 @@ public class KernelMacroCallRule implements CompilerCodeHandler {
 
 		result.appendLine("@decl(java.util.ArrayList<@RuntimePkg@.RuleParam>,arglist)=new java.util.ArrayList<>();");
 
-		FunctionRuleTermNode params = (FunctionRuleTermNode) mcrn
+		FunctionRulePolicyTermNode params = (FunctionRulePolicyTermNode) mcrn
 				.getFunctionRuleElement();
 
 		if (params.hasArguments()) {

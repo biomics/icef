@@ -31,6 +31,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class TakeFunctionElement extends NthFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1563388443336475478L;
 	public static final String NAME = "take";
 	protected final ControlAPI capi;
 	protected final AbstractStorage storage;

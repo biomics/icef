@@ -23,6 +23,10 @@ package org.coreasm.engine.absstorage;
 public final class ElementBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -473221793936902711L;
+	/**
 	 * Name of the Element background
 	 */
 	public static final String ELEMENT_BACKGROUND_NAME = "ELEMENT";

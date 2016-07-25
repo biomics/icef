@@ -31,6 +31,11 @@ import org.coreasm.engine.plugins.number.NumberElement;
 public abstract class AbstractBagElement extends AbstractMapElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6593928927031005335L;
+
+	/**
 	 * Creates a new instance of this element loaded with the given
 	 * collection of elements. 
 	 * 

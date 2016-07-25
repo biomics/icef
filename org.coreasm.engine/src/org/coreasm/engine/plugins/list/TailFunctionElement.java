@@ -30,6 +30,11 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
  */
 public class TailFunctionElement extends ListFunctionElement {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5621223440542438067L;
+
 	public static final String NAME = "tail";
 	
 	protected Signature signature = null;

@@ -22,5 +22,10 @@ import org.coreasm.engine.absstorage.Element;
  * 
  */
 public class BagAbstractUpdateElement extends Element {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4944208562121928614L;
 	// nothing goes here
 }

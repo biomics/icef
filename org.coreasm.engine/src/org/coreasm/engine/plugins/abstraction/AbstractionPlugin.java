@@ -172,7 +172,8 @@ public class AbstractionPlugin extends Plugin
 									IOPlugin.PRINT_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()
-									)), 
+									)),
+					null,
 					null);
 		}
 		return pos;

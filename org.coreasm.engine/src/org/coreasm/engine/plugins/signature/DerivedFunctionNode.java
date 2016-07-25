@@ -51,5 +51,12 @@ public class DerivedFunctionNode extends ASTNode {
     public ASTNode getExpressionNode() {
         return getFirst().getNext();
     }
+    
+    @Override
+    public String unparse()
+    {
+		return getExpressionNode().unparse();
+    	
+    }
         
 }

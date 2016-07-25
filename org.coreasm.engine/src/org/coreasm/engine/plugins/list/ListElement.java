@@ -39,6 +39,10 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class ListElement extends AbstractListElement implements ModifiableIndexedCollection {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5928926636727836217L;
 	private List<Element> listElements;
 	private List<Element> enumerationCache = null;
 	

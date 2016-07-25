@@ -1,4 +1,4 @@
-/*
+/* 
  * Specification.java 	$Revision: 243 $
  *
  * Copyright (C) 2005 Roozbeh Farahbod 
@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.Signature;
 import org.coreasm.engine.absstorage.UniverseElement;
@@ -95,6 +96,7 @@ public class Specification {
 	private Set<UniverseInfo> universes = null;
 	private Set<BackgroundInfo> backgrounds = null;
 	private Set<RuleInfo> rules = null;
+	private Set<PolicyInfo> policies = null;
 	
 	/* 
 	 * list of all the nodes in the tree sorted 
@@ -228,6 +230,7 @@ public class Specification {
 		universes = null;
 		backgrounds = null;
 		rules = null;
+		policies = null;
 	}
 	
 	/**
@@ -632,6 +635,33 @@ public class Specification {
 		}
 		return rules;
 	}
+	
+	/**
+	 * Returns information on the policies defined for this specification.
+	 * The result may vary depending on the specification being parsed 
+	 * or not.
+	 */
+	public Set<PolicyInfo> getDefinedPolicies() {
+		if (policies == null) {
+			if (getRequiredPlugins() == null)
+				return Collections.emptySet();
+			else {
+				policies = new HashSet<PolicyInfo>();
+				for (Plugin p: requiredPlugins) {
+					if (p instanceof VocabularyExtender) {
+						Map<String, PolicyElement> map = ((VocabularyExtender)p).getPolicies();
+						if (map == null)
+							continue;
+						for (Entry<String, PolicyElement> po: map.entrySet()) {
+							if (po.getValue() != null)
+								policies.add(new PolicyInfo(p.getName(), po.getKey(), po.getValue()));
+						}
+					}
+				}
+			}
+		}
+		return policies;
+	}
 
 	/**
 	 * Returns the Node (in the abstract syntax tree) 
@@ -787,9 +817,32 @@ public class Specification {
 		/** name of the plug-in that provides this function */
 		public final String plugin;
 		
+		public final RuleElement ruleElement;
+		
 		public RuleInfo(String plugin, String name, RuleElement r) {
 			this.plugin = plugin;
 			this.name = name;
+			this.ruleElement = r;
+		}
+	}
+	
+	/**
+	 * Metadata for policies.    
+	 */
+	public static class PolicyInfo {
+		
+		/** name of the function */
+		public final String name;
+		
+		/** name of the plug-in that provides this function */
+		public final String plugin;
+		
+		public final PolicyElement policyElement;
+		
+		public PolicyInfo(String plugin, String name, PolicyElement p) {
+			this.plugin = plugin;
+			this.name = name;
+			this.policyElement = p;
 		}
 	}
 	

@@ -43,6 +43,7 @@ import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.PluginAggregationAPI;
 import org.coreasm.engine.absstorage.PluginAggregationAPI.Flag;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
@@ -289,11 +290,12 @@ public class IOPlugin extends Plugin implements
 					new UpdateMultiset(
 							new Update(
 									PRINT_OUTPUT_FUNC_LOC,
-									new StringElement(pos.getMessage().getValue().toString()),
+									new StringElement(capi.getSelfAgentName()+"> "+pos.getMessage().getValue().toString()),
 									PRINT_ACTION,
 									interpreter.getSelf(),
 									pos.getScannerInfo()
 									)), 
+					null,
 					null);
 		}
 		return pos;
@@ -320,6 +322,7 @@ public class IOPlugin extends Plugin implements
 									(pos.isAppend() ? APPEND_ACTION : WRITE_ACTION),
 									interpreter.getSelf(),
 									pos.getScannerInfo())),
+					null,
 					null);
 		}
 		return pos;
@@ -334,6 +337,8 @@ public class IOPlugin extends Plugin implements
 	public Map<String,FunctionElement> getFunctions() {
 		if (functions == null) {
 			functions = new HashMap<String,FunctionElement>();
+			if(inputFunction==null)
+				inputFunction = new InputFunctionElement(this);
 			functions.put(INPUT_FUNC_NAME, inputFunction);
 			functions.put(PRINT_OUTPUT_FUNC_NAME, outputFunction);
 			functions.put(READ_FUNC_NAME, filereadFunction);
@@ -773,6 +778,16 @@ public class IOPlugin extends Plugin implements
 
 	public Map<String, RuleElement> getRules() {
 		return null;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 }

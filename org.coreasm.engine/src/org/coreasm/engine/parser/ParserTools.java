@@ -1,3 +1,4 @@
+
 package org.coreasm.engine.parser;
 
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import org.codehaus.jparsec.functors.Map;
 import org.coreasm.engine.ControlAPI;
 import org.coreasm.engine.EngineError;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.interpreter.ScannerInfo;
 import org.coreasm.engine.kernel.Kernel;
@@ -31,6 +32,11 @@ public class ParserTools
 		if ( ! instances.containsKey(capi))
 			instances.put(capi, new ParserTools());
 		return instances.get(capi);
+	}
+	
+	public static void removeInstance(ControlAPI capi) {
+		if (instances != null)
+			instances.remove(capi);
 	}
 	
 	// TERMINALS
@@ -215,6 +221,27 @@ public class ParserTools
 		}
 	}
 	
+	public static class PolicySignatureParseMap
+	extends ArrayParseMap
+	{
+
+		public PolicySignatureParseMap() {
+			super(Kernel.PLUGIN_NAME);
+		}
+		
+		@Override
+		public Node map(Object[] from) {
+			Node node = new ASTNode(
+					"Kernel",
+					ASTNode.DECLARATION_CLASS,
+					"PolicySignature",
+					null,
+					((Node)from[0]).getScannerInfo()
+				);
+			addChildren(node,from);
+			return node;
+		}
+	}
 
 	public static class RuleDeclarationParseMap
 	extends ArrayParseMap
@@ -254,7 +281,44 @@ public class ParserTools
 
 	}
 	
-	
+	public static class PolicyDeclarationParseMap
+	extends ArrayParseMap
+	{
+
+		public PolicyDeclarationParseMap() {
+			super(Kernel.PLUGIN_NAME);
+		}
+		
+		public Node map(Object[] vals) {
+			ScannerInfo info = null;
+			info = ((Node)vals[0]).getScannerInfo();
+			
+			Node node = new ASTNode(
+					null,
+					ASTNode.DECLARATION_CLASS,
+					Kernel.GR_POLICYDECLARATION,
+					null,
+					info
+					);
+
+			for (int i=0; i < vals.length; i++) {
+				Node child = (Node)vals[i];
+				if (child != null)
+					// to give proper names to ASTNode children:
+					if (child instanceof ASTNode) {
+						if (((ASTNode)child).getGrammarClass().equals("PolicySignature"))
+							node.addChild("alpha", child);
+						else
+							node.addChild("beta", child);
+					} else
+						node.addChild(child);
+			}
+			
+			return node;
+		}
+
+	}
+
 	
 	public static class CoreASMParseMap
 	extends ArrayParseMap
@@ -291,16 +355,16 @@ public class ParserTools
 	
 	
 	
-	public static class FunctionRuleTermParseMap
+	public static class FunctionRulePolicyTermParseMap
 	extends ArrayParseMap
 	{
 
-		public FunctionRuleTermParseMap() {
+		public FunctionRulePolicyTermParseMap() {
 			super(Kernel.PLUGIN_NAME);
 		}
 		
 		public Node map(Object[] v) {
-			Node node = new FunctionRuleTermNode(((Node)v[0]).getScannerInfo());
+			Node node = new FunctionRulePolicyTermNode(((Node)v[0]).getScannerInfo());
 			node.addChild("alpha", (Node)v[0]); // ID
 			
 			for (int i=1; i < v.length; i++) {

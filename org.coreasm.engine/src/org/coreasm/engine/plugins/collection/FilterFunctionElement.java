@@ -45,6 +45,11 @@ import org.coreasm.engine.absstorage.Signature;
  */
 public class FilterFunctionElement extends CollectionFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5810311608252014922L;
+
 	/** suggested name for this function */
 	public static final String NAME = "filter";
 	

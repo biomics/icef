@@ -24,6 +24,10 @@ package org.coreasm.engine.absstorage;
 public final class SuperUniverseElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1226100582613403135L;
+	/**
 	 * Name of the super universe background
 	 */
 	public static final String SUPER_UNIVERSE_NAME = "SUPER_UNIVERSE";

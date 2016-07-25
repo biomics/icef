@@ -35,7 +35,7 @@ import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.kernel.KernelServices;
@@ -112,7 +112,7 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
             		   loc.getFirst().setToken("-" + entry.getKey());
             		   while (loc.getFirst().getNextCSTNode() != null)	// Remove arguments from copy
             			   loc.getFirst().getNextCSTNode().removeFromTree();
-            		   FunctionRuleTermNode rule = (FunctionRuleTermNode)n;
+            		   FunctionRulePolicyTermNode rule = (FunctionRulePolicyTermNode)n;
 
             		   // If the rule part is of the form 'x' or 'x(...)'
             		   if (rule.hasName() && storage.isRuleName(rule.getName())) {
@@ -136,8 +136,8 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
 	    					   value = Element.UNDEF;
 	    					   capi.warning(PLUGIN_NAME, "result hasn't been set by the rule " + x + ".", n, interpreter);
 	    				   }
-	    				   pos.setNode(null, null, null);	// The updates got stored into pos by ruleCallWithResult but they should be stored in n instead
-	    				   n.setNode(n.getLocation(), newUpdates, value);
+	    				   pos.setNode(null, null, null, null);	// The updates got stored into pos by ruleCallWithResult but they should be stored in n instead
+	    				   n.setNode(n.getLocation(), newUpdates, null,value);
 	    				   return letNode;
             		   }
             	   }
@@ -163,7 +163,7 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
             		   throw new EngineError();
                } catch (EngineError e) {
             	   capi.warning(PLUGIN_NAME, "TurboASM Plugin: Inconsistent updates computed in sequence. Leaving the sequence", letNode.getInRule(), interpreter);
-            	   pos.setNode(null, updates, null);
+            	   pos.setNode(null, updates, null, null);
                }
                
                return pos;
@@ -177,7 +177,7 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
                
                composed = storage.compose(composed, letNode.getInRule().getUpdates());
                storage.popState();
-               pos.setNode(null,composed,null);
+               pos.setNode(null,composed,null, null);
                return pos;
            }
         }
@@ -207,7 +207,7 @@ public class LetRulePlugin extends Plugin implements ParserPlugin, InterpreterPl
 
 			Parser<Node> ruleParser = kernel.getRuleParser();
 			Parser<Node> termParser = kernel.getTermParser();
-			Parser<Node> funcRuleTermParser = kernel.getFunctionRuleTermParser();
+			Parser<Node> funcRuleTermParser = kernel.getFunctionRulePolicyTermParser();
 
 			ParserTools pTools = ParserTools.getInstance(capi);
 			Parser<Node> idParser = pTools.getIdParser();

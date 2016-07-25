@@ -16,10 +16,12 @@
 package org.coreasm.engine;
 
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.scheduler.Scheduler;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.plugin.Plugin;
@@ -172,5 +174,16 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	 * 
 	 */
 	public boolean hasErrorOccurred();
+	
+	/**
+	 * Returns the last error encountered by the engine.
+	 */
+	public CoreASMError getError();
+
+	public String getSelfAgentName();
+
+	public int getCounter();
+
+	public Set<String> getAgentsToDestroy();
 }
 

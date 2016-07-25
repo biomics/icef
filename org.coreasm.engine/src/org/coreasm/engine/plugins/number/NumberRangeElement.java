@@ -27,6 +27,10 @@ import org.coreasm.engine.absstorage.Enumerable;
  */
 public class NumberRangeElement extends Element implements Enumerable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5991980061994616510L;
 	private final double start;
     private final double end;
     private final double step;

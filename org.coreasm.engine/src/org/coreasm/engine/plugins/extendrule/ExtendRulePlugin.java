@@ -161,7 +161,7 @@ public class ExtendRulePlugin extends Plugin implements ParserPlugin, Interprete
 							pos.getScannerInfo()));
 				}
 				
-				pos.setNode(null, augU, null);
+				pos.setNode(null, augU,null, null);
 				interpreter.removeEnv(node.getIdNode().getToken());
 			}
 		}

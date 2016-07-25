@@ -28,6 +28,10 @@ import org.coreasm.engine.plugins.string.StringElement;
  */
 public class InputFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4733719571260543062L;
 	private final IOPlugin plugin;
 	
 	/**

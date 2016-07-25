@@ -33,6 +33,11 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class SetNthFunctionElement extends ListFunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1054569278091825082L;
+
 	public static final String NAME = "setnth";
 	
 	protected Signature signature;

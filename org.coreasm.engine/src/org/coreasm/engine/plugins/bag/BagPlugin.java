@@ -40,6 +40,7 @@ import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.PluginAggregationAPI;
 import org.coreasm.engine.absstorage.PluginAggregationAPI.Flag;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -206,7 +207,7 @@ public class BagPlugin extends Plugin
 					}
 					
 					// result of this node is the bag element produced
-					pos.setNode(null,null,new BagElement(elements));
+					pos.setNode(null,null,null,new BagElement(elements));
 				}		
 	        }
 			
@@ -240,7 +241,7 @@ public class BagPlugin extends Plugin
 							} else 
 								// if any domain is empty, the whole result is also empty
 								if (((Enumerable)domain.getValue()).enumerate().size() == 0) { 
-									pos.setNode(null, null, new BagElement());
+									pos.setNode(null, null, null, new BagElement());
 									return pos;
 								}
 						}
@@ -320,7 +321,7 @@ public class BagPlugin extends Plugin
 							
 							return guard;
 						} else {
-							pos.setNode(null, null, new BagElement(newBag.get(pos)));
+							pos.setNode(null, null, null, new BagElement(newBag.get(pos)));
 						}
 							
 					}
@@ -352,7 +353,7 @@ public class BagPlugin extends Plugin
 						
 						return guard;
 					} else {
-						pos.setNode(null, null, new BagElement(newBag.get(pos)));
+						pos.setNode(null, null, null, new BagElement(newBag.get(pos)));
 						return pos;
 					}
 				}
@@ -361,7 +362,7 @@ public class BagPlugin extends Plugin
 			}
 			
 			else if (pos instanceof TrueGuardNode) {
-				pos.setNode(null, null, BooleanElement.TRUE);
+				pos.setNode(null, null, null, BooleanElement.TRUE);
 				return pos;
 			}
 		}
@@ -1117,5 +1118,15 @@ public class BagPlugin extends Plugin
 			return node;
 		}
 		
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 }

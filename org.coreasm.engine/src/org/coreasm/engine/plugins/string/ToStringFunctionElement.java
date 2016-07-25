@@ -26,6 +26,10 @@ import org.coreasm.engine.absstorage.FunctionElement;
  */
 public class ToStringFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7734181913100018268L;
 	/** name of the 'toString' function */
 	public static final String TOSTRING_FUNC_NAME = "toString";
 	

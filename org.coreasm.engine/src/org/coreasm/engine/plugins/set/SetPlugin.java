@@ -39,6 +39,7 @@ import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.PluginAggregationAPI;
 import org.coreasm.engine.absstorage.PluginAggregationAPI.Flag;
 import org.coreasm.engine.absstorage.PluginCompositionAPI;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -217,7 +218,7 @@ public class SetPlugin extends Plugin
 					}
 					
 					// result of this node is the set element produced
-					pos.setNode(null,null,new SetElement(elements));
+					pos.setNode(null,null,null, new SetElement(elements));
 				}		
 	        }
 			
@@ -253,7 +254,7 @@ public class SetPlugin extends Plugin
 							} else 
 								// if any domain is empty, the whole result is also empty
 								if (((Enumerable)domain.getValue()).enumerate().size() == 0) { 
-									pos.setNode(null, null, new SetElement());
+									pos.setNode(null, null, null, new SetElement());
 									return pos;
 								}
 						}
@@ -333,7 +334,7 @@ public class SetPlugin extends Plugin
 							
 							return guard;
 						} else {
-							pos.setNode(null, null, new SetElement(newSet.get(pos)));
+							pos.setNode(null, null, null, new SetElement(newSet.get(pos)));
 						}
 							
 					}
@@ -365,7 +366,7 @@ public class SetPlugin extends Plugin
 						
 						return guard;
 					} else {
-						pos.setNode(null, null, new SetElement(newSet.get(pos)));
+						pos.setNode(null, null, null, new SetElement(newSet.get(pos)));
 						return pos;
 					}
 				}
@@ -374,7 +375,7 @@ public class SetPlugin extends Plugin
 			}
 			
 			else if (pos instanceof TrueGuardNode) {
-				pos.setNode(null, null, BooleanElement.TRUE);
+				pos.setNode(null, null, null, BooleanElement.TRUE);
 				return pos;
 			}
 		}
@@ -650,11 +651,11 @@ public class SetPlugin extends Plugin
 				} 
 				return result;
 			} 
-
+			//System.out.println("The instance of l is"+l.getClass().getName());
 			//for other operators
-			if ((l instanceof AbstractSetElement || l.equals(Element.UNDEF))
-					&& (r instanceof AbstractSetElement || r.equals(Element.UNDEF))) {
-				if (l instanceof AbstractSetElement && r instanceof AbstractSetElement) {
+			if ((l instanceof AbstractSetElement || (l instanceof UniverseElement) || l.equals(Element.UNDEF))
+					&& (r instanceof AbstractSetElement || (r instanceof UniverseElement) || r.equals(Element.UNDEF))) {
+				if ((l instanceof AbstractSetElement|| (l instanceof UniverseElement)) && (r instanceof AbstractSetElement|| (r instanceof UniverseElement))) {
 					// get enumerable interface to operands
 					Enumerable eL = (Enumerable)l;
 					Enumerable eR = (Enumerable)r;
@@ -1173,5 +1174,15 @@ public class SetPlugin extends Plugin
 			return node;
 		}
 		
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 }

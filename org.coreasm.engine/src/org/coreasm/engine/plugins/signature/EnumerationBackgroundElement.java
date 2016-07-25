@@ -21,6 +21,7 @@ import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.BooleanElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Enumerable;
+import org.coreasm.engine.plugins.collection.AbstractSetElement;
 
 /** 
  * This is the class of Enumeration Background elements. If an enumeration is
@@ -34,10 +35,14 @@ import org.coreasm.engine.absstorage.Enumerable;
  * @author  George Ma
  * 
  */
-public class EnumerationBackgroundElement extends BackgroundElement 
+public class EnumerationBackgroundElement extends BackgroundElement
     implements Enumerable {
 
-    private final List<EnumerationElement> members;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -554599495674927156L;
+	private final List<EnumerationElement> members;
     private List<Element> enumCache = null;
     
     public EnumerationBackgroundElement(List<EnumerationElement> members) {

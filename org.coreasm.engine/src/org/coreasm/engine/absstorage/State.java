@@ -123,6 +123,14 @@ public interface State {
 	public RuleElement getRule(String name);
 	
 	/**
+	 * Finds a rule in the state with the given name.
+	 * 
+	 * @return the found rule element; <code>null</code> if no 
+	 * such rule exists.
+	 */
+	public PolicyElement getPolicy(String name);
+	
+	/**
 	 * Adds a new rule to the state.
 	 * 
 	 * @param name name of the rule
@@ -131,6 +139,17 @@ public interface State {
 	 * identifier in the state with the same name.
 	 */
 	public void addRule(String name, RuleElement rule) 
+			throws NameConflictException;
+	
+	/**
+	 * Adds a new policy to the state.
+	 * 
+	 * @param name name of the policy
+	 * @param rule new rule to be added
+	 * @throws NameConflictException if there is another
+	 * identifier in the state with the same name.
+	 */
+	public void addPolicy(String name, PolicyElement policy) 
 			throws NameConflictException;
 	
 //	/**
@@ -162,6 +181,12 @@ public interface State {
 	 * the mapping between names and rules. 
 	 */
 	public FunctionElement getRuleElementFunction();
+	
+	/**
+	 * @return returns the function element that holds 
+	 * the mapping between names and policies. 
+	 */
+	public FunctionElement getPolicyElementFunction();
 
 	/**
 	 * @return returns the function element that holds 

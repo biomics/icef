@@ -57,7 +57,7 @@ public class OptionNode extends ASTNode {
 			if (node.getToken() != null)
 				return node.getToken();
 			else
-				if (node.getGrammarClass().equals(ASTNode.FUNCTION_RULE_CLASS))
+				if (node.getGrammarClass().equals(ASTNode.FUNCTION_RULE_POLICY_CLASS))
 					return node.getFirstASTNode().getToken();
 				else
 					return "";

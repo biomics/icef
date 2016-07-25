@@ -29,6 +29,10 @@ import org.coreasm.engine.interpreter.ASTNode;
  */
 public class ControlStateElement extends Element {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -189759123436964678L;
 	final Stack<? extends Object> callStack;
 	final ASTNode node;
 	final List<ASTNode> nodePathToRoot;

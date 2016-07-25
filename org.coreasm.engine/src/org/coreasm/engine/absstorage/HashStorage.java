@@ -212,6 +212,12 @@ public class HashStorage implements AbstractStorage {
 			for (String name: veRules.keySet()) {
 				addRule(name, veRules.get(name));
 			}
+		// add provided policies to the state
+		Map<String,PolicyElement> vePolicies = ve.getPolicies();
+		if (vePolicies != null)
+			for (String name: vePolicies.keySet()) {
+					addPolicy(name, vePolicies.get(name));
+			}
 	}
 	
 	public synchronized void fireUpdateSet(Set<Update> updateSet) throws InvalidLocationException {
@@ -219,9 +225,63 @@ public class HashStorage implements AbstractStorage {
 		// Doing this check will allow us to bypass calling setValue(...)
 		if (isStateStacked()) 
 			throw new EngineError("Cannot fire updates when the state stack is not empty.");
-
-		//TODO this should be done in a transactional fashion
+		AbstractUniverse agents = this.getUniverse(AbstractStorage.AGENTS_UNIVERSE_NAME);
+		AbstractUniverse asims = this.getUniverse(AbstractStorage.ASIMS_UNIVERSE_NAME);
+		
+		//this is done in a transactional fashion
 		for (Update u: updateSet) {
+			//BSL Here is where we have to update
+			if 	(u.loc.name==AbstractStorage.PROGRAM_FUNCTION_NAME)
+			{
+				try {	
+					if(u.value == Element.UNDEF)
+					{
+						if(!u.loc.args.get(0).equals(capi.getScheduler().getSelfAgent()))
+						{
+							capi.getAgentsToDeregister().add(u.loc.args.toString());
+						}
+						else
+						{
+							capi.getAgentsToDestroy().add("self");
+						}
+						agents.setValue(u.loc.args, BooleanElement.FALSE);
+					}
+					else
+					{
+						if(!u.loc.args.get(0).equals(capi.getScheduler().getSelfAgent()))
+						{
+							capi.getAgentsToRegister().add(u.loc.args.toString());
+							agents.setValue(u.loc.args, BooleanElement.TRUE);
+						}
+					}
+				} 
+				catch (UnmodifiableFunctionException e) {
+					// this should not happen 
+					String msg = "Agents universe appears to be not modifiable!";
+					logger.error(msg);
+					throw new EngineError(msg);
+				}
+			}
+			else if 	(u.loc.name==AbstractStorage.ASIMS_UNIVERSE_NAME)
+			{
+				
+						try {
+							asims.setValue(u.loc.args, u.value);
+							System.out.println("Setting ASIM: "+u.loc.args+":="+u.value);
+						} catch (UnmodifiableFunctionException e) {
+							// this should not happen 
+							String msg = "Agents universe appears to be not modifiable!";
+							logger.error(msg);
+							throw new EngineError(msg);
+						}
+					
+			}
+			else if(u.loc.name==AbstractStorage.AGENTS_UNIVERSE_NAME)
+			{
+				String msg = "Agents universe is derived. It should not be manually updated.";
+				logger.error(msg);
+				throw new EngineError(msg);
+			}
 			state.setValue(u.loc, u.value);
 		}
 		monitoredCache.clear();
@@ -521,6 +581,10 @@ public class HashStorage implements AbstractStorage {
 	public synchronized void addRule(String name, RuleElement rule) throws NameConflictException {
 		state.addRule(name, rule);
 	}
+	
+	public synchronized void addPolicy(String name, PolicyElement policy) throws NameConflictException {
+		state.addPolicy(name, policy);
+	}
 
 	public Set<Location> getLocations() {
 		return state.getLocations();
@@ -698,6 +762,11 @@ public class HashStorage implements AbstractStorage {
 		private NameTableFunction<RuleElement> ruleElements;
 		
 		/**
+		 * Policies
+		 */
+		private NameTableFunction<PolicyElement> policyElements;
+		
+		/**
 		 * Creates a new <code>HashState</code>.
 		 */
 		public HashState() {
@@ -707,8 +776,10 @@ public class HashStorage implements AbstractStorage {
 			universeElements = new NameTableFunction<AbstractUniverse>();
 			functionElements = new NameTableFunction<FunctionElement>();
 			ruleElements = new NameTableFunction<RuleElement>();
+			policyElements = new NameTableFunction<PolicyElement>();
 			functionElements.setValue(UNIVERSE_ELEMENT_FUNCTION_NAME, universeElements);
 			functionElements.setValue(RULE_ELEMENT_FUNCTION_NAME, ruleElements);
+			functionElements.setValue(POLICY_ELEMENT_FUNCTION_NAME, policyElements);
 			functionElements.setValue(FUNCTION_ELEMENT_FUNCTION_NAME, functionElements);
 		}
 
@@ -741,6 +812,10 @@ public class HashStorage implements AbstractStorage {
 		public Map<String,RuleElement> getRules() {
 			return ruleElements.getTableClone();
 		}
+		
+		public Map<String,PolicyElement> getPolicies() {
+			return policyElements.getTableClone();
+		}
 
 		public synchronized void addRule(String name, RuleElement rule) throws NameConflictException {
 			if (rule == null)
@@ -748,6 +823,14 @@ public class HashStorage implements AbstractStorage {
 			if (nameExists(name))
 				throw new NameConflictException("Identifier \"" + name + "\" is defined more than once.");
 			ruleElements.setValue(name, rule);
+		}
+		
+		public synchronized void addPolicy(String name, PolicyElement policy) throws NameConflictException {
+			if (policy == null)
+				throw new NullPointerException();
+			if (nameExists(name))
+				throw new NameConflictException("Identifier \"" + name + "\" is defined more than once.");
+			policyElements.setValue(name, policy);
 		}
 
 		public Set<Location> getLocations() {
@@ -874,7 +957,11 @@ public class HashStorage implements AbstractStorage {
 				if (id == null) {
 					id = ruleElements.getValue(name);
 					if (id == null)
-						throw new IdentifierNotFoundException();
+						if (id == null) {
+							id = policyElements.getValue(name);
+							if (id == null)
+								throw new IdentifierNotFoundException();
+					}
 				}
 			}
 			return id;
@@ -887,7 +974,8 @@ public class HashStorage implements AbstractStorage {
 		private boolean nameExists(String name) {
 			return universeElements.containsName(name)
 					|| functionElements.containsName(name)
-					|| ruleElements.containsName(name);
+					|| ruleElements.containsName(name)
+					|| policyElements.containsName(name);
 		}
 
 		public FunctionElement getFunction(String name) {
@@ -903,6 +991,10 @@ public class HashStorage implements AbstractStorage {
 
 		public RuleElement getRule(String name) {
 			return ruleElements.getValue(name);
+		}
+		
+		public PolicyElement getPolicy(String name) {
+			return policyElements.getValue(name);
 		}
 
 		public String toString() {
@@ -946,7 +1038,7 @@ public class HashStorage implements AbstractStorage {
 			for (Entry<String,FunctionElement> e: functionElements.getTable().entrySet()) {
 				FunctionElement f = e.getValue();
 				if (f.isModifiable() && 
-						!(f.equals(functionElements) || f.equals(universeElements) || f.equals(ruleElements))) {
+						!(f.equals(functionElements) || f.equals(universeElements) || f.equals(ruleElements)|| f.equals(policyElements))) {
 					String name = e.getKey();
 					writer.println("    - " + name);
 					for (Location l: f.getLocations(name)) {
@@ -1003,10 +1095,28 @@ public class HashStorage implements AbstractStorage {
 		public FunctionElement getRuleElementFunction() {
 			return ruleElements;
 		}
+		
+		public FunctionElement getPolicyElementFunction() {
+			return policyElements;
+		}
 
 		public FunctionElement getUniverseElementFunction() {
 			return universeElements;
 		}
+	}
+
+	public PolicyElement getPolicy(String name) {
+		return state.getPolicy(name);
+	}
+
+
+	public FunctionElement getPolicyElementFunction() {
+		return state.getPolicyElementFunction();
+	}
+
+	@Override
+	public boolean isPolicyName(String token) {
+		return getPolicy(token) != null;
 	}
 
 }

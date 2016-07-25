@@ -1,4 +1,4 @@
-/*
+/* AbstractStorage old
  * AbstractStorage.java 	1.0 	$Revision: 243 $
  * 
  * Copyright (C) 2005 Roozbeh Farahbod 
@@ -27,14 +27,23 @@ public interface AbstractStorage extends State {
 	/** 'program' function name */
 	public static final String PROGRAM_FUNCTION_NAME = "program";
 	
+	/** 'program' function name */
+	public static final String POLICY_FUNCTION_NAME = "schedulingPolicy";
+	
 	/** 'Agents' universe name */
 	public static final String AGENTS_UNIVERSE_NAME = "Agents";
+	
+	/** 'ASIMs' universe name */
+	public static final String ASIMS_UNIVERSE_NAME = "ASIMs";
 	
 	/** 'functionElement' function name */
 	public static final String FUNCTION_ELEMENT_FUNCTION_NAME = "functionElement";
 	
 	/** 'ruleElement' function name */
 	public static final String RULE_ELEMENT_FUNCTION_NAME = "ruleElement";
+	
+	/** 'policyElement' function name */
+	public static final String POLICY_ELEMENT_FUNCTION_NAME = "policyElement";
 
 	/** 'universeElement' function name */
 	public static final String UNIVERSE_ELEMENT_FUNCTION_NAME = "universeElement";
@@ -197,6 +206,12 @@ public interface AbstractStorage extends State {
 	 * of a rule in the state.
 	 */
 	public boolean isRuleName(String token);
+	
+	/**
+	 * Return <code>true<code> if the given name is the name
+	 * of a rule in the state.
+	 */
+	public boolean isPolicyName(String token);
 
 	/**
 	 * @return the last inconsistent updates. Returns <code>null</code>

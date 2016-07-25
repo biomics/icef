@@ -81,5 +81,9 @@ public class ChooseRuleNode extends ASTNode {
     public ASTNode getCondition() {
     	return (ASTNode)getChildNode(ChooseRulePlugin.GUARD_NAME);
     }
+
+	public ASTNode getDistribution() {
+		 return (ASTNode)getChildNode(ChooseRulePlugin.DISTRIBUTION_NAME);
+	}
     
 }

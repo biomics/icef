@@ -24,6 +24,10 @@ package org.coreasm.engine.absstorage;
 public class FunctionBackgroundElement extends BackgroundElement {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -744590362010379503L;
+	/**
 	 * Name of the function background
 	 */
 	public static final String FUNCTION_BACKGROUND_NAME = "FUNCTION";

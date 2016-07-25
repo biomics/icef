@@ -24,10 +24,15 @@ import java.util.List;
  *  one instance of this class in each state.
  *   
  *  @author  Roozbeh Farahbod
- *  
+ *   
  */
 public class BooleanBackgroundElement extends BackgroundElement 
     implements Enumerable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2851780538964245314L;
 
 	/**
 	 * Name of the boolean background

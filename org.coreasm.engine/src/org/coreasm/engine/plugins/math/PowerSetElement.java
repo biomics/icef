@@ -39,6 +39,11 @@ import org.slf4j.LoggerFactory;
 
 public class PowerSetElement extends Element implements Enumerable, Collection<Element> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6089177294830765500L;
+
 	public static final int MAX_SIZE = 31;
 	
 	protected static final Logger logger = LoggerFactory.getLogger(PowerSetElement.class);

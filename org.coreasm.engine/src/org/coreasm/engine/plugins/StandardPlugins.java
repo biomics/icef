@@ -34,26 +34,37 @@ public class StandardPlugins extends Plugin implements PackagePlugin {
 
 	public StandardPlugins() {
 		names = new HashSet<String>();
+		names.add("StringPlugin");
+		names.add("IOPlugin");
+		names.add("TimePlugin");
 		names.add("BlockRulePlugin");
 		names.add("ChooseRulePlugin");
 		names.add("ConditionalRulePlugin");
 		names.add("ExtendRulePlugin");
 		names.add("ForallRulePlugin");
-		names.add("IOPlugin");
 		names.add("LetRulePlugin");
 		names.add("NumberPlugin");
 		names.add("PredicateLogicPlugin");
 		names.add("SetPlugin");
 		names.add("SignaturePlugin");
-		names.add("StringPlugin");
 		names.add("TurboASMPlugin");
 		names.add("CollectionPlugin");
 		names.add("ListPlugin");
+		names.add("StackPlugin");
+		names.add("MathPlugin");
+		names.add("QueuePlugin");
 		names.add("MapPlugin");
 		names.add("AbstractionPlugin");
 		names.add("CaseRulePlugin");
 		names.add("OptionsPlugin");
 		names.add("KernelExtensionsPlugin");
+		names.add("BlockPolicyPlugin");
+		names.add("ChoosePolicyPlugin");
+		names.add("ConditionalPolicyPlugin");
+		names.add("ForallPolicyPlugin");
+		names.add("CasePolicyPlugin");
+		names.add("LetPolicyPlugin");
+		names.add("CommunicationPlugin");
 	}
 	
 	/**

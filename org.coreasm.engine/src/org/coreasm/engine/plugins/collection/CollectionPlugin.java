@@ -26,6 +26,7 @@ import org.coreasm.compiler.plugins.collection.CompilerCollectionPlugin;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.interpreter.ASTNode;
@@ -181,6 +182,7 @@ public class CollectionPlugin extends Plugin
 		String gClass = pos.getGrammarClass();
         
 		// if collection related rule
+		//TODO BSL maybe needs to have POLICY_CLASS case?
 		if (gClass.equals(ASTNode.RULE_CLASS))
 		{
 			// add/to rule
@@ -210,7 +212,7 @@ public class CollectionPlugin extends Plugin
 											atNode.getAddElement(),
 											interpreter.getSelf(),
 											pos),
-											
+									null,		
 									null);
 							} catch (InterpreterException e) {
 								capi.error(e.getMessage(), pos, interpreter);
@@ -253,6 +255,7 @@ public class CollectionPlugin extends Plugin
 												rfNode.getRemoveElement(), 
 												interpreter.getSelf(),
 												pos),
+										null,
 										null);
 							} catch (InterpreterException e) {
 								capi.error(e.getMessage(), pos, interpreter);
@@ -313,6 +316,16 @@ public class CollectionPlugin extends Plugin
 
 	public Map<String, UniverseElement> getUniverses() {
 		return null;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 }

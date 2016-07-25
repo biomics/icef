@@ -26,12 +26,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Iterator;
+
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.AgentCreationElement;
+import org.coreasm.engine.absstorage.BooleanElement;
+import org.coreasm.engine.absstorage.MessageElement;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.ElementList;
 import org.coreasm.engine.absstorage.HashStorage;
 import org.coreasm.engine.absstorage.InvalidLocationException;
+import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.State;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
@@ -39,21 +44,30 @@ import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.interpreter.SelfAgent;
 import org.coreasm.engine.loader.PluginManager;
+import org.coreasm.engine.mailbox.Mailbox;
+import org.coreasm.engine.mailbox.MailboxImp;
 import org.coreasm.engine.parser.GrammarRule;
 import org.coreasm.engine.parser.JParsecParser;
+import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.parser.OperatorRule;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.parser.ParserException;
+import org.coreasm.engine.parser.ParserTools;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.PackagePlugin;
 import org.coreasm.engine.plugin.Plugin;
 import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.ServiceProvider;
 import org.coreasm.engine.plugin.ServiceRequest;
+import org.coreasm.engine.plugins.signature.EnumerationElement;
+import org.coreasm.engine.plugins.string.StringElement;
 import org.coreasm.engine.scheduler.Scheduler;
 import org.coreasm.engine.scheduler.SchedulerImp;
 import org.coreasm.util.Tools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class provides the actual implementation of a CoreASM engine. It
@@ -64,8 +78,8 @@ import org.coreasm.util.Tools;
  * @author Roozbeh Farahbod, Michael Stegmaier, Marcel Dausend
  * 
  */
-public class Engine implements ControlAPI {	
-	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 6, 5, "beta");
+public class Engine implements ControlAPI {
+	public static final VersionInfo VERSION_INFO = new VersionInfo(1, 7, 3, "SNAPSHOT");
 
 	private static final Logger logger = LoggerFactory.getLogger(Engine.class);
 
@@ -81,8 +95,29 @@ public class Engine implements ControlAPI {
 
 	private final Interpreter interpreter;
 	
+	private final Mailbox mailbox;
+
+	/** Agents to be created by the external CoreASM manager
+	 *  Keys of this map denote identifiers of locatoins in which the 
+	 *  name of the created agent (the value of the map) is stored */
+	private final Map<String, AgentCreationElement> agentsToCreate;
+	
+	/** Internal agents to be registered into the external CoreASM manager
+	 *  elements of this set contain the names of these agents
+	 */
+	private final Set<String> agentsToRegister;
+	
+	/** Agents to be deleted from the external CoreASM manager
+	 * The elements are the names of the external agents to be deleted*/
+	private final Set<String> agentsToDelete;
+	
+	/** Internal agents to be deregistered from the external CoreASM manager
+	 *  elements of this set contain the names of these agents
+	 */
+	private final Set<String> agentsToDeregister;
+	
 	/** Loader used to obtain plugin classes */
-	private PluginManager pluginLoader;
+	private final PluginManager pluginLoader;
 
 	/** List of grammar rules gathered from plugins */
 	private ArrayList<GrammarRule> grammarRules = null;
@@ -103,23 +138,23 @@ public class Engine implements ControlAPI {
 	private volatile boolean engineBusy = false;
 
 	/** Cache of EngineMode events */
-	private Map<EngineMode, Map<EngineMode, EngineModeEvent>> modeEventCache;
+	private final Map<EngineMode, Map<EngineMode, EngineModeEvent>> modeEventCache;
 
 	/** CoreASM Plugin Service Registry */
 	private Map<String, Set<ServiceProvider>> serviceRegistry;
 
 	/** User command queue */
 //	private Queue<EngineCommand> commandQueue;
-	private CommandQueue commandQueue;
+	private final CommandQueue commandQueue;
 
 	/** Properties of the engine */
 	private EngineProperties properties;
 
 	/** Collection of registered observers */
-	private Collection<EngineObserver> observers;
+	private final Collection<EngineObserver> observers;
 
 	/** List of interpreter listeners */
-	private LinkedList<InterpreterListener> interpreterListeners;
+	private final LinkedList<InterpreterListener> interpreterListeners;
 
 	/** Remaining steps of the current run */
 	private int remainingRunCount = 0;
@@ -135,7 +170,15 @@ public class Engine implements ControlAPI {
 
 	private boolean isStateInitialized = false;
 
-	private List<CoreASMWarning> warnings;
+	private final List<CoreASMWarning> warnings;
+
+	private String selfExternalName;
+
+	private String externalName;
+
+	private UpdateMultiset ASIMsUpdates;
+
+	private int counter=-1;
 
 	/**
 	 * Constructs a new CoreASM engine with the specified properties. This is
@@ -144,16 +187,21 @@ public class Engine implements ControlAPI {
 	 * This method is <code>protected</code>.
 	 *
 	 * @param properties
-	 *            properties of the engine to be created.
+	 *			properties of the engine to be created.
 	 */
 	protected Engine(java.util.Properties properties) {
 		name = "CoreASM" + Tools.lFormat(++lastEngineId, 5);
 		this.properties = new EngineProperties();
 		if (properties != null)
 			this.properties.putAll(properties);
-
+		ASIMsUpdates = new UpdateMultiset();
 		storage = new HashStorage(this);
 		scheduler = new SchedulerImp(this);
+		mailbox = new MailboxImp(this);
+		agentsToCreate = new HashMap<String, AgentCreationElement>();
+		agentsToRegister = new HashSet<String>();
+		agentsToDeregister = new HashSet<String>();
+		agentsToDelete = new HashSet<String>();
 		parser = new JParsecParser(this);
 		interpreter = new InterpreterImp(this);
 		engineThread = new EngineThread(name);
@@ -175,6 +223,26 @@ public class Engine implements ControlAPI {
 
 		// Starting the execution thread of the engine
 		engineThread.start();
+	}
+
+	/**
+	 * @return the agentsToDelete
+	 */
+	public Set<String> getAgentsToDelete() {
+        HashSet<String> toDelete = new HashSet<String>();
+        toDelete.addAll(agentsToDelete);
+		return toDelete;
+	}
+	
+	public Set<String> getAgentsToDestroy() {
+		return agentsToDelete;
+	}
+
+	/**
+	 * @return the agentsToDeregister
+	 */
+	public Set<String> getAgentsToDeregister() {
+		return agentsToDeregister;
 	}
 
 	/**
@@ -359,6 +427,10 @@ public class Engine implements ControlAPI {
 	public Set<? extends Element> getAgentSet() {
 		return scheduler.getAgentSet();
 	}
+	@Override
+	public Set<? extends Element> getASIMSet() {
+		return scheduler.getASIMSet();
+	}
 
 	@Override
 	public UpdateMultiset getUpdateInstructions() {
@@ -505,7 +577,7 @@ public class Engine implements ControlAPI {
 	private void notifySuccess() {
 		// TODO no notification is sent
 		logger.debug("Last update succeeded.");
-        scheduler.incrementStepCount();
+		scheduler.incrementStepCount();
 	}
 
 	/**
@@ -574,6 +646,10 @@ public class Engine implements ControlAPI {
 
 		return plugins;
 	}
+
+    public void setSelfName(String name) {
+    	 externalName =name;
+    }
 
 	@Override
 	public Scheduler getScheduler() {
@@ -727,6 +803,10 @@ public class Engine implements ControlAPI {
 //		final EngineMode engineMode = getEngineMode();
 		return (lastError != null) || (engineMode == EngineMode.emError) ;
 	}
+	
+	public CoreASMError getError() {
+		return lastError;
+	}
 
 	@Override
 	@Deprecated
@@ -738,12 +818,127 @@ public class Engine implements ControlAPI {
 	public void waitWhileBusy() {
 		while (isBusy()) {
 			try {
-				Thread.sleep(50);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 		logger.debug("Finished waiting. (Mode: {})",getEngineMode());
+	}
+	
+	@Override
+	public void waitWhileBusyOrUntilCreation() {
+		while (isBusy() && getEngineMode() != EngineMode.emCreateAgent) {
+			try { 
+					Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		logger.debug("Finished waiting while busy or until creation. (Mode: {})",getEngineMode());
+	}
+
+    @Override
+    public Mailbox getMailbox() {
+        return mailbox;
+    }
+	
+	@Override
+	public synchronized void fillInBox(Set<MessageElement> msgs) {
+		mailbox.fillInbox(msgs);
+	}
+
+	@Override
+    public Set<MessageElement> emptyOutbox() {
+        Set<MessageElement> msgs = null;
+        synchronized(mailbox) {
+            msgs = mailbox.emptyOutbox();
+        }
+        return msgs;
+	}
+
+	@Override
+	public Map<String, AgentCreationElement> getAgentsToCreate() {
+		return agentsToCreate;
+	}
+
+	@Override
+	public void reportNewAgents(Map<String,String> agents) {
+		Set<String> identifiers = agentsToCreate.keySet();
+		Iterator<String> it = identifiers.iterator();
+		
+		while(it.hasNext()) {
+			String id = it.next();
+			if(agents.containsKey(id)) {
+				System.out.println("Store new agent name: "+agents.get(id)+" in identifier "+id);
+				AgentCreationElement ace = agentsToCreate.get(id);
+				Element e = new EnumerationElement(agents.get(id));
+				Update u = new Update(ace.getLocation(),e, Update.UPDATE_ACTION,interpreter.getSelf(),ace.getScannerInfo());						
+				//TODO BSL how do you prevent the new element from being overwritten?
+				scheduler.getUpdateInstructions().add(u);
+				agents.remove(id);
+			} else {
+				System.out.println("Identifier "+id+" must be set to 'undef'");
+				agents.remove(id);
+				warning("ASIM Creation Failure", "The ASIM to be created in "+id+" could not be created");
+			}
+		}
+
+		if(agents.size() > 0) {
+			System.err.println("Undefined behaviour. coreASM manager reports to set agent for location which was not requested!");
+			System.err.println("Ignore!");
+		}
+
+		commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
+	}
+	
+	@Override
+	public void addASIMs(Set<String> asims) {
+		for(String asimName: asims) {
+         //   System.out.println("ADDING UPDATE TO SCHEDULER FOR "+asimName);
+				StringElement e = new StringElement(asimName);
+				Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
+				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
+				//TODO BSL how do you prevent the new element from being overwritten?
+				ASIMsUpdates.add(u);
+		}
+		asims.clear();
+	//	commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
+		
+	}
+	
+	@Override
+	public void deleteASIMs(Set<String> asims) {
+		Set<? extends Element> knownASIMs = scheduler.getASIMSet();
+		for(String asimName: asims) {
+		//find the asim in the set of known ASIMs
+			for (Element e: knownASIMs)
+			{
+				StringElement knownASIM = (StringElement)e;
+				if (knownASIM.toString().equals(asimName))
+				{
+					//found it! Remove from universe and list of known asims
+					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
+					Update u = new Update(l,BooleanElement.FALSE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
+					scheduler.getUpdateSet().add(u);
+					//knownASIMs.remove(e); // removed, this should update from the content in the abstract storage!
+					asims.remove(asimName);
+					break;
+				}
+			}
+				
+		}
+		if(!asims.isEmpty())
+		{
+			for(String a : asims)
+			{
+				System.err.println("You asked me to delete the ASIM "+a+" but I have no record of that ASIM!");
+			}
+			warning("Error deleting ASIM","I tried to delete an ASIM that I did not know!");
+		}
+		asims.clear();
+	//	commandQueue.add(new EngineCommand(EngineCommand.CmdType.ecAggregate, null));
+		
 	}
 
 	@Override
@@ -802,11 +997,11 @@ public class Engine implements ControlAPI {
 						}
 
 						// if engine mode is idle and there is no user command,
-						// sleep for a short time (100ms)
+						// sleep for a short time
 						if ((engineMode == EngineMode.emIdle && commandQueue.isEmpty())
 									|| engineMode == EngineMode.emError) {
 							try {
-								Thread.sleep(100);
+								Thread.sleep(1);
 							} catch (InterruptedException e) {
 								logger.debug( "Engine is forced to stop.");
 							}
@@ -878,6 +1073,7 @@ public class Engine implements ControlAPI {
 
 						case emPreparingInitialState:
 							scheduler.prepareInitialState();
+							mailbox.prepareInitialState();
 							isStateInitialized = true;
 							next(EngineMode.emIdle);
 							break;
@@ -888,30 +1084,63 @@ public class Engine implements ControlAPI {
 							break;
 
 						case emStartingStep:
+							counter++;
+					        
 							if (!isStateInitialized
 									|| specification == null
 									|| specification.getRootNode() == null)
 								throw new EngineError("Engine cannot make a step " +
 										"before the specification is properly loaded.");
 							warnings.clear();
+							agentsToDelete.clear();
+							agentsToDeregister.clear();
+							agentsToRegister.clear();
 							scheduler.startStep();
 							scheduler.retrieveAgents();
-							next(EngineMode.emSelectingAgents);
+							scheduler.retrieveASIMs();
+							//FIXME BSL remove the loopback method!!!
+							//mailbox.loopback();
+							mailbox.startStep();
+							//TODO FIXME BSL If I uncomment the line below, the mailbox gets emptied!
+							//mailbox.clearOutboxLocation();
+							next(EngineMode.emResolvePolicy);
+							break;
+							
+						case emResolvePolicy:
+//							scheduler.startStep();
+//							scheduler.retrieveAgents();
+							scheduler.evaluatePolicy();
+							storage.aggregateUpdates();
+							if (storage.isConsistent(scheduler.getUpdateSet())) {
+								storage.fireUpdateSet(scheduler.getUpdateSet());
+								next(EngineMode.emSelectingAgents);}
+							else 
+								next(EngineMode.emUpdateFailed);
 							break;
 
 						case emSelectingAgents:
 							if (scheduler.selectAgents())
 								next(EngineMode.emRunningAgents);
-							else
-								next(EngineMode.emStepSucceeded);
+							else{
+								next(EngineMode.emTerminating);
+								logger.warn("Environment stopped.");
+							}
 							break;
 
 						case emRunningAgents:
+                            /* dummy!! */
+							/* simulate creation of agents 
+							agentsToCreate.put("loc1", "");
+							agentsToCreate.put("loc2", "");
+							agentsToCreate.put("loc3", "wantThisName");  */
+
 							if (scheduler.getSelectedAgentSet().size() == 0)
-								next(EngineMode.emAggregation);
+								// next(EngineMode.emAggregation);
+								next(EngineMode.emCreateAgent);
 							else {
 								scheduler.executeAgentPrograms();
-								next(EngineMode.emAggregation);
+								// next(EngineMode.emAggregation);
+								next(EngineMode.emCreateAgent);
 							}
 							break;
 
@@ -931,15 +1160,15 @@ public class Engine implements ControlAPI {
 							*/
 
 						case emUpdateFailed:
-							if (scheduler.isSingleAgentInconsistent())
-								next(EngineMode.emStepFailed);
-							else {
+//							if (scheduler.isSingleAgentInconsistent())
+//								next(EngineMode.emStepFailed);
+//							else {
 								scheduler.handleFailedUpdate();
-								if (scheduler.agentsCombinationExists())
-									next(EngineMode.emSelectingAgents);
-								else
+//								if (scheduler.environmentPresent())
+//									next(EngineMode.emSelectingAgents);
+//								else
 									next(EngineMode.emStepFailed);
-							}
+//							}
 							break;
 
 							/*
@@ -950,15 +1179,19 @@ public class Engine implements ControlAPI {
 							*/
 
 						case emStepSucceeded:
+							mailbox.endStep();
 							notifySuccess();
 							next(EngineMode.emIdle);
+							for (String a:agentsToDelete){
+								System.out.println("DestroyASIM "+a+"made it to the emStepSucceeded engine mode");
+							}
 							break;
 
 						case emStepFailed:
 							notifyFailure();
 							next(EngineMode.emIdle);
 							break;
-
+							
 							/*
 						case emInitializingSelf:
 							storage.setChosenAgent(scheduler.getChosenAgent());
@@ -967,7 +1200,25 @@ public class Engine implements ControlAPI {
 							break;
 							*/
 
+						case emCreateAgent:
+							// there are no agents which have been 
+							// created in the last step
+							if(agentsToCreate.size() == 0) {
+								next(EngineMode.emAggregation);
+							} else {
+								processNextCommand();
+								// agentsToCreate.clear();
+								try {
+									Thread.sleep(1);
+								} catch (InterruptedException e) {
+									logger.debug( "Engine is forced to stop.");
+								}
+								break;
+							}
+
 						case emAggregation:
+							scheduler.getUpdateInstructions().addAll(ASIMsUpdates);
+							ASIMsUpdates.clear();
 							storage.aggregateUpdates();
 							if (storage.isConsistent(scheduler.getUpdateSet())) {
 								storage.fireUpdateSet(scheduler.getUpdateSet());
@@ -1027,6 +1278,11 @@ public class Engine implements ControlAPI {
 						//   logger.error( ste.toString());
 					}
 				}
+				
+				storage.clearState();
+				scheduler.dispose();
+				ParserTools.removeInstance(Engine.this);
+				OperatorRegistry.removeInstance(Engine.this);
 
 				// Terminating plugins
 				for (Plugin p: pluginLoader.getPlugins())
@@ -1041,13 +1297,14 @@ public class Engine implements ControlAPI {
 			}
 
 			engineBusy = false;
+			System.gc();
 		}
 
 		/**
 		 * Switches the engine mode to a new mode.
 		 *
 		 * @param newMode
-		 *            new mode of the engine
+		 *			new mode of the engine
 		 */
 		private void next(EngineMode newMode) throws EngineException {
 			engineBusy = true;
@@ -1167,6 +1424,11 @@ public class Engine implements ControlAPI {
 							error("The specification passed to the engine is invalid.");
 					break;
 
+				case ecAggregate:
+					agentsToCreate.clear();
+					next(EngineMode.emAggregation);
+					break;
+
 				case ecStep:
 					next(EngineMode.emStartingStep);
 					break;
@@ -1241,9 +1503,9 @@ public class Engine implements ControlAPI {
 	}
 
 	@Override
-    public int getStepCount() {
-        return scheduler.getStepCount();
-    }
+	public int getStepCount() {
+		return scheduler.getStepCount();
+	}
 
 	@Override
 	public void addServiceProvider(String type, ServiceProvider provider) {
@@ -1302,6 +1564,30 @@ public class Engine implements ControlAPI {
 	public List<InterpreterListener> getInterpreterListeners() {
 		return interpreterListeners;
 	}
+
+	@Override
+	public Set<String> getAgentsToRegister() {
+		return agentsToRegister;
+	}
+
+	@Override
+	public String getSelfAgentName() {
+		//System.out.println("Returning the external name "+ externalName);
+		return externalName;
+	}
+
+	@Override
+	public int getCounter() {
+		// TODO Auto-generated method stub
+		return counter;
+	}
+
+	@Override
+	public synchronized void clearOutboxLocation() {
+		mailbox.clearOutboxLocation();
+		
+	}
+
 }
 
 /**
@@ -1320,7 +1606,7 @@ class EngineCommand {
 	 * @author Roozbeh Farahbod
 	 */
 	public enum CmdType {
-		ecTerminate, ecInit, ecLoadSpec, ecOnlyParseSpec, ecOnlyParseHeader, ecStep, ecRun, ecRecover
+		ecTerminate, ecInit, ecLoadSpec, ecOnlyParseSpec, ecOnlyParseHeader, ecAggregate, ecStep, ecRun, ecRecover
 	};
 
 	/**

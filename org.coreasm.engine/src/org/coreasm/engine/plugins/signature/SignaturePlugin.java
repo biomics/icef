@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.FunctionElement.FunctionClass;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MapFunction;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.Signature;
 import org.coreasm.engine.absstorage.UniverseElement;
@@ -55,12 +57,15 @@ import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.KernelServices;
 import org.coreasm.engine.parser.GrammarRule;
 import org.coreasm.engine.parser.ParseMap;
+import org.coreasm.engine.parser.ParserException;
 import org.coreasm.engine.parser.ParserTools;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.ParserPlugin;
 import org.coreasm.engine.plugin.Plugin;
+import org.coreasm.engine.plugin.PluginServiceInterface;
 import org.coreasm.engine.plugin.UndefinedIdentifierHandler;
 import org.coreasm.engine.plugin.VocabularyExtender;
+import org.coreasm.engine.plugins.communication.CommunicationPlugin.CommunicationPSI;
 import org.coreasm.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +79,8 @@ public class SignaturePlugin extends Plugin
 		implements ParserPlugin, VocabularyExtender, ExtensionPointPlugin, UndefinedIdentifierHandler {
   
 	protected static final Logger logger = LoggerFactory.getLogger(SignaturePlugin.class);
-
+	protected SignaturePluginPSI pluginPSI;
+	
 	public static final VersionInfo VERSION_INFO = new VersionInfo(0, 3, 1, "beta");
 	
 	public static final String PLUGIN_NAME = SignaturePlugin.class.getSimpleName();
@@ -91,11 +97,24 @@ public class SignaturePlugin extends Plugin
 	 * "on" and "strict" are equivalent. 
 	 */
 	public static final String TYPE_CHECKING_PROPERTY = "Signature.TypeChecking";
+
+	public static final String FUNCTION_CLASS = "FunctionClass";
+
+	public static final String FUNCTION_DOMAIN = "FunctionDomain";
+
+	public static final String FUNCTION_RANGE = "FunctionWithDomain";
+
+	public static final String FUNCTION_WITH_INITIALISATION = "FunctionWithInitialisation";
+
+	public static final String FUNCTION_KEYWORD = "Function";
+
+	public static final String FUNCTION_ID = "FunctionID";
 	
     private HashMap<String,FunctionElement> functions;
     private HashMap<String,UniverseElement> universes;
     private HashMap<String,BackgroundElement> backgrounds;
     private HashMap<String,RuleElement> rules;
+    private HashMap<String,PolicyElement> policies;
     
     private Set<String>	dependencyNames;
     private Map<String, GrammarRule> parsers = null;
@@ -129,6 +148,7 @@ public class SignaturePlugin extends Plugin
         idCheckingMode = CheckMode.cmOff;
 		funcRangeFunction = new FunctionRangeFunctionElement();
 		funcDomainFunction = new FunctionDomainFunctionElement();
+		pluginPSI = new SignaturePluginPSI();
     }
 
 	public Set<Parser<? extends Object>> getLexers() {
@@ -264,44 +284,39 @@ public class SignaturePlugin extends Plugin
 					});
 			parsers.put("FunctionClass", new GrammarRule("FunctionClass", 
 					"'controlled'|'static'|'monitored'", funcClassParser, PLUGIN_NAME));
-			
-			// FunctionSignature : 'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm ('initially' Term | 'initialized by' Term)?
-			Parser<Node> funcSigParser = Parsers.array(
-					new Parser[] {
-						pTools.getKeywParser("function", PLUGIN_NAME),
-						funcClassParser.optional(),
-						idParser,
-						pTools.getOprParser(":"),
-						univTupleParser.optional(),
-						pTools.getOprParser("->"),
-						univTermParser,
-						Parsers.or(
-							pTools.seq(
-								pTools.getKeywParser("initially", PLUGIN_NAME),
-								termParser).atomic(),
-							pTools.seq(
-								pTools.getKeywParser("initialized", PLUGIN_NAME),
-								pTools.getKeywParser("by", PLUGIN_NAME),
-								termParser).atomic()
-						).optional()
-					}).map(new ParserTools.ArrayParseMap(PLUGIN_NAME) {
 
-						public Node map(Object[] vals) {
-							Node node = new FunctionNode(((Node)vals[0]).getScannerInfo());
-							addChildren(node, vals);
-							return node;
-						}});
-			parsers.put("FunctionSignature", new GrammarRule("FunctionSignature", 
-					"'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm (('initially' Term) | ('initialized by' Term))?", funcSigParser, PLUGIN_NAME));
-			
+			// FunctionSignature : 'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm ('initially' Term | 'initialized by' Term)?
+						Parser<Node> funcSigParser = Parsers.array(
+								new Parser[] {
+									funcClassParser,
+									pTools.getKeywParser("function", PLUGIN_NAME).optional(),
+									idParser,
+									pTools.getOprParser(":"),
+									Parsers.or(pTools.seq(
+											univTupleParser,
+											pTools.getOprParser("->"),
+											univTupleParser).atomic(),
+											univTupleParser)
+									,//univTermParser,
+									Parsers.or(
+										pTools.seq(
+											pTools.getKeywParser("initially", PLUGIN_NAME),
+											termParser).atomic(),
+										pTools.seq(
+											pTools.getKeywParser("initialized", PLUGIN_NAME),
+											pTools.getKeywParser("by", PLUGIN_NAME),
+											termParser).atomic()
+									).optional()
+								}).map(new FunctionSignatureParseMap());
+						parsers.put("FunctionSignature", new GrammarRule("FunctionSignature", 
+								"'function' (FunctionClass)? ID ':' (UniverseTuple)? '->' UniverseTerm (('initially' Term) | ('initialized by' Term))?", funcSigParser, PLUGIN_NAME));
 			// DerivedFunctionDeclaration : 'function'? 'derived' RuleSignature '=' Term
 			Parser<Node> derivedFuncParser = Parsers.array(
-					new Parser[] {
-						pTools.seq(
-								pTools.getKeywParser("function", PLUGIN_NAME)).optional(),
+					new Parser[] {pTools.seq(
 						pTools.getKeywParser("derived", PLUGIN_NAME),
+						pTools.getKeywParser("function", PLUGIN_NAME).optional(),
 						ruleSignatureParser,
-						pTools.getOprParser("="),
+						pTools.getOprParser("=")).atomic(),
 						Parsers.or(termParser, ruleParser),
 					}).map(
 					new ParserTools.ArrayParseMap(PLUGIN_NAME) {
@@ -317,7 +332,7 @@ public class SignaturePlugin extends Plugin
 							return node;
 						}});
 			parsers.put("DerivedFunctionDeclaration", new GrammarRule("DerivedFunctionDeclaration", 
-					"'function'? 'derived' RuleSignature '=' Term", derivedFuncParser, PLUGIN_NAME));
+					"'derived' ('function')? RuleSignature '=' Term", derivedFuncParser, PLUGIN_NAME));
 			
 			
 			// Signature : (EnumerationDefinition|FunctionSignature|UniverseDefinition)*
@@ -348,6 +363,14 @@ public class SignaturePlugin extends Plugin
 			
 		}
 		return parsers;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.coreasm.engine.plugin.Plugin#getPluginInterface()
+	 */
+	@Override
+	public PluginServiceInterface getPluginInterface() {
+		return pluginPSI;
 	}
 	
     /* (non-Javadoc)
@@ -650,6 +673,9 @@ public class SignaturePlugin extends Plugin
         if (rules == null) {
             rules = new HashMap<String,RuleElement>();
         }
+        if (policies == null) {
+            policies = new HashMap<String,PolicyElement>();
+        }
         
         ASTNode node = capi.getParser().getRootNode().getFirst();
         
@@ -824,7 +850,13 @@ public class SignaturePlugin extends Plugin
             // TODO: check signature for correct signature of program function
             function = (MapFunction) capi.getStorage().getFunction(AbstractStorage.PROGRAM_FUNCTION_NAME);
         }
-        else if (functionNode.hasInitializer())
+        else 
+        	if (functionNode.getName().equals(AbstractStorage.POLICY_FUNCTION_NAME)) {
+                 // TODO: check signature for correct signature of policy function
+                 function = (MapFunction) capi.getStorage().getFunction(AbstractStorage.POLICY_FUNCTION_NAME);
+             }
+             else 
+        	if (functionNode.hasInitializer())
         	function = new DerivedMapFunction(capi, functionNode.getInitializerParams(), functionNode.getInitNode());
         else
         	function = new MapFunction();        
@@ -834,7 +866,7 @@ public class SignaturePlugin extends Plugin
         signature.setRange(functionNode.getRange());
         function.setSignature(signature);
 
-        if (!functionNode.getName().equals(AbstractStorage.PROGRAM_FUNCTION_NAME)) {
+        if (!functionNode.getName().equals(AbstractStorage.PROGRAM_FUNCTION_NAME)||!functionNode.getName().equals(AbstractStorage.POLICY_FUNCTION_NAME)) {
             addFunction(functionNode.getName(),function,functionNode, interpreter);
         }
     
@@ -910,7 +942,7 @@ public class SignaturePlugin extends Plugin
 			currentParams = currentParams.getNext();
 		}
 
-		DerivedFunctionElement func = new DerivedFunctionElement(capi, params, exprNode);
+		DerivedFunctionElement func = new DerivedFunctionElement(capi,idNode.getToken(), params, exprNode);
 		
 		addFunction(idNode.getToken(), func, currentSignature, interpreter);
 
@@ -971,7 +1003,7 @@ public class SignaturePlugin extends Plugin
     }
 
 	public Set<String> getRuleNames() {
-		return Collections.emptySet();
+		return rules.keySet();
 	}
 
 	public Map<String, RuleElement> getRules() {
@@ -1022,7 +1054,7 @@ public class SignaturePlugin extends Plugin
             if (functions.keySet().contains(id)) {
                 FunctionElement f = functions.get(id);
                 Location l = new Location(id,args);
-                pos.setNode(l, null, f.getValue(l.args));
+                pos.setNode(l, null, null, f.getValue(l.args));
             }
             else {
             	String msg = "unknown identifier \""+id+"\".";
@@ -1048,5 +1080,155 @@ public class SignaturePlugin extends Plugin
 		}
 		return dependencyNames;
 	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		if (rules == null)
+			processSignatures();
+		return policies;
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return policies.keySet();
+	}
     
+	public static class FunctionSignatureParseMap extends ParserTools.ArrayParseMap {
+
+	    String nextChildName = "alpha";
+
+	    public FunctionSignatureParseMap() {
+			super(PLUGIN_NAME);
+		}
+	    
+	    public Node map(Object[] vals) {
+	    	nextChildName = SignaturePlugin.FUNCTION_CLASS;
+	    	//System.out.println("Vals has "+ vals.length);
+	    	Node node = new FunctionNode(((Node)vals[0])
+	    			.getScannerInfo());
+			addChildren(node, vals);
+			return node;
+	    }
+		
+		
+		public void addChild(Node parent, Node child) {
+			//System.out.println("The token of the child: "+child.getToken());
+			String token = child.getToken();
+			if (child instanceof ASTNode)
+			{
+				//System.out.println("Child is ASTNode, and contreteNodeType: "+child.getConcreteNodeType());					
+				parent.addChild(nextChildName, child);
+				if (token!=null &&(token.equals("static") || token.equals("controlled")|| token.equals("monitored")))
+		        	nextChildName = SignaturePlugin.FUNCTION_ID;
+			}
+			else {
+				//System.out.println("Child is NOT ASTNode");
+		        if (token.equals("function"))
+		        	nextChildName = SignaturePlugin.FUNCTION_KEYWORD;
+		        else if (token.equals(":"))
+		        	nextChildName = SignaturePlugin.FUNCTION_DOMAIN;
+		        else if (token.equals("->"))
+		        	nextChildName = SignaturePlugin.FUNCTION_RANGE;
+		        else if (token.equals("initially"))
+		        	nextChildName = SignaturePlugin.FUNCTION_WITH_INITIALISATION;
+				parent.addChild(child);
+		        
+			}
+		}
+
+	}
+	
+public class SignaturePluginPSI implements PluginServiceInterface {
+		
+		public void setDerivedFunctionsDefinitions(String incomingDerivedFunctions)
+		{
+			synchronized(pluginPSI){
+				String[] definitions = incomingDerivedFunctions.split("\n");
+				DerivedFunctionNode derivedFuncNode = null;
+				org.coreasm.engine.parser.Parser parser = capi.getParser();
+				for(String function: definitions)
+				{
+					try {
+						derivedFuncNode = (DerivedFunctionNode)parser.parseDerivedFunction(function);
+						ASTNode exprNode = derivedFuncNode.getExpressionNode();
+						ASTNode idNode = derivedFuncNode.getNameSignatureNode().getFirst();
+						
+						// create structure for all parameters
+						ArrayList<String> params = new ArrayList<String>();
+						ASTNode currentParams = idNode.getNext();
+						// while there are parameters to add to the list
+						while (currentParams != null) {
+							// add parameters to the list
+							params.add(currentParams.getToken());
+							// get next parameter
+							currentParams = currentParams.getNext();
+						}
+
+						DerivedFunctionElement func = new DerivedFunctionElement(capi,idNode.getToken(), params, exprNode);
+//						DerivedFunctionElement test = (DerivedFunctionElement) getFunctions().get(idNode.getToken());
+//						if(test!=null)
+//						{
+//							test.getExpr();
+//							test.getName();
+//						}
+						getFunctions().put(idNode.getToken(), func);
+					} catch (ParserException e) {
+						capi.error(e);
+					}
+				}			
+			}
+		}
+		
+		public void addDerivedFunctions(Set<DerivedFunctionElement> parsedDerivedFunctions)
+		{
+			synchronized(pluginPSI){
+				//TODO BSL Discuss with Daniel how we are going to create function elements!
+				
+			}
+		}
+		
+		public Set<DerivedFunctionElement> getDerivedFunctions() 
+		{
+			synchronized(pluginPSI){
+				Set<DerivedFunctionElement> result= new HashSet<DerivedFunctionElement>();
+				for (String s:functions.keySet())
+				{
+					FunctionElement function = functions.get(s);
+					if(function instanceof DerivedFunctionElement)
+					{
+						result.add((DerivedFunctionElement) function);
+					}
+				}
+				return result; 
+			}
+			
+		}
+		
+		public String getDerivedFunctionsDefinitions() {
+			synchronized (pluginPSI) {
+				StringBuilder result = new StringBuilder();
+				Set<DerivedFunctionElement> dfunctions = getDerivedFunctions();
+				for (DerivedFunctionElement f : dfunctions) {
+					result.append(" derived ");
+					result.append(f.name);
+					if (f.params.size() > 0) {
+						result.append("(");
+						int i = 0;
+						for (; i < f.params.size() - 1; i++) {
+							result.append(f.params.get(i));
+							result.append(",");
+						}
+						result.append(f.params.get(i));
+						result.append(")");
+					}
+					result.append(" = ");
+					result.append(f.getExpr().toString());
+					//result.append("\n");
+				}
+				//FIXME BSL remove the following line: used for testing!
+				//setDerivedFunctionsDefinitions(result.toString());
+				return result.toString();
+			}
+		}
+	}
 }

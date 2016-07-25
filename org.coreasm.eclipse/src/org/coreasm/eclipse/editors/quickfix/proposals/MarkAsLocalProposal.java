@@ -4,7 +4,7 @@ import java.util.Stack;
 
 import org.coreasm.eclipse.editors.ASMDocument;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 import org.coreasm.engine.interpreter.Node;
 import org.coreasm.engine.kernel.Kernel;
 import org.coreasm.engine.kernel.RuleOrFuncElementNode;
@@ -87,8 +87,8 @@ public class MarkAsLocalProposal implements ICompletionProposal {
 					fringe.add(declarationNode);
 					while (!fringe.isEmpty()) {
 						ASTNode node = fringe.pop();
-						if (ASTNode.FUNCTION_RULE_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRuleTermNode) {
-							FunctionRuleTermNode frNode = (FunctionRuleTermNode)node;
+						if (ASTNode.FUNCTION_RULE_POLICY_CLASS.equals(node.getGrammarClass()) && node instanceof FunctionRulePolicyTermNode) {
+							FunctionRulePolicyTermNode frNode = (FunctionRulePolicyTermNode)node;
 							if (frNode.hasName() && document.getNodePosition(frNode) == offset)
 								return frNode;
 						}

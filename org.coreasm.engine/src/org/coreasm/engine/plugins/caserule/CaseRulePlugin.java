@@ -171,7 +171,7 @@ public class CaseRulePlugin extends Plugin
             		result.addAll(rule.getUpdates());
             	}
             	
-            	pos.setNode(null, result, null);
+            	pos.setNode(null, result, null, null);
             	return pos;
             	
             }

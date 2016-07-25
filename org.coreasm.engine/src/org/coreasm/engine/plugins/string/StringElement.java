@@ -28,6 +28,10 @@ import org.coreasm.util.Tools;
  */
 public class StringElement extends Element implements Enumerable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7709605354468448375L;
 	protected final String string;
 	protected List<Element> indexedView = null;
 	protected String denotationalValue = null;

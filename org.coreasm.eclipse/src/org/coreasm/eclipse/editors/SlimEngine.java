@@ -21,6 +21,7 @@ import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.Specification;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.State;
@@ -29,6 +30,7 @@ import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.Interpreter;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.plugin.ExtensionPointPlugin;
 import org.coreasm.engine.plugin.PackagePlugin;
@@ -598,8 +600,11 @@ public class SlimEngine implements ControlAPI {
 	@Override
 	public void waitWhileBusy() {
 		throw new UnsupportedOperationException();
-
 	}
+	
+	public void waitWhileBusyOrUntilCreation() {
+		throw new UnsupportedOperationException();
+	} 
 
 	@Override
 	public boolean isBusy() {
@@ -702,6 +707,68 @@ public class SlimEngine implements ControlAPI {
 	public List<InterpreterListener> getInterpreterListeners() {
 		throw new UnsupportedOperationException();
 		
+	}
+
+	@Override
+	public CoreASMError getError() {
+		return errors.get(errors.size()-1);
+	}
+
+	@Override
+	public Mailbox getMailbox() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void reportNewAgents(Map<String, String> agents) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public Map<String, AgentCreationElement> getAgentsToCreate() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToRegister() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToDeregister() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToDelete() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<? extends Element> getASIMSet() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addASIMs(Set<String> asims) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteASIMs(Set<String> asims) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setSelfName(String name) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public String getSelfAgentName() {
+		throw new UnsupportedOperationException();
 	}
 
 }

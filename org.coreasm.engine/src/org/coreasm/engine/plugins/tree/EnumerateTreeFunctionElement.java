@@ -30,6 +30,11 @@ import org.coreasm.engine.plugins.list.ListElement;
  */
 public class EnumerateTreeFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6251238393913340946L;
+
 	// valuesOnly: if set to true, the returned collection
 	// will contains the values in the nodes of the tree. If set to
 	// false, the enumeration will contain the nodes themselves.

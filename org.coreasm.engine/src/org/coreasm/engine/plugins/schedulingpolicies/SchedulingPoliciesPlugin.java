@@ -38,6 +38,7 @@ import org.coreasm.engine.absstorage.FunctionElement;
 import org.coreasm.engine.absstorage.Location;
 import org.coreasm.engine.absstorage.MapFunction;
 import org.coreasm.engine.absstorage.NameElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.absstorage.Update;
@@ -274,7 +275,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 				} else {
 					pos.setNode(null, new UpdateMultiset(
 							new Update(getSchedulingStatusLocation(agentNode.getValue()), 
-									suspendedFlag, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())), null);
+									suspendedFlag, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())),null, null);
 
 					logger.debug("Suspending agent '{}'.", agentNode.getValue());
 				}
@@ -292,7 +293,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 							
 							pos.setNode(null, new UpdateMultiset(
 									new Update(getSchedulingStatusLocation(agentNode.getValue()), 
-											Element.UNDEF, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())), null);
+											Element.UNDEF, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo())), null, null);
 
 							logger.debug("Resuming agent '{}'", agentNode.getValue());
 						} else
@@ -315,7 +316,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 							updates.add(new Update(getSchedulingStatusLocation(agentNode.getValue()), 
 											terminatedFlag, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo()));
 
-							pos.setNode(null, updates, null);
+							pos.setNode(null, updates, null, null);
 
 							logger.debug("Terminating agent '{}'.", agentNode.getValue());
 						}
@@ -330,7 +331,7 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 								final Location agentsLoc = new Location(AbstractStorage.AGENTS_UNIVERSE_NAME, new ElementList(a));
 								updates.add(new Update(agentsLoc, BooleanElement.FALSE, Update.UPDATE_ACTION, interpreter.getSelf(), pos.getScannerInfo()));
 							}
-							pos.setNode(null, updates, null);
+							pos.setNode(null, updates, null, null);
 
 							logger.debug("Shutting down.");
 						}
@@ -409,5 +410,15 @@ public class SchedulingPoliciesPlugin extends Plugin implements
 			targetModes.put(EngineMode.emStartingStep, ExtensionPointPlugin.DEFAULT_PRIORITY);
 		}
 		return targetModes;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 }

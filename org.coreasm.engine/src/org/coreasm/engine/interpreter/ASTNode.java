@@ -13,6 +13,11 @@
  
 package org.coreasm.engine.interpreter;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +25,9 @@ import java.util.List;
 
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasm.engine.plugins.map.MapElement;
 
 /** 
  * Represents nodes of the abstract syntax tree.
@@ -39,13 +46,15 @@ public class ASTNode extends Node implements Serializable {
 	/** grammar classes */
 	public static final String ID_CLASS = "Id";
 	public static final String RULE_CLASS = "Rule";
+	public static final String POLICY_CLASS = "Policy";
 	public static final String EXPRESSION_CLASS = "Expression";
-	public static final String FUNCTION_RULE_CLASS = "FunctionRule";
+	public static final String FUNCTION_RULE_POLICY_CLASS = "FunctionRulePolicy";
 	public static final String DECLARATION_CLASS = "Declaration";
 	public static final String UNARY_OPERATOR_CLASS = "UnaryOperator";
 	public static final String BINARY_OPERATOR_CLASS = "BinaryOperator";
     public static final String TERNARY_OPERATOR_CLASS = "TernaryOperator";
     public static final String INDEX_OPERATOR_CLASS = "IndexOperator";
+   
     
 	/** grammar class of this node */
 	protected String grammarClass;
@@ -55,6 +64,9 @@ public class ASTNode extends Node implements Serializable {
 
 	/** updates associated with this node */
 	protected UpdateMultiset updates;
+	
+	/** triggers associated with this node */
+	protected TriggerMultiset triggers;
 	
 	/** a value associated with this node */
 	protected Element value;
@@ -81,6 +93,7 @@ public class ASTNode extends Node implements Serializable {
 		this.location = null;
 		this.value = null;
 		this.updates = null;
+		this.triggers = null;
 		if (this.grammarClass == null)
 			this.grammarClass = "";
 		if (this.grammarRule == null)
@@ -154,6 +167,16 @@ public class ASTNode extends Node implements Serializable {
 	}
 	
 	/**
+	 * Returns the collection of update instructions (if any) generated 
+	 * from evaluting this node. This is <i>updates(node)</i>.
+	 * 
+	 * @return <code>Collection</code> of <code>Update</code>
+	 */
+	public TriggerMultiset getTriggers(){
+		return triggers;
+	}
+	
+	/**
 	 * Returns the value associated with this node.
 	 * 
 	 */
@@ -172,7 +195,7 @@ public class ASTNode extends Node implements Serializable {
 	 * Returns <code>true</code> if this node is evaluated.
 	 */
 	public boolean isEvaluated() {
-		return (updates != null || value != null || location != null);
+		return (updates != null || value != null || location != null || triggers != null);
 	}
 	
 	/**
@@ -183,10 +206,11 @@ public class ASTNode extends Node implements Serializable {
 	 * @param updates collection of updates
 	 * @param value value
 	 */
-	public void setNode(Location loc, UpdateMultiset updates, Element value) {
+	public void setNode(Location loc, UpdateMultiset updates, TriggerMultiset triggers, Element value) {
 		this.location = loc;
 		this.updates = updates;
 		this.value = value;
+		this.triggers = triggers;
 	}
 
 	/**
@@ -228,7 +252,11 @@ public class ASTNode extends Node implements Serializable {
 		if (first == null)
 			return null;
 		else
+		{
+		//	System.out.println("Is first ASTNode Serializable? "+isSerializable((ASTNode)first));    
 			return (ASTNode)first;
+		}
+			
 	}
 
 	/**
@@ -322,17 +350,18 @@ public class ASTNode extends Node implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		String str = "[";
-		if (token != null)
-			str = str + "'" + token + "':";
-		if (grammarClass != null) 
-			str = str + grammarClass + ":";
-		if (grammarRule != null)
-			str = str + grammarRule + " ";
-
-        if (str.length() == 1)
-			str = "[GenericNode";
-		return str + (scannerInfo==null?"":scannerInfo) + "]";
+//		String str = "[";
+//		if (token != null)
+//			str = str + "'" + token + "':";
+//		if (grammarClass != null) 
+//			str = str + grammarClass + ":";
+//		if (grammarRule != null)
+//			str = str + grammarRule + " ";
+//
+//        if (str.length() == 1)
+//			str = "[GenericNode";
+//		return str + (scannerInfo==null?"":scannerInfo) + "]";
+		return this.unparseTree();
 	}
 	
 	/**
@@ -384,4 +413,5 @@ public class ASTNode extends Node implements Serializable {
 		}
 		
 	}
+	
 }

@@ -25,6 +25,7 @@ import org.coreasm.compiler.plugins.math.CompilerMathPlugin;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.BackgroundElement;
 import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.RuleElement;
 import org.coreasm.engine.absstorage.UniverseElement;
 import org.coreasm.engine.interpreter.ASTNode;
@@ -225,9 +226,20 @@ public class MathPlugin extends Plugin implements VocabularyExtender, ParserPlug
 		if (token == null) 
 			return pos;
 		else if (token.equals(KW_RANDOM_VALUE)) {
-			pos.setNode(null, null, NumberElement.getInstance(Math.random()));
+			pos.setNode(null, null, null, NumberElement.getInstance(Math.random()));
 		}
 		return pos;
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+		return Collections.emptySet();
 	}
 
 }

@@ -27,6 +27,11 @@ import org.coreasm.engine.plugins.number.NumberElement;
  */
 public class StepCountFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2811059378375548047L;
+
 	/** Name of this function */
 	public static final String FUNC_NAME = "stepcount";
 	

@@ -29,6 +29,11 @@ import org.coreasm.engine.interpreter.ASTNode;
 public class RuleElement extends Element {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3145054441378469795L;
+
+	/**
 	 * Declaration node in the parse tree.
 	 */
 	public final ASTNode node;
@@ -126,6 +131,8 @@ public class RuleElement extends Element {
 	}
 
 	public String toString() {
-		return "@" + this.getName();
+		//return "@" + this.getName();
+		return //"rule "+this.getName()+" = "+
+				this.getBody().unparseTree();
 	}
 }

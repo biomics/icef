@@ -180,11 +180,6 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 		}
 	}
 	
-	public void finalize() {
-		engine.terminate();
-		//syntaxEngine.terminate();
-	}
-	
 	public static void newLaunch(String abspathname) throws CoreException {
 		newLaunch(abspathname, null);
 	}
@@ -268,8 +263,11 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 			engine.loadSpecification(abspathname);
 			engine.waitWhileBusy();
 			if (engine.getEngineMode()!=EngineMode.emIdle) {
-				handleError();
-				return;
+				if (engine.getEngineMode()!= EngineMode.emTerminated)
+				{	
+					handleError();
+					return;
+				}
 			}
 			
 			if (shouldStop)
@@ -305,7 +303,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 				engine.step(); step++;
 
 				while (!shouldStop && engine.isBusy())
-					Thread.sleep(50);
+					Thread.sleep(1);
 				
 				if (shouldStop) {
 					// give some time to the engine to finish
@@ -317,19 +315,19 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 				
 				updates = engine.getUpdateSet(0);
 				if (markSteps)
-					stddump.println("#--- end of step " + step);
+					stddump.println("#--- end of step " + (step-1));
 				if (dumpUpdates)
-					stddump.println("Updates at step "+step+": "+updates);
+					stddump.println("Updates at step "+(step-1)+": "+updates);
 				if (dumpState)
-					stddump.println("State at step "+step+":\n"+engine.getState());
+					stddump.println("State at step "+(step-1)+":\n"+engine.getState());
 				if (printAgents)
 					stddump.println("Last selected agents: " + engine.getLastSelectedAgents());
-				if (terminated(step,updates,prevupdates))
+				if (terminated((step-1),updates,prevupdates))
 					break;
 				prevupdates=updates;
 				
 			}
-			if (engine.getEngineMode()!=EngineMode.emIdle) 
+			if (engine.getEngineMode()!=EngineMode.emIdle && engine.getEngineMode()!= EngineMode.emTerminated)
 				handleError();
 		} catch (Exception e) {
 			exception = e;
@@ -367,6 +365,8 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 			
 			runningInstance.engine.hardInterrupt();
 			
+			runningInstance.engine = null;
+			
 			runningInstance = null;
 			
 			postExecutionCallback();
@@ -384,7 +384,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 			return true;
 		if (stopOnError && lastError!=null)
 			return true;
-		if (stopOnStepsLimit && step>stepsLimit)
+		if (stopOnStepsLimit && step>=stepsLimit)
 			return true;
 		return false;
 	}
@@ -732,7 +732,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 		if (lastError != null)
 			message = lastError.showError();
 		else
-			message = "Enginemode should be " + EngineMode.emIdle + " but is " + engine.getEngineMode();
+			message = "Error: Enginemode should be " + EngineMode.emIdle + " but is " + engine.getEngineMode();
         
 //		JOptionPane.showMessageDialog(null, message, "CoreASM Engine Error", JOptionPane.ERROR_MESSAGE);
         showErrorDialog("CoreASM Engine Error",message);

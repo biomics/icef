@@ -20,6 +20,7 @@ import org.coreasm.engine.InconsistentUpdateSetException;
 import org.coreasm.engine.Specification;
 import org.coreasm.engine.VersionInfo;
 import org.coreasm.engine.absstorage.AbstractStorage;
+import org.coreasm.engine.absstorage.AgentCreationElement;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.InvalidLocationException;
 import org.coreasm.engine.absstorage.RuleElement;
@@ -32,6 +33,7 @@ import org.coreasm.engine.interpreter.InterpreterException;
 import org.coreasm.engine.interpreter.InterpreterImp;
 import org.coreasm.engine.interpreter.InterpreterListener;
 import org.coreasm.engine.interpreter.Node;
+import org.coreasm.engine.mailbox.Mailbox;
 import org.coreasm.engine.parser.OperatorRegistry;
 import org.coreasm.engine.parser.Parser;
 import org.coreasm.engine.plugin.Plugin;
@@ -51,12 +53,11 @@ public class WatchExpressionAPI implements ControlAPI {
 	}
 	
 	public synchronized Element evaluateExpression(ASTNode expression, Element agent, ASMStorage storage) throws InterpreterException {
-		if (Thread.holdsLock(capi.getInterpreter().getInterpreterInstance()))
-			throw new InterpreterException(new CoreASMError("The current thread already holds a lock on the interpreter instance!"));
 		this.storage = storage;
 		copyOprRegFromCapi();
 		
 		Interpreter interpreter = new InterpreterImp(this);
+		interpreter.cleanUp();
 		
 		for (Entry<String, Element> environmentVariable : storage.getEnvVars().entrySet())
 			interpreter.addEnv(environmentVariable.getKey(), environmentVariable.getValue());
@@ -77,14 +78,23 @@ public class WatchExpressionAPI implements ControlAPI {
 			} while (!(interpreter.isExecutionComplete() || hasErrorOccurred()));
 		}
 		finally {
+			interpreter.dispose();
 			unbindPlugins();
 			storage.discardStackedUpdates();
+			OperatorRegistry.removeInstance(this);
 		}
 		
 		if (hasErrorOccurred())
 			throw new InterpreterException(lastError);
 		
-		return interpreter.getPosition().getValue();
+		return expression.getValue();
+	}
+	
+	public void dispose() {
+		capi = null;
+		storage = null;
+		lastError = null;
+		warnings = null;
 	}
 	
 	private void bindPlugins() {
@@ -289,6 +299,10 @@ public class WatchExpressionAPI implements ControlAPI {
 	@Override
 	public void waitWhileBusy() {
 	}
+	
+
+	public void waitWhileBusyOrUntilCreation() {
+	}
 
 	@Override
 	public boolean isBusy() {
@@ -478,6 +492,68 @@ public class WatchExpressionAPI implements ControlAPI {
 	@Override
 	public boolean hasErrorOccurred() {
 		return lastError != null;
+	}
+
+	@Override
+	public CoreASMError getError() {
+		return lastError;
+	}
+
+	@Override
+	public Mailbox getMailbox() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void reportNewAgents(Map<String, String> agents) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public Map<String, AgentCreationElement> getAgentsToCreate() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToRegister() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToDeregister() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<String> getAgentsToDelete() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Set<? extends Element> getASIMSet() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addASIMs(Set<String> asims) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteASIMs(Set<String> asims) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setSelfName(String name) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public String getSelfAgentName() {
+		throw new UnsupportedOperationException();
 	}
 
 }

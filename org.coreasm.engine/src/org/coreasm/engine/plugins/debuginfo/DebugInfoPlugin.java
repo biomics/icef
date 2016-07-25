@@ -26,6 +26,7 @@ import java.util.StringTokenizer;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasm.engine.VersionInfo;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.Interpreter;
@@ -188,7 +189,7 @@ public class DebugInfoPlugin extends Plugin implements ParserPlugin, Interpreter
 			String msg = node.getMessage().getValue().toString();
 			writeDebugInfo(channel, msg);
 			
-			pos.setNode(null, new UpdateMultiset(), null);
+			pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
 		}
 		
 		return pos;

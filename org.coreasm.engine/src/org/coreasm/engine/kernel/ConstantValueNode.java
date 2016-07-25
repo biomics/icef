@@ -3,6 +3,7 @@ package org.coreasm.engine.kernel;
 import org.coreasm.engine.CoreASMError;
 import org.coreasm.engine.absstorage.Element;
 import org.coreasm.engine.absstorage.Location;
+import org.coreasm.engine.absstorage.TriggerMultiset;
 import org.coreasm.engine.absstorage.UpdateMultiset;
 import org.coreasm.engine.interpreter.ASTNode;
 import org.coreasm.engine.interpreter.ScannerInfo;
@@ -28,10 +29,10 @@ public class ConstantValueNode extends ASTNode {
 	public void setValue(Element value) {
 		if (value == null)
 			throw new CoreASMError("Constant value must not be null", this);
-		super.setNode(null, new UpdateMultiset(), value);
+		super.setNode(null, new UpdateMultiset(), new TriggerMultiset(), value);
 	}
 	
 	@Override
-	public void setNode(Location loc, UpdateMultiset updates, Element value) {
+	public void setNode(Location loc, UpdateMultiset updates, TriggerMultiset triggers, Element value) {
 	}
 }

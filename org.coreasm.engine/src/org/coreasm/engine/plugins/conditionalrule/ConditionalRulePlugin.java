@@ -96,13 +96,13 @@ public class ConditionalRulePlugin extends Plugin
 						return conditionalNode.getIfRule();
 					}
 					else {
-						pos.setNode(null, conditionalNode.getIfRule().getUpdates(), null);
+						pos.setNode(null, conditionalNode.getIfRule().getUpdates(),null, null);
 						return pos;
 					}
 				}
 				else { // guard is false
 					if (conditionalNode.getElseRule() == null) { // there is no else 
-						pos.setNode(null, new UpdateMultiset(), null);
+						pos.setNode(null, new UpdateMultiset(), null,null);
 						return pos;
 					}
 					else {
@@ -110,7 +110,7 @@ public class ConditionalRulePlugin extends Plugin
 							return conditionalNode.getElseRule();
 						}
 						else {
-							pos.setNode(null, conditionalNode.getElseRule().getUpdates(), null);
+							pos.setNode(null, conditionalNode.getElseRule().getUpdates(), null,null);
 							return pos;
 						}
 					}
@@ -127,12 +127,12 @@ public class ConditionalRulePlugin extends Plugin
 			if (value.getValue()) {
 				if (!conditionalTerm.getIfTerm().isEvaluated())
 					return conditionalTerm.getIfTerm();
-				pos.setNode(null, new UpdateMultiset(), conditionalTerm.getIfTerm().getValue());
+				pos.setNode(null, new UpdateMultiset(), null,conditionalTerm.getIfTerm().getValue());
 			}
 			else {
 				if (!conditionalTerm.getElseTerm().isEvaluated())
 					return conditionalTerm.getElseTerm();
-				pos.setNode(null, new UpdateMultiset(), conditionalTerm.getElseTerm().getValue());
+				pos.setNode(null, new UpdateMultiset(), null, conditionalTerm.getElseTerm().getValue());
 			}
 		}
 		else {

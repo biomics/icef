@@ -207,9 +207,6 @@ public class ASMParser extends Observable implements org.coreasm.engine.parser.P
 					
 			result = new ParsingResult(false, doc, pe);	// result for the observers
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 		
 		parentEditor.createPluginMark(uses);
 		
@@ -558,6 +555,24 @@ public class ASMParser extends Observable implements org.coreasm.engine.parser.P
 			positionMap = new PositionMap(slimengine.getSpec().getText(), 1, 1);
 		}
 		return positionMap;
+	}
+
+	@Override
+	public ASTNode parseRuleOnly(String strRule) throws org.coreasm.engine.parser.ParserException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTNode parseRuleDeclarationOnly(String strRule) throws org.coreasm.engine.parser.ParserException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTNode parseDerivedFunction(String function) throws org.coreasm.engine.parser.ParserException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

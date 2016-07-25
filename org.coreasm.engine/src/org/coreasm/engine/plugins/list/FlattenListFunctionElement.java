@@ -30,6 +30,11 @@ import org.coreasm.engine.plugins.collection.AbstractListElement;
  */
 public class FlattenListFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6583016746128289366L;
+
 	public static final String NAME = "flattenList";
 	
 	protected Signature signature = null;

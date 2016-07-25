@@ -19,8 +19,10 @@ import java.util.Set;
 import org.coreasm.engine.EngineException;
 import org.coreasm.engine.InvalidSpecificationException;
 import org.coreasm.engine.absstorage.Element;
+import org.coreasm.engine.absstorage.PolicyElement;
 import org.coreasm.engine.absstorage.Update;
 import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasm.engine.interpreter.SelfAgent;
 
 /** 
  *	Defines the interface of the scheduler module.
@@ -169,7 +171,7 @@ public interface Scheduler {
      * decide if a failure should be reported or there are other options available.
      * 
      */
-    public boolean agentsCombinationExists();
+    public boolean environmentPresent();
     
     /*
      * Removed from the concurrent version of the engine
@@ -195,14 +197,14 @@ public interface Scheduler {
 	public void executeAgentPrograms() throws EngineException;
 
     /**
-     * Sets the value of <i>initAgent</i> in the scheduler.
+     * Sets the value of <i>EnvironmentAgent</i> in the scheduler.
      */
-    public void setInitAgent(Element agent);
+    public void setSelfAgent(SelfAgent agent);
         
     /**
-     * Returns the value of <i>initAgent</i> in the scheduler.
+     * Returns the value of <i>EnvironmentAgent</i> in the scheduler.
      */    
-    public Element getInitAgent();
+    public Element getSelfAgent();
     
     /**
      * Sets <i>stepCount</i> to the specified value.
@@ -219,4 +221,18 @@ public interface Scheduler {
      * Increments <i>stepCount</i> by 1.
      */       
     public void incrementStepCount();
+
+    /**
+     * Sets the name of the scheduling policy, to look it up in the abstract storage
+     * @param schedulingPolicyName
+     */
+	public void setPolicy(PolicyElement schedulingPolicy);
+
+	public void evaluatePolicy() throws EngineException;
+	
+	public void dispose();
+
+	public void retrieveASIMs();
+
+	public Set<? extends Element> getASIMSet();
 }

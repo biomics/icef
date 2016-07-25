@@ -8,7 +8,7 @@ import org.coreasm.compiler.codefragment.CodeFragment;
 import org.coreasm.compiler.exception.CompilerException;
 import org.coreasm.compiler.interfaces.CompilerCodeHandler;
 import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.FunctionRuleTermNode;
+import org.coreasm.engine.interpreter.FunctionRulePolicyTermNode;
 
 /**
  * Handles r-code for f(t1, t2...tn)
@@ -20,7 +20,7 @@ public class KernelFunctionRuleExpressionHandler implements CompilerCodeHandler 
 	@Override
 	public void compile(CodeFragment result, ASTNode node, CompilerEngine engine)
 			throws CompilerException {
-		FunctionRuleTermNode frtn = (FunctionRuleTermNode) node;
+		FunctionRulePolicyTermNode frtn = (FunctionRulePolicyTermNode) node;
 		String name = frtn.getName();
 
 		if (frtn.getArguments().size() > 0) {

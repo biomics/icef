@@ -30,6 +30,10 @@ import org.coreasm.engine.plugins.list.ListElement;
  */
 public class DFTFunctionElement extends FunctionElement {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3342512986795134976L;
 	public static final String DFT_FUNC_NAME = TreePlugin.TREE_PREFIX + "DFT";
 	public static final String DFT_NODES_FUNC_NAME = TreePlugin.TREE_PREFIX + "DFTN";
 
