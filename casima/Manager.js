@@ -14,7 +14,6 @@
 var ASIM = require("./ASIM");
 var ASIMCreationError = require("./ASIMCreationError");
 var Brapper = require("./Brapper");
-var Scheduler = require("./Scheduler");
 var Simulation = require("./Simulation");
 
 var uuid = require("node-uuid");
