@@ -1,4 +1,16 @@
-var WebSocketServer = require('ws').Server;
+/*      
+ * server.js v1.0
+ *
+ * This file contains source code developed by the European 
+ * FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling
+ *
+ * Licensed under the Academic Free License version 3.0
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ *
+ */
+
 var express = require('express');
 var http = require('http');
 
@@ -77,7 +89,7 @@ function startScheduler() {
     });
 
     scheduler.on('error', function(e) {
-        console.log("[Scheduler ASIM]: Error: "+e);
+        // console.log("[Scheduler ASIM]: Error: "+e);
     });
 
     scheduler.on('exit', function(code) {
@@ -101,61 +113,93 @@ function initApp() {
     // send an array of simulation identifiers
     app.get("/simulations", function(req, res) {
         manager.getSimulations(function(success, error) {
-            if(error == null)
-                res.send(200, success.data);
+            if(!error)
+                res.status(200).json({ simulations : success.data } );
             else
-                res.send(500, error);
+                res.send(500);
         });
     });
 
+    app.get("/simulations/:name", function(req, res) {
+        var name = req.params.name;
+        manager.getSimulation(name, function(success, error) {
+            if(success != null && success != undefined) {
+                res.status(success.code).json(success.data);
+            }
+            else {
+                res.status(error.code).json({ msg : error.msg });
+            }
+        });
+    });
+
+    app.put("/simulations/:name", function(req, res) {
+        var name = req.params.name;
+        manager.getSimulation(name, function(success, error) {
+            if(success != null && success != undefined) {
+                res.status(success.code).json(success.data);
+            }
+            else {
+                res.status(error.code).json({ msg : error.msg });
+            }
+        });
+    });
+
+    // load a simulation by putting a specification
     app.put("/simulations",
             express.json(),
             function(req, res) {
-                var result = manager.loadSimulation(req.body);
-                if(result.success) {
-                    res.send(200, result);
-                } else {
-                    res.send(409, result);
-                }
+                var result = manager.loadSimulation(req.body, function(success, error) {
+                    if(success != null) {
+                        res.status(success.code).json(success.data);
+                    } else {
+                        var msg = {};
+                        msg.msg = error.msg;
+                        msg.error = error.data;
+
+                        res.status(error.code).json(msg);
+                    }
+                });
             },
             function(req, res) {
-                console.log("Unable to load new simulation.");
                 res.status(500).json({ error : "Unable to load new simulation."});
             }
            );
 
-    // TODO: SOME DELETION
-
     // ****************** BRAPPERS ******************
 
     app.get("/brappers", function(req, res) {
-        var allWrappers = manager.getASIMBrappers();
-        res.send(allWrappers);
+        var allASIMBrappers  = manager.getASIMBrappers();
+        var allSchedulerBrappers = manager.getSchedulerBrappers();
+
+        var allBrappers = allASIMBrappers;
+        for(var k in allSchedulerBrappers) {
+            allBrappers[k] = allSchedulerBrappers[k];
+        }
+        res.send(allBrappers);
     });
 
     app.put("/brappers", 
             express.json(), 
             function(req, res) {
+                // TODO: rewrite method with callback
                 var result = manager.registerASIMBrapper(req.body);
                 if(result.success) {
-                    res.send(200, result);
+                    res.send(200, { msg : result.msg, id : result.id });
                 } else {
-                    res.send(409, result);
+                    res.send(409, { msg : result.msg });
                 }
             },
             function(req, res) {
-                console.log("Unable to register new brapper.");
                 res.status(500).json({ error : "Unable to register new brapper."});
             }
     );
 
     app.get("/brappers/:id", function(req, res) {
         var id = req.params.id;
-        var result = manager.getASIMBrapper(id);
+        var result = manager.getASIMBrapperInfo(id);
         if(result == undefined) {
-            res.status(404).json({ error : "Brapper with id '"+id+"' has not been registered."});
-        } 
-        else {
+            res.status(404).json({ msg : "Brapper with id '"+id+"' does not exist."});
+        } else {
             res.status(200).send(result);
         }
     });
@@ -177,30 +221,23 @@ function initApp() {
 
         for(var i in allASIMs)
             simpleASIMs.push(allASIMs[i].simplify());
-        res.send(simpleASIMs);
+
+        res.send({ asims : simpleASIMs});
     });
 
     app.put("/asims", 
              express.json(), 
              function(req, res) {
-                 var result = manager.createASIM(req.body);
-                 if(result.success) {
-                     if(result.asim == undefined)
-                         res.send(204);
-                     else {
-                         var response = {};
-                         response.name = result.asim.name;
-                         response.simulation = result.asim.simulation;
-                         response.success = true;
-                         response.error = "";
-                         res.send(201, response);
+                 manager.createASIM(req.body, function(success, error) {
+                     if(success != null) {
+                         res.send(success.code, { msg : success.msg, asim : success.asim});
+                     } else {
+                         res.send(error.code, { error: error.msg, details : error.details });
                      }
-                 } else {
-                     res.send(409, result);
-                 }
+                 });
              }, 
              function(req, res) {
-                 res.send(500, "Unable to create new agent.");
+                 res.send(500, "Unable to create new ASIM.");
              }
             );
 
@@ -284,61 +321,84 @@ function initApp() {
             express.json(),
             function(req, res) {
                 var simulation = req.params.simulation;
-         
-                var result = manager.recvMsg(simulation, req.body);
 
-                if(!result.success) 
-                    console.log("ERROR: "+result.msg);
-
-                res.set("Connection", "close");
-                res.send(204);
-                res.end();
+                manager.recvMsg(simulation, req.body, function(success, error) {
+                    if(error != null) {
+                        res.send(error.code, { error : error.msg });
+                    } else {
+                        res.send(success.code, { msg : success.msg });
+                    }
+                });
             },
             function(error, req, res, next) {
-                res.set("Connection", "close");
                 console.log("Error: Invalid message request. "+error);
-                res.send(400, "Invalid message request. Check format!\n");
+                res.send(500, { error : "Manager has a problem processing this message! Check whether message is a valid JSON document.\n" } );
                 res.end();
-            }
-            );
+            });
     
     // ****************** Schedulers ******************
 
     app.get("/schedulers", function(req, res) {
-        res.send(501);
+        var allSchedulers = manager.getSchedulers();
+        var simpleASIMs = [];
+
+        for(var i in allSchedulers)
+            simpleASIMs.push(allSchedulers[i].simplify());
+
+        res.send({ schedulers : simpleASIMs });
     });
+
+    app.get("/schedulers/:simulation", 
+            express.json(), 
+            function(req, res) {
+                var simulation = req.params.simulation;
+                
+                var allASIMs = manager.getSchedulers(simulation);
+
+                if(allASIMs == null || allASIMs == undefined)
+                    res.send(404, { error : "Simulation or schedulers not found." });
+                
+                var result = [];
+                
+                for(var i in allASIMs)
+                    result.push(allASIMs[i].simplify());
+                
+                res.send(200, { schedulers : result });
+            }, 
+            function(req, res) {
+                res.send(500, { error : "Internal manager error!" });
+            }
+           );
+    
+    app.get("/schedulers/:simulation/:name", 
+            express.json(), 
+            function(req, res) {
+                var simulation = req.params.simulation;
+                var name = req.params.name;
+                var result = manager.getScheduler(simulation, name);
+                if(result == undefined)
+                    res.send(404, { error : "Scheduler identified by '"+name+"' does not exist." });
+                else
+                    res.send(200, result);
+            }, 
+            function(req, res) {
+                res.send(500, "Internal Manager error. Unable to retrieve scheduler.");
+            }
+           );
 
     app.put("/schedulers", 
              express.json(), 
              function(req, res) {
-                 var result = manager.createASIM(req.body);
-                 if(result.success) {
-                     if(result.asim == undefined)
-                         res.send(204);
-                     else {
-                         var response = {};
-                         response.name = result.asim.name;
-                         response.simulation = result.asim.simulation;
-                         response.success = true;
-                         response.error = "";
-                         res.send(201, response);
+                 var result = manager.createScheduler(req.body, function(success, error) {
+                     if(success != null) {
+                         res.send(success.code, { msg : success.msg, scheduler : success.scheduler});
+                     } else {
+                         res.send(error.code, { error: error.msg, details : error.details });
                      }
-                 } else {
-                     res.send(409, result);
-                 }
+                 });
              }, 
              function(req, res) {
-                 res.send(500, "Unable to create new scheduler ASIM.");
-             }
-            );
-    
-    app.get("/schedulers/:id", 
-             express.json(), 
-             function(req, res) {
-                 res.send(501);
-             }, 
-             function(req, res) {
-                 res.send(501);
+                 res.send(500, "Unable to create new scheduler.");
              }
             );
 
@@ -356,18 +416,25 @@ function initApp() {
                      res.send(200, result.msg);
              }, 
              function(req, res) {
-                 res.send(500, "Unable to control scheduler.");
+                 res.send(500, "Internal manager error. Unable to control scheduler.");
              }
             );
 
-    app.delete("/schedulers/:id", 
+    app.delete("/schedulers/:simulation/:id", 
              express.json(), 
 
              function(req, res) {
-                 res.send(501);
+                 var simulation = req.params.simulation;
+                 var name = req.params.id;
+                 manager.delScheduler(simulation, name, function(success, error) {
+                     if(error != null)
+                         res.send(error.code, { error : error.msg });
+                     else
+                         res.send(success.code, { msg : success.msg});
+                 });
              }, 
              function(req, res) {
-                 res.send(501);
+                 res.send(500, "Internal manager error. Unable to delete scheduler.");
              }
             );
 
@@ -450,25 +517,25 @@ function initApp() {
                  }
                  console.log("req.body: "+JSON.stringify(req.body));
 
-                 var result = manager.register4Updates(simulation, req.body);
-
-                 console.log("RESULT: ",result);
-                 
-                 if(result.success) 
-                     res.send(200);
-                 else {
-                     res.send(403, result.msg);
-                 }
-                         
-                 res.end();
+                 var result = manager.register4Updates(simulation, req.body, function(success, error) {
+                     if(success != null) {
+                         res.writeHead(201, { 'Content-Type' : 'text/plain' });
+                         res.end(success.msg);
+                     }
+                     else {
+                         res.writeHead(403, { 'Content-Type' : 'text/plain' });
+                         res.end(error.msg);
+                     }
+                 });
                  
              },
+
              function(error, req, res, next) {
                  res.set("Connection", "close");
                  res.send(500, "Unable to register locations: "+error);
                  res.end();
              }
-            );
+           );
 };
 
 var serverAPI = module.exports = {
