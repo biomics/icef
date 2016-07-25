@@ -1,3 +1,16 @@
+/*
+ * Manager.js v1.0
+ *
+ * This file contains source code developed by the European
+ * FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling
+ *
+ * Licensed under the Academic Free License version 3.0
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ *
+ */
+
 var ASIM = require("./ASIM");
 var ASIMCreationError = require("./ASIMCreationError");
 var Brapper = require("./Brapper");
@@ -26,10 +39,6 @@ var Manager = (function() {
     };
 
     cls.prototype = {
-        getScheduler : function() {
-            return this.scheduler;
-        },
-
         setScheduler : function() {
         },
 
@@ -38,17 +47,38 @@ var Manager = (function() {
             var ids = [];
             for(var id in this.simMap) 
                 ids.push(id);
-            callback({ data : ids});
+            callback({ data : ids}, null);
         },
 
-        loadSimulation : function(spec) {
-            var newSimulation = new Simulation(this);
-            var result = newSimulation.load(spec);
+        // retrieve the set of all simulation ids
+        getSimulation : function(name, callback) {
+            /* console.log("this.simMap: ", this.simMap);
+               console.log("this.simMap[name]: ", this.simMap[name]); */
 
-            if(result.success)
-                this.simMap[newSimulation.getId()] = newSimulation;
+            if(this.simMap != null && this.simMap[name] != undefined && this.simMap[name] != null) {
+                callback({ code : 200, data : this.simMap[name].getStatus() }, null);
+            } else {
+                callback(null, { code : 404, msg : "Simulation '"+name+"' does not exist." });
+            }
+        },
 
-            return result;
+        // load a simulation secification given by spec
+        loadSimulation : function(spec, callback) {
+            var simulation = null;
+
+            // if no simulation id is specified, create a new simulation
+            if(spec.id == undefined || spec.id == null || this.simMap[spec.id] == undefined)
+                simulation = new Simulation(this);
+            else {
+                simulation = this.simMap[spec.id];
+            }
+
+            var self = this;
+            simulation.load(spec, function(success, error) {
+                if(success != null)
+                    self.simMap[simulation.getId()] = simulation;
+                callback(success, error);
+            });
         },
 
         registerSchedulerBrapper : function(descr) {
@@ -106,7 +136,11 @@ var Manager = (function() {
             return this.asimBrapperMap;
         },
 
-        getASIMBrapper : function(id) {
+        getSchedulerBrappers : function() {
+            return this.schedulerBrapperMap;
+        },
+
+        getASIMBrapperInfo : function(id) {
             return this.asimBrapperMap[id];
         },
 
@@ -128,6 +162,45 @@ var Manager = (function() {
             return list;
         },
 
+        getScheduler : function(simulation, name) {
+            if(!this.simMap[simulation])
+                return undefined;
+            else {
+                var scheduler = this.simMap[simulation].getScheduler(name);
+                if(scheduler)
+                    return scheduler.simplify();
+                else
+                    return scheduler;
+            }
+        },
+
+        delScheduler : function(simulation, name, callback) {
+            var sim = this.simMap[simulation];
+            if(!sim) {
+                callback(null, { code : 404, msg : "Cannot delete scheduler. Simulation '"+simulation+"' does not exist." });
+            } else {
+                sim.delScheduler(name, callback);
+            }
+        },
+
+        getSchedulers : function(simulation) {
+            var list = [];
+
+            if(simulation == undefined || simulation == null) {
+                for(var sim in this.simMap) {
+                    if(this.simMap[sim])
+                        list = list.concat(this.simMap[sim].getSchedulers());
+                }
+            } else {
+                if(this.simMap[simulation] == undefined)
+                    return null;
+                else
+                    return this.simMap[simulation].getSchedulers();
+            }
+            
+            return list;
+        },
+
         getASIM : function(simulation, asimName) {
             if(!this.simMap[simulation])
                 return undefined;
@@ -140,53 +213,59 @@ var Manager = (function() {
             }
         },
 
-        createASIM : function(descr) {
+        createASIM : function(spec, callback) {
             // check for an empty brapper
             var brapper = this.getASIMBrapper();
-            if(brapper == null) 
-                return { success : false, msg : "Manager has no brappers to run ASIMs. Register or restart them." };
+            if(brapper == null) {
+                callback(null, { code : 503, msg : "Manager has no brappers to run ASIMs. Register or restart them." });
+                return;
+            }
 
             var simulation = null;
             // create a new simulation for this ASIM
-            if(descr.simulation == undefined || descr.simulation == null) {
+            if(spec.simulation == undefined || spec.simulation == null) {
                 simulation = new Simulation(this);
                 this.simMap[simulation.getId()] = simulation;
             } else {
-                if(this.simMap[descr.simulation] == undefined) {
+                if(this.simMap[spec.simulation] == undefined) {
                     simulation = new Simulation(this);
-                    simulation.setId(descr.simulation);
+                    simulation.setId(spec.simulation);
                     this.simMap[simulation.getId()] = simulation;
                 } else 
-                    simulation = this.simMap[descr.simulation];                
+                    simulation = this.simMap[spec.simulation];                
             }
 
             // first create the new ASIM
             var newASIM = null;
             try{               
-                newASIM = new ASIM(descr);
+                newASIM = new ASIM(spec);
             }
             catch(e) {
                 if(e instanceof ASIMCreationError) {
-                    return { success : false, error : e.toString() };
+                    callback(null, { code : 400, msg : "Error while creating ASIM: " + e.toString() });
                 } else 
-                    throw e;
+                    callback(null, { code : 500, msg : "Unexpected error during ASIM creation. Report to developer." });
             }
 
             // ASIM already exists => error
             if(simulation.hasASIM(newASIM))
-                return { success : false, msg : "ASIM '"+newASIM.getName()+"' already exists in simulation '"+simulation.getId()+"'.\n" };
+                callback(null, { code : 409, msg : "ASIM '"+newASIM.getName()+"' already exists in simulation '"+simulation.getId()+"'.\n" });
             else
                 simulation.addASIM(newASIM);
             
             brapper.addASIM(newASIM);
 
             var self = this;
-            newASIM.load(descr.start);
+            newASIM.load(brapper, function(success, error) {
+                if(success != null) {
+                    if(spec.start)
+                        simulation.report2Scheduler(newASIM.getName(), "start");
 
-            if(descr.start)
-                simulation.report2Scheduler(newASIM.getName(), "start");
-            
-            return { success : true, msg : "ASIM '"+newASIM.getName()+"' created successfully in simulation '"+simulation.getId()+"'.\n", asim : newASIM.simplify() };
+                    callback({ code : success.code, msg : "ASIM '"+newASIM.getName()+"' created successfully in simulation '"+simulation.getId()+"'.", asim : newASIM.simplify() }, null);
+                } else {
+                    callback(null, error);
+                }
+            });
         },
 
         controlASIM : function(simulation, name, cmd) {
@@ -204,6 +283,60 @@ var Manager = (function() {
                 return sim.delASIM(name);
             } else
                 return false;
+        },
+
+        createScheduler : function(spec, callback) {
+            // check for an empty brapper
+            var brapper = this.getSchedulerBrapper();
+
+            if(brapper == null) {
+                callback(null, { code : 503, msg : "Manager has no brappers to run Schedulers. Register or restart a scheduler brapper." });
+                return;
+            }
+
+            var simulation = null;
+            // create a new simulation for this Scheduler
+            if(spec.simulation == undefined || spec.simulation == null) {
+                simulation = new Simulation(this);
+                this.simMap[simulation.getId()] = simulation;
+            } else {
+                if(this.simMap[spec.simulation] == undefined) {
+                    simulation = new Simulation(this);
+                    simulation.setId(spec.simulation);
+                    this.simMap[simulation.getId()] = simulation;
+                } else
+                    simulation = this.simMap[spec.simulation];
+            }
+
+            // first create the new ASIM for this scheduler
+            var newASIM = null;
+            try{
+                newASIM = new ASIM(spec);
+            }
+            catch(e) {
+                if(e instanceof ASIMCreationError) {
+                    callback(null, { code : 400, msg : "Unable to create scheduler ASIM '"+newASIM.getName()+"' in simulation '"+simulation.getId()+"'" });
+                } else {
+                    callback(null, { code : 503, msg : e });
+                }
+            }
+
+            if(simulation.hasASIM(newASIM))
+                callback(null, { code : 409, msg : "Scheduler ASIM '"+newASIM.getName()+"' already exists in simulation '"+simulation.getId()+"'." });
+            else
+                newASIM.setSimulation(simulation.getId());
+
+            brapper.addASIM(newASIM);
+
+            var self = this;
+            newASIM.load(brapper, function(success, error) {
+                if(success != null) {
+                    simulation.addScheduler(newASIM);
+                    callback({ code : success.code, msg : "Scheduler ASIM '"+newASIM.getName()+"' created successfully in simulation '"+simulation.getId()+"'.", scheduler : newASIM.simplify() }, null);
+                } else {
+                    callback(null, error);
+                }
+            });
         },
 
         controlScheduler : function(simulation, name, cmd) {
@@ -251,13 +384,15 @@ var Manager = (function() {
                 return this.asimBrapperMap[minId];
         },
 
-        recvMsg : function(simulation, msg) {
+        recvMsg : function(simulation, msg, callback) {
             var sim = this.simMap[simulation];
             
-            if(sim == undefined || sim == null)
-                return { success : false, msg : "Simulation for message does not exist. Ignore." };
+            if(sim == undefined || sim == null) {
+                callback(null, { code : 404, msg : "Simulation specified in message does not exist. Ignore." });
+                return;
+            }
             
-            return sim.recvMsg(msg);
+            sim.recvMsg(msg, callback);
         },
 
         // TODO also send the updates to some internal 
@@ -267,31 +402,47 @@ var Manager = (function() {
             var sim = this.simMap[simulation];
             
             if(sim == undefined || sim == null) {
-                console.log("Simulation '"+simulation+"' for updates does not exist. Ignore.");
+                // console.log("Simulation '"+simulation+"' for updates does not exist. Ignore.");
                 return { success : false, msg : "Simulation for updates does not exist. Ignore." };
             }
 
             return sim.recvUpdate(update);
         },
 
-        register4Updates : function(simulation, registration) {
+        // TODO: review this method
+        register4Updates : function(simulation, registration, callback) {
             var sim = this.simMap[simulation];
 
-            if(sim == undefined || sim == null)
-                return { success : false, msg : "Simulation for updates does not exist. Ignore." };
+            if(simulation == undefined || simulation == null) {
+                callback(null, { msg : "Simulation for updates does not exist. Ignore." });
+                return;
+            }
 
             var success = true;
             var msg = "";
+
+            var numBrappers = Object.keys(this.asimBrapperMap).length;
+            var brapperCount = 0;
             for(var b in this.asimBrapperMap) {
-                console.log("SEND REGISTRATIONS TO "+b);
-                var result = this.asimBrapperMap[b].register4Updates(simulation, registration);
-                success = success && result.success;
+                var self = this;
+                var result = this.asimBrapperMap[b].register4Updates(simulation, registration, function(result) {
+                    brapperCount++;
+
+                    success = success && result.success;
+
+                    if(brapperCount == numBrappers) {
+
+                        if(success)
+                            callback({msg : "Registration successful" }, null);
+                        else
+                            callback(null, { msg : "Unable to register all locations in brapper '"+self.asimBrapperMap[b].id+"'" });
+                    };
+                });
             }
 
-            if(success)
-                return { success : true, msg : "Registration successful" };
-            else
-                return { success : false, msg : "Unable to register all locations in brapper '"+this.id+"'" };
+            if(numBrappers == 0) {
+                callback({ msg : "No registrations required" }, null);
+            }
         },
 
         sendUpdate : function(update) {
