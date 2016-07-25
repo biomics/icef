@@ -1,3 +1,17 @@
+/*
+ * EngineManager.java v1.0
+ *
+ * This file contains source code developed by the European
+ * FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling
+ *
+ * Licensed under the Academic Free License version 3.0
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ *
+ */
+
+
 package org.coreasm.biomics;
 
 import java.io.IOException;
@@ -37,8 +51,81 @@ public class EngineManager {
 
     private static final HashMap<String, ArrayList<UpdateRegistrationRequest>> registrationRequests = new HashMap<>();
 
+    public static String getASIMs() {
+        String response = "{";
+        boolean simcomma = false;
+
+        Set<String> simulations = asims.keySet();
+        for(String simulation : simulations) {
+            if(!simcomma)
+                simcomma = true;
+            else
+                response += ", ";
+
+            response += simulation + " : [";
+            Set<String> asimNames = asims.get(simulation).keySet();
+            boolean comma = false;
+            for(String name : asimNames) {
+                if(!comma)
+                    comma = true;
+                else
+                    response += ", ";
+
+                response += name;
+            }
+
+            response += "]";
+        }
+
+        response += "}";
+            
+        return response;
+    }
+
+    public static String getASIMs(String simulation) {
+        String response = "{ \""+simulation+"\" : [";
+
+        if(!asims.containsKey(simulation))
+            return null;
+        else {
+            Set<String> asimNames = asims.get(simulation).keySet();
+            boolean comma = false;
+            for(String name : asimNames) {
+                if(!comma)
+                    comma = true;
+                else 
+                    response += ", ";
+
+                response += "\"" + name + "\"";
+            }
+        }
+
+        response += "]}";
+
+        return response;
+    }
+
+    public static String getASIM(String simulation, String asimName) {
+        String response = "{ \""+asimName+"\" : ";
+	
+        if(!asims.containsKey(simulation))
+            return null;
+        else {
+            if(!asims.get(simulation).containsKey(asimName))
+		return null;
+	    else {
+		CoreASMContainer casm = asims.get(simulation).get(asimName);
+
+		response += casm.toJSON();
+            }
+        }
+
+        response += " }";
+
+        return response;
+    }
+
     public static CoreASMError createASIM(ASIMCreationRequest req) {
-        System.out.println("CreateASIM");
         asimCounter++;
 
         if(req.simulation == null || req.simulation.equals(""))
@@ -72,13 +159,21 @@ public class EngineManager {
 
         program += "scheduling "+req.policy+"\n\n";
 
-        System.out.println("Program to execute:\n"+program);
+        System.err.println("Program to execute:\n"+program);
 
         int delay = 200;
         if(wrapper.config.schedulingMode)
             delay = 200;
-        
+
         CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program, delay);
+
+        CoreASMError error = null;
+        synchronized(casm) {
+            if(casm.hasErrorOccurred()) {
+                error = casm.getError();
+                return error;
+            }
+        }
 
         synchronized(asims) {
             if(asims.containsKey(req.simulation))
@@ -89,23 +184,16 @@ public class EngineManager {
             }
         }
 
-        System.out.println("Update location registrations");
+        // always required? Makes only sense for schedulers
         updateLocationRegistrations();
 
-        if(req.start) {
+        if(req.start)
             casm.start();
-        }
 
-        CoreASMError error = null;
-        synchronized(casm) {
-            if(casm.hasErrorOccurred())
-                error = casm.getError();
-        }
-
-        return error;
+        return null;
     }
     
-    public static boolean controlASIM(String simulation, String name, String cmd) {
+    public static int controlASIM(String simulation, String name, String cmd) {
         Map<String, CoreASMContainer> simASIMs = null;
         synchronized(asims) {
             if(asims.containsKey(simulation)) {
@@ -113,13 +201,14 @@ public class EngineManager {
             }
         }
 
-        if(simASIMs != null) {
+	if(simASIMs != null) {
             if(simASIMs.containsKey(name)) {
                 CoreASMContainer casm = simASIMs.get(name);
                 synchronized(casm) {                    
                     switch(cmd) {
                     case "start":
-                        casm.start();
+                        if(!casm.isRunning())
+                            casm.start();
                         break;
                     case "pause":
                         casm.pauseASIM();
@@ -128,16 +217,52 @@ public class EngineManager {
                         casm.resumeASIM();
                         break;
                     case "stop":
+                        if(casm.isRunning()) {
+                            casm.stopASIM();
+                            try {
+                                casm.join();
+                            } 
+                            catch(Exception e) {
+                                // nothing
+                            }
+                            
+                            CoreASMContainer newCASM = new CoreASMContainer(casm.simId, casm.asimName, casm.asimProgram, casm.delay);
+                            casm.destroy();
+                            casm = null;
+
+                            asims.get(simulation).put(name, newCASM);
+                            updateLocationRegistrations();
+                        }
+
+                        break;
                     default:
+			return 400;
                     }
-                    
-                    return true;
+                    return 200;
                 }
             } else {
-                return false;
+                return 404;
             }
         } else
-            return false;
+            return 404;
+    }
+
+    public static String getASIMState(String simulation, String name) {
+	Map<String, CoreASMContainer> simASIMs = null;
+        synchronized(asims) {
+            if(asims.containsKey(simulation)) {
+                simASIMs = asims.get(simulation);
+            }
+        }
+	
+        if(simASIMs != null) {
+            if(simASIMs.containsKey(name)) {
+                CoreASMContainer casm = simASIMs.get(name);
+		return casm.getStatus();
+	    }
+	}
+
+	return "unknown";
     }
 
     public static boolean receiveMsg(String simId, MessageRequest req) {
@@ -164,14 +289,16 @@ public class EngineManager {
                     return false;
 
                 Map<String, CoreASMContainer> simAsims = asims.get(simId);
-                
-                // check whether this ASIM is managed here
+		
+		// check whether this ASIM is managed here
                 String[] names = req.toAgent.split("@");
                 if(names.length != 2) {
                     System.err.println("EngineManager detects wrong address format in '"+req.toAgent+"'");
                     return false;
                 } else 
                     asim = names[1];
+
+		// TODO: Also check whether the agent (names[0]) is actually running inside the ASIM
                 
                 if(!simAsims.containsKey(asim)) {
                     System.err.println("EngineManager does not know this ASIM. Wrong delivery!");
@@ -224,7 +351,7 @@ public class EngineManager {
         
         List<UpdateLocation> registrations = req.registrations;
         for(UpdateLocation reg : registrations) {
-            System.out.println("* Register locations: "+reg.location);
+            // System.out.println("* Register locations: "+reg.location);
 
             if(reg.location == null)
                 continue;
@@ -275,7 +402,7 @@ public class EngineManager {
                 Map<String, CoreASMContainer> simAsims = asims.get(simId);
                 Set<String> allASIMs = simAsims.keySet();
                 for(String trg : allASIMs) {
-                    System.out.println("[Scheduling ASIM '"+trg+"'] New ASIM '"+name+"' registered.");
+                    System.out.println("[Scheduler ASIM '"+trg+"'] New ASIM '"+name+"' registered.");
                     simAsims.get(trg).newASIM(name);
                 }
             }
@@ -295,7 +422,7 @@ public class EngineManager {
                 Map<String, CoreASMContainer> simAsims = asims.get(simId);
                 Set<String> allASIMs = simAsims.keySet();
                 for(String trg : allASIMs) {
-                    System.out.println("[Scheduling ASIM '"+trg+"'] ASIM '"+name+"' deregistered.");
+                    System.out.println("[Scheduler ASIM '"+trg+"'] ASIM '"+name+"' deregistered.");
                     simAsims.get(trg).delASIM(name);
                 }
             }
@@ -330,7 +457,7 @@ public class EngineManager {
                         asim = asimAddress[1];
                     
                     if(!simAsims.containsKey(asim)) {
-                        System.out.println("EngineManager does not know this ASIM");
+                        // System.out.println("EngineManager does not know this ASIM");
                         return false;
                     }
                     
@@ -347,7 +474,7 @@ public class EngineManager {
 
                 return result;
             } else {
-                System.err.println("WARNING: Ignore message as it is not update!");
+                System.err.println("WARNING: Ignore message as it is not an update!");
                 return false;
             }
         } else {
@@ -409,25 +536,21 @@ public class EngineManager {
             response.close();
         } 
         catch (ProcessingException pe) {
-            System.out.println("Problem processing: "+pe);
-            System.out.println("Cause: "+pe.getCause());
+            System.err.println("Problem processing: "+pe);
+            System.err.println("Cause: "+pe.getCause());
         } catch (Exception exception) {
-            System.out.println(exception);
+            System.err.println(exception);
         }
     }
 
     public static void updateLocationRegistrations() {
-        // System.out.println("XX updateLocationRegistrations");
         for(String sim : registrationRequests.keySet()) {
-            // System.out.println("XX Simulation: sim");
             ArrayList<UpdateRegistrationRequest> urs = registrationRequests.get(sim);
 
             for(UpdateRegistrationRequest ur : urs) {
-                // System.out.println("XX UpdateRegistration ... ");
+
                 List<UpdateLocation> registrations = ur.registrations;
                 for(UpdateLocation reg : registrations) {
-                    
-                    // System.out.println("XX [Brapper] Renew update registration for location "+reg.location+" in simulation '"+sim+"'");
                     
                     if(reg.location == null)
                         continue;
@@ -445,6 +568,8 @@ public class EngineManager {
         }
     }
 
+    // TODO - request does not report ASIM in local asims map of this brapper
+    // TODO - kill all asims!!!
     public static String requestASIMCreation(AgentCreationElement req, String simId) {
         if(wrapper == null) {
             System.err.println("FATAL: EngineManager cannot access Brapper!");
@@ -463,7 +588,7 @@ public class EngineManager {
             CoreASMError e = createASIM(localReq);
             
             if(e != null) {
-                System.out.println(e);
+                System.err.println(e);
                 return null;
             } else {
                 synchronized(asims) {
@@ -476,16 +601,17 @@ public class EngineManager {
                             casm.start();
                         else
                             return null;
-                    } else
+                    } else {
+                        
                         return null;
+                    }
                 }
-                
+
                 return newName;
             }
         }
 
         String json = "{ \"simulation\" : \"" + simId + "\", " + req.toJSON().substring(1);
-
         Response response = null;
         try {
             response = ClientBuilder.newBuilder()
@@ -497,10 +623,10 @@ public class EngineManager {
                 .put(Entity.json(json));
         } 
         catch (ProcessingException pe) {
-            System.out.println("Problem processing: "+pe);
-            System.out.println("Cause: "+pe.getCause());
+            System.err.println("Problem processing: "+pe);
+            System.err.println("Cause: "+pe.getCause());
         } catch (Exception exception) {
-            System.out.println(exception);
+            System.err.println(exception);
         }
 
         ObjectMapper mapper = new ObjectMapper();
@@ -517,8 +643,10 @@ public class EngineManager {
             
             response.close();
 
-            return res.name;
+            return res.asim.name;
         }
+
+        // TODO WHAT IF RESPONSE CODE IS NOT 201
 
         return null;
     }
@@ -530,7 +658,7 @@ public class EngineManager {
         }
         
         if(wrapper.getConfig().getManager() == null || wrapper.commUrl == null) {
-            System.out.println("No manager available. Don't send updates");
+            System.err.println("No manager available. Don't send updates");
             return;
         }
 
@@ -546,8 +674,6 @@ public class EngineManager {
                 .put(Entity.json(json));
 
             response.close();
-
-            System.out.println("- Update sent");
         } 
         catch (ProcessingException pe) {
             System.err.println("ERROR: Problem processing Update: "+pe);
@@ -591,8 +717,6 @@ public class EngineManager {
 
             registrations += "] }";
 
-            System.out.println("toSend: "+registrations);
-
             try {
                 Response response = ClientBuilder.newBuilder()
                     .build()
@@ -602,7 +726,7 @@ public class EngineManager {
                     .accept("*/*")
                     .put(Entity.json(registrations));
                 int status = response.getStatus(); 
-                if(status == 200) {
+                if(status == 201) {
                     success = true;
                 } else {
                     success = false;
@@ -627,7 +751,6 @@ public class EngineManager {
         boolean success = true;
 
         for(String name : asims) {
-            System.out.println("ENGINEMANAGER: REQ DEL ASIM "+name);
             try {
                 Response response = ClientBuilder.newBuilder()
                     .build()
@@ -638,7 +761,7 @@ public class EngineManager {
                     .delete();
                 int status = response.getStatus(); 
                 if(status == 200) {
-                    System.out.println(response.readEntity(String.class));
+                    // System.out.println(response.readEntity(String.class));
                 } else {
                     System.err.println("Unable to delete ASIM '"+name+"'.");
                     success = false;
@@ -670,14 +793,20 @@ public class EngineManager {
 
         if(casm != null) {
             synchronized(casm) {
-                casm.pauseASIM();
+                casm.stopASIM();
+                try {
+                    casm.join();
+                } 
+                catch(Exception e) {
+                    // nothing
+                }            
                 casm.destroy();
-                casm.interrupt();
                 casm = null;
+                asims.get(simId).remove(name);
             }
-        }
-
-        return true;
+	    return true;
+        } else
+	    return false;
     }
 
     private static void registerWithManager() {
@@ -689,7 +818,6 @@ public class EngineManager {
             wrapper.config.getPort() + "\" }";
 
         try {
-            
             Response response = ClientBuilder.newBuilder()
                 .build()
                 .target(wrapper.commUrl)
@@ -699,7 +827,7 @@ public class EngineManager {
                 .put(Entity.json(registration));
             int status = response.getStatus(); 
             if(status == 200) {
-                System.out.println(response.readEntity(String.class));
+                // System.out.println(response.readEntity(String.class));
             } else {
                 System.err.println("Unable to register brapper.");
             }
