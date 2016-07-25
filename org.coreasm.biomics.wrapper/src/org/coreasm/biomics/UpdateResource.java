@@ -1,3 +1,16 @@
+/*
+ * UpdateResource.java v1.0
+ *
+ * This file contains source code developed by the European
+ * FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling
+ *
+ * Licensed under the Academic Free License version 3.0
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ *
+ */
+
 package org.coreasm.biomics;
 
 import java.util.List;
@@ -34,41 +47,37 @@ public class UpdateResource {
         }
 
         if(result) {
-            return Response.status(200).build();
+            return Response.status(200).entity("{ \"msg\" : \"Update received and accumulated successfully.\" }").type(MediaType.APPLICATION_JSON).build();
         } else {
-            return Response.status(403).build();
+            return Response.status(404).entity("{ \"msg\" : \"Unable to process update.\"}").type(MediaType.APPLICATION_JSON).build();
         }
     }
 
     @PUT
-    @Path("/{simId}/asim/{name}")
-    @Consumes("application/json")
+    @Path("/{simId}/{name}")
     public Response newASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
         boolean result = false;
         
         result = EngineManager.newASIM(simId, name);
 
         if(result) {
-            return Response.status(201).build();
+            return Response.status(201).entity("{ \"msg\" : \"New ASIM has been registered successfully.\" }").type(MediaType.APPLICATION_JSON).build();
         } else {
-            return Response.status(403).build();
+            return Response.status(404).entity("{ \"msg\" : \"Unable to register new ASIM in this brapper.\"}").type(MediaType.APPLICATION_JSON).build();
         }
     }
 
     @DELETE
-    @Path("/{simId}/asim/{name}")
-    @Consumes("application/json")
+    @Path("/{simId}/{name}")
     public Response removeASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
         boolean result = false;
 
-        System.out.println("UpdateResource.removeASIM");
-        
         result = EngineManager.delASIM(simId, name);
 
         if(result) {
-            return Response.status(201).build();
+            return Response.status(200).entity("{ \"msg\" : \"ASIM successfully deregistered from brapper and its ASIMs.\"}").type(MediaType.APPLICATION_JSON).build();
         } else {
-            return Response.status(403).build();
+            return Response.status(404).entity("{ \"msg\" : \"Unable to deregister ASIM in this brapper.\"}").type(MediaType.APPLICATION_JSON).build();
         }
     }
 
@@ -78,17 +87,15 @@ public class UpdateResource {
     public Response register4Updates(@PathParam("simId") String simId, String update) {
         UpdateRegistrationRequest req = UpdateRegistrationRequest.getUpdateRegistrationRequest(update);
 
-        System.out.println("register4Updates");
-
         boolean result = false;
         if(req != null && req.target != null) {
             result = EngineManager.register4Updates(simId, req);
         }
 
         if(result) {
-            return Response.status(200).build();
+            return Response.status(201).entity("{ \"msg\" : \"Registration for specified locations create successfully.\"}").type(MediaType.APPLICATION_JSON).build();
         } else {
-            return Response.status(403).build();
+            return Response.status(403).entity("{ \"msg\" : \"Registration for specified locations was not successful.\"}").type(MediaType.APPLICATION_JSON).build();
         }
     }
 }
