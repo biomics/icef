@@ -1,3 +1,17 @@
+/*
+ * ASIM.js v1.0
+ *
+ * This file contains source code developed by the European
+ * FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling
+ *
+ * Licensed under the Academic Free License version 3.0
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ *
+ */
+
+
 var ASIMState = require("./ASIMState");
 var ASIMCreationError = require("./ASIMCreationError");
 
@@ -6,7 +20,7 @@ var uuid = require("node-uuid");
 
 var ASIM = (function() {        
 
-    var cls = function(spec) {
+    var cls = function(spec, scheduler) {
         if(spec.name == undefined || spec.name == null || spec.name == "") 
             this.name = "ASIM"+uuid.v4().replace(/-/g, "");
         else
@@ -43,23 +57,28 @@ var ASIM = (function() {
         this.registeredLocations = null;
         this.brapper = null;
         this.status = ASIMState.EMPTY;
+
+        if(scheduler == undefined || scheduler == null)
+            this.isScheduler = false;
+        else
+            this.isScheduler = scheduler;
     };
 
     cls.prototype = {
         control : function(command) {
-            console.log("ASIM: command = "+command);
             var cmd = command.toLowerCase();
 
             switch(command) {
-                case "start" : return this.run(); break;
-                case "pause" : return this.pause(); break;
-                case "resume" : return this.resume(); break;
-                default : console.log("Don't know what to do!");
+            case "start" : return this.run(); break;
+            case "pause" : return this.pause(); break;
+            case "resume" : return this.resume(); break;
+	    case "stop" : return this.stop(); break;
+            default :
             }
 
             return { success : false, msg : "Unknown command '"+command+"'.\n" };
         },
-        
+
         pause : function() {
             if(this.status == ASIMState.ERROR)
                 return { success : false, msg : "Cannot pause ASIM '"+this.name+"' as it is in error state\n" };
@@ -67,34 +86,30 @@ var ASIM = (function() {
             if(this.status != ASIMState.RUNNING)
                 return { success : false, msg : "Cannot pause ASIM '"+this.name+"' as it is not running.\n" };
 
-            var request = { command : "pause" };
-
-            var data = JSON.stringify(request);
-
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
-                path: '/asims/'+this.simulation+'/'+this.name,
+                path: '/asims/'+this.simulation+'/'+this.name+'/pause',
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
+                    'Content-Length': 0
                 }
             };
-            
+
             var self = this;
 
             var request = http.request(options, function(res) {
                 var resData = "";
-                
+
                 res.setEncoding('utf8');
-                
+
                 res.on('data', function(chunk) { if(chunk) resData += chunk; });
-                
+
                 res.on('end', function(chunk) {
                     if(chunk)
                         resData += chunk;
-                    
+
                     var result = JSON.parse(resData);
                     if(result.error != undefined && result.error != null && result.error != "") {
                         self.setError(result.error);
@@ -104,12 +119,11 @@ var ASIM = (function() {
                         self.status = ASIMState.PAUSED;
                 });
             });
-            
+
             request.on('error', function(e) {
                 return { success : false, msg : "Unable to pause ASIM '"+this.name+"'\n" };
             });
-            
-            request.write(data);
+
             request.end();
 
             return { success : true, msg : "Pausing of ASIM '"+this.name+"' successfully triggered\n" };
@@ -122,34 +136,29 @@ var ASIM = (function() {
             if(this.status != ASIMState.PAUSED)
                 return { success : false, msg : "Cannot resume ASIM '"+this.name+"' as it is not paused.\n" };
 
-            var request = { command : "resume" };
-
-            var data = JSON.stringify(request);
-
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
-                path: '/asims/'+this.simulation+'/'+this.name,
+                path: '/asims/'+this.simulation+'/'+this.name+'/resume',
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
+                    'Content-Length': 0
                 }
             };
-            
+	    
             var self = this;
-
             var request = http.request(options, function(res) {
                 var resData = "";
-                
+
                 res.setEncoding('utf8');
-                
+
                 res.on('data', function(chunk) { if(chunk) resData += chunk; });
-                
+
                 res.on('end', function(chunk) {
                     if(chunk)
                         resData += chunk;
-                    
+
                     var result = JSON.parse(resData);
                     if(result.error != undefined && result.error != null && result.error != "") {
                         self.setError(result.error);
@@ -159,19 +168,68 @@ var ASIM = (function() {
                         self.status = ASIMState.RUNNING;
                 });
             });
-            
+
             request.on('error', function(e) {
                 return { success : false, msg : "Unable to resume ASIM '"+this.name+"'\n" };
             });
-            
-            request.write(data);
+
             request.end();
 
             return { success : true, msg : "Resuming of ASIM '"+this.name+"' successfully triggered\n" };
         },
 
+	stop : function() {
+            if(this.status == ASIMState.ERROR)
+                return { success : false, msg : "Cannot stop ASIM '"+this.name+"' as it is in error state\n" };
+
+            var options = {
+                host: this.brapper.host,
+                port: this.brapper.port,
+                path: '/asims/'+this.simulation+'/'+this.name+'/stop',
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': 0
+                }
+            };
+
+            var self = this;
+
+            var request = http.request(options, function(res) {
+                var resData = "";
+
+                res.setEncoding('utf8');
+
+                res.on('data', function(chunk) { if(chunk) resData += chunk; });
+
+                res.on('end', function(chunk) {
+                    if(chunk)
+                        resData += chunk;
+
+                    var result = JSON.parse(resData);
+                    if(result.error != undefined && result.error != null && result.error != "") {
+                        self.setError(result.error);
+                        self.brapper = null;
+                        self.unload();
+                    } else 
+                        self.status = ASIMState.RUNNING;
+                });
+            });
+
+            request.on('error', function(e) {
+                return { success : false, msg : "Unable to stop ASIM '"+this.name+"'\n" };
+            });
+
+            request.end();
+
+            return { success : true, msg : "Stopping of ASIM '"+this.name+"' successfully triggered\n" };
+        },
+
         setRegisteredLocations : function(reg) {
-            this.registeredLocations = reg;
+            if(reg == undefined)
+                this.registeredLocations = null;
+            else
+                this.registeredLocations = reg;
         },
 
         registerLocations : function() {
@@ -196,34 +254,29 @@ var ASIM = (function() {
             if(this.status == ASIMState.ERROR)
                 return { success : true, msg : "Cannot start ASIM '"+this.name+"' as it is in error state\n" };
 
-            var request = { command : "start" };
-
-            var data = JSON.stringify(request);
-
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
-                path: '/asims/'+this.simulation+'/'+this.name,
+                path: '/asims/'+this.simulation+'/'+this.name+'/start',
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(data)
+                    'Content-Length': 0
                 }
             };
-            
+
             var self = this;
 
             var request = http.request(options, function(res) {
                 var resData = "";
-                
+
                 res.setEncoding('utf8');
-                
+
                 res.on('data', function(chunk) { if(chunk) resData += chunk; });
-                
+
                 res.on('end', function(chunk) {
                     if(chunk)
                         resData += chunk;
-                    console.log("resData: "+resData);
                     var result = JSON.parse(resData);
                     if(result.error != undefined && result.error != null && result.error != "") {
                         self.setError(result.error);
@@ -233,20 +286,26 @@ var ASIM = (function() {
                         self.status = ASIMState.RUNNING;
                 });
             });
-            
+
             request.on('error', function(e) {
                 return { success : false, msg : "Unable to start ASIM '"+this.name+"'\n" };
             });
-            
-            request.write(data);
+
             request.end();
 
             return { success : true, msg : "Starting of ASIM '"+this.name+"' successfully triggered\n" };
         },
 
-        load : function() {
-            var request = {};
+        load : function(brapper, callback) {
+            if(brapper == undefined || brapper == null) {
+                callback(null, { msg : "Unable to load ASIM '"+this.name+"'. Do not know where to load it." });
+                return;
+            }
 
+            this.brapper = brapper;
+            this.brapper.addASIM(this);
+
+            var request = {};
             request.simulation = this.simulation;
             request.signature = this.signature;
             request.program = this.program;
@@ -254,9 +313,9 @@ var ASIM = (function() {
             request.policy = this.policy;
             request.name = this.name;
             request.start = this.start;
-            
+
             var data = JSON.stringify(request);
-            
+
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
@@ -267,62 +326,54 @@ var ASIM = (function() {
                     'Content-Length': Buffer.byteLength(data)
                 }
             };
-            
-            var self = this;
 
-            var request = http.request(options, function(res) {
+            var self = this;
+            var req = http.request(options, function(res) {
                 var resData = "";
-                
+
                 res.setEncoding('utf8');
-                
+
                 res.on('data', function(chunk) {
                     if(chunk)
                         resData += chunk;
                 });
-                
+
+                // TODO: create error in brapper which shows that something went wrong
                 res.on('end', function(chunk) {
                     if(chunk)
                         resData += chunk;
-                    
-                    var result = null;
-                    try {
-                        result = JSON.parse(resData);
-                    } 
-                    catch(e) {
-                        console.log("ERROR DURING CREATION: "+e);
-                        console.log("DATA: "+resData);
-                        self.setError(resData);
-                        self.brapper = null;
-                        self.unload();
-                        return;
-                    }
-                    if(result.error != undefined && result.error != null && result.error != "") {
-                        console.log("ERROR DURING CREATION: "+result.error);
-                        self.setError(result.error);
-                        self.brapper = null;
-                        self.unload();
+
+                    if(res.statusCode != 201) {
+                        callback(null, { code : 400, msg: "Error in creation of ASIM '"+self.getName()+"'.", details : JSON.parse(resData)});
                     } else {
-                        if(self.start)
-                            self.status = ASIMState.RUNNING;
-                        else
+			var result = null;
+                        try {
+                            result = JSON.parse(resData);
                             self.status = ASIMState.LOADED;
+                            callback({ code : 201, msg : "ASIM '" + self.getName() + "' successfully created."}, null);
+                        }
+                        catch(e) {
+                            self.setError(resData);
+                            callback(null, { code : 500, msg: "Unexpected response from brapper '"+self.brapper.id+"' during ASIM creation: "+resData });
+                        }
                     }
                 });
             });
-            
-            request.on('error', function(e) {
-                console.log("Problem: ", e);
+
+            req.on('error', function(e) {
+                callback(null, { code : 500, msg : e });
             });
-            
-            request.write(data);
-            request.end();
+
+            req.write(data);
+            req.end();
         },
 
-        recvMsg : function(msg) {
+        recvMsg : function(msg, callback) {
             if(this.status == ASIMState.RUNNING) {
-                return this.brapper.recvMsg(msg);
-            } else
-                return { success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" };
+                this.brapper.recvMsg(msg, callback);
+            } else {
+		callback(null, { code : 503, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" });
+	    }
         },
 
         recvUpdate : function(msg) {
@@ -350,22 +401,22 @@ var ASIM = (function() {
                     'Content-Length': 0
                 }
             };
-            
+
             var self = this;
             var error = null;
 
             var request = http.request(options, function(res) {
                 var resData = "";
                 res.setEncoding('utf8');
-                
+
                 if(res.statusCode != 201) 
                     error = { success : false, msg : "Unable to report new ASIM '"+this.name+"'\n" };
             });
-            
+
             request.on('error', function(e) {
                 error = { success : false, msg : "Unable to report new ASIM '"+this.name+"'\n" };
             });
-            
+
             request.write("");
             request.end();
 
@@ -385,22 +436,22 @@ var ASIM = (function() {
                     'Content-Length': 0
                 }
             };
-            
+
             var self = this;
             var error = null;
 
             var request = http.request(options, function(res) {
                 var resData = "";
                 res.setEncoding('utf8');
-                
+
                 if(res.statusCode != 201) 
                     error = { success : false, msg : "Unable to report removed ASIM '"+this.name+"'\n" };
             });
-            
+
             request.on('error', function(e) {
                 error = { success : false, msg : "Unable to report removed ASIM '"+this.name+"'\n" };
             });
-            
+
             request.write("");
             request.end();
 
@@ -453,7 +504,7 @@ var ASIM = (function() {
             sASIM.status = this.status;
             if(this.error)
                 sASIM.error = this.error 
-            
+
             return sASIM;
         }
     };
