@@ -1,12 +1,15 @@
-/*	
+/*
+ * CoreASMContainer.java v1.0
+ *
+ * This file contains source code developed by the European
+ * FP7 research project BIOMICS (Grant no. 318202)
  * Copyright (C) 2016 Daniel Schreckling
  *
- * Partially reuses Carma.java in org.coreasm.ui with  
+ * Partially reuses Carma.java in org.coreasm.ui with
  * Copyright (C) 2006-2010 Roozbeh Farahbod
  *
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
 
@@ -86,8 +89,8 @@ public class CoreASMContainer extends Thread {
     protected String asimProgram;
     protected int delay;
 
-	private CoreASMEngine engine = null;
-	private UpdateMultiset lastUpdateSet = null;
+    private CoreASMEngine engine = null;
+    private UpdateMultiset lastUpdateSet = null;
     private ObjectMapper mapper = null;
 
     private HashMap<Location, Update> updateMap = null;
@@ -97,7 +100,11 @@ public class CoreASMContainer extends Thread {
     private HashMap<String, HashSet<String>> updateRegistrations = null;
     private HashSet<String> requiredLocs = null;
 
+    private boolean running = false;
+    private boolean stopped = false;
     private boolean paused = false;
+    private boolean inError = false;
+    private CoreASMError parseError = null;
 
     public CoreASMContainer(ASIMCreationRequest req) {
         asimName = req.name;
@@ -115,10 +122,15 @@ public class CoreASMContainer extends Thread {
         updateMap = new HashMap<Location, Update>();
         updateRegistrations = new HashMap<>();
 
+        inError = false;
+        parseError = null;
+
         delay = rate;
         delay = 100;
 
         initEngine();
+
+        System.err.println("#### Load Specification");
 
         if(!loadSpec(newProgram)) {
             System.err.println("[ASIM "+newName+"]: Error while loading BSL specification.");
@@ -127,16 +139,58 @@ public class CoreASMContainer extends Thread {
             System.out.println("[ASIM "+newName+"]: BSL specification successfully loaded.");
         }
 
+        System.err.println("#### Done Loading Specification");
+
         prepareMapper();
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public String getStatus() {
+	if(inError)
+	    return "error";
+	else
+	    if(stopped)
+		return "stopped";
+	    else
+		if(running)
+		    return "running";
+		else
+		    if(paused)
+			return "paused";
+		    else
+			return "idle";
+    }
+
+    public String toJSON() {
+	String json = " { ";
+	json += "\"name\" : \"" + asimName + "\", ";
+	json += "\"simulation\" : \""+simId+ "\", ";
+	json += "\"status\" : \"" + getStatus() + "\", ";
+	json += "\"error\" : \"" + (getError() == null ? "" : getError()) + "\"";
+	json += "}";
+
+	return json;
     }
 
     // TODO: Synchronize this!!!
     public void pauseASIM() {
+	running = false;
         paused = true;
     }
 
     // TODO: Synchronize this!!!
     public void resumeASIM() {
+	running = true;
+        paused = false;
+    }
+
+    // TODO: Synchronize this!!!
+    public void stopASIM() {
+        stopped = true;
+        running = false;
         paused = false;
     }
 
@@ -292,13 +346,6 @@ public class CoreASMContainer extends Thread {
                 System.err.println(e);
                 e.printStackTrace();
             }
-
-            
-            /*System.out.println("\t----------------------------------");
-              System.out.println("\tMsg: "+msg);
-              System.out.println("\tJSON: "+json);
-              System.out.println("\t----------------------------------");*/
-            
         }
     }
 
@@ -311,7 +358,6 @@ public class CoreASMContainer extends Thread {
             if(updateRegistrations.containsKey(update.loc.name)) {
                 Set<String> targets = updateRegistrations.get(update.loc.name);
                 for(String t : targets) {
-                    // System.out.println("=> Send "+update.loc.name+" to "+t);
                     if(!map.containsKey(t))
                         map.put(t, new UpdateMultiset());
                     map.get(t).add(update);
@@ -338,8 +384,6 @@ public class CoreASMContainer extends Thread {
                 e.printStackTrace();
             }
         }
-        
-        // System.out.println("--- handleUpdateSet --- ");
     }
 
     public synchronized void newASIM(String name) {
@@ -347,15 +391,10 @@ public class CoreASMContainer extends Thread {
     }
 
     public synchronized void delASIM(String name) {
-        System.out.println("*** CoreASMContainer delASIM "+name+" ***");
         asimsToDel.add(name);
     }
 
     public synchronized void injectASIMs() {
-        for(String asim : asimsToAdd) 
-            System.out.println("***** CoreASMContainer: Adding ASIM: "+asim+" *****");
-        for(String asim : asimsToDel) 
-            System.out.println("***** CoreASMContainer: Deleting ASIM: "+asim+" *****");
         engine.addASIMs(asimsToAdd);
 
         HashSet<String> copy = new HashSet<String>();
@@ -383,11 +422,7 @@ public class CoreASMContainer extends Thread {
     }
 
     public boolean receiveUpdate(MessageRequest req) {
-        System.out.println("CoreASMContainer receives update");
-
         String strUpdates = req.body;
-        // System.out.println("strUpdates: "+strUpdates);
-
         UpdateMultiset updates = null;
         try {
             updates = mapper.readValue(strUpdates, UpdateMultiset.class);
@@ -406,11 +441,12 @@ public class CoreASMContainer extends Thread {
             Location newLoc = new Location(u.loc.name, newArgs);
             Update newUpdate = new Update(newLoc, u.value, u.action, (Element)null, null);
             Update oldUpdate = updateMap.get(newLoc);
-            if(oldUpdate != null) {
+            /* if(oldUpdate != null) {
                 System.out.println("OVERWRITING OLD UPDATE IN LOCATION "+newLoc);
                 System.out.println("New value of "+newLoc+": "+newUpdate.value);
                 System.out.println("Old value of "+newLoc+": "+oldUpdate.value);
-            }
+		}
+	    */
             updateMap.put(newLoc, newUpdate);
         }
 
@@ -428,13 +464,13 @@ public class CoreASMContainer extends Thread {
 
     public void run() {
         int currentStep = 1;
-
+        running = true;
+	
         // EngineManager.updateLocationRegistrations(asimName);
 
         do {
 
             if(engine == null || engine.getEngineMode().equals(EngineMode.emTerminated)) {
-                System.out.println("ASIM "+asimName+" terminates");
                 engine = null;
                 break;
             }
@@ -449,8 +485,8 @@ public class CoreASMContainer extends Thread {
                 // TODO REPORT STH HERE
             }
 
-			if (currentStep == 1)
-				lastUpdateSet = new UpdateMultiset();
+	    if (currentStep == 1)
+		lastUpdateSet = new UpdateMultiset();
 
             injectUpdates();
             injectASIMs();
@@ -459,9 +495,9 @@ public class CoreASMContainer extends Thread {
                 engine.fillInBox(getInBox());
                 emptyInBox();
             }
-
-			engine.step();
-			engine.waitWhileBusyOrUntilCreation();
+	    
+	    engine.step();
+	    engine.waitWhileBusyOrUntilCreation();
 
             if(engine.getEngineMode() == EngineMode.emCreateAgent) {
                 Map<String, AgentCreationElement> loc2Agent = engine.getAgentsToCreate();
@@ -475,39 +511,33 @@ public class CoreASMContainer extends Thread {
                     String loc = it.next();
                     String name = EngineManager.requestASIMCreation(loc2Agent.get(loc), simId);
                     agents.put(loc, name);
-                    System.out.println("["+asimName+"]: Agent "+name+" created.");
+                    System.out.println("["+asimName+"]: ASIM "+name+" created.");
                 }
                 engine.reportNewAgents(agents);
             }
             engine.waitWhileBusy();
-
-			if (engine.getEngineMode() == EngineMode.emError) {
+	    
+	    if (engine.getEngineMode() == EngineMode.emError) {
                 System.err.println("[ASIM Execution ERROR]: "+asimName+": "+engine.getError());
             }
 
-            // System.out.println("handle outgoing Messages");
-
             handleOutgoingMessages();
             deleteASIMs();
-                
-            /* System.out.println(" + ----- end of STEP " + currentStep + " ----- + \n");                
-            System.out.println("\tUpdates after step " + currentStep + " are : " + engine.getUpdateSet(0));
-            System.out.println();*/
 
             lastUpdateSet = new UpdateMultiset(engine.getUpdateSet(0));
             distributeUpdateSet(lastUpdateSet);
 
-			currentStep++;
+	    currentStep++;
+
+	    // System.err.println("step: " + currentStep);
             
-		} while(true);
+	} while(true && !stopped);
+
+        engine.terminate();
+        engine.waitWhileBusy();
     }
 
     public void deleteASIMs() {
-        // System.out.println("deleteASIMs: "+engine.getAgentsToDelete().size());
-        /* for(String s : engine.getAgentsToDelete())
-           System.out.println("Delete "+s);
-        */
-
         EngineManager.requestASIMDeletion(simId, engine.getAgentsToDelete());
     }
 
@@ -591,8 +621,16 @@ public class CoreASMContainer extends Thread {
                 EngineManager.registerLocations(asimName+"@"+asimName, simId, requiredLocs);
                 return true;
             }
-        } else 
+        } else {
+            parseError = getError();
+            inError = true;
+
             return false;
+        }
+    }
+
+    public boolean isInError() {
+        return inError;
     }
 
     public void destroy() {
