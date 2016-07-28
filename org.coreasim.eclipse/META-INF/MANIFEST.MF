@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: CoreASM Eclipse Plugin
-Bundle-SymbolicName: org.coreasm.eclipse;singleton:=true
+Bundle-SymbolicName: org.coreasim.eclipse;singleton:=true
 Bundle-Activator: org.coreasim.eclipse.CoreASIMPlugin
 Bundle-Vendor: coreasm.org
 Require-Bundle: org.eclipse.ui,

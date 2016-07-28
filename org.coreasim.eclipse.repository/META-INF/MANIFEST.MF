@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CoreASM Eclipse Standalone
-Bundle-SymbolicName: org.coreasm.eclipse.repository;singleton:=true
+Bundle-SymbolicName: org.coreasim.eclipse.repository;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.coreasim.eclipse.repository.Activator
 Bundle-Vendor: The CoreASM Team

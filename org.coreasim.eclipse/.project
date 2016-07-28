@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.coreasm.eclipse</name>
+	<name>org.coreasim.eclipse</name>
 	<comment></comment>
 	<projects>
 		<project>org.coreasm.util</project>

@@ -1,17 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.coreasm.biomics</groupId>
-    <artifactId>org.coreasm.biomics.wrapper</artifactId>
+    <groupId>org.coreasim.biomics</groupId>
+    <artifactId>org.coreasim.biomics.wrapper</artifactId>
     <packaging>jar</packaging>
-    <version>0.1</version>
-    <name>BIOMICS CoreASM Wrapper</name>
+    <version>1.0.0</version>
+    <name>BIOMICS CoreASIM Wrapper</name>
 
 	<parent>
-		<artifactId>org.coreasm.parent</artifactId>
-		<groupId>org.coreasm</groupId>
+		<artifactId>org.coreasim.parent</artifactId>
+		<groupId>org.coreasim</groupId>
 		<version>1.7.3-SNAPSHOT</version>
-		<relativePath>../org.coreasm.parent</relativePath>
+		<relativePath>../org.coreasim.parent</relativePath>
 	</parent>
 
     <dependencyManagement>
@@ -28,8 +28,8 @@
 
     <dependencies>
 	  <dependency>
-		<groupId>org.coreasm</groupId>
-		<artifactId>org.coreasm.engine</artifactId>
+		<groupId>org.coreasim</groupId>
+		<artifactId>org.coreasim.engine</artifactId>
 		<version>1.7.3-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
@@ -85,7 +85,7 @@
             </descriptorRefs>          
             <archive>
               <manifest>
-                <mainClass>org.coreasm.biomics.Wrapper</mainClass>
+                <mainClass>org.coreasim.biomics.Wrapper</mainClass>
               </manifest>
             </archive>
             <finalName>brapper</finalName>
@@ -112,7 +112,7 @@
           <configuration>
             <archive>
               <manifest>
-                <mainClass>org.coreasm.biomics.wrapper.Wrapper</mainClass>
+                <mainClass>org.coreasim.biomics.wrapper.Wrapper</mainClass>
               </manifest>
             </archive>
             <source>1.7</source>
@@ -131,7 +131,7 @@
             </execution>
           </executions>
           <configuration>
-            <mainClass>org.coreasm.biomics.Wrapper</mainClass>
+            <mainClass>org.coreasim.biomics.Wrapper</mainClass>
           </configuration>
         </plugin>
       </plugins>

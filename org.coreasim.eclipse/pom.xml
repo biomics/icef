@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>org.coreasm.eclipse</artifactId>
+	<artifactId>org.coreasim.eclipse</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>CoreASM Eclipse Plugin</name>
+	<name>CoreASIM Eclipse Plugin</name>
 
 	<parent>
-		<artifactId>org.coreasm.eclipse.parent</artifactId>
+		<artifactId>org.coreasim.eclipse.parent</artifactId>
 		<groupId>org.coreasm</groupId>
 		<version>1.1.1-SNAPSHOT</version>
 		<relativePath>../org.coreasm.eclipse.parent</relativePath>
@@ -16,7 +16,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.coreasm</groupId>
-			<artifactId>org.coreasm.engine</artifactId>
+			<artifactId>org.coreasim.engine</artifactId>
 			<version>1.7.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
