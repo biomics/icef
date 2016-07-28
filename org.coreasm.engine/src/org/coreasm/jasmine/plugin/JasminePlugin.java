@@ -40,7 +40,7 @@ import org.codehaus.jparsec.Tokens.Fragment;
 import org.coreasim.engine.EngineError;
 import org.coreasim.engine.Specification;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.BackgroundElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementList;

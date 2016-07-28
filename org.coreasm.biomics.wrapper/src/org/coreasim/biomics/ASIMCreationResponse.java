@@ -15,7 +15,7 @@ package org.coreasim.biomics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

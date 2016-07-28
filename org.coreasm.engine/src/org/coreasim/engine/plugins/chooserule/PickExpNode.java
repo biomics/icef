@@ -17,7 +17,7 @@ package org.coreasim.engine.plugins.chooserule;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.ScannerInfo;
 

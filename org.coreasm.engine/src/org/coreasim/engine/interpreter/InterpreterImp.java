@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.EngineError;
 import org.coreasim.engine.EngineTools;
 import org.coreasim.engine.absstorage.AbstractStorage;
@@ -198,7 +198,7 @@ public class InterpreterImp implements Interpreter {
 				if (pos.getParent() != null)
 					pos = pos.getParent();
 			}
-		} catch (CoreASMError e) {
+		} catch (CoreASIMError e) {
 			if (e.node != null)
 				capi.error(e);
 			else
@@ -603,7 +603,7 @@ public class InterpreterImp implements Interpreter {
 
 			if (theRule == null) {
 				if (!frNode.hasName())
-					throw new CoreASMError("A FunctionRulePolicyTerm must have a name.", frNode);
+					throw new CoreASIMError("A FunctionRulePolicyTerm must have a name.", frNode);
 
 				// If the current node is of the form 'x' or 'x(...)'
 				x = frNode.getName();
@@ -742,7 +742,7 @@ public class InterpreterImp implements Interpreter {
 
 			if (thePolicy == null) {
 				if (!fpNode.hasName())
-					throw new CoreASMError("A FunctionPolicyTerm must have a name.", fpNode);
+					throw new CoreASIMError("A FunctionPolicyTerm must have a name.", fpNode);
 
 				// If the current node is of the form 'x' or 'x(...)'
 				x = fpNode.getName();

@@ -15,7 +15,7 @@ package org.coreasm.network.plugins.graph;
 import java.util.List;
 import java.util.Set;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.FunctionElement;
 import org.coreasim.engine.absstorage.Signature;
@@ -33,7 +33,7 @@ public class NewEdgeFunctionElement extends FunctionElement {
 		if (args.size() == 2)
 			return new EdgeElement(args.get(0), args.get(1));
 		else
-			throw new CoreASMError("Two vertices are required to create an edge.");
+			throw new CoreASIMError("Two vertices are required to create an edge.");
 	}
 
 	@Override

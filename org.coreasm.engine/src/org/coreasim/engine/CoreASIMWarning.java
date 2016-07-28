@@ -27,7 +27,7 @@ import org.coreasim.engine.parser.ParserException;
  * @author Roozbeh Farahbod
  *
  */
-public class CoreASMWarning extends CoreASMIssue {
+public class CoreASIMWarning extends CoreASIMIssue {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ public class CoreASMWarning extends CoreASMIssue {
 	 * @param stack rule call stack
 	 * @param node the parse-tree node that caused this warning
 	 */
-	public CoreASMWarning(String src, String msg, Throwable cause, CharacterPosition pos,
+	public CoreASIMWarning(String src, String msg, Throwable cause, CharacterPosition pos,
 			Stack<CallStackElement> stack, Node node) {
 		super(msg, cause, pos, stack, node);
 		this.src = src;
@@ -57,7 +57,7 @@ public class CoreASMWarning extends CoreASMIssue {
 	 * @param stack rule call stack
 	 * @param node the parse-tree node that caused this warning
 	 */
-	public CoreASMWarning(String src, String msg, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMWarning(String src, String msg, Stack<CallStackElement> stack, Node node) {
 		super(msg, stack, node);
 		this.src = src;
 	}
@@ -70,7 +70,7 @@ public class CoreASMWarning extends CoreASMIssue {
 	 * @param stack rule call stack
 	 * @param node the parse-tree node that caused this warning
 	 */
-	public CoreASMWarning(String src, Throwable cause, Stack<CallStackElement> stack,
+	public CoreASIMWarning(String src, Throwable cause, Stack<CallStackElement> stack,
 			Node node) {
 		super(cause, stack, node);
 		this.src = src;
@@ -83,7 +83,7 @@ public class CoreASMWarning extends CoreASMIssue {
 	 * @param msg the warning msg
 	 * @param node the parse-tree node that caused this warning
 	 */
-	public CoreASMWarning(String src, String msg, Node node) {
+	public CoreASIMWarning(String src, String msg, Node node) {
 		super(msg, node);
 		this.src = src;
 	}
@@ -94,7 +94,7 @@ public class CoreASMWarning extends CoreASMIssue {
 	 * @param src the module generating this warning 
 	 * @param msg the warning msg
 	 */
-	public CoreASMWarning(String src, String msg) {
+	public CoreASIMWarning(String src, String msg) {
 		super(msg);
 		this.src = src;
 	}
@@ -105,7 +105,7 @@ public class CoreASMWarning extends CoreASMIssue {
 	 * @param src the module generating this warning 
 	 * @param cause the throwable that casused this warning
 	 */
-	public CoreASMWarning(String src, ParserException cause) {
+	public CoreASIMWarning(String src, ParserException cause) {
 		super(cause);
 		this.src = src;
 	}

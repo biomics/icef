@@ -1,6 +1,6 @@
 package org.coreasim.eclipse.wizards;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,11 +46,11 @@ public class ASMWizardPage extends WizardPage {
 		super("wizardPage");
 		setTitle("CoreASM Editor File");
 //		ImageDescriptor id=ImageDescriptor.createFromFile(CoreASMPlugin.class,"../../icons/CoreASM-logo48.gif");
-		ImageDescriptor id=CoreASMPlugin.getImageDescriptor("icons/logo-96x.png");
+		ImageDescriptor id=CoreASIMPlugin.getImageDescriptor("icons/logo-96x.png");
 		setImageDescriptor(id);
 		setDescription("This wizard creates a new file with *." 
-				+ CoreASMPlugin.COREASM_FILE_EXT_1 + " or *." 
-				+ CoreASMPlugin.COREASM_FILE_EXT_2 
+				+ CoreASIMPlugin.COREASM_FILE_EXT_1 + " or *." 
+				+ CoreASIMPlugin.COREASM_FILE_EXT_2 
 				+ " extension containing a standard (almost empty) CoreASM specification.");
 		this.selection = selection;
 	}
@@ -119,7 +119,7 @@ public class ASMWizardPage extends WizardPage {
 				containerText.setText(container.getFullPath().toString());
 			}
 		}
-		fileText.setText("untitled." + CoreASMPlugin.COREASM_FILE_EXT_1);
+		fileText.setText("untitled." + CoreASIMPlugin.COREASM_FILE_EXT_1);
 	}
 
 	/**
@@ -172,11 +172,11 @@ public class ASMWizardPage extends WizardPage {
 		int dotLoc = fileName.lastIndexOf('.');
 		if (dotLoc != -1) {
 			String ext = fileName.substring(dotLoc + 1);
-			if (ext.equalsIgnoreCase(CoreASMPlugin.COREASM_FILE_EXT_1) == false 
-					&& ext.equalsIgnoreCase(CoreASMPlugin.COREASM_FILE_EXT_2) == false) {
+			if (ext.equalsIgnoreCase(CoreASIMPlugin.COREASM_FILE_EXT_1) == false 
+					&& ext.equalsIgnoreCase(CoreASIMPlugin.COREASM_FILE_EXT_2) == false) {
 				updateStatus("File extension must be \"" 
-						+ CoreASMPlugin.COREASM_FILE_EXT_1 + "\" or \""
-						+ CoreASMPlugin.COREASM_FILE_EXT_2 + "\".");
+						+ CoreASIMPlugin.COREASM_FILE_EXT_1 + "\" or \""
+						+ CoreASIMPlugin.COREASM_FILE_EXT_2 + "\".");
 				return;
 			}
 		}

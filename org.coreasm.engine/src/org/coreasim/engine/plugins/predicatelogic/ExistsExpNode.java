@@ -18,7 +18,7 @@ package org.coreasim.engine.plugins.predicatelogic;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.ScannerInfo;
 
@@ -55,14 +55,14 @@ public class ExistsExpNode extends ASTNode {
     /**
      * Returns a map of the variable names to the nodes which
      * represent the domains that variable should be taken from
-     * @throws CoreASMError 
+     * @throws CoreASIMError 
      */
-    public Map<String,ASTNode> getVariableMap() throws CoreASMError {
+    public Map<String,ASTNode> getVariableMap() throws CoreASIMError {
     	Map<String,ASTNode> variableMap = new HashMap<String,ASTNode>();
         
         for (ASTNode current = getFirst(); current.getNext() != null && current.getNext().getNext() != null && ASTNode.ID_CLASS.equals(current.getGrammarClass()); current = current.getNext().getNext()) {
             if (variableMap.put(current.getToken(),current.getNext()) != null)
-            	throw new CoreASMError("Variable \""+current.getToken()+"\" already defined in forall expression.", this);
+            	throw new CoreASIMError("Variable \""+current.getToken()+"\" already defined in forall expression.", this);
         }
         
         return variableMap;

@@ -29,7 +29,7 @@ import org.coreasim.engine.parser.ParserException;
  *
  */
 
-public class CoreASMIssue extends Error {
+public class CoreASIMIssue extends Error {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -43,7 +43,7 @@ public class CoreASMIssue extends Error {
 	protected Specification spec = null;
 	
 	@SuppressWarnings("unchecked")
-	public CoreASMIssue(String msg, Throwable cause, CharacterPosition pos, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMIssue(String msg, Throwable cause, CharacterPosition pos, Stack<CallStackElement> stack, Node node) {
 		this.message = msg;
 		this.cause = cause;
 		this.pos = pos;
@@ -54,23 +54,23 @@ public class CoreASMIssue extends Error {
 		this.node = node;
 	}
 	
-	public CoreASMIssue(String msg, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMIssue(String msg, Stack<CallStackElement> stack, Node node) {
 		this(msg, null, null, stack, node);
 	}
 	
-	public CoreASMIssue(Throwable cause, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMIssue(Throwable cause, Stack<CallStackElement> stack, Node node) {
 		this(null, cause, null, stack, node);
 	}
 	
-	public CoreASMIssue(String msg, Node node) {
+	public CoreASIMIssue(String msg, Node node) {
 		this(msg, null, null, null, node);
 	}
 	
-	public CoreASMIssue(String msg) {
+	public CoreASIMIssue(String msg) {
 		this(msg, null, CharacterPosition.NO_POSITION, null, null);
 	}
 	
-	public CoreASMIssue(ParserException cause) {
+	public CoreASIMIssue(ParserException cause) {
 		this(cause.msg, cause, cause.pos, null, null);
 	}
 	

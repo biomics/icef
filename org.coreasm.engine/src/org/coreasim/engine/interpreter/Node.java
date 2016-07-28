@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.EngineError;
 import org.coreasim.engine.Specification;
 import org.coreasim.engine.parser.CharacterPosition;
@@ -196,7 +196,7 @@ public class Node implements Serializable {
 			}
 			index++;
 		}
-		throw new CoreASMError("Expected child node is missing.");
+		throw new CoreASIMError("Expected child node is missing.");
 	}
 
 	/**
@@ -616,7 +616,7 @@ public class Node implements Serializable {
 			}
 			index++;
 		}
-		throw new CoreASMError("Node to be replaced is missing.");
+		throw new CoreASIMError("Node to be replaced is missing.");
 	}
 
 	public Node removeFromTree(){

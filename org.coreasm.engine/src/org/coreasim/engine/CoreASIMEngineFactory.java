@@ -19,12 +19,12 @@ package org.coreasim.engine;
  * @author Roozbeh Farahbod
  * 
  */
-public class CoreASMEngineFactory {
+public class CoreASIMEngineFactory {
 
 	/**
 	 * Creates and returns a new CoreASM engine.
 	 */
-	public static CoreASMEngine createEngine() {
+	public static CoreASIMEngine createEngine() {
 		return new Engine();
 	}
 	
@@ -32,7 +32,7 @@ public class CoreASMEngineFactory {
 	 * Creates and returns a new CoreASM engine with the 
 	 * given properties.
 	 */
-	public static CoreASMEngine createEngine(java.util.Properties properties) {
+	public static CoreASIMEngine createEngine(java.util.Properties properties) {
 		return new Engine(properties);
 	}
 }

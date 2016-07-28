@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementList;
@@ -72,7 +72,7 @@ public class FilterFunctionElement extends CollectionFunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!checkArguments(args))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		
 		Collection<? extends Element> values = ((Enumerable)args.get(0)).enumerate();
 		FunctionElement f = (FunctionElement)args.get(1);

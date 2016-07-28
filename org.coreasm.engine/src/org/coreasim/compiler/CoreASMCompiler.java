@@ -49,8 +49,8 @@ import org.coreasim.compiler.interfaces.CompilerVocabularyExtender;
 import org.coreasim.compiler.paths.CompilerPathConfig;
 import org.coreasim.compiler.paths.DefaultPaths;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMEngine;
-import org.coreasim.engine.CoreASMEngineFactory;
+import org.coreasim.engine.CoreASIMEngine;
+import org.coreasim.engine.CoreASIMEngineFactory;
 import org.coreasim.engine.Engine;
 import org.coreasim.engine.interpreter.ASTNode;
 
@@ -78,7 +78,7 @@ public class CoreASMCompiler implements CompilerEngine {
 	private List<String> warnings;
 	private List<String> errors;
 	
-	private CoreASMEngine coreasm;
+	private CoreASIMEngine coreasm;
 	
 	private List<String> timings;
 	private long lastTime;
@@ -101,11 +101,11 @@ public class CoreASMCompiler implements CompilerEngine {
 	 * @param options The options for the compilation process
 	 * @param casm A CoreASMEngine
 	 */
-	public CoreASMCompiler(CompilerOptions options, CoreASMEngine casm){
+	public CoreASMCompiler(CompilerOptions options, CoreASIMEngine casm){
 		init(options, casm);
 	}
 	
-	private void init(CompilerOptions options, CoreASMEngine casm){		
+	private void init(CompilerOptions options, CoreASIMEngine casm){		
 		lastTime = System.nanoTime();
 		//initialize components
 		this.options = options;
@@ -437,7 +437,7 @@ public class CoreASMCompiler implements CompilerEngine {
 			cae = (Engine) coreasm;
 		}
 		else{
-			cae = (Engine)CoreASMEngineFactory.createEngine();
+			cae = (Engine)CoreASIMEngineFactory.createEngine();
 			cae.initialize();
 		}
 		

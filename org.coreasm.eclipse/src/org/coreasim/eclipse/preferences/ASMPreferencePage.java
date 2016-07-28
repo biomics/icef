@@ -1,6 +1,6 @@
 package org.coreasim.eclipse.preferences;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
@@ -30,7 +30,7 @@ public class ASMPreferencePage
 
 	public ASMPreferencePage() {
 		super(GRID);
-		setPreferenceStore(CoreASMPlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(CoreASIMPlugin.getDefault().getPreferenceStore());
 		setDescription("Global preferences for CoreASM Eclipse Plugin");
 	}
 	

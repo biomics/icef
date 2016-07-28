@@ -14,7 +14,7 @@ package org.coreasm.network.plugins.graph;
 
 import java.util.List;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementBackgroundElement;
 import org.coreasim.engine.absstorage.FunctionElement;
@@ -52,7 +52,7 @@ public class DijkstraShortestPathFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!(args.size() == 3 && args.get(0) instanceof GraphElement))
-			throw new CoreASMError("Illegal arguments for " + FUNCTION_NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + FUNCTION_NAME + ".");
 		
 		GraphElement ge = (GraphElement)args.get(0);
 		Element start = args.get(1);

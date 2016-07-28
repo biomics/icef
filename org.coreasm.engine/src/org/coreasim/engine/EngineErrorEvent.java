@@ -22,14 +22,14 @@ import java.util.Date;
 public class EngineErrorEvent extends EngineEvent {
 
 	/** CoreASM error associated with this event. */
-	protected final CoreASMError error;
+	protected final CoreASIMError error;
 	
 	protected final Date time;
 	
 	/** 
 	 * Creates a new error event with the given CoreASM error.
 	 */
-	public EngineErrorEvent(CoreASMError error) {
+	public EngineErrorEvent(CoreASIMError error) {
 		this.error = error;
 		this.time = new Date();
 	}
@@ -37,7 +37,7 @@ public class EngineErrorEvent extends EngineEvent {
 	/**
 	 * Returns the exception associated with this event.
 	 */
-	public CoreASMError getError() {
+	public CoreASIMError getError() {
 		return error;
 	}
 	

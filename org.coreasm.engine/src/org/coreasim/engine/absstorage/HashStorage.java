@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.EngineError;
 import org.coreasim.engine.EngineTools;
 import org.coreasim.engine.kernel.Kernel;
@@ -155,7 +155,7 @@ public class HashStorage implements AbstractStorage {
 			}
 			
 		} catch (NameConflictException e) {
-			throw new CoreASMError(e.getMessage());
+			throw new CoreASIMError(e.getMessage());
 		}
 	}
 	

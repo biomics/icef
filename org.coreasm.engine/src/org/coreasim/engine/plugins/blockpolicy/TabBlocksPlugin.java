@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.coreasim.engine.SpecLine;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.plugin.ExtensionPointPlugin;
 import org.coreasim.engine.plugin.Plugin;
 import org.coreasim.util.Tools;

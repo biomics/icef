@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.FunctionElement.FunctionClass;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.FunctionRulePolicyTermNode;
@@ -246,7 +246,7 @@ public class FunctionNode extends ASTNode {
 			   params.add(arg.getName());
 		   }
 		   else
-			   throw new CoreASMError("Parameter must be an identifier.", argNode);
+			   throw new CoreASIMError("Parameter must be an identifier.", argNode);
 	   }
 	   return params;
    }

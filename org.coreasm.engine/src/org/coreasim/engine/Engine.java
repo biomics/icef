@@ -160,7 +160,7 @@ public class Engine implements ControlAPI {
 	private int remainingRunCount = 0;
 
 	/** Last error occurred in the engine */
-	private volatile CoreASMError lastError = null;
+	private volatile CoreASIMError lastError = null;
 
 	/* the latest loaded specification */
 	private Specification specification = null;
@@ -170,7 +170,7 @@ public class Engine implements ControlAPI {
 
 	private boolean isStateInitialized = false;
 
-	private final List<CoreASMWarning> warnings;
+	private final List<CoreASIMWarning> warnings;
 
 	private String selfExternalName;
 
@@ -218,7 +218,7 @@ public class Engine implements ControlAPI {
 		interpreterListeners = new LinkedList<InterpreterListener>();
 		modeEventCache = new HashMap<EngineMode, Map<EngineMode,EngineModeEvent>>();
 		specification = null;
-		warnings = new ArrayList<CoreASMWarning>();
+		warnings = new ArrayList<CoreASIMWarning>();
 		serviceRegistry = new HashMap<String, Set<ServiceProvider>>();
 
 		// Starting the execution thread of the engine
@@ -627,7 +627,7 @@ public class Engine implements ControlAPI {
 		pNames.addAll(pluginLoader.getRequestedPlugins());
 
 		// Adding kernel plugin names
-		for (String name: CoreASMEngine.KERNEL_PLUGINS)
+		for (String name: CoreASIMEngine.KERNEL_PLUGINS)
 			pNames.add(name);
 
 		for (String pName: pNames) {
@@ -701,26 +701,26 @@ public class Engine implements ControlAPI {
 
 	@Override
 	public synchronized void error(String msg, Node errorNode, Interpreter interpreter) {
-		CoreASMError error;
+		CoreASIMError error;
 		if (interpreter != null)
-			error = new CoreASMError(msg, interpreter.getCurrentCallStack(), errorNode);
+			error = new CoreASIMError(msg, interpreter.getCurrentCallStack(), errorNode);
 		else
-			error = new CoreASMError(msg, errorNode);
+			error = new CoreASIMError(msg, errorNode);
 		this.error(error);
 	}
 
 	@Override
 	public synchronized void error(Throwable e, Node errorNode, Interpreter interpreter) {
-		CoreASMError error;
+		CoreASIMError error;
 		if (interpreter != null)
-			error = new CoreASMError(e, interpreter.getCurrentCallStack(), errorNode);
+			error = new CoreASIMError(e, interpreter.getCurrentCallStack(), errorNode);
 		else
-			error = new CoreASMError(e, null, errorNode);
+			error = new CoreASIMError(e, null, errorNode);
 		this.error(error);
 	}
 
 	@Override
-	public synchronized void error(CoreASMError e) {
+	public synchronized void error(CoreASIMError e) {
 		// FIXME why can we get into this method more than once?!
 
 		if (lastError != null)
@@ -758,27 +758,27 @@ public class Engine implements ControlAPI {
 	@Override
 	public void warning(String src, Throwable e, Node node,
 			Interpreter interpreter) {
-		CoreASMWarning warning;
+		CoreASIMWarning warning;
 		if (interpreter != null)
-			warning = new CoreASMWarning(src, e, interpreter.getCurrentCallStack(), node);
+			warning = new CoreASIMWarning(src, e, interpreter.getCurrentCallStack(), node);
 		else
-			warning = new CoreASMWarning(src, e, null, node);
+			warning = new CoreASIMWarning(src, e, null, node);
 		this.warning(warning);
 	}
 
 	@Override
 	public void warning(String src, String msg, Node node,
 			Interpreter interpreter) {
-		CoreASMWarning warning;
+		CoreASIMWarning warning;
 		if (interpreter != null)
-			warning = new CoreASMWarning(src, msg, interpreter.getCurrentCallStack(), node);
+			warning = new CoreASIMWarning(src, msg, interpreter.getCurrentCallStack(), node);
 		else
-			warning = new CoreASMWarning(src, msg, node);
+			warning = new CoreASIMWarning(src, msg, node);
 		this.warning(warning);
 	}
 
 	@Override
-	public synchronized void warning(CoreASMWarning w) {
+	public synchronized void warning(CoreASIMWarning w) {
 		w.setContext(parser, specification);
 		warnings.add(w);
 
@@ -794,7 +794,7 @@ public class Engine implements ControlAPI {
 
 
 	@Override
-	public List<CoreASMWarning> getWarnings() {
+	public List<CoreASIMWarning> getWarnings() {
 		return warnings;
 	}
 
@@ -804,7 +804,7 @@ public class Engine implements ControlAPI {
 		return (lastError != null) || (engineMode == EngineMode.emError) ;
 	}
 	
-	public CoreASMError getError() {
+	public CoreASIMError getError() {
 		return lastError;
 	}
 
@@ -1264,12 +1264,12 @@ public class Engine implements ControlAPI {
 						break;
 
 						}
-					} catch (CoreASMError ce) {
+					} catch (CoreASIMError ce) {
 						error(ce);
 						logger.error( "Error occured: {}", ce.showError());
 					} catch (Throwable e) {
 						if (e instanceof ParserException)
-							error(new CoreASMError((ParserException)e));
+							error(new CoreASIMError((ParserException)e));
 						else
 							error(e);
 						logger.error("Exception occured. ", e);

@@ -13,7 +13,7 @@
 
 package org.coreasim.biomics;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 
 public class ASIMControlResponse {
     public String name;

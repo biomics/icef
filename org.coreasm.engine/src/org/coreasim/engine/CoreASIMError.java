@@ -29,35 +29,35 @@ import org.coreasim.engine.parser.ParserException;
  *
  */
 
-public class CoreASMError extends CoreASMIssue {
+public class CoreASIMError extends CoreASIMIssue {
 
 	private static final long serialVersionUID = 1L;
 	
-	public CoreASMError(String msg, Throwable cause, CharacterPosition pos, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMError(String msg, Throwable cause, CharacterPosition pos, Stack<CallStackElement> stack, Node node) {
 		super(msg, cause, pos, stack, node);
 	}
 	
-	public CoreASMError(String msg, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMError(String msg, Stack<CallStackElement> stack, Node node) {
 		this(msg, null, null, stack, node);
 	}
 	
-	public CoreASMError(Throwable cause, Stack<CallStackElement> stack, Node node) {
+	public CoreASIMError(Throwable cause, Stack<CallStackElement> stack, Node node) {
 		this(null, cause, null, stack, node);
 	}
 	
-	public CoreASMError(String msg, CharacterPosition pos) {
+	public CoreASIMError(String msg, CharacterPosition pos) {
 		this(msg, null, pos, null, null);
 	}
 	
-	public CoreASMError(String msg, Node node) {
+	public CoreASIMError(String msg, Node node) {
 		this(msg, null, null, null, node);
 	}
 	
-	public CoreASMError(String msg) {
+	public CoreASIMError(String msg) {
 		this(msg, null, CharacterPosition.NO_POSITION, null, null);
 	}
 	
-	public CoreASMError(ParserException cause) {
+	public CoreASIMError(ParserException cause) {
 		this(cause.msg, cause, cause.pos, null, null);
 	}
 	

@@ -24,10 +24,10 @@ import javax.swing.JPanel;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
-import org.coreasim.engine.CoreASMEngine;
+import org.coreasim.engine.CoreASIMEngine;
 import org.coreasim.engine.EngineException;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.BackgroundElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementBackgroundElement;
@@ -453,7 +453,7 @@ public class GraphPlugin extends Plugin implements VocabularyExtender, ParserPlu
 	@Override
 	public void fireOnModeTransition(EngineMode source, EngineMode target)
 			throws EngineException {
-		if (target.equals(CoreASMEngine.EngineMode.emStepSucceeded)) {
+		if (target.equals(CoreASIMEngine.EngineMode.emStepSucceeded)) {
 			
 			// update all the views that are monitoring a graph location
 			for (Location loc: graphViewers.keySet()) {
@@ -490,7 +490,7 @@ public class GraphPlugin extends Plugin implements VocabularyExtender, ParserPlu
 	public Map<EngineMode, Integer> getTargetModes() {
 		if (targetModes  == null) {
 			targetModes = new HashMap<EngineMode, Integer>();
-			targetModes.put(CoreASMEngine.EngineMode.emStepSucceeded, ExtensionPointPlugin.DEFAULT_PRIORITY);
+			targetModes.put(CoreASIMEngine.EngineMode.emStepSucceeded, ExtensionPointPlugin.DEFAULT_PRIORITY);
 		}
 		return targetModes;
 	}

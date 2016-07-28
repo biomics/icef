@@ -26,15 +26,15 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.editors.ASMEditor;
 import org.coreasim.eclipse.engine.CoreASMEngineFactory;
 import org.coreasim.eclipse.launch.ICoreASMConfigConstants;
 import org.coreasim.eclipse.preferences.PreferenceConstants;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMEngine;
-import org.coreasim.engine.CoreASMError;
-import org.coreasim.engine.CoreASMWarning;
+import org.coreasim.engine.CoreASIMEngine;
+import org.coreasim.engine.CoreASIMError;
+import org.coreasim.engine.CoreASIMWarning;
 import org.coreasim.engine.EngineErrorEvent;
 import org.coreasim.engine.EngineErrorObserver;
 import org.coreasim.engine.EngineEvent;
@@ -45,7 +45,7 @@ import org.coreasim.engine.EngineWarningEvent;
 import org.coreasim.engine.EngineWarningObserver;
 import org.coreasim.engine.Specification;
 import org.coreasim.engine.StepFailedEvent;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.Update;
 import org.coreasim.engine.interpreter.ScannerInfo;
 import org.coreasim.engine.plugin.PluginServiceInterface;
@@ -71,7 +71,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 	protected static EngineDriver runningInstance=null;
 	private static Set<EngineDriverAction> actions = new HashSet<EngineDriverAction>();
 	
-	protected CoreASMEngine engine;
+	protected CoreASIMEngine engine;
 	private final boolean isSyntaxEngine;
 	//private CoreASMEngine syntaxEngine;
 	
@@ -81,7 +81,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 	private String abspathname;
 	private boolean updateFailed;
 	private String stepFailedMsg;
-	protected CoreASMError lastError;
+	protected CoreASIMError lastError;
 	private int stepsLimit;
 	private boolean stopOnEmptyUpdates;
 	private boolean stopOnStableUpdates;
@@ -117,7 +117,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 	
 	protected EngineDriver(boolean isSyntaxEngine) {
 		super();
-		CoreASMGlobal.setRootFolder(CoreASMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER));
+		CoreASMGlobal.setRootFolder(CoreASIMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER));
 		engine = CoreASMEngineFactory.createCoreASMEngine();
 		shouldStop = false;
 		this.isSyntaxEngine = isSyntaxEngine;
@@ -193,7 +193,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 				runningInstance.setConfig(config);
 			runningInstance.dolaunch(abspathname);
 		} else
-			throw new CoreException(new Status(Status.WARNING, CoreASMPlugin.PLUGIN_ID, -1, "Another specification is currently running.", null));
+			throw new CoreException(new Status(Status.WARNING, CoreASIMPlugin.PLUGIN_ID, -1, "Another specification is currently running.", null));
 	}
 
 	/*
@@ -391,7 +391,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 
 	private void setInputOutputPhase1() {
 
-		console=new IOConsole("CoreASM Specification",null,CoreASMPlugin.getImageDescriptor(CoreASMPlugin.MAIN_ICON_PATH),true);	
+		console=new IOConsole("CoreASM Specification",null,CoreASIMPlugin.getImageDescriptor(CoreASIMPlugin.MAIN_ICON_PATH),true);	
 		consoleStdout=console.newOutputStream();
 		consoleStderr=console.newOutputStream();
 		consoleStddump=console.newOutputStream();
@@ -411,7 +411,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 	
 	private void setInputOutputPhase2() {
 
-		console=new IOConsole("CoreASM "+curspecname(),null,CoreASMPlugin.getImageDescriptor(CoreASMPlugin.MAIN_ICON_PATH),true);	
+		console=new IOConsole("CoreASM "+curspecname(),null,CoreASIMPlugin.getImageDescriptor(CoreASIMPlugin.MAIN_ICON_PATH),true);	
 		consoleStdout=console.newOutputStream();
 		consoleStderr=console.newOutputStream();
 		consoleStddump=console.newOutputStream();
@@ -559,7 +559,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 				ControlAPI capi = (ControlAPI) engine;
 				for (Update update : capi.getStorage().getLastInconsistentUpdate()) {
 					for (ScannerInfo scannerInfo : update.sources) {
-						CoreASMError error = new CoreASMError("Inconsistent Update: " + update, scannerInfo.getPos(capi
+						CoreASIMError error = new CoreASIMError("Inconsistent Update: " + update, scannerInfo.getPos(capi
 								.getParser().getPositionMap()));
 						error.setContext(capi.getParser(), capi.getSpec());
 						showErrorInEclipse(error);
@@ -588,11 +588,11 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 			showWarningInEclipse(((EngineWarningEvent)event).getWarning());
 	}
 	
-	private void showErrorInEclipse(CoreASMError error) {
+	private void showErrorInEclipse(CoreASIMError error) {
 		ASMEditor.createRuntimeErrorMark(error, (ControlAPI)engine);
 	}
 	
-	private void showWarningInEclipse(CoreASMWarning warning) {
+	private void showWarningInEclipse(CoreASIMWarning warning) {
 		ASMEditor.createRuntimeWarningMark(warning, (ControlAPI)engine);
 	}
 	
@@ -709,7 +709,7 @@ public class EngineDriver implements Runnable, EngineModeObserver, EngineStepObs
 	/**
 	 * @return Returns the lastError.
 	 */
-	public CoreASMError getLastError() {
+	public CoreASIMError getLastError() {
 		return lastError;
 	}
 

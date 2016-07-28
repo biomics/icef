@@ -10,7 +10,7 @@ import java.util.Stack;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.error.ParserException;
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.debug.core.model.ASMDebugTarget;
 import org.coreasim.eclipse.debug.core.model.ASMLineBreakpoint;
 import org.coreasim.eclipse.debug.core.model.ASMMethodBreakpoint;
@@ -21,11 +21,11 @@ import org.coreasim.eclipse.debug.util.ASMDebugUtils;
 import org.coreasim.eclipse.engine.driver.EngineDriver;
 import org.coreasim.eclipse.launch.ICoreASMConfigConstants;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.EngineErrorEvent;
 import org.coreasim.engine.EngineEvent;
 import org.coreasim.engine.EngineModeEvent;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.FunctionElement;
@@ -328,7 +328,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 			((EngineDebugger)runningInstance).specPath = specPath;
 			runningInstance.dolaunch(abspathname);
 		} else
-			throw new CoreException(new Status(Status.WARNING, CoreASMPlugin.PLUGIN_ID, -1, "Another specification is currently running.", null));
+			throw new CoreException(new Status(Status.WARNING, CoreASIMPlugin.PLUGIN_ID, -1, "Another specification is currently running.", null));
 	}
 	
 	/**
@@ -392,7 +392,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	@Override
 	protected void handleError() {
 		// lastError is needed by the ASM Update View, it must not be set to null at this point
-		CoreASMError error = lastError;
+		CoreASIMError error = lastError;
 		super.handleError();
 		lastError = error;
 	}

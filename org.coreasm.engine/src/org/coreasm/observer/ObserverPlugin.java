@@ -37,10 +37,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.coreasim.engine.CoreASMEngine;
+import org.coreasim.engine.CoreASIMEngine;
 import org.coreasim.engine.Specification;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.AbstractUniverse;
 import org.coreasim.engine.absstorage.Location;
 import org.coreasim.engine.absstorage.Update;
@@ -118,7 +118,7 @@ public class ObserverPlugin extends Plugin implements ExtensionPointPlugin {
 	}
 
 	public void fireOnModeTransition(EngineMode src, EngineMode target) {
-		if (target.equals(CoreASMEngine.EngineMode.emStepSucceeded)) {
+		if (target.equals(CoreASIMEngine.EngineMode.emStepSucceeded)) {
 			ensureLocationListIsLoaded();
 			
 			// first things to do
@@ -176,7 +176,7 @@ public class ObserverPlugin extends Plugin implements ExtensionPointPlugin {
 	public Map<EngineMode, Integer> getTargetModes() {
 		if (targetModes == null) {
 			targetModes = new HashMap<EngineMode, Integer>();
-			targetModes.put(CoreASMEngine.EngineMode.emStepSucceeded, ExtensionPointPlugin.DEFAULT_PRIORITY);
+			targetModes.put(CoreASIMEngine.EngineMode.emStepSucceeded, ExtensionPointPlugin.DEFAULT_PRIORITY);
 		}
 		return targetModes;
 	}

@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.Enumerable;
 import org.coreasim.engine.absstorage.FunctionElement;
@@ -56,7 +56,7 @@ public class SubGraphFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!(args.size() == 2 && args.get(0) instanceof GraphElement && args.get(1) instanceof Enumerable))
-			throw new CoreASMError("Illegal arguments for " + FUNCTION_NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + FUNCTION_NAME + ".");
 		
 		GraphElement ge = (GraphElement)args.get(0);
 		Collection<? extends Element> vs = ((Enumerable)args.get(1)).enumerate();

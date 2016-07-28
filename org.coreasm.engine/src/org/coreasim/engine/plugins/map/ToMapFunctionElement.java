@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementBackgroundElement;
 import org.coreasim.engine.absstorage.Enumerable;
@@ -52,7 +52,7 @@ public class ToMapFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!checkArguments(args))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		
 		Enumerable s = (Enumerable)args.get(0);
 		Map<Element, Element> map = new HashMap<Element, Element>();
@@ -63,18 +63,18 @@ public class ToMapFunctionElement extends FunctionElement {
 		for (Element e: s.enumerate()) {
 			// if all the elements are not tuples return undef
 			if (!(e instanceof AbstractListElement)) 
-				throw new CoreASMError("Not all elements provided to " + NAME + " are tuples.");
+				throw new CoreASIMError("Not all elements provided to " + NAME + " are tuples.");
 			List<? extends Element> pair = ((AbstractListElement)e).getList();
 			
 			// if all the elements are not pairs (tuples of size 2) return undef
 			if (pair.size() != 2)
-				throw new CoreASMError("Not all elements provided to " + NAME + " are pairs.");
+				throw new CoreASIMError("Not all elements provided to " + NAME + " are pairs.");
 			Element k = pair.get(0);
 			Element v = pair.get(1);
 			
 			// if there are two tuples with the same key, return undef
 			if (map.put(k, v) != null)
-				throw new CoreASMError("Duplicate key encountered by " + NAME + ": " + k);
+				throw new CoreASIMError("Duplicate key encountered by " + NAME + ": " + k);
 		}
 		return new MapElement(map);
 	}

@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.coreasim.engine.CoreASMEngineFactory;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMEngineFactory;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.Engine;
 import org.coreasim.engine.EngineErrorEvent;
 import org.coreasim.engine.EngineErrorObserver;
@@ -15,7 +15,7 @@ import org.coreasim.engine.EngineEvent;
 import org.coreasim.engine.EngineProperties;
 import org.coreasim.engine.EngineStepObserver;
 import org.coreasim.engine.StepFailedEvent;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.Update;
 import org.coreasim.engine.plugin.PluginServiceInterface;
 import org.coreasim.engine.plugins.debuginfo.DebugInfoPlugin.DebugInfoPSI;
@@ -37,7 +37,7 @@ public class TestEngineDriver implements Runnable, EngineStepObserver, EngineErr
 	private TestEngineDriverStatus status = TestEngineDriverStatus.stopped;
 
 	private boolean updateFailed;
-	protected CoreASMError lastError;
+	protected CoreASIMError lastError;
 	private int stepsLimit;
 	private boolean stopOnEmptyUpdates;
 	private boolean stopOnStableUpdates;
@@ -52,7 +52,7 @@ public class TestEngineDriver implements Runnable, EngineStepObserver, EngineErr
 			runningInstances = new LinkedList<TestEngineDriver>();
 		runningInstances.add(this);
 		CoreASMGlobal.setRootFolder(Tools.getRootFolder());
-		engine = (Engine) org.coreasim.engine.CoreASMEngineFactory.createEngine();
+		engine = (Engine) org.coreasim.engine.CoreASIMEngineFactory.createEngine();
 		engine.addObserver(this);
 		shouldStop = false;
 		shouldPause = true;
@@ -63,7 +63,7 @@ public class TestEngineDriver implements Runnable, EngineStepObserver, EngineErr
 			pluginFolders += EngineProperties.PLUGIN_FOLDERS_DELIM
 					+ System.getProperty(EngineProperties.PLUGIN_FOLDERS_PROPERTY);
 		engine.setProperty(EngineProperties.PLUGIN_FOLDERS_PROPERTY, pluginFolders);
-		engine.setClassLoader(CoreASMEngineFactory.class.getClassLoader());
+		engine.setClassLoader(CoreASIMEngineFactory.class.getClassLoader());
 		engine.initialize();
 		engine.waitWhileBusy();
 	}

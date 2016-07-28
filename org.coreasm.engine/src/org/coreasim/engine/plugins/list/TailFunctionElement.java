@@ -16,7 +16,7 @@ package org.coreasim.engine.plugins.list;
 import java.util.List;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementBackgroundElement;
 import org.coreasim.engine.absstorage.Signature;
@@ -49,7 +49,7 @@ public class TailFunctionElement extends ListFunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!checkArguments(args))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		
 		AbstractListElement list = (AbstractListElement)args.get(0);
 		return list.tail();

@@ -14,7 +14,7 @@ package org.coreasm.network.plugins.graph;
 
 import java.util.List;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.BooleanBackgroundElement;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.Element;
@@ -56,7 +56,7 @@ public class HasCyclesFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!(args.size() == 1 && args.get(0) instanceof GraphElement))
-			throw new CoreASMError("Illegal arguments for " + FUNCTION_NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + FUNCTION_NAME + ".");
 		
 		Graph<Element, Element> g = ((GraphElement)args.get(0)).getGraph();
 		CycleDetector<Element, Element> detector = detectorCache.getCycleDetector(g);

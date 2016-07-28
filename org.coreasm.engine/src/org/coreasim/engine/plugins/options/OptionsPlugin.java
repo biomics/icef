@@ -23,7 +23,7 @@ import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.options.CompilerOptionsPlugin;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.Node;
 import org.coreasim.engine.kernel.KernelServices;

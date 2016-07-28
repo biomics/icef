@@ -32,9 +32,9 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.io.CompilerIOPlugin;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.BackgroundElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementList;
@@ -456,7 +456,7 @@ public class IOPlugin extends Plugin implements
 							fw.append(line + System.lineSeparator());
 					}
 					catch (IOException e) {
-						throw new CoreASMError("File " + outputFile + " could not be created.");
+						throw new CoreASIMError("File " + outputFile + " could not be created.");
 					}
 					finally {
 						if (fw != null)
@@ -486,7 +486,7 @@ public class IOPlugin extends Plugin implements
 		}
 		catch (UnmodifiableFunctionException e) {
 			// Should not happen
-			throw new CoreASMError("Output function is unmodifiable.");
+			throw new CoreASIMError("Output function is unmodifiable.");
 		}
 	}
 

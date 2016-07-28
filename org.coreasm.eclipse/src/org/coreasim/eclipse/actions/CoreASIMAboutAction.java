@@ -33,21 +33,21 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.osgi.framework.BundleReference;
 import org.osgi.framework.Version;
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.engine.CoreASMEngineFactory;
 import org.coreasim.eclipse.preferences.PreferenceConstants;
-import org.coreasim.engine.CoreASMEngine;
+import org.coreasim.engine.CoreASIMEngine;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.util.CoreASMGlobal;
 
 /**
  * Shows a brief About window.
  * 
  */
-public class CoreASMAboutAction implements IWorkbenchWindowActionDelegate {
+public class CoreASIMAboutAction implements IWorkbenchWindowActionDelegate {
 
-	public static final Version version = ((BundleReference) org.coreasim.eclipse.CoreASMPlugin.class.getClassLoader())
+	public static final Version version = ((BundleReference) org.coreasim.eclipse.CoreASIMPlugin.class.getClassLoader())
 			.getBundle().getVersion();
 
 	private static final String COREASM_WEBSITE = "http://www.github.com/CoreASM";
@@ -80,7 +80,7 @@ public class CoreASMAboutAction implements IWorkbenchWindowActionDelegate {
 	/**
 	 * The constructor.
 	 */
-	public CoreASMAboutAction() {
+	public CoreASIMAboutAction() {
 		windowOpen = false;
 	}
 
@@ -90,9 +90,9 @@ public class CoreASMAboutAction implements IWorkbenchWindowActionDelegate {
 		final Shell shell = new Shell(display, SWT.SHELL_TRIM & (~SWT.RESIZE));
 		shell.setLayout(new FillLayout(SWT.VERTICAL));
 
-		String root = CoreASMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER);
+		String root = CoreASIMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER);
 		try {
-			shell.setImage(new Image(display, root + CoreASMPlugin.MAIN_ICON_PATH));
+			shell.setImage(new Image(display, root + CoreASIMPlugin.MAIN_ICON_PATH));
 		} catch (Throwable e) {
 			MessageDialog.openError(window.getShell(), "CoreASM Plug-in", e.getMessage());
 		}
@@ -226,9 +226,9 @@ public class CoreASMAboutAction implements IWorkbenchWindowActionDelegate {
 
 			// collect content for plugin list
 			if (plugins == null) {
-				CoreASMGlobal.setRootFolder(CoreASMPlugin.getDefault().getPreferenceStore()
+				CoreASMGlobal.setRootFolder(CoreASIMPlugin.getDefault().getPreferenceStore()
 						.getString(PreferenceConstants.ROOT_FOLDER));
-				CoreASMEngine engine = CoreASMEngineFactory.createCoreASMEngine();
+				CoreASIMEngine engine = CoreASMEngineFactory.createCoreASMEngine();
 				engine.setClassLoader(this.getClass().getClassLoader());
 				engine.initialize();
 				engine.waitWhileBusy();

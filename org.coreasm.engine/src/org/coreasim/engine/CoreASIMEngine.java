@@ -39,12 +39,12 @@ import org.coreasim.engine.scheduler.Scheduler;
  * <p>
  * Most of the methods of this interface are intended to be implemented in a
  * non-blocking fashion. Engine drivers (such as GUIs) are recommended to call
- * {@link CoreASMEngine#waitWhileBusy()} if they want to wait for the engine to
+ * {@link CoreASIMEngine#waitWhileBusy()} if they want to wait for the engine to
  * complete its tasks.
  * 
  * @author Roozbeh Farahbod
  */
-public interface CoreASMEngine extends VersionInfoProvider {
+public interface CoreASIMEngine extends VersionInfoProvider {
 
 	public static String[] KERNEL_PLUGINS = { "Kernel" };
 
@@ -66,7 +66,7 @@ public interface CoreASMEngine extends VersionInfoProvider {
 
     public boolean hasErrorOccurred();
 
-    public CoreASMError getError();
+    public CoreASIMError getError();
 
     public void setSelfName(String name);
 		 
@@ -388,7 +388,7 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	 * 
 	 * @return the current execution mode of the engine as an integer.
 	 */
-	public CoreASMEngine.EngineMode getEngineMode();
+	public CoreASIMEngine.EngineMode getEngineMode();
 
 	/**
 	 * Returns an interface to the requested plugin.
@@ -626,9 +626,9 @@ public interface CoreASMEngine extends VersionInfoProvider {
 	/**
 	 * Returns the list of warnings occurred during the last/current step.
 	 * 
-	 * @return a list of {@link CoreASMWarning} instances.
+	 * @return a list of {@link CoreASIMWarning} instances.
 	 */
-	public List<CoreASMWarning> getWarnings();
+	public List<CoreASIMWarning> getWarnings();
 
 	/**
 	 * Returns the current set of known ASIMs. This methods returns the

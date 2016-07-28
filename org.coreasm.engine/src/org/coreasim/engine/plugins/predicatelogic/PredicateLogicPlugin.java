@@ -27,7 +27,7 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.predicatelogic.CompilerPredicateLogicPlugin;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.Element;
@@ -382,7 +382,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
         try {
         	variableMap = existsExpNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -509,7 +509,7 @@ public class PredicateLogicPlugin extends Plugin implements OperatorProvider, Pa
         try {
         	variableMap = forallExpNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }

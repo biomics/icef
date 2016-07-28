@@ -47,13 +47,13 @@ import org.coreasim.biomics.serializers.UpdateDeserializer;
 import org.coreasim.biomics.serializers.UpdateMultisetDeserializer;
 import org.coreasim.biomics.serializers.UpdateMultisetSerializer;
 import org.coreasim.biomics.serializers.UpdateSerializer;
-import org.coreasim.engine.CoreASMEngine;
-import org.coreasim.engine.CoreASMEngineFactory;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMEngine;
+import org.coreasim.engine.CoreASIMEngineFactory;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.Engine;
 import org.coreasim.engine.EngineProperties;
 import org.coreasim.engine.InconsistentUpdateSetException;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.AgentCreationElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.InvalidLocationException;
@@ -86,7 +86,7 @@ public class CoreASMContainer extends Thread {
     protected String asimProgram;
     protected int delay;
 
-    private CoreASMEngine engine = null;
+    private CoreASIMEngine engine = null;
     private UpdateMultiset lastUpdateSet = null;
     private ObjectMapper mapper = null;
 
@@ -101,7 +101,7 @@ public class CoreASMContainer extends Thread {
     private boolean stopped = false;
     private boolean paused = false;
     private boolean inError = false;
-    private CoreASMError parseError = null;
+    private CoreASIMError parseError = null;
 
     public CoreASMContainer(ASIMCreationRequest req) {
         asimName = req.name;
@@ -195,7 +195,7 @@ public class CoreASMContainer extends Thread {
         return engine.hasErrorOccurred();
     }
 
-    public CoreASMError getError() {
+    public CoreASIMError getError() {
         return engine.getError();
     }
 
@@ -583,7 +583,7 @@ public class CoreASMContainer extends Thread {
     }
 
     private void initEngine() {
-        CoreASMEngine tempEngine = CoreASMEngineFactory.createEngine();
+        CoreASIMEngine tempEngine = CoreASIMEngineFactory.createEngine();
 
         Logger root = (Logger)LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         if (root instanceof ch.qos.logback.classic.Logger) {

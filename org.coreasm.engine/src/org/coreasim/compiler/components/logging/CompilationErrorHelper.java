@@ -1,7 +1,7 @@
 package org.coreasim.compiler.components.logging;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMEngine;
+import org.coreasim.engine.CoreASIMEngine;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.Node;
 import org.coreasim.engine.parser.CharacterPosition;
@@ -36,7 +36,7 @@ public class CompilationErrorHelper {
 	 * @param engine The CoreASMEngine used for the operation
 	 * @return The nodes character position
 	 */
-	public static CharacterPosition getNodePos(ASTNode node, CoreASMEngine engine){
+	public static CharacterPosition getNodePos(ASTNode node, CoreASIMEngine engine){
 		return ((Node) node).getCharPos(((ControlAPI) engine).getParser());
 	}
 	

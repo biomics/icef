@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.coreasim.compiler.CompilerOptions;
 import org.coreasim.compiler.CoreASMCompiler;
-import org.coreasim.engine.CoreASMEngine;
-import org.coreasim.engine.CoreASMEngineFactory;
+import org.coreasim.engine.CoreASIMEngine;
+import org.coreasim.engine.CoreASIMEngineFactory;
 import org.coreasim.engine.Engine;
 import org.coreasim.engine.EngineProperties;
 import org.coreasim.util.Tools;
@@ -30,8 +30,8 @@ public class CompilerDriver {
 			maxSteps = minSteps;
 		
 		//create a CoreASM engine
-		CoreASMEngine engine = (Engine) CoreASMEngineFactory.createEngine();
-		engine.setClassLoader(CoreASMEngineFactory.class.getClassLoader());
+		CoreASIMEngine engine = (Engine) CoreASIMEngineFactory.createEngine();
+		engine.setClassLoader(CoreASIMEngineFactory.class.getClassLoader());
 		String pluginFolders = Tools.getRootFolder(Engine.class)+"/plugins";
 		if (System.getProperty(EngineProperties.PLUGIN_FOLDERS_PROPERTY) != null)
 			pluginFolders += EngineProperties.PLUGIN_FOLDERS_DELIM

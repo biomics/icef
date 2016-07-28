@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.debug.core.model.ASMStackFrame;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IVariable;
@@ -45,7 +45,7 @@ public class ASMCompareView extends ViewPart implements IDebugContextListener {
 	private Object[] elements;
 	private ArrayList<TableViewerColumn> columns = new ArrayList<TableViewerColumn>();
 	private boolean differencesOnly;
-	private final Image IMAGE = CoreASMPlugin.getImageDescriptor("icons/CoreASM-Logo.png").createImage();
+	private final Image IMAGE = CoreASIMPlugin.getImageDescriptor("icons/CoreASM-Logo.png").createImage();
 
 	class ViewContentProvider implements IStructuredContentProvider {
 		@Override

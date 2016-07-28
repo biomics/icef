@@ -37,7 +37,7 @@ import org.coreasim.engine.scheduler.Scheduler;
  * @author Roozbeh Farahbod
  * 
  */
-public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
+public interface ControlAPI extends CoreASIMEngine, ServiceRegistry {
 	
     /**
     * Adds the specified interpreter listener to receive interpreter events.
@@ -122,7 +122,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	 *
 	 * @param e the error instance
 	 */
-	public void error(CoreASMError e);
+	public void error(CoreASIMError e);
 
 	/**
 	 * Sends a warning message to the engine.
@@ -165,7 +165,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	 *
 	 * @param w the warning instance
 	 */
-	public void warning(CoreASMWarning w);
+	public void warning(CoreASIMWarning w);
 
 
 	/**
@@ -178,7 +178,7 @@ public interface ControlAPI extends CoreASMEngine, ServiceRegistry {
 	/**
 	 * Returns the last error encountered by the engine.
 	 */
-	public CoreASMError getError();
+	public CoreASIMError getError();
 
 	public String getSelfAgentName();
 

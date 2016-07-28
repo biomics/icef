@@ -23,7 +23,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 
 import java.io.IOException;
 
@@ -127,7 +127,7 @@ public class ASIMResource {
 	    return Response.status(400).entity("{ msg : \"Unable to create ASIM. JSON specification of ASIM is incorrect: "+ioe+"\" }").type(MediaType.APPLICATION_JSON).build();
         }
 
-        CoreASMError error = EngineManager.createASIM(req);
+        CoreASIMError error = EngineManager.createASIM(req);
 
         ASIMCreationResponse res = new ASIMCreationResponse();
 	res.setMsg("ASIM successfully created");

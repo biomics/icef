@@ -21,14 +21,14 @@ import java.util.Date;
 public class EngineWarningEvent extends EngineEvent {
 
 	/** CoreASM warning associated with this event. */
-	protected final CoreASMWarning warning;
+	protected final CoreASIMWarning warning;
 	
 	protected final Date time;
 	
 	/** 
 	 * Creates a new warning event with the given CoreASM error.
 	 */
-	public EngineWarningEvent(CoreASMWarning w) {
+	public EngineWarningEvent(CoreASIMWarning w) {
 		this.warning = w;
 		this.time = new Date();
 	}
@@ -36,7 +36,7 @@ public class EngineWarningEvent extends EngineEvent {
 	/**
 	 * Returns the warning associated with this event.
 	 */
-	public CoreASMWarning getWarning() {
+	public CoreASIMWarning getWarning() {
 		return warning;
 	}
 	

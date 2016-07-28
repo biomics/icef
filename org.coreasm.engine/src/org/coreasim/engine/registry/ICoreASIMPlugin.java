@@ -23,7 +23,7 @@ import org.coreasim.engine.plugin.PluginServiceInterface;
  * Interface of all CoreASM plugins.
  *
  */
-public interface ICoreASMPlugin extends VersionInfoProvider {
+public interface ICoreASIMPlugin extends VersionInfoProvider {
 
 	/**
 	 * Returns the name of this Plug-in,

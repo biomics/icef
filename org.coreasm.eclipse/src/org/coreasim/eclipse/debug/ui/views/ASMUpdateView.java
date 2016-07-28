@@ -4,12 +4,12 @@ package org.coreasim.eclipse.debug.ui.views;
 import java.util.ArrayList;
 import java.util.Set;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.debug.core.model.ASMDebugTarget;
 import org.coreasim.eclipse.debug.core.model.ASMStackFrame;
 import org.coreasim.eclipse.debug.util.ASMDebugUtils;
 import org.coreasim.eclipse.engine.debugger.EngineDebugger;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.util.Tools;
 import org.eclipse.debug.ui.DebugUITools;
@@ -50,8 +50,8 @@ public class ASMUpdateView extends ViewPart implements IDebugContextListener {
 	private Set<? extends Element> agents;
 	private Set<ASMUpdate> updates;
 	private Object[] elements;
-	private final Image IMAGE_UPDATE = CoreASMPlugin.getImageDescriptor("icons/CoreASM-Logo.png").createImage();
-	private final Image IMAGE_BREAKPOINT = CoreASMPlugin.getImageDescriptor("icons/stepping_mode.png").createImage();
+	private final Image IMAGE_UPDATE = CoreASIMPlugin.getImageDescriptor("icons/CoreASM-Logo.png").createImage();
+	private final Image IMAGE_BREAKPOINT = CoreASIMPlugin.getImageDescriptor("icons/stepping_mode.png").createImage();
 
 	class ViewContentProvider implements IStructuredContentProvider {
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
@@ -251,7 +251,7 @@ public class ASMUpdateView extends ViewPart implements IDebugContextListener {
 						refresh();
 					}
 					else {
-						CoreASMError lastError = debugTarget.getLastError();
+						CoreASIMError lastError = debugTarget.getLastError();
 						if (lastError != null) {
 							elements = new ASMUpdateViewElement[] { new ASMUpdateViewElement(lastError.showError().replaceAll("\r|\n", " ")) };
 							refresh();

@@ -2,7 +2,7 @@ package org.coreasim.eclipse.editors.contentassist;
 
 import java.io.IOException;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -19,7 +19,7 @@ import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
 public class TemplateManager {
 	/** Key to store custom templates. */
-	private static final String CUSTOM_TEMPLATES_KEY = CoreASMPlugin.getDefault()
+	private static final String CUSTOM_TEMPLATES_KEY = CoreASIMPlugin.getDefault()
 			.toString() + ".customtemplates";
 	
 	/** The shared instance. */
@@ -52,7 +52,7 @@ public class TemplateManager {
 
 		if (fStore == null) {
 			fStore = new ContributionTemplateStore(getContextTypeRegistry(),
-					CoreASMPlugin.getDefault().getPreferenceStore(),
+					CoreASIMPlugin.getDefault().getPreferenceStore(),
 					CUSTOM_TEMPLATES_KEY);
 			try {
 				fStore.load();
@@ -79,20 +79,20 @@ public class TemplateManager {
 
 	/* Forward methods to CoreASMPlugin plugin instance */
 	public ImageRegistry getImageRegistry() {
-		return CoreASMPlugin.getDefault().getImageRegistry();
+		return CoreASIMPlugin.getDefault().getImageRegistry();
 	}
 	
 	public static ImageDescriptor imageDescriptorFromPlugin(String string, String default_image) {
-		return CoreASMPlugin.imageDescriptorFromPlugin(string, default_image);
+		return CoreASIMPlugin.imageDescriptorFromPlugin(string, default_image);
 	}
 	
 	public IPreferenceStore getPreferenceStore() {
-		return CoreASMPlugin.getDefault().getPreferenceStore();
+		return CoreASIMPlugin.getDefault().getPreferenceStore();
 	}
 
 	@SuppressWarnings("deprecation")
 	public void savePluginPreferences() {
-		CoreASMPlugin.getDefault().savePluginPreferences();
+		CoreASIMPlugin.getDefault().savePluginPreferences();
 	}
 }
 

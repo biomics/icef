@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.plugin.ExtensionPointPlugin;
 import org.coreasim.engine.plugin.Plugin;
 

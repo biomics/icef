@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.FunctionElement;
@@ -67,7 +67,7 @@ public class StringMatchingFunction extends FunctionElement {
 						else ret = BooleanElement.FALSE;
 
 				}catch (PatternSyntaxException e) {
-					capi.error(new CoreASMError("regex used in expression - matches(\""+string+"\", \""+ regex+"\") - is not conform to the syntax of Java regular expressions!\nFor more help look here: http://www.regexplanet.com/advanced/java/",capi.getInterpreter().getInterpreterInstance().getPosition()));
+					capi.error(new CoreASIMError("regex used in expression - matches(\""+string+"\", \""+ regex+"\") - is not conform to the syntax of Java regular expressions!\nFor more help look here: http://www.regexplanet.com/advanced/java/",capi.getInterpreter().getInterpreterInstance().getPosition()));
 				}
 			}
 		}

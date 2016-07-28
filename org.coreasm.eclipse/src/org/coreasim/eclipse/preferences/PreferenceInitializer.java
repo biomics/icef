@@ -3,7 +3,7 @@ package org.coreasim.eclipse.preferences;
 import java.io.IOException;
 import java.net.URL;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.util.Tools;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -21,12 +21,12 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
-		IPreferenceStore store = CoreASMPlugin.getDefault()
+		IPreferenceStore store = CoreASIMPlugin.getDefault()
 				.getPreferenceStore();
 
 		URL u;
 		try {
-			u = FileLocator.toFileURL(CoreASMPlugin.getDefault().getBundle().getEntry("/"));
+			u = FileLocator.toFileURL(CoreASIMPlugin.getDefault().getBundle().getEntry("/"));
 			store.setDefault(PreferenceConstants.ROOT_FOLDER,u.getPath());
 		} catch (IOException e) {
 			store.setDefault(PreferenceConstants.ROOT_FOLDER, Tools.getRootFolder());

@@ -28,7 +28,7 @@ import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.kernel.CompilerKernelPlugin;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.Engine;
 import org.coreasim.engine.VersionInfo;
 import org.coreasim.engine.absstorage.AbstractStorage;
@@ -1207,7 +1207,7 @@ public class Kernel extends Plugin
 				final String ruleName = idNode.getToken();
 				
 				if (ruleElements.get(ruleName) != null) 
-					throw new CoreASMError(
+					throw new CoreASIMError(
 							"Rule '" + ruleName + "' is defined more than once.", idNode);
 				
 				// create structure for all parameters
@@ -1265,7 +1265,7 @@ public class Kernel extends Plugin
 				final String policyName = idNode.getToken();
 				
 				if (policyElements.get(policyName) != null) 
-					throw new CoreASMError(
+					throw new CoreASIMError(
 							"Policy '" + policyName + "' is defined more than once.", idNode);
 				
 				// create structure for all parameters

@@ -1,6 +1,6 @@
 package org.coreasim.eclipse.launch;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.preferences.PreferenceConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -98,10 +98,10 @@ public class SourceTab extends AbstractLaunchConfigurationTab implements
 		if (image!=null)
 			return image;
 		else {
-            String root = CoreASMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER);
+            String root = CoreASIMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER);
 //			ImageDescriptor id = CoreASMPlugin.getImageDescriptor(root + CoreASMPlugin.MAIN_ICON_PATH);
 //			return id.createImage();
-			return new Image(Display.getCurrent(), root+CoreASMPlugin.MAIN_ICON_PATH);
+			return new Image(Display.getCurrent(), root+CoreASIMPlugin.MAIN_ICON_PATH);
 		}
 	}
 
@@ -168,8 +168,8 @@ public class SourceTab extends AbstractLaunchConfigurationTab implements
 		}
 		if (comp.getSpec().getText().isEmpty()) {
 			setErrorMessage("You must choose a specification (." 
-					+ CoreASMPlugin.COREASM_FILE_EXT_1 + " or ."
-					+ CoreASMPlugin.COREASM_FILE_EXT_2 + ") file.");
+					+ CoreASIMPlugin.COREASM_FILE_EXT_1 + " or ."
+					+ CoreASIMPlugin.COREASM_FILE_EXT_2 + ") file.");
 			return false;
 		}
 		IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(comp.getProject().getText());

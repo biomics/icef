@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.coreasim.engine.ControlAPI;
 import org.coreasim.engine.EngineException;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 
 /** 
  *	Interface for plugins that extend the engine's life-cycle.

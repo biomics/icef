@@ -1,6 +1,6 @@
 package org.coreasim.engine.kernel;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.Location;
 import org.coreasim.engine.absstorage.TriggerMultiset;
@@ -28,7 +28,7 @@ public class ConstantValueNode extends ASTNode {
 	
 	public void setValue(Element value) {
 		if (value == null)
-			throw new CoreASMError("Constant value must not be null", this);
+			throw new CoreASIMError("Constant value must not be null", this);
 		super.setNode(null, new UpdateMultiset(), new TriggerMultiset(), value);
 	}
 	

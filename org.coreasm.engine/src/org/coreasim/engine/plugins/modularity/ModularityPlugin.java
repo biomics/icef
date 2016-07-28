@@ -34,7 +34,7 @@ import org.coreasim.compiler.plugins.modularity.CompilerModularityPlugin;
 import org.coreasim.engine.SpecLine;
 import org.coreasim.engine.Specification;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.interpreter.Node;
 import org.coreasim.engine.interpreter.ScannerInfo;
 import org.coreasim.engine.parser.GrammarRule;

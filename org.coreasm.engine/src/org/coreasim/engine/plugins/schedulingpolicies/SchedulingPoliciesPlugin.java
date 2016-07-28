@@ -26,7 +26,7 @@ import org.codehaus.jparsec.Parsers;
 import org.coreasim.engine.EngineError;
 import org.coreasim.engine.EngineException;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.AbstractStorage;
 import org.coreasim.engine.absstorage.AbstractUniverse;
 import org.coreasim.engine.absstorage.BackgroundElement;

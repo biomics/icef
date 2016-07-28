@@ -28,11 +28,11 @@ import org.coreasim.util.Tools;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class CoreASMPlugin extends AbstractUIPlugin {
+public class CoreASIMPlugin extends AbstractUIPlugin {
 
 	public static final String PLUGINS_FOLDER_NAME = "plugins";
 
-	Logger logger = LoggerFactory.getLogger(CoreASMPlugin.class);
+	Logger logger = LoggerFactory.getLogger(CoreASIMPlugin.class);
 	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.coreasm.eclipse";
@@ -48,12 +48,12 @@ public class CoreASMPlugin extends AbstractUIPlugin {
 	private Shell shell = null;
 	
 	//The shared instance.
-	private static CoreASMPlugin plugin;
+	private static CoreASIMPlugin plugin;
 	
 	/**
 	 * The constructor.
 	 */
-	public CoreASMPlugin() {
+	public CoreASIMPlugin() {
 		plugin = this;
 		String rootFolder = findRootFolder();
 		Tools.setRootFolder(rootFolder);
@@ -117,7 +117,7 @@ public class CoreASMPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the shared instance.
 	 */
-	public static CoreASMPlugin getDefault() {
+	public static CoreASIMPlugin getDefault() {
 		return plugin;
 	}
 

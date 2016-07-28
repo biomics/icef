@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
 import org.coreasim.engine.absstorage.AbstractStorage;
 import org.coreasim.engine.absstorage.BooleanElement;
@@ -285,7 +285,7 @@ public class UniversalControlPlugin extends Plugin implements ParserPlugin, Inte
 				if (!node.getResetCondition().isEvaluated())
 					return node.getResetCondition();
 				if (!(node.getResetCondition().getValue() instanceof BooleanElement))
-					throw new CoreASMError("The value of the reset condition must be a BooleanElement but was " + node.getResetCondition().getValue() + ".", node.getResetCondition());
+					throw new CoreASIMError("The value of the reset condition must be a BooleanElement but was " + node.getResetCondition().getValue() + ".", node.getResetCondition());
 				BooleanElement value = (BooleanElement)node.getResetCondition().getValue();
 				if (value.getValue())
 					repetitions = 0;
@@ -300,16 +300,16 @@ public class UniversalControlPlugin extends Plugin implements ParserPlugin, Inte
 					repetitionCount = 1;
 				else {
 					if (!(repetitionNode instanceof ASTNode))
-						throw new CoreASMError("Illegal node encountered.", repetitionNode);
+						throw new CoreASIMError("Illegal node encountered.", repetitionNode);
 					ASTNode repetitionASTNode = (ASTNode)repetitionNode;
 					if (!repetitionASTNode.isEvaluated())
 						return repetitionASTNode;
 					if (!(repetitionASTNode.getValue() instanceof NumberElement))
-						throw new CoreASMError("The value of the repetition count must be a NumberElement but was " + repetitionASTNode.getValue() + ".", repetitionASTNode);
+						throw new CoreASIMError("The value of the repetition count must be a NumberElement but was " + repetitionASTNode.getValue() + ".", repetitionASTNode);
 					NumberElement value = (NumberElement)repetitionASTNode.getValue();
 					repetitionCount = (int)value.getValue();
 					if (repetitionCount < 0)
-						throw new CoreASMError("The value of the repetition count must be possitive but was " + repetitionCount + ".", repetitionASTNode);
+						throw new CoreASIMError("The value of the repetition count must be possitive but was " + repetitionCount + ".", repetitionASTNode);
 				}
 				if (repetitions >= repetitionCount) {
 					pos.setNode(null, new UpdateMultiset(), null, null);
@@ -327,7 +327,7 @@ public class UniversalControlPlugin extends Plugin implements ParserPlugin, Inte
 			boolean conditionMet = true;
 			if (node.getCondition() != null) {
 				if (!(node.getCondition().getValue() instanceof BooleanElement))
-					throw new CoreASMError("The value of the condition must be a BooleanElement but was " + node.getCondition().getValue() + ".", node.getCondition());
+					throw new CoreASIMError("The value of the condition must be a BooleanElement but was " + node.getCondition().getValue() + ".", node.getCondition());
 				BooleanElement value = (BooleanElement)node.getCondition().getValue();
 				conditionMet = value.getValue();
 			}
@@ -379,7 +379,7 @@ public class UniversalControlPlugin extends Plugin implements ParserPlugin, Inte
 						if (node.isSequential() && prevRule != null) {
 							Set<Update> aggregatedUpdates = storage.performAggregation(prevRule.getUpdates());
 							if (!storage.isConsistent(aggregatedUpdates))
-								throw new CoreASMError("Inconsistent updates computed in sequence.", prevRule);
+								throw new CoreASIMError("Inconsistent updates computed in sequence.", prevRule);
 							storage.pushState();
 							storage.apply(aggregatedUpdates);
 						}
@@ -408,7 +408,7 @@ public class UniversalControlPlugin extends Plugin implements ParserPlugin, Inte
 							composedUpdates = new UpdateMultiset();
 						Set<Update> aggregatedUpdates = storage.performAggregation(updates);
 						if (!storage.isConsistent(aggregatedUpdates))
-							throw new CoreASMError("Inconsistent updates computed in loop.", pos);
+							throw new CoreASIMError("Inconsistent updates computed in loop.", pos);
 						storage.apply(aggregatedUpdates);
 						getComposedUpdates().put(pos, storage.compose(composedUpdates, updates));
 						interpreter.getInterpreterInstance().clearTree(node.getCondition());
@@ -471,7 +471,7 @@ public class UniversalControlPlugin extends Plugin implements ParserPlugin, Inte
 								}
 							}
 						} catch (InvalidLocationException e) {
-							throw new CoreASMError("Encountered invalid location: " + u.loc, pos);
+							throw new CoreASIMError("Encountered invalid location: " + u.loc, pos);
 						}
 					}
 					getRepetitions().put(pos, (fixpoint ? 1 : 0));

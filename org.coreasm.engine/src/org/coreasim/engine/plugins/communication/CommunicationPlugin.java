@@ -21,9 +21,9 @@ import java.util.Set;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.Specification.FunctionInfo;
 import org.coreasim.engine.Specification.PolicyInfo;
 import org.coreasim.engine.Specification.RuleInfo;
@@ -521,7 +521,7 @@ public class CommunicationPlugin extends Plugin implements
 		}
 		catch (UnmodifiableFunctionException e) {
 			// Should not happen
-			throw new CoreASMError("Outbox function is unmodifiable.");
+			throw new CoreASIMError("Outbox function is unmodifiable.");
 		}
 	}
 	
@@ -545,7 +545,7 @@ public class CommunicationPlugin extends Plugin implements
 		}
 		catch (UnmodifiableFunctionException e) {
 			// Should not happen
-			throw new CoreASMError("inbox function is unmodifiable.");
+			throw new CoreASIMError("inbox function is unmodifiable.");
 		}
 	}
 

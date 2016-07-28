@@ -27,11 +27,11 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.signature.CompilerSignaturePlugin;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.EngineError;
 import org.coreasim.engine.EngineTools;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.CoreASIMEngine.EngineMode;
 import org.coreasim.engine.absstorage.AbstractStorage;
 import org.coreasim.engine.absstorage.AbstractUniverse;
 import org.coreasim.engine.absstorage.BackgroundElement;
@@ -768,22 +768,22 @@ public class SignaturePlugin extends Plugin
     private boolean checkNameUniqueness(String name, String type, ASTNode node, Interpreter interpreter) {
     	boolean result = true;
         if (rules.containsKey(name)) {
-        	throw new CoreASMError("Cannot add " + type + " '" + name + "'." + 
+        	throw new CoreASIMError("Cannot add " + type + " '" + name + "'." + 
             		" A derived function with the same name already exists.", node);
         }
         if (functions.containsKey(name)) {
 //            capi.error("Cannot add " + type + " '" + name + "'." + 
 //            		" A function with the same name already exists.", node, interpreter);
 //            result = false;
-        	throw new CoreASMError("Cannot add " + type + " '" + name + "'." + 
+        	throw new CoreASIMError("Cannot add " + type + " '" + name + "'." + 
             		" A function with the same name already exists.", node);
         }
         if (universes.containsKey(name)) {
-        	throw new CoreASMError("Cannot add " + type + " '" + name + "'." + 
+        	throw new CoreASIMError("Cannot add " + type + " '" + name + "'." + 
             		" A universe with the same name already exists.", node);
         }
         if (backgrounds.containsKey(name)) {
-        	throw new CoreASMError("Cannot add " + type + " '" + name + "'." + 
+        	throw new CoreASIMError("Cannot add " + type + " '" + name + "'." + 
             		" A background with the same name already exists.", node);
         }
         return result;

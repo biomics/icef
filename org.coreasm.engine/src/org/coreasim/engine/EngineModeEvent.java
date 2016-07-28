@@ -21,16 +21,16 @@ package org.coreasim.engine;
 public class EngineModeEvent extends EngineEvent {
 	
 	/** Old mode of the engine */
-	protected final CoreASMEngine.EngineMode oldMode;
+	protected final CoreASIMEngine.EngineMode oldMode;
 	
 	/** New mode of the engine */
-	protected final CoreASMEngine.EngineMode newMode;
+	protected final CoreASIMEngine.EngineMode newMode;
 
 	/**
 	 * Creates a new engine mode event with the given old and new modes.
 	 */
-	public EngineModeEvent(CoreASMEngine.EngineMode oldMode,
-			CoreASMEngine.EngineMode newMode) {
+	public EngineModeEvent(CoreASIMEngine.EngineMode oldMode,
+			CoreASIMEngine.EngineMode newMode) {
 		this.oldMode = oldMode;
 		this.newMode = newMode;
 	}
@@ -38,14 +38,14 @@ public class EngineModeEvent extends EngineEvent {
 	/**
 	 * @return Returns the newMode.
 	 */
-	public CoreASMEngine.EngineMode getNewMode() {
+	public CoreASIMEngine.EngineMode getNewMode() {
 		return newMode;
 	}
 
 	/**
 	 * @return Returns the oldMode.
 	 */
-	public CoreASMEngine.EngineMode getOldMode() {
+	public CoreASIMEngine.EngineMode getOldMode() {
 		return oldMode;
 	}
 

@@ -32,7 +32,7 @@ public class PluginRegistry implements IPluginRegistry {
 	private static IPluginRegistry SINGLETON = null;
 
 	/** Holds a mapping of plugin names to plugins. */
-	private Map<String, ICoreASMPlugin> plugins = new HashMap<String, ICoreASMPlugin>();
+	private Map<String, ICoreASIMPlugin> plugins = new HashMap<String, ICoreASIMPlugin>();
 
 	private boolean initialized = false;
 
@@ -46,8 +46,8 @@ public class PluginRegistry implements IPluginRegistry {
 	}
 	
 	@Override
-	public Collection<ICoreASMPlugin> getPlugins() {
-		Collection<ICoreASMPlugin> result = plugins.values();
+	public Collection<ICoreASIMPlugin> getPlugins() {
+		Collection<ICoreASIMPlugin> result = plugins.values();
 		
 		if (result != null) {
 			return Collections.unmodifiableCollection(result);
@@ -57,7 +57,7 @@ public class PluginRegistry implements IPluginRegistry {
 	}
 
 	@Override
-	public ICoreASMPlugin getPlugin(String name) {
+	public ICoreASIMPlugin getPlugin(String name) {
 		return plugins.get(name);
 	}
 

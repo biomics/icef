@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.Signature;
 import org.coreasim.engine.plugins.collection.AbstractListElement;
@@ -42,7 +42,7 @@ public class ZipFunctionElement extends ListFunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!checkArguments(args))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		List<? extends Element> list0 = ((AbstractListElement) args.get(0)).getList();
 		List<? extends Element> list1 = ((AbstractListElement) args.get(1)).getList();
 		return new ListElement(zip(list0, list1));

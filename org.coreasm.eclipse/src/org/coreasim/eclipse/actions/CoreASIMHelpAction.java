@@ -3,7 +3,7 @@ package org.coreasim.eclipse.actions;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.preferences.PreferenceConstants;
 import org.coreasim.util.Tools;
 import org.eclipse.jface.action.IAction;
@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
  * Shows a brief help window.
  * 
  */
-public class CoreASMHelpAction implements IWorkbenchWindowActionDelegate {
+public class CoreASIMHelpAction implements IWorkbenchWindowActionDelegate {
 	private IWorkbenchWindow window;
     private boolean windowOpen;
     private Shell shell;
@@ -33,7 +33,7 @@ public class CoreASMHelpAction implements IWorkbenchWindowActionDelegate {
 	/**
 	 * The constructor.
 	 */
-	public CoreASMHelpAction() {
+	public CoreASIMHelpAction() {
         windowOpen = false;
     }
 
@@ -49,9 +49,9 @@ public class CoreASMHelpAction implements IWorkbenchWindowActionDelegate {
             shell = new Shell (window.getShell(),SWT.SHELL_TRIM);
             shell.setLayout(new FillLayout());
             shell.setText("CoreASM Help");
-            String root = CoreASMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER);
+            String root = CoreASIMPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.ROOT_FOLDER);
             try {
-                shell.setImage(new Image(display,root+CoreASMPlugin.MAIN_ICON_PATH));
+                shell.setImage(new Image(display,root+CoreASIMPlugin.MAIN_ICON_PATH));
             }
             catch (Throwable e) {
                 MessageDialog.openError(

@@ -16,7 +16,7 @@ package org.coreasim.engine.plugins.list;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.FunctionElement;
 import org.coreasim.engine.absstorage.Signature;
@@ -59,7 +59,7 @@ public class FlattenListFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!(args.size() == 1 && args.get(0) instanceof AbstractListElement))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		
 		return new ListElement(flattenList(((AbstractListElement) args.get(0)).getList()));
 	}

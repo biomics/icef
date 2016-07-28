@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.coreasim.eclipse.callhierarchy.ASMCallHierarchyView;
 import org.coreasim.eclipse.editors.ASMDeclarationWatcher.Declaration;
 import org.coreasim.eclipse.editors.errors.AbstractError;
@@ -19,9 +19,9 @@ import org.coreasim.eclipse.editors.warnings.CoreASMEclipseWarning;
 import org.coreasim.eclipse.preferences.PreferenceConstants;
 import org.coreasim.eclipse.util.Utilities;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
-import org.coreasim.engine.CoreASMIssue;
-import org.coreasim.engine.CoreASMWarning;
+import org.coreasim.engine.CoreASIMError;
+import org.coreasim.engine.CoreASIMIssue;
+import org.coreasim.engine.CoreASIMWarning;
 import org.coreasim.engine.Specification;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.Node;
@@ -221,7 +221,7 @@ implements IDocumentListener
 	protected void initializeEditor() {
 		super.initializeEditor();
 		ChainedPreferenceStore chainPrefStore = new ChainedPreferenceStore(
-				new IPreferenceStore[]{getPreferenceStore(),CoreASMPlugin.getDefault().getPreferenceStore()}); 
+				new IPreferenceStore[]{getPreferenceStore(),CoreASIMPlugin.getDefault().getPreferenceStore()}); 
 		//use the CoreASM preference store to save and access preferences of the editor, e.g. the bracket highlighting
 		setPreferenceStore(chainPrefStore);
 	}
@@ -490,7 +490,7 @@ implements IDocumentListener
 		}
 	}
 	
-	public static void createRuntimeErrorMark(CoreASMError error, ControlAPI capi) {
+	public static void createRuntimeErrorMark(CoreASIMError error, ControlAPI capi) {
 		if (error.getSpec() == null)
 			error.setContext(capi.getParser(), capi.getSpec());
 		IEditorPart editor = Utilities.getEditor(getIssueFileName(error, capi));
@@ -501,7 +501,7 @@ implements IDocumentListener
 		}
 	}
 	
-	private static String getIssueFileName(CoreASMIssue issue, ControlAPI capi) {
+	private static String getIssueFileName(CoreASIMIssue issue, ControlAPI capi) {
 		CharacterPosition charPos = issue.pos;
 		Specification spec = issue.getSpec();
 		if (capi != null) {
@@ -549,7 +549,7 @@ implements IDocumentListener
 		createErrorMark(error, false);
 	}
 	
-	public static void createRuntimeWarningMark(CoreASMWarning warning, ControlAPI capi) {
+	public static void createRuntimeWarningMark(CoreASIMWarning warning, ControlAPI capi) {
 		IEditorPart editor = Utilities.getEditor(getIssueFileName(warning, capi));
 		if (editor instanceof ASMEditor) {
 			ASMEditor asmEditor = (ASMEditor)editor;
@@ -701,7 +701,7 @@ implements IDocumentListener
 		
 		//Enable bracket highlighting in the preference store
 		//and set default values
-		IPreferenceStore store = CoreASMPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore store = CoreASIMPlugin.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true); //highlighting activated
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, "128,128,128"); //color of highlighting box is gray
 	

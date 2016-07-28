@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementBackgroundElement;
 import org.coreasim.engine.absstorage.Signature;
@@ -68,14 +68,14 @@ public class SetNthFunctionElement extends ListFunctionElement {
 		else if (args.get(2) == null)
 			exception = "Illegal argument: Thrid argument of " + NAME + " should be an element.";
 		if (!exception.isEmpty())
-			throw new CoreASMError(exception);
+			throw new CoreASIMError(exception);
 		
 		ListElement list = (ListElement) args.get(0);
 		NumberElement n = (NumberElement)args.get(1);
 		if (n.getValue() <= 0)
-			throw new CoreASMError("Index out of range for " + NAME + ". Second parameter must be a positive number.");
+			throw new CoreASIMError("Index out of range for " + NAME + ". Second parameter must be a positive number.");
 		else if (n.getValue() > list.size())
-			throw new CoreASMError(
+			throw new CoreASIMError(
 					"Index out of range for " + NAME
 							+ ". Second parameter must be a number which is at most the number of list elements.");
 

@@ -5,7 +5,7 @@ import java.util.List;
 import org.coreasim.eclipse.editors.ASMDocument;
 import org.coreasim.eclipse.editors.ASMEditor;
 import org.coreasim.eclipse.editors.SlimEngine;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 
 /**
  * The <code>CoreASMErrorRecognizer</code> collects errors from the CoreASM Engine
@@ -22,7 +22,7 @@ public class CoreASMErrorRecognizer implements ITextErrorRecognizer {
 	@Override
 	public void checkForErrors(ASMDocument document, List<AbstractError> errors) {
 		SlimEngine slimEngine = (SlimEngine)parentEditor.getParser().getSlimEngine();
-		for (CoreASMError error : slimEngine.getErrors())
+		for (CoreASIMError error : slimEngine.getErrors())
 			errors.add(new CoreASMEclipseError(error, document));
 	}
 }

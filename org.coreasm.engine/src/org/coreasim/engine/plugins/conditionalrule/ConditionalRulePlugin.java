@@ -21,7 +21,7 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.conditionalrule.CompilerConditionalRulePlugin;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.UpdateMultiset;
@@ -122,7 +122,7 @@ public class ConditionalRulePlugin extends Plugin
 			if (!conditionalTerm.getCondition().isEvaluated())
 				return conditionalTerm.getCondition();
 			if (!(conditionalTerm.getCondition().getValue() instanceof BooleanElement))
-				throw new CoreASMError("The value of the condition of a conditional term must be a BooleanElement but was " + conditionalTerm.getCondition().getValue() + ".", conditionalTerm.getCondition());
+				throw new CoreASIMError("The value of the condition of a conditional term must be a BooleanElement but was " + conditionalTerm.getCondition().getValue() + ".", conditionalTerm.getCondition());
 			BooleanElement value = (BooleanElement)conditionalTerm.getCondition().getValue();
 			if (value.getValue()) {
 				if (!conditionalTerm.getIfTerm().isEvaluated())

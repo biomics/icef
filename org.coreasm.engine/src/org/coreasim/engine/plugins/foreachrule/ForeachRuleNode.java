@@ -3,7 +3,7 @@ package org.coreasim.engine.plugins.foreachrule;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.ScannerInfo;
 
@@ -34,14 +34,14 @@ public class ForeachRuleNode extends ASTNode {
     /**
      * Returns a map of the variable names to the nodes which
      * represent the domains that variable should be taken from
-     * @throws CoreASMError A CoreASMError is thrown if a variable is defined multiple times
+     * @throws CoreASIMError A CoreASMError is thrown if a variable is defined multiple times
      */
-    public Map<String,ASTNode> getVariableMap() throws CoreASMError {
+    public Map<String,ASTNode> getVariableMap() throws CoreASIMError {
     	Map<String,ASTNode> variableMap = new HashMap<String,ASTNode>();
         
         for (ASTNode current = getFirst(); current.getNext() != null && current.getNext().getNext() != null && ASTNode.ID_CLASS.equals(current.getGrammarClass()); current = current.getNext().getNext()) {
             if (variableMap.put(current.getToken(),current.getNext()) != null)
-            	throw new CoreASMError("Variable \""+current.getToken()+"\" already defined in foreach rule.", this);
+            	throw new CoreASIMError("Variable \""+current.getToken()+"\" already defined in foreach rule.", this);
         }
         
         return variableMap;

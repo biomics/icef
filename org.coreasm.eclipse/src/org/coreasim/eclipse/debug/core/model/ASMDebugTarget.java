@@ -6,7 +6,7 @@ import org.coreasim.eclipse.debug.ui.views.ASMUpdate;
 import org.coreasim.eclipse.engine.debugger.EngineDebugger;
 import org.coreasim.eclipse.engine.driver.EngineDriver.EngineDriverStatus;
 import org.coreasim.eclipse.launch.ICoreASMConfigConstants;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
@@ -68,7 +68,7 @@ public class ASMDebugTarget extends ASMDebugElement implements IDebugTarget {
 		return debugger.getStepFailedMsg();
 	}
 	
-	public CoreASMError getLastError() {
+	public CoreASIMError getLastError() {
 		return debugger.getLastError();
 	}
 	

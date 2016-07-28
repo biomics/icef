@@ -15,7 +15,7 @@ package org.coreasim.engine.plugins.set;
 
 import java.util.List;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.ElementBackgroundElement;
 import org.coreasim.engine.absstorage.Enumerable;
@@ -60,7 +60,7 @@ public class ToSetFunctionElement extends FunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!(args.size() == 1 && args.get(0) instanceof Enumerable))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		
 		return new SetElement(((Enumerable)args.get(0)).enumerate());
 	}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.Element;
 import org.coreasim.engine.absstorage.FunctionBackgroundElement;
 import org.coreasim.engine.absstorage.FunctionElement;
@@ -45,12 +45,12 @@ public class ZipWithFunctionElement extends ListFunctionElement {
 	@Override
 	public Element getValue(List<? extends Element> args) {
 		if (!checkArguments(args))
-			throw new CoreASMError("Illegal arguments for " + NAME + ".");
+			throw new CoreASIMError("Illegal arguments for " + NAME + ".");
 		List<? extends Element> list0 = ((AbstractListElement) args.get(0)).getList();
 		List<? extends Element> list1 = ((AbstractListElement) args.get(1)).getList();
 		FunctionElement f = (FunctionElement)args.get(2);
 		if (f.getSignature() != null && f.getSignature().getDomain().size() != 2)
-			throw new CoreASMError("The function provided to zipwith must have an arity of 2.");
+			throw new CoreASIMError("The function provided to zipwith must have an arity of 2.");
 		return new ListElement(zipWith(list0, list1, f));
 	}
 

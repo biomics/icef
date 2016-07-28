@@ -12,7 +12,7 @@ import java.util.Set;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
 import org.coreasim.engine.absstorage.AbstractStorage;
 import org.coreasim.engine.absstorage.BooleanElement;
@@ -138,7 +138,7 @@ public class ForeachRulePlugin extends Plugin implements ParserPlugin,
             try {
             	variableMap = foreachNode.getVariableMap();
             }
-            catch (CoreASMError e) {
+            catch (CoreASIMError e) {
             	capi.error(e);
             	return pos;
             }
@@ -274,7 +274,7 @@ public class ForeachRulePlugin extends Plugin implements ParserPlugin,
 						composedUpdates = new UpdateMultiset();
 					Set<Update> aggregatedUpdates = storage.performAggregation(foreachNode.getDoRule().getUpdates());
 					if (!storage.isConsistent(aggregatedUpdates))
-						throw new CoreASMError("Inconsistent updates computed in loop.", pos);
+						throw new CoreASIMError("Inconsistent updates computed in loop.", pos);
 					storage.apply(aggregatedUpdates);
 					updates.put(pos, storage.compose(composedUpdates, foreachNode.getDoRule().getUpdates()));
             	}

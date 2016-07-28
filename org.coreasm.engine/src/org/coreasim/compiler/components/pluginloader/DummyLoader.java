@@ -17,7 +17,7 @@ import org.coreasim.engine.plugin.OperatorProvider;
 import org.coreasim.engine.plugin.Plugin;
 import org.coreasim.engine.plugin.SchedulerPlugin;
 import org.coreasim.engine.plugin.VocabularyExtender;
-import org.coreasim.engine.registry.ICoreASMPlugin;
+import org.coreasim.engine.registry.ICoreASIMPlugin;
 
 /*import de.spellmaker.coreasmc.plugins.dummy.abstractionplugin.AbstractionPlugin;
 import de.spellmaker.coreasmc.plugins.dummy.blockruleplugin.BlockRulePlugin;
@@ -81,7 +81,7 @@ public class DummyLoader implements PluginLoader {
 		
 		//add all plugins which provide code but won't appear in the
 		//parse tree body
-		for(ICoreASMPlugin icp : cae.getPlugins()){
+		for(ICoreASIMPlugin icp : cae.getPlugins()){
 			if(allPlugins.get(icp.getName()) != null) continue; //don't load plugins more than once
 			
 			try{
@@ -129,7 +129,7 @@ public class DummyLoader implements PluginLoader {
 				//process dependencies and add all dependencies to the list
 				for(String dep : tmp.get(i).getDependencyNames()){
 					if(allPlugins.get(dep) == null){
-						ICoreASMPlugin depplugin = cae.getPlugin(dep);
+						ICoreASIMPlugin depplugin = cae.getPlugin(dep);
 						try{
 							putPlugin(depplugin, cae);
 						}
@@ -169,7 +169,7 @@ public class DummyLoader implements PluginLoader {
 			return result;
 		}
 		
-		ICoreASMPlugin icap = cae.getPlugin(name);
+		ICoreASIMPlugin icap = cae.getPlugin(name);
 		CompilerPlugin comp = icap.getCompilerPlugin();
 		
 		return comp;
@@ -186,7 +186,7 @@ public class DummyLoader implements PluginLoader {
 		m.put(plugin.getName(), plugin);
 	}
 	
-	private void putPlugin(ICoreASMPlugin icap, Engine cae) throws NotCompilableException{
+	private void putPlugin(ICoreASIMPlugin icap, Engine cae) throws NotCompilableException{
 		CompilerPlugin cp = requestPlugin(icap.getName(), cae);
 		
 		if(cp == null){

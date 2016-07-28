@@ -21,7 +21,7 @@ import java.util.Set;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.engine.ControlAPI;
 import org.coreasim.engine.VersionInfo;
-import org.coreasim.engine.registry.ICoreASMPlugin;
+import org.coreasim.engine.registry.ICoreASIMPlugin;
 import org.coreasim.engine.registry.PluginInfo;
 
 /** 
@@ -30,7 +30,7 @@ import org.coreasim.engine.registry.PluginInfo;
  *  @author  Roozbeh Farahbod
  *  
  */
-public abstract class Plugin implements ICoreASMPlugin {
+public abstract class Plugin implements ICoreASIMPlugin {
 
 	/** Default load order of a plug-in */
 	public static final double DEFAULT_LOAD_PRIORITY = 50.0;

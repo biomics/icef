@@ -22,7 +22,7 @@ public interface IPluginRegistry {
 	 * 
 	 * @return the set of all available plugins
 	 */
-	public Collection<ICoreASMPlugin> getPlugins();
+	public Collection<ICoreASIMPlugin> getPlugins();
 	
 	/**
 	 * Returns the loaded plugin with the given name.
@@ -30,5 +30,5 @@ public interface IPluginRegistry {
 	 * @param name name of the plugin
 	 * @return the plugin instance
 	 */
-	public ICoreASMPlugin getPlugin(String name);
+	public ICoreASIMPlugin getPlugin(String name);
 }

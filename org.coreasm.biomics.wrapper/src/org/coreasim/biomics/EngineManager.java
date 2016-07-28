@@ -34,7 +34,7 @@ import javax.ws.rs.client.WebTarget;
 
 import javax.ws.rs.ProcessingException;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.absstorage.AgentCreationElement;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
@@ -124,26 +124,26 @@ public class EngineManager {
         return response;
     }
 
-    public static CoreASMError createASIM(ASIMCreationRequest req) {
+    public static CoreASIMError createASIM(ASIMCreationRequest req) {
         asimCounter++;
 
         if(req.simulation == null || req.simulation.equals(""))
-            return new CoreASMError("ASIM specification does not define simulation.");
+            return new CoreASIMError("ASIM specification does not define simulation.");
 
         if(req.init == null || req.init.equals(""))
-            return new CoreASMError("ASIM specification does not define init rule.");
+            return new CoreASIMError("ASIM specification does not define init rule.");
 
         if(req.name == null || req.name.equals(""))
-            return new CoreASMError("ASIM specification does not define a name.");
+            return new CoreASIMError("ASIM specification does not define a name.");
  
         if(req.signature == null || req.signature.equals(""))
-            return new CoreASMError("ASIM specification requires a signature.");
+            return new CoreASIMError("ASIM specification requires a signature.");
 
         if(req.program == null || req.program.equals(""))
-            return new CoreASMError("ASIM specification does not define a program.");
+            return new CoreASIMError("ASIM specification does not define a program.");
 
         if(req.policy == null || req.policy.equals(""))
-            return new CoreASMError("ASIM specification does not define a policy.");
+            return new CoreASIMError("ASIM specification does not define a policy.");
 
         String program = "CoreASM "+req.name+"\n\n";
 
@@ -166,7 +166,7 @@ public class EngineManager {
 
         CoreASMContainer casm = new CoreASMContainer(req.simulation, req.name, program, delay);
 
-        CoreASMError error = null;
+        CoreASIMError error = null;
         synchronized(casm) {
             if(casm.hasErrorOccurred()) {
                 error = casm.getError();
@@ -584,7 +584,7 @@ public class EngineManager {
             if(localReq.name == null || localReq.name.equals(""))
                 localReq.name = newName;
 
-            CoreASMError e = createASIM(localReq);
+            CoreASIMError e = createASIM(localReq);
             
             if(e != null) {
                 System.err.println(e);

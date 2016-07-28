@@ -29,7 +29,7 @@ import org.codehaus.jparsec.Parsers;
 import org.coreasim.compiler.interfaces.CompilerPlugin;
 import org.coreasim.compiler.plugins.chooserule.CompilerChooseRulePlugin;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 import org.coreasim.engine.VersionInfo;
 import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.absstorage.Element;
@@ -653,7 +653,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -786,7 +786,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -860,7 +860,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -940,7 +940,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -1080,7 +1080,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -1147,7 +1147,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -1219,7 +1219,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }
@@ -1302,7 +1302,7 @@ public class ChooseRulePlugin extends Plugin implements ParserPlugin,
         try {
         	variableMap = chooseNode.getVariableMap();
         }
-        catch (CoreASMError e) {
+        catch (CoreASIMError e) {
         	capi.error(e);
         	return pos;
         }

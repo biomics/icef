@@ -16,7 +16,7 @@ package org.coreasim.engine.plugin;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.CoreASIMError;
 
 /**
  * Service request container as part of inter-plugin communications.
@@ -35,7 +35,7 @@ public class ServiceRequest {
 	
 	public ServiceRequest(String type) {
 		if (type == null)
-			throw new CoreASMError("Cannot create a service request with an undefied type.");
+			throw new CoreASIMError("Cannot create a service request with an undefied type.");
 		this.type = type;
 		this.parameters = new HashMap<String, Object>();
 	}

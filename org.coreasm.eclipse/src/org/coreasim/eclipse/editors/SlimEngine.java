@@ -13,8 +13,8 @@ import java.util.Set;
 
 import org.coreasim.eclipse.engine.CoreASMEngineFactory;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
-import org.coreasim.engine.CoreASMWarning;
+import org.coreasim.engine.CoreASIMError;
+import org.coreasim.engine.CoreASIMWarning;
 import org.coreasim.engine.Engine;
 import org.coreasim.engine.EngineObserver;
 import org.coreasim.engine.InconsistentUpdateSetException;
@@ -66,8 +66,8 @@ public class SlimEngine implements ControlAPI {
 	private Set<ExtensionPointPlugin> parsingSpecSrcModePlugins = new HashSet<ExtensionPointPlugin>();
 	private Set<ExtensionPointPlugin> parsingSpecTargetModePlugins = new HashSet<ExtensionPointPlugin>();
 	
-	private List<CoreASMWarning> warnings = new ArrayList<CoreASMWarning>();
-	private List<CoreASMError> errors = new ArrayList<CoreASMError>();
+	private List<CoreASIMWarning> warnings = new ArrayList<CoreASIMWarning>();
+	private List<CoreASIMError> errors = new ArrayList<CoreASIMError>();
 	
 	private Specification specification;
 	
@@ -278,8 +278,8 @@ public class SlimEngine implements ControlAPI {
 	}
 	
 	@Override
-	public List<CoreASMWarning> getWarnings() {
-		List<CoreASMWarning> warnings = new ArrayList<CoreASMWarning>(this.warnings);
+	public List<CoreASIMWarning> getWarnings() {
+		List<CoreASIMWarning> warnings = new ArrayList<CoreASIMWarning>(this.warnings);
 		this.warnings.clear();
 		return warnings;
 	}
@@ -297,27 +297,27 @@ public class SlimEngine implements ControlAPI {
 	@Override
 	public void warning(String src, String msg, Node node,
 			Interpreter interpreter) {
-		CoreASMWarning warning; 
+		CoreASIMWarning warning; 
 		if (interpreter != null)
-			warning = new CoreASMWarning(src, msg, interpreter.getCurrentCallStack(), node);
+			warning = new CoreASIMWarning(src, msg, interpreter.getCurrentCallStack(), node);
 		else
-			warning = new CoreASMWarning(src, msg, node);
+			warning = new CoreASIMWarning(src, msg, node);
 		this.warning(warning);
 	}
 
 	@Override
 	public void warning(String src, Throwable e, Node node,
 			Interpreter interpreter) {
-		CoreASMWarning warning; 
+		CoreASIMWarning warning; 
 		if (interpreter != null)
-			warning = new CoreASMWarning(src, e, interpreter.getCurrentCallStack(), node);
+			warning = new CoreASIMWarning(src, e, interpreter.getCurrentCallStack(), node);
 		else
-			warning = new CoreASMWarning(src, e, null, node);
+			warning = new CoreASIMWarning(src, e, null, node);
 		this.warning(warning);
 	}
 
 	@Override
-	public void warning(CoreASMWarning w) {
+	public void warning(CoreASIMWarning w) {
 		w.setContext(parser, specification);
 		warnings.add(w);
 	}
@@ -334,26 +334,26 @@ public class SlimEngine implements ControlAPI {
 
 	@Override
 	public void error(String msg, Node errorNode, Interpreter interpreter) {
-		CoreASMError error; 
+		CoreASIMError error; 
 		if (interpreter != null)
-			error = new CoreASMError(msg, interpreter.getCurrentCallStack(), errorNode);
+			error = new CoreASIMError(msg, interpreter.getCurrentCallStack(), errorNode);
 		else
-			error = new CoreASMError(msg, errorNode);
+			error = new CoreASIMError(msg, errorNode);
 		this.error(error);
 	}
 
 	@Override
 	public void error(Throwable e, Node errorNode, Interpreter interpreter) {
-		CoreASMError error; 
+		CoreASIMError error; 
 		if (interpreter != null)
-			error = new CoreASMError(e, interpreter.getCurrentCallStack(), errorNode);
+			error = new CoreASIMError(e, interpreter.getCurrentCallStack(), errorNode);
 		else
-			error = new CoreASMError(e, null, errorNode);
+			error = new CoreASIMError(e, null, errorNode);
 		this.error(error);
 	}
 
 	@Override
-	public void error(CoreASMError e) {
+	public void error(CoreASIMError e) {
 		e.setContext(parser, specification);
 		errors.add(e);
 	}
@@ -363,8 +363,8 @@ public class SlimEngine implements ControlAPI {
 		return !errors.isEmpty();
 	}
 	
-	public List<CoreASMError> getErrors() {
-		List<CoreASMError> errors = new ArrayList<CoreASMError>(this.errors);
+	public List<CoreASIMError> getErrors() {
+		List<CoreASIMError> errors = new ArrayList<CoreASIMError>(this.errors);
 		this.errors.clear();
 		return errors;
 	}
@@ -711,7 +711,7 @@ public class SlimEngine implements ControlAPI {
 	}
 
 	@Override
-	public CoreASMError getError() {
+	public CoreASIMError getError() {
 		return errors.get(errors.size()-1);
 	}
 

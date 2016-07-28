@@ -3,7 +3,7 @@ package org.coreasim.eclipse.editors.contentassist;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.coreasim.eclipse.CoreASMPlugin;
+import org.coreasim.eclipse.CoreASIMPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.BadLocationException;
@@ -94,7 +94,7 @@ public class TemplateAssistProcessor extends TemplateCompletionProcessor {
 		Image image= registry.get(DEFAULT_IMAGE);
 		
 		if (image == null) {
-			ImageDescriptor desc = TemplateManager.imageDescriptorFromPlugin(CoreASMPlugin.PLUGIN_ID, DEFAULT_IMAGE); //$NON-NLS-1$
+			ImageDescriptor desc = TemplateManager.imageDescriptorFromPlugin(CoreASIMPlugin.PLUGIN_ID, DEFAULT_IMAGE); //$NON-NLS-1$
 			registry.put(DEFAULT_IMAGE, desc);
 			image= registry.get(DEFAULT_IMAGE);
 		}

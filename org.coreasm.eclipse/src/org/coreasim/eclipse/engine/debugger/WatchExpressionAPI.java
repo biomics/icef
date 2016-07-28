@@ -13,8 +13,8 @@ import java.util.Set;
 import org.coreasim.eclipse.debug.core.model.ASMStorage;
 import org.coreasim.eclipse.debug.ui.views.ASMUpdate;
 import org.coreasim.engine.ControlAPI;
-import org.coreasim.engine.CoreASMError;
-import org.coreasim.engine.CoreASMWarning;
+import org.coreasim.engine.CoreASIMError;
+import org.coreasim.engine.CoreASIMWarning;
 import org.coreasim.engine.EngineObserver;
 import org.coreasim.engine.InconsistentUpdateSetException;
 import org.coreasim.engine.Specification;
@@ -46,8 +46,8 @@ import org.coreasim.engine.scheduler.Scheduler;
 public class WatchExpressionAPI implements ControlAPI {
 	private ASMStorage storage;
 	private ControlAPI capi;
-	private CoreASMError lastError = null;
-	private List<CoreASMWarning> warnings = new ArrayList<CoreASMWarning>();
+	private CoreASIMError lastError = null;
+	private List<CoreASIMWarning> warnings = new ArrayList<CoreASIMWarning>();
 
 	public WatchExpressionAPI(ControlAPI capi) {
 		this.capi = capi;
@@ -335,7 +335,7 @@ public class WatchExpressionAPI implements ControlAPI {
 	}
 
 	@Override
-	public List<CoreASMWarning> getWarnings() {
+	public List<CoreASIMWarning> getWarnings() {
 		return warnings;
 	}
 
@@ -426,26 +426,26 @@ public class WatchExpressionAPI implements ControlAPI {
 
 	@Override
 	public void error(String msg, Node errorNode, Interpreter interpreter) {
-		CoreASMError error; 
+		CoreASIMError error; 
 		if (interpreter != null)
-			error = new CoreASMError(msg, interpreter.getCurrentCallStack(), errorNode);
+			error = new CoreASIMError(msg, interpreter.getCurrentCallStack(), errorNode);
 		else
-			error = new CoreASMError(msg, errorNode);
+			error = new CoreASIMError(msg, errorNode);
 		this.error(error);
 	}
 
 	@Override
 	public void error(Throwable e, Node errorNode, Interpreter interpreter) {
-		CoreASMError error; 
+		CoreASIMError error; 
 		if (interpreter != null)
-			error = new CoreASMError(e, interpreter.getCurrentCallStack(), errorNode);
+			error = new CoreASIMError(e, interpreter.getCurrentCallStack(), errorNode);
 		else
-			error = new CoreASMError(e, null, errorNode);
+			error = new CoreASIMError(e, null, errorNode);
 		this.error(error);
 	}
 
 	@Override
-	public void error(CoreASMError e) {
+	public void error(CoreASIMError e) {
 		if (lastError != null)
 			return;
 		
@@ -466,26 +466,26 @@ public class WatchExpressionAPI implements ControlAPI {
 
 	@Override
 	public void warning(String src, String msg, Node node, Interpreter interpreter) {
-		CoreASMWarning warning; 
+		CoreASIMWarning warning; 
 		if (interpreter != null)
-			warning = new CoreASMWarning(src, msg, interpreter.getCurrentCallStack(), node);
+			warning = new CoreASIMWarning(src, msg, interpreter.getCurrentCallStack(), node);
 		else
-			warning = new CoreASMWarning(src, msg, node);
+			warning = new CoreASIMWarning(src, msg, node);
 		this.warning(warning);
 	}
 
 	@Override
 	public void warning(String src, Throwable e, Node node, Interpreter interpreter) {
-		CoreASMWarning warning; 
+		CoreASIMWarning warning; 
 		if (interpreter != null)
-			warning = new CoreASMWarning(src, e, interpreter.getCurrentCallStack(), node);
+			warning = new CoreASIMWarning(src, e, interpreter.getCurrentCallStack(), node);
 		else
-			warning = new CoreASMWarning(src, e, null, node);
+			warning = new CoreASIMWarning(src, e, null, node);
 		this.warning(warning);
 	}
 
 	@Override
-	public void warning(CoreASMWarning w) {
+	public void warning(CoreASIMWarning w) {
 		w.setContext(getParser(), getSpec());
 		warnings.add(w);
 	}
@@ -496,7 +496,7 @@ public class WatchExpressionAPI implements ControlAPI {
 	}
 
 	@Override
-	public CoreASMError getError() {
+	public CoreASIMError getError() {
 		return lastError;
 	}
 
