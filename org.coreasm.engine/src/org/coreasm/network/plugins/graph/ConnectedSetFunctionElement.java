@@ -15,13 +15,13 @@ package org.coreasm.network.plugins.graph;
 import java.util.List;
 import java.util.Set;
 
-import org.coreasm.engine.CoreASMError;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.ElementBackgroundElement;
-import org.coreasm.engine.absstorage.FunctionElement;
-import org.coreasm.engine.absstorage.Signature;
-import org.coreasm.engine.plugins.set.SetBackgroundElement;
-import org.coreasm.engine.plugins.set.SetElement;
+import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.ElementBackgroundElement;
+import org.coreasim.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.Signature;
+import org.coreasim.engine.plugins.set.SetBackgroundElement;
+import org.coreasim.engine.plugins.set.SetElement;
 import org.jgrapht.Graph;
 import org.jgrapht.alg.ConnectivityInspector;
 

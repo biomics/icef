@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.coreasm.engine.absstorage.Location;
-import org.coreasm.engine.absstorage.Update;
-import org.coreasm.engine.absstorage.UpdateMultiset;
+import org.coreasim.engine.absstorage.Location;
+import org.coreasim.engine.absstorage.Update;
+import org.coreasim.engine.absstorage.UpdateMultiset;
+import org.coreasim.util.HashMultiset;
+import org.coreasim.util.Multiset;
 import org.coreasm.jasmine.plugin.JasmineUpdateElement.Type;
-import org.coreasm.util.HashMultiset;
-import org.coreasm.util.Multiset;
 
 /**
  * A utility class to help working on Jasmine update multisets.

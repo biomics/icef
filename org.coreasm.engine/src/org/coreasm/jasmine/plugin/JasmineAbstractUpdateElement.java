@@ -15,8 +15,8 @@ package org.coreasm.jasmine.plugin;
 
 import java.util.Set;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
  * Super class of JASMine update elements.

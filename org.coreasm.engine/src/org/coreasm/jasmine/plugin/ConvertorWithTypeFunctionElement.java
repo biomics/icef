@@ -16,9 +16,9 @@ package org.coreasm.jasmine.plugin;
 
 import java.util.List;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.plugins.string.StringElement;
-import org.coreasm.util.Logger;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.plugins.string.StringElement;
+import org.coreasim.util.Logger;
 
 /**
  * Converts CoreASM elements to Java objects casted to the given class name.
@@ -27,7 +27,7 @@ import org.coreasm.util.Logger;
  *
  */
 
-public class ConvertorWithTypeFunctionElement extends org.coreasm.engine.absstorage.FunctionElement {
+public class ConvertorWithTypeFunctionElement extends org.coreasim.engine.absstorage.FunctionElement {
 
 	/** suggested name of this function */
 	public static final String NAME = "castToJava";

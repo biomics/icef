@@ -10,10 +10,10 @@
  */
 package org.coreasm.network.plugins.signals;
 
-import org.coreasm.engine.absstorage.BackgroundElement;
-import org.coreasm.engine.absstorage.BooleanElement;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.NameElement;
+import org.coreasim.engine.absstorage.BackgroundElement;
+import org.coreasim.engine.absstorage.BooleanElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.NameElement;
 
 /**
  * Signal background element.
@@ -51,7 +51,7 @@ public class SignalBackgroundElement extends BackgroundElement {
 	 * Returns a <code>TRUE</code> boolean for 
 	 * Signal Elements. Otherwise <code>FALSE<code> is returned.
 	 * 
-	 * @see org.coreasm.engine.absstorage.AbstractUniverse#getValue(Element)
+	 * @see org.coreasim.engine.absstorage.AbstractUniverse#getValue(Element)
 	 * @see BooleanElement
 	 */
 	@Override

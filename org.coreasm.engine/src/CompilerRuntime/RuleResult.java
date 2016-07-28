@@ -1,6 +1,6 @@
 package CompilerRuntime;
 
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Element;
 
 public class RuleResult {
 	public UpdateList updates;

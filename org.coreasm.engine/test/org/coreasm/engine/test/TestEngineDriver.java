@@ -6,23 +6,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.coreasm.engine.CoreASMEngine.EngineMode;
-import org.coreasm.engine.CoreASMEngineFactory;
-import org.coreasm.engine.CoreASMError;
-import org.coreasm.engine.Engine;
-import org.coreasm.engine.EngineErrorEvent;
-import org.coreasm.engine.EngineErrorObserver;
-import org.coreasm.engine.EngineEvent;
-import org.coreasm.engine.EngineProperties;
-import org.coreasm.engine.EngineStepObserver;
-import org.coreasm.engine.StepFailedEvent;
-import org.coreasm.engine.absstorage.Update;
-import org.coreasm.engine.plugin.PluginServiceInterface;
-import org.coreasm.engine.plugins.debuginfo.DebugInfoPlugin.DebugInfoPSI;
-import org.coreasm.engine.plugins.io.IOPlugin.IOPluginPSI;
-import org.coreasm.util.CoreASMGlobal;
-import org.coreasm.util.Logger;
-import org.coreasm.util.Tools;
+import org.coreasim.engine.CoreASMEngineFactory;
+import org.coreasim.engine.CoreASMError;
+import org.coreasim.engine.Engine;
+import org.coreasim.engine.EngineErrorEvent;
+import org.coreasim.engine.EngineErrorObserver;
+import org.coreasim.engine.EngineEvent;
+import org.coreasim.engine.EngineProperties;
+import org.coreasim.engine.EngineStepObserver;
+import org.coreasim.engine.StepFailedEvent;
+import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.absstorage.Update;
+import org.coreasim.engine.plugin.PluginServiceInterface;
+import org.coreasim.engine.plugins.debuginfo.DebugInfoPlugin.DebugInfoPSI;
+import org.coreasim.engine.plugins.io.IOPlugin.IOPluginPSI;
+import org.coreasim.util.CoreASMGlobal;
+import org.coreasim.util.Logger;
+import org.coreasim.util.Tools;
 
 public class TestEngineDriver implements Runnable, EngineStepObserver, EngineErrorObserver {
 
@@ -52,7 +52,7 @@ public class TestEngineDriver implements Runnable, EngineStepObserver, EngineErr
 			runningInstances = new LinkedList<TestEngineDriver>();
 		runningInstances.add(this);
 		CoreASMGlobal.setRootFolder(Tools.getRootFolder());
-		engine = (Engine) org.coreasm.engine.CoreASMEngineFactory.createEngine();
+		engine = (Engine) org.coreasim.engine.CoreASMEngineFactory.createEngine();
 		engine.addObserver(this);
 		shouldStop = false;
 		shouldPause = true;

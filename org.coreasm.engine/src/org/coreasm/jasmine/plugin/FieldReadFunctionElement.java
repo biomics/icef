@@ -17,9 +17,9 @@ package org.coreasm.jasmine.plugin;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.FunctionElement;
-import org.coreasm.engine.plugins.string.StringElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.FunctionElement;
+import org.coreasim.engine.plugins.string.StringElement;
 
 /**
  * A monitored function to read field values of Java objects.

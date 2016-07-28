@@ -15,8 +15,8 @@ package org.coreasm.jasmine.plugin;
 
 import java.util.List;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.FunctionElement;
 
 /** 
  * This function element provides type conversion between CoreASM and Java.

@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
-import org.coreasm.util.Tools;
+import org.coreasim.util.Tools;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

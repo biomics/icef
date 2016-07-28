@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.ElementBackgroundElement;
-import org.coreasm.engine.absstorage.Enumerable;
-import org.coreasm.engine.absstorage.FunctionElement;
-import org.coreasm.engine.absstorage.Signature;
-import org.coreasm.util.Logger;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.ElementBackgroundElement;
+import org.coreasim.engine.absstorage.Enumerable;
+import org.coreasim.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.Signature;
+import org.coreasim.util.Logger;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 

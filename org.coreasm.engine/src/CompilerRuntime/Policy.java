@@ -1,8 +1,9 @@
 package CompilerRuntime;
 
 import java.util.concurrent.Callable;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.PolicyBackgroundElement;
+
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.PolicyBackgroundElement;
 /**
  * An interface representing a CoreASM Policy
  * @author Markus Brenner

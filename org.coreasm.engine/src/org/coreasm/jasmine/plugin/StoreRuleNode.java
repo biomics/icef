@@ -14,8 +14,8 @@
 
 package org.coreasm.jasmine.plugin;
 
-import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasim.engine.interpreter.ASTNode;
+import org.coreasim.engine.interpreter.ScannerInfo;
 
 /**
  * Node type of JASMine store rule.

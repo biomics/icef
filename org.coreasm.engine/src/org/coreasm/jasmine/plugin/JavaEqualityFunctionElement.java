@@ -16,9 +16,9 @@ package org.coreasm.jasmine.plugin;
 
 import java.util.List;
 
-import org.coreasm.engine.absstorage.BooleanElement;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.BooleanElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.FunctionElement;
 
 /**
  * A monitored function to check the equality of two JObject elements

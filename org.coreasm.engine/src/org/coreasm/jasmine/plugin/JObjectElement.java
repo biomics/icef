@@ -13,7 +13,7 @@
  
 package org.coreasm.jasmine.plugin;
 
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Element;
 
 /** 
  * JObject element introduced by the JASMine plugin.

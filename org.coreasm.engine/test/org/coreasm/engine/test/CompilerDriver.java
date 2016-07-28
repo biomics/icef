@@ -7,13 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import org.coreasm.compiler.CompilerOptions;
-import org.coreasm.compiler.CoreASMCompiler;
-import org.coreasm.engine.CoreASMEngine;
-import org.coreasm.engine.CoreASMEngineFactory;
-import org.coreasm.engine.Engine;
-import org.coreasm.engine.EngineProperties;
-import org.coreasm.util.Tools;
+import org.coreasim.compiler.CompilerOptions;
+import org.coreasim.compiler.CoreASMCompiler;
+import org.coreasim.engine.CoreASMEngine;
+import org.coreasim.engine.CoreASMEngineFactory;
+import org.coreasim.engine.Engine;
+import org.coreasim.engine.EngineProperties;
+import org.coreasim.util.Tools;
 
 public class CompilerDriver {
 	public static TestReport runSpecification(File testFile){

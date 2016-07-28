@@ -3,7 +3,7 @@ package CompilerRuntime;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.coreasm.engine.absstorage.Trigger;
+import org.coreasim.engine.absstorage.Trigger;
 
 /**
  * A list of agents

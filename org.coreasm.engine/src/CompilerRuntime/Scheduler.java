@@ -5,14 +5,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.coreasm.engine.absstorage.AbstractUniverse;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.Enumerable;
-import org.coreasm.engine.absstorage.FunctionElement;
-import org.coreasm.engine.absstorage.InvalidLocationException;
-import org.coreasm.engine.absstorage.Location;
-import org.coreasm.engine.absstorage.Update;
-import org.coreasm.engine.scheduler.SchedulingPolicy;
+import org.coreasim.engine.absstorage.AbstractUniverse;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Enumerable;
+import org.coreasim.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.InvalidLocationException;
+import org.coreasim.engine.absstorage.Location;
+import org.coreasim.engine.absstorage.Update;
+import org.coreasim.engine.scheduler.SchedulingPolicy;
 
 public class Scheduler {
 	private CompilerRuntime.Runtime runtime;

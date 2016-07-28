@@ -18,8 +18,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
  * A container for JASMine updates. It is useful when we need to

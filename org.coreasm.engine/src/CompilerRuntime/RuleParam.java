@@ -1,7 +1,7 @@
 package CompilerRuntime;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.Location;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Location;
 
 public interface RuleParam {	
 	public Location evaluateL(CompilerRuntime.LocalStack localStack) throws Exception;

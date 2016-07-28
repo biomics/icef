@@ -13,8 +13,8 @@
  
 package org.coreasm.network.plugins.signals;
 
-import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasim.engine.interpreter.ASTNode;
+import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
  *	SignalRuleNode is a Node for signal rule nodes.

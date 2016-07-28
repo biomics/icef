@@ -1,5 +1,0 @@
-// Module for CoreASM Test 030
-// Roozbeh Farahbod, 2009
-
-rule R2 = 
-	print "yep!"

@@ -29,23 +29,23 @@ import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.coreasm.engine.absstorage.ElementList;
-import org.coreasm.engine.absstorage.AbstractUniverse;
-import org.coreasm.engine.absstorage.BackgroundElement;
-import org.coreasm.engine.absstorage.FunctionElement;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.BooleanElement;
-import org.coreasm.engine.absstorage.IdentifierNotFoundException;
-import org.coreasm.engine.absstorage.Location;
-import org.coreasm.engine.absstorage.MapFunction;
-import org.coreasm.engine.absstorage.UnmodifiableFunctionException;
-import org.coreasm.engine.absstorage.Update;
-import org.coreasm.engine.absstorage.NameConflictException;
-import org.coreasm.engine.absstorage.UniverseElement;
-import org.coreasm.engine.absstorage.InvalidLocationException;
-import org.coreasm.engine.EngineError;
-import org.coreasm.engine.absstorage.NameElement;
-import org.coreasm.engine.interpreter.SelfAgent;
+import org.coreasim.engine.EngineError;
+import org.coreasim.engine.absstorage.AbstractUniverse;
+import org.coreasim.engine.absstorage.BackgroundElement;
+import org.coreasim.engine.absstorage.BooleanElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.ElementList;
+import org.coreasim.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.IdentifierNotFoundException;
+import org.coreasim.engine.absstorage.InvalidLocationException;
+import org.coreasim.engine.absstorage.Location;
+import org.coreasim.engine.absstorage.MapFunction;
+import org.coreasim.engine.absstorage.NameConflictException;
+import org.coreasim.engine.absstorage.NameElement;
+import org.coreasim.engine.absstorage.UniverseElement;
+import org.coreasim.engine.absstorage.UnmodifiableFunctionException;
+import org.coreasim.engine.absstorage.Update;
+import org.coreasim.engine.interpreter.SelfAgent;
 
 /** 
  *	This is an implementation of the <code>AbstractStorage</code> interface that

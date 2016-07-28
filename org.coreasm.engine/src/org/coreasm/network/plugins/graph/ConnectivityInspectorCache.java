@@ -14,7 +14,7 @@ package org.coreasm.network.plugins.graph;
 
 import java.util.HashMap;
 
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Element;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.UndirectedGraph;

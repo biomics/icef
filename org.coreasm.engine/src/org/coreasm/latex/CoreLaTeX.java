@@ -16,7 +16,7 @@ package org.coreasm.latex;
 
 import java.util.Set;
 
-import org.coreasm.engine.interpreter.Node;
+import org.coreasim.engine.interpreter.Node;
 
 /**
  * A very simple module to generate LaTeX output from 

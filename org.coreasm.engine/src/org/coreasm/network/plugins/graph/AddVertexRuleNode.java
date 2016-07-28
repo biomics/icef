@@ -12,8 +12,8 @@
 package org.coreasm.network.plugins.graph;
 
 
-import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasim.engine.interpreter.ASTNode;
+import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
  *	AST node for add-vertex rules.

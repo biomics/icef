@@ -1,7 +1,7 @@
 package CompilerRuntime;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.InvalidLocationException;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.InvalidLocationException;
 
 public interface AbstractStorage extends State{
 	/** 'program' function name */

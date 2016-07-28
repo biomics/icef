@@ -12,7 +12,7 @@
  */
 package org.coreasm.network.plugins.signals;
 
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Element;
 
 /**
  * Represents a signal.

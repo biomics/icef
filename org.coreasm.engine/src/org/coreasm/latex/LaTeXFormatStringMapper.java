@@ -19,11 +19,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.coreasm.engine.interpreter.ASTNode;
-import org.coreasm.engine.interpreter.Node;
-import org.coreasm.engine.interpreter.NodeToFormatStringMapper;
-import org.coreasm.engine.plugins.string.StringNode;
-import org.coreasm.util.Tools;
+import org.coreasim.engine.interpreter.ASTNode;
+import org.coreasim.engine.interpreter.Node;
+import org.coreasim.engine.interpreter.NodeToFormatStringMapper;
+import org.coreasim.engine.plugins.string.StringNode;
+import org.coreasim.util.Tools;
 
 /**
  * Maps CoreASM abstract syntax tree nodes to a format string producing LaTeX output. 

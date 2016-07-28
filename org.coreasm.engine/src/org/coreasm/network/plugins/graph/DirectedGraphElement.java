@@ -12,7 +12,7 @@
  */
 package org.coreasm.network.plugins.graph;
 
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Element;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.UndirectedGraph;

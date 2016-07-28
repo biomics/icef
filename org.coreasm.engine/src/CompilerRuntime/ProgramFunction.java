@@ -2,9 +2,9 @@ package CompilerRuntime;
 
 import java.util.List;
 
-import org.coreasm.engine.absstorage.MapFunction;
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.ElementList;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.ElementList;
+import org.coreasim.engine.absstorage.MapFunction;
 
 public class ProgramFunction extends MapFunction {
 	@Override

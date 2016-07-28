@@ -1,6 +1,6 @@
 package CompilerRuntime;
 
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Element;
 
 public interface PolicyParam {	
 	public Element evaluateTrigger(CompilerRuntime.LocalStack localStack) throws Exception;

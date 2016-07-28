@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.plugins.collection.AbstractListElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.plugins.collection.AbstractListElement;
 import org.jgrapht.EdgeFactory;
 
 /**

@@ -3,6 +3,7 @@
 	<name>org.coreasm.eclipse</name>
 	<comment></comment>
 	<projects>
+		<project>org.coreasm.util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

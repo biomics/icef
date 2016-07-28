@@ -19,9 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.coreasm.engine.absstorage.Element;
-import org.coreasm.engine.absstorage.Location;
-import org.coreasm.engine.interpreter.ScannerInfo;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.Location;
+import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
  * The element that represents JASMine commands

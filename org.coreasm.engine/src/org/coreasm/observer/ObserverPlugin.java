@@ -37,18 +37,18 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.coreasm.engine.CoreASMEngine;
-import org.coreasm.engine.CoreASMEngine.EngineMode;
-import org.coreasm.engine.Specification;
-import org.coreasm.engine.VersionInfo;
-import org.coreasm.engine.absstorage.AbstractUniverse;
-import org.coreasm.engine.absstorage.Location;
-import org.coreasm.engine.absstorage.Update;
-import org.coreasm.engine.plugin.ExtensionPointPlugin;
-import org.coreasm.engine.plugin.InitializationFailedException;
-import org.coreasm.engine.plugin.Plugin;
-import org.coreasm.util.Logger;
-import org.coreasm.util.Tools;
+import org.coreasim.engine.CoreASMEngine;
+import org.coreasim.engine.Specification;
+import org.coreasim.engine.VersionInfo;
+import org.coreasim.engine.CoreASMEngine.EngineMode;
+import org.coreasim.engine.absstorage.AbstractUniverse;
+import org.coreasim.engine.absstorage.Location;
+import org.coreasim.engine.absstorage.Update;
+import org.coreasim.engine.plugin.ExtensionPointPlugin;
+import org.coreasim.engine.plugin.InitializationFailedException;
+import org.coreasim.engine.plugin.Plugin;
+import org.coreasim.util.Logger;
+import org.coreasim.util.Tools;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -271,7 +271,7 @@ public class ObserverPlugin extends Plugin implements ExtensionPointPlugin {
 			for (Update u: updateset) {
 				if (locationList == null || locationList.contains(u.loc.name)) {
 					Element updateElement = output.createElement("update");
-					for (org.coreasm.engine.absstorage.Element a: u.agents) {
+					for (org.coreasim.engine.absstorage.Element a: u.agents) {
 						updateElement.appendChild(agentToXML(a));
 					}
 					updateElement.appendChild(locationToXML(u.loc));
@@ -291,7 +291,7 @@ public class ObserverPlugin extends Plugin implements ExtensionPointPlugin {
 		Element result = output.createElement("location");
 		result.setAttribute("name", loc.name);
 		int i = 1;
-		for (org.coreasm.engine.absstorage.Element arg: loc.args) {
+		for (org.coreasim.engine.absstorage.Element arg: loc.args) {
 			Element argElement = output.createElement("arg");
 			argElement.setAttribute("index", String.valueOf(i));
 			argElement.appendChild(valueToXML(arg));
@@ -303,7 +303,7 @@ public class ObserverPlugin extends Plugin implements ExtensionPointPlugin {
 	/*
 	 * Returns an XML representation of the given agent.
 	 */
-	private Element agentToXML(org.coreasm.engine.absstorage.Element agent) {
+	private Element agentToXML(org.coreasim.engine.absstorage.Element agent) {
 		Element result = output.createElement("agent");
 		result.appendChild(valueToXML(agent));
 		return result;
@@ -312,7 +312,7 @@ public class ObserverPlugin extends Plugin implements ExtensionPointPlugin {
 	/*
 	 * Returns an XML representation of the given value. 
 	 */
-	private Element valueToXML(org.coreasm.engine.absstorage.Element value) {
+	private Element valueToXML(org.coreasim.engine.absstorage.Element value) {
 		Element result = output.createElement("value");
 		result.setAttribute("type", value.getClass().getName());
 		AbstractUniverse bkg = capi.getStorage().getUniverse(value.getBackground());

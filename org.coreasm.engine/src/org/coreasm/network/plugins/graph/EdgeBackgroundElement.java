@@ -12,9 +12,9 @@
  */
 package org.coreasm.network.plugins.graph;
 
-import org.coreasm.engine.absstorage.BackgroundElement;
-import org.coreasm.engine.absstorage.BooleanElement;
-import org.coreasm.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.BackgroundElement;
+import org.coreasim.engine.absstorage.BooleanElement;
+import org.coreasim.engine.absstorage.Element;
 
 /**
  * Background element of Edges
