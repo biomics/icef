@@ -16,8 +16,8 @@ import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 public class ASMOccurenceHighlighter implements IASMSelectionListener {
-	private static final String ANNOTATION_OCCURRENCE = "org.coreasm.eclipse.ui.occurrence";
-	private static final String ANNOTATION_OCCURRENCE_WRITE = "org.coreasm.eclipse.ui.occurrence.write";
+	private static final String ANNOTATION_OCCURRENCE = "org.coreasim.eclipse.ui.occurrence";
+	private static final String ANNOTATION_OCCURRENCE_WRITE = "org.coreasim.eclipse.ui.occurrence.write";
 	
 	private Annotation[] annotations;
 	

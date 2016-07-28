@@ -5,13 +5,13 @@
 
 	<artifactId>org.coreasim.eclipse.repository</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<name>CoreASM Eclipse Plugin Repository</name>
+	<name>CoreASIM Eclipse Plugin Repository</name>
 
 	<parent>
 		<version>1.1.1-SNAPSHOT</version>
-		<groupId>org.coreasm</groupId>
+		<groupId>org.coreasim</groupId>
 		<artifactId>org.coreasim.eclipse.parent</artifactId>
-		<relativePath>../org.coreasm.eclipse.parent</relativePath>
+		<relativePath>../org.coreasim.eclipse.parent</relativePath>
 	</parent>
 	
 	<distributionManagement>

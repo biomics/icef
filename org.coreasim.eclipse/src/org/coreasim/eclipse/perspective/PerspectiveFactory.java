@@ -13,7 +13,7 @@ public class PerspectiveFactory implements IPerspectiveFactory {
 	private void defineLayout(IPageLayout layout) {
 		// Add "new wizards".
         layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");
-        layout.addNewWizardShortcut("org.coreasm.eclipse.newFileWizard");
+        layout.addNewWizardShortcut("org.coreasim.eclipse.newFileWizard");
 
         layout.createFolder("left", IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA);
         layout.createFolder("right", IPageLayout.RIGHT, 0.8f, IPageLayout.ID_EDITOR_AREA);

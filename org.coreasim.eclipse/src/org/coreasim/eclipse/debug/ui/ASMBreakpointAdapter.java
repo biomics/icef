@@ -39,7 +39,7 @@ public class ASMBreakpointAdapter implements IToggleBreakpointsTarget {
 		if (editor != null) {
 			IResource resource = (IResource)editor.getEditorInput().getAdapter(IResource.class);
 			int lineNumber = ((ITextSelection)selection).getStartLine();
-			IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug");
+			IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug");
 			
 			for (int i = 0; i < breakpoints.length; i++) {
 				if (breakpoints[i] instanceof ILineBreakpoint && resource.equals(breakpoints[i].getMarker().getResource())) {
@@ -72,7 +72,7 @@ public class ASMBreakpointAdapter implements IToggleBreakpointsTarget {
 			IResource resource = (IResource)editor.getEditorInput().getAdapter(IResource.class);
 			String ruleName = getRuleName(part, selection);
 			int lineNumber = ((ITextSelection)selection).getStartLine();
-			IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug");
+			IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug");
 			
 			for (int i = 0; i < breakpoints.length; i++) {
 				if (breakpoints[i] instanceof ASMMethodBreakpoint && resource.equals(breakpoints[i].getMarker().getResource())) {
@@ -101,7 +101,7 @@ public class ASMBreakpointAdapter implements IToggleBreakpointsTarget {
 			String functionName = function[0];
 			String functionType = function[1];
 			int lineNumber = ((ITextSelection)selection).getStartLine();
-			IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug");
+			IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug");
 			
 			for (int i = 0; i < breakpoints.length; i++) {
 				if (breakpoints[i] instanceof ASMWatchpoint && resource.equals(breakpoints[i].getMarker().getResource())) {

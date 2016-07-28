@@ -29,7 +29,7 @@ public class ASMUpdate extends ASMUpdateViewElement {
 		this.consistent = consistent;
 		this.update = update;
 
-		for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+		for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug")) {
 			try {
 				if (!breakpoint.isEnabled())
 					continue;

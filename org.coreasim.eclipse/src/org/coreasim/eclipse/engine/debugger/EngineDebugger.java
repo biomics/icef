@@ -535,7 +535,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 			return false;
 		ASTNode parent = frNode.getParent();
 		if (!(parent instanceof UpdateRuleNode) || frNode != parent.getFirst()) {
-			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug")) {
 				try {
 					if (!breakpoint.isEnabled())
 						continue;
@@ -554,7 +554,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	private boolean isLineBreakpointHit() {
 		if (!DebugPlugin.getDefault().getBreakpointManager().isEnabled())
 			return false;
-		for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+		for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug")) {
 			try {
 				if (!breakpoint.isEnabled() || breakpoint instanceof ASMMethodBreakpoint)
 					continue;
@@ -639,7 +639,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 //			handle watchpoints (modification)
 			boolean breakpointHit = false;
 			if (DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
-				for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+				for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug")) {
 					try {
 						if (!breakpoint.isEnabled() || breakpoint == prevWatchpoint)
 							continue;
@@ -673,7 +673,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	public void onRuleCall(RuleElement rule, List<ASTNode> args, ASTNode pos, Element agent) {
 		currentAgent = agent;
 		if (DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
-			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug")) {
 				try {
 					if (!breakpoint.isEnabled())
 						continue;
@@ -731,7 +731,7 @@ public class EngineDebugger extends EngineDriver implements InterpreterListener 
 	public void onPolicyCall(PolicyElement policy, List<ASTNode> args, ASTNode pos, Element agent) {
 		currentAgent = agent;
 		if (DebugPlugin.getDefault().getBreakpointManager().isEnabled()) {
-			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasm.eclipse.debug")) {
+			for (IBreakpoint breakpoint : DebugPlugin.getDefault().getBreakpointManager().getBreakpoints("org.coreasim.eclipse.debug")) {
 				try {
 					if (!breakpoint.isEnabled())
 						continue;

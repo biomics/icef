@@ -42,6 +42,6 @@ public class ASMLineBreakpoint extends LineBreakpoint {
 	
 	@Override
 	public String getModelIdentifier() {
-		return "org.coreasm.eclipse.debug";
+		return "org.coreasim.eclipse.debug";
 	}
 }

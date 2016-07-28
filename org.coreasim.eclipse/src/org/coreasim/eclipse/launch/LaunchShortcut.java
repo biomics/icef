@@ -71,7 +71,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 	private void launch(IFile file, String mode) {
 		String project = file.getProject().getName();
 		ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType("org.coreasm.eclipse.launchConfigurationType");
+		ILaunchConfigurationType type = launchManager.getLaunchConfigurationType("org.coreasim.eclipse.launchConfigurationType");
 		
 		HashMap<String, ILaunchConfiguration> launchConfigurations = new HashMap<String, ILaunchConfiguration>();
 		

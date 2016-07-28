@@ -35,12 +35,12 @@ public class CoreASIMPlugin extends AbstractUIPlugin {
 	Logger logger = LoggerFactory.getLogger(CoreASIMPlugin.class);
 	
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.coreasm.eclipse";
+	public static final String PLUGIN_ID = "org.coreasim.eclipse";
 	
 	public static final String MAIN_ICON_PATH = "icons/icon16x16.gif";
 
-	public static final String COREASM_FILE_EXT_1 = "casm";
-	public static final String COREASM_FILE_EXT_2 = "coreasm";
+	public static final String COREASM_FILE_EXT_1 = "casim";
+	public static final String COREASM_FILE_EXT_2 = "coreasim";
 	public static final String[] COREASM_FILE_EXTS = {COREASM_FILE_EXT_1, COREASM_FILE_EXT_2};
 
 	// private static final String PROPERTIES_FILE_NAME = "coreasmEclipsePlugin.plist"; 
@@ -58,8 +58,7 @@ public class CoreASIMPlugin extends AbstractUIPlugin {
 		String rootFolder = findRootFolder();
 		Tools.setRootFolder(rootFolder);
 		File folder = new File(new File(new File(rootFolder), "target"), "lib");
-
-		System.setProperty(Tools.COREASM_ENGINE_LIB_PATH, new File(folder, "org.coreasm.engine.jar").getAbsolutePath());
+		System.setProperty(Tools.COREASM_ENGINE_LIB_PATH, new File(folder, "org.coreasim.engine.jar").getAbsolutePath());
 		
 	}
 

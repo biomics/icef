@@ -8,14 +8,14 @@
 
 	<parent>
 		<artifactId>org.coreasim.eclipse.parent</artifactId>
-		<groupId>org.coreasm</groupId>
+		<groupId>org.coreasim</groupId>
 		<version>1.1.1-SNAPSHOT</version>
-		<relativePath>../org.coreasm.eclipse.parent</relativePath>
+		<relativePath>../org.coreasim.eclipse.parent</relativePath>
 	</parent>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.coreasm</groupId>
+			<groupId>org.coreasim</groupId>
 			<artifactId>org.coreasim.engine</artifactId>
 			<version>1.7.3-SNAPSHOT</version>
 		</dependency>
@@ -28,6 +28,11 @@
 			<groupId>org.jparsec</groupId>
 			<artifactId>jparsec</artifactId>
 			<version>2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.coreasim</groupId>
+			<artifactId>org.coreasim.util</artifactId>
+			<version>1.7.2</version>
 		</dependency>
 	</dependencies>
 	

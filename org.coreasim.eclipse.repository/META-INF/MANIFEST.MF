@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: CoreASM Eclipse Standalone
+Bundle-Name: CoreASIM Eclipse Standalone
 Bundle-SymbolicName: org.coreasim.eclipse.repository;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.coreasim.eclipse.repository.Activator
-Bundle-Vendor: The CoreASM Team
+Bundle-Vendor: BIOMICS Consortium
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

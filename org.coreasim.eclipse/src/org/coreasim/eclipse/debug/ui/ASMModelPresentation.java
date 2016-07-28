@@ -35,7 +35,7 @@ public class ASMModelPresentation extends LabelProvider implements IDebugModelPr
 	@Override
 	public String getEditorId(IEditorInput input, Object element) {
 		if (element instanceof IFile || element instanceof ILineBreakpoint)
-			return "org.coreasm.eclipse.ASMEditor";
+			return "org.coreasim.eclipse.ASMEditor";
 		return null;
 	}
 

@@ -11,7 +11,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 public class ASMCallHierarchyView extends ViewPart {
-	public static final String ID = "org.coreasm.eclipse.views.ASMCallHierarchy";
+	public static final String ID = "org.coreasim.eclipse.views.ASMCallHierarchy";
 	private ASMCallHierarchyViewer treeViewer;
 
 	@Override

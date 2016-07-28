@@ -11,7 +11,7 @@ public class ASMRulerActionDelegate extends AbstractRulerActionDelegate {
 
 	@Override
 	protected IAction createAction(ITextEditor editor, IVerticalRulerInfo ruler) {
-		return new ASMRulerAction(ResourceBundle.getBundle("org.coreasm.eclipse.editors.ASMEditorMessages"), "ASMRulerAction.", editor, ruler);
+		return new ASMRulerAction(ResourceBundle.getBundle("org.coreasim.eclipse.editors.ASMEditorMessages"), "ASMRulerAction.", editor, ruler);
 	}
 
 }

@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import org.coreasim.engine.config.ConfigurationException;
 import org.coreasim.engine.config.IConfiguration;
-import org.coreasm.util.Tools;
+import org.coreasim.util.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

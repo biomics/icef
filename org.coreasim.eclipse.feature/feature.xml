@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.coreasm.eclipse.feature"
-      label="CoreASM Eclipse Plugin"
+      id="org.coreasim.eclipse.feature"
+      label="CoreASIM Eclipse Plugin"
       version="1.1.1.qualifier"
-      provider-name="CoreASM Group">
+      provider-name="BIOMICS">
 
    <description url="https://github.com/CoreASM/coreasm.core">
       The CoreASM Eclipse Plugin
@@ -21,7 +21,6 @@ CoreASM is one of the few ASM tools that is implemented as an open framework. Co
    </license>
 
    <url>
-      <update label="CoreASM Update Site" url="http://pmserver.informatik.uni-ulm.de/coreasm/org.coreasm.eclipse.updatesite/"/>
       <discovery label="CoreASM @ github.com" url="https://github.com/CoreASM/coreasm.core"/>
    </url>
 
@@ -37,7 +36,7 @@ CoreASM is one of the few ASM tools that is implemented as an open framework. Co
    </requires>
 
    <plugin
-         id="org.coreasm.eclipse"
+         id="org.coreasim.eclipse"
          download-size="0"
          install-size="0"
          version="1.1.1.qualifier"/>

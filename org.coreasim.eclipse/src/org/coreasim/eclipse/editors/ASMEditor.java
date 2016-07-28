@@ -85,10 +85,10 @@ implements IDocumentListener
 	public static final String PARTITION_COMMENT = "__asm_comment";
 
 	// constant for marker types
-	public static final String MARKER_TYPE_PROBLEM = "org.coreasm.eclipse.markers.ProblemMarker";
-	public static final String MARKER_TYPE_RUNTIME_PROBLEM = "org.coreasm.eclipse.markers.RuntimeProblemMarker";
-	public static final String MARKER_TYPE_PLUGINS = "org.coreasm.eclipse.markers.PluginMarker";
-	public static final String MARKER_TYPE_INCLUDE = "org.coreasm.eclipse.markers.IncludeMarker";
+	public static final String MARKER_TYPE_PROBLEM = "org.coreasim.eclipse.markers.ProblemMarker";
+	public static final String MARKER_TYPE_RUNTIME_PROBLEM = "org.coreasim.eclipse.markers.RuntimeProblemMarker";
+	public static final String MARKER_TYPE_PLUGINS = "org.coreasim.eclipse.markers.PluginMarker";
+	public static final String MARKER_TYPE_INCLUDE = "org.coreasim.eclipse.markers.IncludeMarker";
 	public static final String MARKER_TYPE_DECLARATIONS = "asm.markerType.declarations";
 	
 	private final ISelectionListener postSelectionListener = new ISelectionListener() {
@@ -160,8 +160,8 @@ implements IDocumentListener
 				}
 			}
 		};
-		action.setActionDefinitionId("org.coreasm.eclipse.actions.OpenDeclaration");
-		setAction("org.coreasm.eclipse.actions.OpenDeclaration", action);
+		action.setActionDefinitionId("org.coreasim.eclipse.actions.OpenDeclaration");
+		setAction("org.coreasim.eclipse.actions.OpenDeclaration", action);
 		action = new Action("Open Call Hierarchy") {
 			@Override
 			public void run() {
@@ -189,8 +189,8 @@ implements IDocumentListener
 				}
 			}
 		};
-		action.setActionDefinitionId("org.coreasm.eclipse.actions.OpenCallHierarchy");
-		setAction("org.coreasm.eclipse.actions.OpenCallHierarchy", action);
+		action.setActionDefinitionId("org.coreasim.eclipse.actions.OpenCallHierarchy");
+		setAction("org.coreasim.eclipse.actions.OpenCallHierarchy", action);
 	}
 	
 	public ASTNode getSelectedIDnode() {
@@ -206,8 +206,8 @@ implements IDocumentListener
 	@Override
 	protected void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
-		menu.insertBefore(ICommonMenuConstants.GROUP_OPEN, getAction("org.coreasm.eclipse.actions.OpenDeclaration"));
-		menu.insertBefore(ICommonMenuConstants.GROUP_OPEN, getAction("org.coreasm.eclipse.actions.OpenCallHierarchy"));
+		menu.insertBefore(ICommonMenuConstants.GROUP_OPEN, getAction("org.coreasim.eclipse.actions.OpenDeclaration"));
+		menu.insertBefore(ICommonMenuConstants.GROUP_OPEN, getAction("org.coreasim.eclipse.actions.OpenCallHierarchy"));
 	}
 	
 	/*

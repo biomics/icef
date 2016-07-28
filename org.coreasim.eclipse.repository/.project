@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>org.coreasim.eclipse.repository</name>
-	<comment></comment>
+	<comment>The CoreASM project focuses on the design of a lean executable ASM (Abstract State Machines) language, in combination with a supporting tool environment for high-level design, experimental validation and formal verification (where appropriate) of abstract system models. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
 	<projects>
+		<project>org.coreasim.eclipse</project>
+		<project>org.coreasim.eclipse.feature</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -12,6 +14,11 @@
 		</buildCommand>
 		<buildCommand>
 			<name>org.eclipse.pde.SchemaBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>

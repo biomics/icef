@@ -4,21 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.coreasim.eclipse.parent</artifactId>
 	<packaging>pom</packaging>
-	<name>CoreASM Eclipse Parent Project</name>
+	<name>CoreASIM Eclipse Parent Project</name>
 	<version>1.1.1-SNAPSHOT</version>
 
 	<parent>
 		<artifactId>org.coreasim.parent</artifactId>
 		<groupId>org.coreasim</groupId>
 		<version>1.7.3-SNAPSHOT</version>
-		<relativePath>../org.coreasm.parent</relativePath>
+		<relativePath>../org.coreasim.parent</relativePath>
 	</parent>
 
-	<modules>
-		<module>../org.coreasm.eclipse</module>
-		<module>../org.coreasm.eclipse.feature</module>
-		<module>../org.coreasm.eclipse.repository</module>
-	</modules>
 
 	<properties>
 		<tycho-version>0.20.0</tycho-version>
@@ -62,7 +57,7 @@
 						<configuration>
 							<excludeTransitive>true</excludeTransitive>
 							<excludeGroupIds>*</excludeGroupIds>
-							<includeGroupIds>org.coreasm</includeGroupIds>
+							<includeGroupIds>org.coreasim</includeGroupIds>
 							<stripVersion>true</stripVersion>
 							<outputDirectory>${project.build.directory}/lib/</outputDirectory>
 						</configuration>
@@ -153,4 +148,9 @@
 			<layout>p2</layout>
 		</repository>
 	</repositories>
+	<modules>
+		<module>../org.coreasim.eclipse</module>
+		<module>../org.coreasim.eclipse.feature</module>
+		<module>../org.coreasim.eclipse.repository</module>
+	</modules>
 </project>
