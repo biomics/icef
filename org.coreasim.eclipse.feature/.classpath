@@ -17,7 +17,7 @@
   <classpathentry kind="lib" path="/home/dasch/.m2/repository/p2/osgi/bundle/org.apache.batik.util.gui/1.6.0.v201011041432/org.apache.batik.util.gui-1.6.0.v201011041432.jar"/>
   <classpathentry kind="lib" path="/home/dasch/.m2/repository/p2/osgi/bundle/org.eclipse.osgi.services/3.3.100.v20130513-1956/org.eclipse.osgi.services-3.3.100.v20130513-1956.jar"/>
   <classpathentry kind="src" path="/org.coreasim.eclipse"/>
-  <classpathentry kind="lib" path="/home/dasch/projects/biomics/merge/new/coreASM/org.coreasim.eclipse/target/lib/org.coreasm.engine.jar"/>
+  <classpathentry kind="lib" path="/home/dasch/projects/biomics/merge/new/coreASM/org.coreasim.eclipse/target/lib/org.coreasim.engine.jar"/>
   <classpathentry kind="lib" path="/home/dasch/.m2/repository/p2/osgi/bundle/org.eclipse.ui/3.105.0.v20130522-1122/org.eclipse.ui-3.105.0.v20130522-1122.jar"/>
   <classpathentry kind="lib" path="/home/dasch/.m2/repository/p2/osgi/bundle/org.eclipse.core.runtime/3.9.100.v20131218-1515/org.eclipse.core.runtime-3.9.100.v20131218-1515.jar"/>
   <classpathentry kind="lib" path="/home/dasch/.m2/repository/p2/osgi/bundle/org.eclipse.debug.ui/3.9.0.v20130516-1713/org.eclipse.debug.ui-3.9.0.v20130516-1713.jar"/>

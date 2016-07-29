@@ -23,6 +23,10 @@ public class LoadingTools {
 	public static String getPluginClassName(InputStream stream) throws IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		String name = reader.readLine();
+		// TODO: Dirty patch to support "old" coreasm plugins 
+		if(name.startsWith("org.coreasm.")) {
+			name = "org.coreasim." + name.substring(12);
+		}
 		return name;
 	}
 }

@@ -1,12 +1,11 @@
 package org.coreasim.eclipse;
 
 /**
- * @mainpage Eclipse-Plugin for CoreASM
+ * @mainpage Eclipse-Plugin for CoreASIM
  * 
  * 
- *           This is the Activator class of the CoreASM Eclipse Plugin. The
- *           sources and the CoreASM wiki are hosted on
- *           https://github.com/CoreASM/coreasm.core
+ *           This is the Activator class of the CoreASIM Eclipse Plugin. 
+ *           
  */
 
 import java.io.File;
@@ -59,7 +58,6 @@ public class CoreASIMPlugin extends AbstractUIPlugin {
 		Tools.setRootFolder(rootFolder);
 		File folder = new File(new File(new File(rootFolder), "target"), "lib");
 		System.setProperty(Tools.COREASM_ENGINE_LIB_PATH, new File(folder, "org.coreasim.engine.jar").getAbsolutePath());
-		
 	}
 
 	// TODO clean up the following two methods 
@@ -81,7 +79,7 @@ public class CoreASIMPlugin extends AbstractUIPlugin {
 			return ".";
 		}
 		String rootFolder = pluginsFolderURL.getPath();
-		logger.info("CoreASM Eclipse root folder is detected at '{}'.", rootFolder);
+		logger.info("CoreASIM Eclipse root folder is detected at '{}'.", rootFolder);
 		return rootFolder;
 	}
 	
@@ -100,8 +98,10 @@ public class CoreASIMPlugin extends AbstractUIPlugin {
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
+		System.out.println("PLUGIN START");
 		super.start(context);
 		plugin = this;
+		System.out.println("PLUGIN START DONE");
 	}
 
 	/**
@@ -127,6 +127,9 @@ public class CoreASIMPlugin extends AbstractUIPlugin {
 		} else 
 			if (shell == null)
 				shell = new Shell();
+		
+		System.out.println("getSchell DONE");
+		
 		return shell;
 	}
 	

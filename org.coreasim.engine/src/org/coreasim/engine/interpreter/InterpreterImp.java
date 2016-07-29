@@ -106,7 +106,7 @@ public class InterpreterImp implements Interpreter {
 	 * Creates a new interpreter with a link to the given ControlAPI module.
 	 */
 	public InterpreterImp(ControlAPI capi) {
-		((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.ERROR); // added
+		// ((ch.qos.logback.classic.Logger) logger).setLevel(ch.qos.logback.classic.Level.ERROR); // added
 																								// this
 																								// line
 																								// to

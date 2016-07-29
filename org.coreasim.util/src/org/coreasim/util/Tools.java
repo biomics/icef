@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Tools {
 	
-	private static final String CONF_COREASM_ENGINE_ROOT_FOLDER = "org.coreasm.engine.rootFolder";
+	private static final String CONF_COREASM_ENGINE_ROOT_FOLDER = "org.coreasim.engine.rootFolder";
 
 	private final static Logger logger = LoggerFactory.getLogger(Tools.class);
 
@@ -48,7 +48,7 @@ public class Tools {
 	
 	public static final int DEFAULT_STRING_LENGTH_LIMIT =   40;
 
-	public static final String COREASM_ENGINE_LIB_PATH = "coreasm.engine.lib.path";
+	public static final String COREASM_ENGINE_LIB_PATH = "coreasim.engine.lib.path";
 
 	private static Random random = new Random();
 	
@@ -375,7 +375,7 @@ public class Tools {
 		final URL classURL = ClassLoader.getSystemResource(classFile);
 
 		String fullPath = "";
-		String sampleClassFile = "/org/coreasm/util/Tools.class";
+		String sampleClassFile = "/org/coreasim/util/Tools.class";
 		if (classURL == null) {
 			Tools tempObject = new Tools();
 			fullPath = tempObject.getClass().getResource(sampleClassFile).toString();
