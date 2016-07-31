@@ -234,7 +234,7 @@ public class ASMContentProvider implements ITreeContentProvider
 	public boolean hasChildren(Object element) {
 		if (element instanceof IFile) {
 			IFile file = (IFile)element;
-			return "casm".equals(file.getFileExtension()) || "coreasm".equals(file.getFileExtension());
+			return "casim".equals(file.getFileExtension()) || "coreasim".equals(file.getFileExtension());
 		}
 		if (!(element instanceof ASMOutlineTreeNode))
 			return false;

@@ -333,14 +333,14 @@ public class ParserTools
 			
 			// consider the possiblity of starting with a 
 			// comment or whitespace
-			if (vals[0] != null && ((Node)vals[0]).getToken().equals("CoreASM"))
+			if (vals[0] != null && ((Node)vals[0]).getToken().equals("CoreASIM"))
 				info = ((Node)vals[0]).getScannerInfo();
 			else
 				info = ((Node)vals[1]).getScannerInfo();
 			
 			ASTNode rootNode = new ASTNode(
 					"Kernel", 
-					"CoreASM", 
+					"CoreASIM", 
 					Kernel.GR_COREASM, 
 					null, 
 					info

@@ -34,7 +34,7 @@ extends AbstractError
 			}
 		}
 		if (expected.size() == 0) {
-			expected.add("CoreASM");
+			expected.add("CoreASIM");
 			expected.add("CoreModule");
 		}
 		

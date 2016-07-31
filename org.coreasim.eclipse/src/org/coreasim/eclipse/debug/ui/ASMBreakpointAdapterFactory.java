@@ -18,7 +18,7 @@ public class ASMBreakpointAdapterFactory implements IAdapterFactory {
 		if (adaptableObject instanceof ASMEditor) {
 			ASMEditor editorPart = (ASMEditor) adaptableObject;
 			IResource resource = (IResource) editorPart.getEditorInput().getAdapter(IResource.class);
-			if (resource != null && ("coreasm".equalsIgnoreCase(resource.getFileExtension()) || "casm".equalsIgnoreCase(resource.getFileExtension())))
+			if (resource != null && ("coreasim".equalsIgnoreCase(resource.getFileExtension()) || "casim".equalsIgnoreCase(resource.getFileExtension())))
 				return new ASMBreakpointAdapter();
 		}
 		return null;

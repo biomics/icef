@@ -79,9 +79,9 @@ public class CompileJob extends Job {
 		IStatus result = null; 
 		if(err == null){
 			
-			MultiStatus r = new MultiStatus("CoreASM", IStatus.OK, "Compilation successfull", null);
+			MultiStatus r = new MultiStatus("CoreASIM", IStatus.OK, "Compilation successfull", null);
 			for(String s : warnings){
-				r.add(new Status(IStatus.WARNING, "CoreASM", s));
+				r.add(new Status(IStatus.WARNING, "CoreASIM", s));
 			}
 			
 			if(options.keepTempFiles){
@@ -130,18 +130,18 @@ public class CompileJob extends Job {
 					}
 				}
 				catch(Exception e){
-					r.add(new Status(IStatus.ERROR, "CoreASM", "Execution failed: " + e.getMessage()));
+					r.add(new Status(IStatus.ERROR, "CoreASIM", "Execution failed: " + e.getMessage()));
 				}
 			}
 			result = r;
 		}
 		else{	
-			MultiStatus r = new MultiStatus("CoreASM", IStatus.ERROR, "Compilation failed", null);
+			MultiStatus r = new MultiStatus("CoreASIM", IStatus.ERROR, "Compilation failed", null);
 			for(String s : errors){
-				r.add(new Status(IStatus.ERROR, "CoreASM", s));
+				r.add(new Status(IStatus.ERROR, "CoreASIM", s));
 			}
 			for(String s : warnings){
-				r.add(new Status(IStatus.WARNING, "CoreASM", s));
+				r.add(new Status(IStatus.WARNING, "CoreASIM", s));
 			}
 			result = r;
 		}

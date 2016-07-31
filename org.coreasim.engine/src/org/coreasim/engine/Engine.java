@@ -190,7 +190,7 @@ public class Engine implements ControlAPI {
 	 *			properties of the engine to be created.
 	 */
 	protected Engine(java.util.Properties properties) {
-		name = "CoreASM" + Tools.lFormat(++lastEngineId, 5);
+		name = "CoreASIM" + Tools.lFormat(++lastEngineId, 5);
 		this.properties = new EngineProperties();
 		if (properties != null)
 			this.properties.putAll(properties);

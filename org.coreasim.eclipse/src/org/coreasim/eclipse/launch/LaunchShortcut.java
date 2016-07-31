@@ -111,7 +111,7 @@ public class LaunchShortcut implements ILaunchShortcut {
 		IEditorPart editor = Utilities.getEditor(file);
 		if (editor instanceof ASMEditor) {
 			ASMParser parser = ((ASMEditor)editor).getParser();
-			if (parser.getRootNode() != null && "CoreASM".equals(parser.getRootNode().getGrammarRule()))
+			if (parser.getRootNode() != null && "CoreASIM".equals(parser.getRootNode().getGrammarRule()))
 				return true;
 		}
 		return false;

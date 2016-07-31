@@ -109,14 +109,14 @@ public class TestAllCasm {
 				@Override
 				public boolean accept(File file) {
 					return (file.isDirectory()
-							|| file.getName().toLowerCase().endsWith(".casm")
-							|| file.getName().toLowerCase().endsWith(".coreasm"));
+							|| file.getName().toLowerCase().endsWith(".casim")
+							|| file.getName().toLowerCase().endsWith(".coreasim"));
 				}
 			})) {
 				getTestFile(testFiles, child, clazz);
 			}
 		else if (file != null
-				&& file.getName().toLowerCase().matches(clazz.getSimpleName().toLowerCase() + "(.casm|.coreasm)"))
+				&& file.getName().toLowerCase().matches(clazz.getSimpleName().toLowerCase() + "(.casim|.coreasim)"))
 			testFiles.add(file);
 	}
 
@@ -127,8 +127,8 @@ public class TestAllCasm {
 				@Override
 				public boolean accept(File file) {
 					return (file.isDirectory()
-							|| file.getName().toLowerCase().endsWith(".casm")
-							|| file.getName().toLowerCase().endsWith(".coreasm"));
+							|| file.getName().toLowerCase().endsWith(".casim")
+							|| file.getName().toLowerCase().endsWith(".coreasim"));
 				}
 			})) {
 				getTestFiles(testFiles, child);

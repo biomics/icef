@@ -37,7 +37,7 @@ public class InitializationParseMap extends ParseMapN<Node> {
 		
 		ASTNode rootNode = new ASTNode(
 				pluginName, 
-				"CoreASM", 
+				"CoreASIM", 
 				Kernel.GR_COREASM, 
 				null, 
 				info

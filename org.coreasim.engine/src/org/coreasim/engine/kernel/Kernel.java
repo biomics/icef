@@ -91,7 +91,7 @@ public class Kernel extends Plugin
 	public static final String PLUGIN_NAME = Kernel.class.getSimpleName();
 
 	/** Grammar Rule Names */
-	public static final String GR_COREASM = "CoreASM";
+	public static final String GR_COREASM = "CoreASIM";
 	public static final String GR_USE_CLAUSE = "UseClauses";
 	public static final String GR_HEADER = "Header";
 	public static final String GR_NOSIGNATURE = "NoSignature";
@@ -118,7 +118,7 @@ public class Kernel extends Plugin
 	public static final String GR_POLICY_OR_FUNCTION_ELEMENT_TERM = "PolicyOrFunctionElementTerm";
 	
 	/** keywords */
-	public static final String KW_COREASM = "CoreASM";
+	public static final String KW_COREASM = "CoreASIM";
 	public static final String KW_USE = "use";
 	public static final String KW_INIT = "init";
 	public static final String KW_SKIP = "skip";
@@ -175,7 +175,7 @@ public class Kernel extends Plugin
     //private final Parser<Node>[] ruleSignatureParserArray = new Parser[1];
     //private final Parser<Node> ruleSignatureParser = ParserTools.lazy("RuleSignature", ruleSignatureParserArray);
 
-    private final String[] keywords = {"CoreASM", "nosignature", "use", "init", "rule", 
+    private final String[] keywords = {"CoreASIM", "nosignature", "use", "init", "rule", 
     		"ruleelement", "skip", "import", "do", "undef", "true", "false", "self", 
     		"scheduling", "policy", "policyelement", "schedule", "with", "in"};
     private final String[] operators = {"=", "(", ")", ",", "@", ":=", "!!", "#"};
@@ -450,7 +450,7 @@ public class Kernel extends Plugin
 	
 	    	// CoreASM : 'CoreASM' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration)*
 	    	Parser<Node> coreASMParser = Parsers.array(new Parser[] {
-	    			parserTools.getKeywParser("CoreASM", this.getName()),
+	    			parserTools.getKeywParser("CoreASIM", this.getName()),
 	    			idParser,
 	    			parserTools.star(
 	    					Parsers.or(
@@ -464,7 +464,7 @@ public class Kernel extends Plugin
 	    				)
 	    			}).map(new ParserTools.CoreASMParseMap())
 	    			.followedBy(Parsers.EOF);
-	    	parsers.put("CoreASM", new GrammarRule("CoreASM", 
+	    	parsers.put("CoreASIM", new GrammarRule("CoreASIM", 
 	    			"'BSL' ID ( UseClause | Header | 'init' ID | 'scheduling' ID | RuleDeclaration | PolicyDeclaration )*", 
 	    			coreASMParser, this.getName()));
 		}

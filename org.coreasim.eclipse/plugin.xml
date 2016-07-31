@@ -14,7 +14,7 @@
    	  		class="org.coreasim.eclipse.editors.ASMEditor"
    	  		contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
    	  		default="false"
-   	  		extensions="casm,coreasim"
+   	  		extensions="casim,coreasim"
 			icon="icons/CoreASIM-Logo.png"
    	  		id="org.coreasim.eclipse.ASMEditor"
    	  		name="CoreASIMEditor">
@@ -340,7 +340,7 @@
             sourcePathComputerId="org.coreasim.eclipse.debug.sourcePathComputer">
          <fileExtension
                default="true"
-               extension="*.casm">
+               extension="*.casim">
          </fileExtension>
          <fileExtension
                default="false"

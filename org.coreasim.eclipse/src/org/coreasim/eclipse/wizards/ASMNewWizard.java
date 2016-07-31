@@ -164,7 +164,7 @@ public class ASMNewWizard extends Wizard implements INewWizard {
 
 	private void throwCoreException(String message) throws CoreException {
 		IStatus status =
-			new Status(IStatus.ERROR, "CoreASM", IStatus.OK, message, null);
+			new Status(IStatus.ERROR, "CoreASIM", IStatus.OK, message, null);
 		throw new CoreException(status);
 	}
 

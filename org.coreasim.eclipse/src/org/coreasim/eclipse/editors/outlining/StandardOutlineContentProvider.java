@@ -11,7 +11,7 @@ public class StandardOutlineContentProvider implements OutlineContentProvider {
 
 	@Override
 	public URL getImage(String grammarRule) {
-		if ("CoreASM".equals(grammarRule) || "CoreModule".equals(grammarRule))
+		if ("CoreASIM".equals(grammarRule) || "CoreModule".equals(grammarRule))
 			return FileLocator.find(FrameworkUtil.getBundle(getClass()), new Path("/icons/icon16.gif"), null);
 		if ("UseClauses".equals(grammarRule))
 			return FileLocator.find(FrameworkUtil.getBundle(getClass()), new Path("/icons/editor/package.gif"), null);
@@ -65,6 +65,6 @@ public class StandardOutlineContentProvider implements OutlineContentProvider {
 
 	@Override
 	public boolean hasDeclarations(String grammarRule) {
-		return "CoreASM".equals(grammarRule) || "CoreModule".equals(grammarRule);
+		return "CoreASIM".equals(grammarRule) || "CoreModule".equals(grammarRule);
 	}
 }

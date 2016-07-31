@@ -187,7 +187,7 @@ public class ASMBreakpointAdapter implements IToggleBreakpointsTarget {
 			ASMEditor editorPart = (ASMEditor) part;
 			IResource resource = (IResource) editorPart.getEditorInput().getAdapter(IResource.class);
 			
-			if (resource != null && ("coreasm".equalsIgnoreCase(resource.getFileExtension()) || "casm".equalsIgnoreCase(resource.getFileExtension())))
+			if (resource != null && ("coreasim".equalsIgnoreCase(resource.getFileExtension()) || "casim".equalsIgnoreCase(resource.getFileExtension())))
 				return editorPart;
 		}
 		return null;		

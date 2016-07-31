@@ -104,10 +104,10 @@ public class ASMDebugUtils {
 	
 	private static int indexOfCasmFilename(String context) {
 		int index;
-		if (context.contains(".coreasm") && context.indexOf(".coreasm") != context.indexOf(".coreasm."))
-			index = context.substring(0, context.indexOf(".coreasm")).lastIndexOf(' ') + 1;
-		else if (context.contains(".casm"))
-			index = context.substring(0, context.indexOf(".casm")).lastIndexOf(' ') + 1;
+		if (context.contains(".coreasim") && context.indexOf(".coreasim") != context.indexOf(".coreasim."))
+			index = context.substring(0, context.indexOf(".coreasim")).lastIndexOf(' ') + 1;
+		else if (context.contains(".casim"))
+			index = context.substring(0, context.indexOf(".casim")).lastIndexOf(' ') + 1;
 		else
 			return -1;
 		if (index < 0)

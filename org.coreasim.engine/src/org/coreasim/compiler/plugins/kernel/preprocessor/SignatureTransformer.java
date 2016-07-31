@@ -65,7 +65,7 @@ public class SignatureTransformer implements SynthesizeRule {
 			
 			return result;
 		}
-		else if(n.getGrammarClass().equals("CoreASM") && n.getGrammarRule().equals("CoreASM")){
+		else if(n.getGrammarClass().equals("CoreASIM") && n.getGrammarRule().equals("CoreASIM")){
 			//collect all rules and put them in the head
 			HashMap<String, Information> result = new HashMap<String, Information>();
 			Information resultInfo = new Information();
@@ -102,7 +102,7 @@ public class SignatureTransformer implements SynthesizeRule {
 		List<Trigger> triggers = new ArrayList<Trigger>();
 		triggers.add(new Trigger(null, "Declaration", "RuleSignature", null));
 		triggers.add(new Trigger(null, "Declaration", "RuleDeclaration", null));
-		triggers.add(new Trigger(null, "CoreASM", "CoreASM", null));
+		triggers.add(new Trigger(null, "CoreASIM", "CoreASIM", null));
 		return triggers;
 	}
 

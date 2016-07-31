@@ -112,7 +112,7 @@ public class CompilerKernelPlugin extends CompilerCodePlugin implements
 		this.register(new KernelMacroCallRule(), CodeType.U, "Rule",
 				"MacroCallRule", null);
 
-		this.register(new KernelCoreHandler(), CodeType.BASIC, null, "CoreASM",
+		this.register(new KernelCoreHandler(), CodeType.BASIC, null, "CoreASIM",
 				null);
 		this.register(new KernelInitHandler(), CodeType.BASIC, null,
 				"Initialization", null);

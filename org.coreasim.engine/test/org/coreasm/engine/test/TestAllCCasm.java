@@ -92,14 +92,14 @@ public class TestAllCCasm {
 				@Override
 				public boolean accept(File file) {
 					return (file.isDirectory()
-							|| file.getName().toLowerCase().endsWith(".casm")
-							|| file.getName().toLowerCase().endsWith(".coreasm"));
+							|| file.getName().toLowerCase().endsWith(".casim")
+							|| file.getName().toLowerCase().endsWith(".coreasim"));
 				}
 			})) {
 				getTestFile(testFiles, child, clazz);
 			}
 		else if (file != null
-				&& file.getName().toLowerCase().matches(clazz.getSimpleName().replace("Compiler", "").toLowerCase() + "(.casm|.coreasm)"))
+				&& file.getName().toLowerCase().matches(clazz.getSimpleName().replace("Compiler", "").toLowerCase() + "(.casim|.coreasim)"))
 			testFiles.add(file);
 	}
 }

@@ -33,7 +33,7 @@ public class FileSelectionListener implements Listener {
 	private void makeFilters(FileDialog dialog){
 		if(fieldName.equals("SpecificationName")){
 			dialog.setFilterNames(new String[]{"CoreASM specifications", "All Files (*.*)"});
-			dialog.setFilterExtensions(new String[]{"*.coreasm|*.casm", "*.*"});
+			dialog.setFilterExtensions(new String[]{"*.coreasim|*.casim", "*.*"});
 		}
 		else if(fieldName.equals("outputFile")){
 			dialog.setFilterNames(new String[]{"jar Archives", "All Files (*.*)"});

@@ -104,7 +104,7 @@ public class ASMParser extends Observable implements org.coreasim.engine.parser.
 		// The parser is created through the Kernel object, as a "side effect"
 		// of the first call of Kernel.getParser()
 		Kernel kernel = (Kernel) engine.getPlugin("Kernel");
-		GrammarRule rootRule = kernel.getParsers().get("CoreASM");
+		GrammarRule rootRule = kernel.getParsers().get("CoreASIM");
 		rootParser = rootRule.parser;
 		
 		// The old module parser must be discarded, a new one will be derived from 
@@ -479,7 +479,7 @@ public class ASMParser extends Observable implements org.coreasim.engine.parser.
 		
 		public ParsingJob()
 		{
-			super("CoreASM Parser");
+			super("CoreASIM Parser");
 			this.setPriority(DECORATE);
 			this.pause();
 		}
