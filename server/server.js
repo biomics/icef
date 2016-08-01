@@ -14,9 +14,7 @@
 var express = require('express');
 var http = require('http');
 
-var sys = require('sys');
 var spawn = require('child_process').spawn;
-var exec = require('child_process').exec;
 
 var app = null;
 var server = null;
