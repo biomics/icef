@@ -374,9 +374,17 @@ public class JParsecParser implements Parser {
             ASTNode cur = node.getFirst();
 
             if(gr.equals("SchedulePrimitive")) {
-                ASTNode search = cur = cur.getNext().getNext();
-                if(cur != null)
-                    visited.add(cur.toString());
+                if(cur != null) {
+                	cur = cur.getNext();
+                	if(cur != null) {
+                		cur = cur.getNext();
+                	
+                		if(cur != null) {
+                			System.out.println("Visited: "+cur.toString());
+                			visited.add(cur.toString());
+                		}
+                	}
+                }
             }            
             if(gr.equals("LetPolicy") || gr.equals("ChoosePolicy") || gr.equals("ForallPolicy")) {
                 /* System.out.println("\tCur '"+cur+"' is exists expression");
