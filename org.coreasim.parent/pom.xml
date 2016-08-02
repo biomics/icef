@@ -4,7 +4,7 @@
   <artifactId>org.coreasim.parent</artifactId>
   <version>1.7.3-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>CoreASM Parent Project</name>
+  <name>CoreASIM Parent Project</name>
   <url>https://github.com/coreasm/coreasm.core</url>
   <description>The CoreASM project focuses on the design of a lean executable ASM (Abstract State Machines) language, in combination with a supporting tool environment for high-level design, experimental validation and formal verification (where appropriate) of abstract system models.</description>
   
