@@ -1,15 +1,20 @@
 /*	
  * $Id: //CoreASM/development/main-concurrent/src/org/coreasm/engine/interpreter/InterpreterImp.java#17 $
  * 
- * InterpreterImp.java 	1.0 	$Revision: 253 $
+ * InterpreterImp.java 	1.0 	
  *
  * Copyright (C) 2005 Roozbeh Farahbod 
  * 
- * Last modified by $Author: rfarahbod $ on $Date: 2011-05-15 01:40:58 +0200 (So, 15 Mai 2011) $.
- *
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ * 
  *
  */
 
@@ -847,7 +852,8 @@ public class InterpreterImp implements Interpreter {
 								return pos;
 							}
 						}
-						else if (capi.getASIMSet().contains(agentName)) {
+						else// if (capi.getASIMSet().contains(agentName)) 
+							{
 							// We see that the agent is an external
 							// agent!
 							if (content != null && subject != null) {
@@ -877,12 +883,13 @@ public class InterpreterImp implements Interpreter {
 										pos, this);
 							}
 
-						} else {
-							capi.warning("Policy Warning",
-									"The policy is trying to schedule an agent that is neither a local agent nor an ASIM");
-							pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
-							return pos;
-						}
+						} 
+//						else {
+//							capi.warning("Policy Warning",
+//									"The policy is trying to schedule an agent that is neither a local agent nor an ASIM");
+//							pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);
+//							return pos;
+//						}
 					} else {
 						capi.warning("Policy Warning", "The policy is trying to schedule undef!");
 						pos.setNode(null, new UpdateMultiset(), new TriggerMultiset(), null);

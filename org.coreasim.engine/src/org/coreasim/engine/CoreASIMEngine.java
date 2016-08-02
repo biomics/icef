@@ -1,13 +1,18 @@
 /*
- * CoreASMEngine.java 
+ * CoreASMEngine.java 	1.0
  *
  * Copyright (C) 2005-2010 Roozbeh Farahbod 
- * 
- * Last modified by $Author: rfarahbod $ on $Date: 2011-01-07 02:19:25 +0100 (Fr, 07 Jan 2011) $.
- *
+*
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ * 
  *
  */
 
@@ -638,12 +643,27 @@ public interface CoreASIMEngine extends VersionInfoProvider {
 	 */
 	public Set<? extends Element> getASIMSet();
 
+	/**
+	 * Registers internally the set of given ASIMs
+	 * @param asims the set of ASIMs to be registered
+	 */
 	public void addASIMs(Set<String> asims);
 
+	/**
+	 * Deletes internally the given set of ASIMs 
+	 * @param asims the set of ASIMs to be deleted
+	 */
 	public void deleteASIMs(Set<String> asims);
 
+	/**
+	 * Returns the main parser
+	 * @return the main parser
+	 */
     public Parser getParser();
 
+    /**
+     * Removes all the messages from the outbox location
+     */
 	public void clearOutboxLocation();
 
 }

@@ -581,10 +581,4 @@ public class WatchExpressionAPI implements ControlAPI {
 		return null;
 	}
 
-	@Override
-	public int getCounter() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 }

@@ -1,13 +1,17 @@
 /*
- * SchedulingPoliciesPlugin.java 		$Revision: 216 $
+ * SchedulingPoliciesPlugin.java 		1.0
  * 
  * Copyright (c) 2008 Roozbeh Farahbod
  *
- * Last modified on $Date: 2010-12-08 23:01:43 +0100 (Mi, 08 Dez 2010) $  by $Author: rfarahbod $
- * 
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
  *
  */
 

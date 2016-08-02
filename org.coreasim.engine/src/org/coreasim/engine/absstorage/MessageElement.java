@@ -1,14 +1,10 @@
 /*	
- * MessageElement.java 	1.0 	$Revision: 80 $
+ * MessageElement.java 	1.0 	
  * 
- *
- * Copyright (C) 2005 Roozbeh Farahbod 
- * 
- * Last modified by $Author: rfarahbod $ on $Date: 2009-07-24 16:25:41 +0200 (Fr, 24 Jul 2009) $.
- *
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -28,54 +24,105 @@ public class MessageElement extends Element {
 	 * 
 	 */
 	private static final long serialVersionUID = 926274521917609653L;
-
+	/**
+	 * Returns the Element payload of the message element
+	 * @return the message payload 
+	 */
 	public Element getMessage() {
 		return message;
 	}
-
+	/**
+	 * Returns the destination Agent of the message element
+	 * @return the destination agent
+	 */
 	public String getToAgent() {
 		return toAgent;
 	}
-
+	/**
+	 * Returns the subject of the message element
+	 * @return the subject
+	 */
 	public String getSubject() {
 		return subject;
 	}
-
+	/**
+	 * Sets the message payload
+	 * @param the message payload
+	 */
 	public void setMessage(Element message) {
 		this.message = message;
 	}
-
+	/**
+	 * Sets the destination agent
+	 * @param the destination Agent toAgent
+	 */
 	public void setToAgent(String toAgent) {
 		this.toAgent = toAgent;
 	}
-
+	
+	/**
+	 * Sets the origin Agent
+	 * @param fromAgent the origin agent
+	 */
 	public void setFromAgent(String fromAgent) {
 		this.fromAgent = fromAgent;
 	}
-
+	/**
+	 * Sets the subject 
+	 * @param subject the subject of the message element
+	 */
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
-
+	/**
+	 * Sets the stepcount 
+	 * @param stepcount the stepcount
+	 */
 	public void setStepcount(int stepcount) {
 		this.stepcount = stepcount;
 	}
-
+	/**
+	 * Returns the stepcount of the message element
+	 * @return the stepcount
+	 */
 	public int getStepcount() {
 		return stepcount;
 	}
-
+	/**
+	 * Returns the origin agent of the message element
+	 * @return the origin agent
+	 */
 	public String getFromAgent() {
 		return fromAgent;
 	}
-
+	/**
+	 * The payload 
+	 */
 	private Element message;
+	/**
+	 * The destination agent
+	 */
 	private String toAgent;
+	/**
+	 * The origin agent
+	 */
 	private String fromAgent;
+	/**
+	 * The subject
+	 */
 	private String subject;
+	/**
+	 * The stepcount
+	 */
 	private int stepcount;
+	/**
+	 * the type //Could be removed?
+	 */
 	private String type;
-	
+
+	/**
+	 * Default constructor
+	 */
 	public MessageElement()
 	{
 		this.fromAgent = "";
@@ -84,7 +131,10 @@ public class MessageElement extends Element {
 		this.subject = "";
 		this.stepcount = -1;
 	}
-
+/**
+ * Builds a copy of the given Message Element
+ * @param e the message element to be copied
+ */
 	public MessageElement(MessageElement e) {
         fromAgent = e.getFromAgent();
         toAgent = e.getToAgent();
@@ -93,7 +143,15 @@ public class MessageElement extends Element {
         stepcount = e.getStepcount();
         type = e.getType();
     }
-
+	/**
+	 * Conditioned constructor. Requires correct types in order to construct the message element
+	 * @param fromAgent The destination agent (cannot be null)
+	 * @param message the payload of the message (cannot be null)
+	 * @param toAgent the origin agent (cannot be null)
+	 * @param subject the subject (cannot be null)
+	 * @param stepcount the stepcount 
+	 * @param type the type
+	 */
 	public MessageElement(String fromAgent, Element message, String toAgent, String subject, int stepcount, String type) {
 		if (fromAgent == null)
 			throw new NullPointerException("Cannot create a MessageElement with a null sender");

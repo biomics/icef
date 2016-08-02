@@ -1,13 +1,10 @@
 /*	
- * PrintRuelNode.java 	1.5 	$Revision: 243 $
+ * CreateAgentNode.java 	1.0
  * 
- * Copyright (C) 2006-2007 Roozbeh Farahbod
- *
- * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
- *
- * Licensed under the Academic Free License version 3.0
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
+ * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -50,19 +47,30 @@ public class CreateAgentRuleNode extends ASTNode {
 	public ASTNode getAgentName() {
 		return (ASTNode) this.getChildNode("id");
 	}
-
+	/**
+	 * @return the init rule part of the node
+	 */
 	public ASTNode getAgentInit() {
 		return (ASTNode) this.getChildNode("init");
 	}
 	
+	/**
+	 * @return the program part of the node
+	 */
 	public ASTNode getAgentProgram() {
 		return (ASTNode) this.getChildNode("program");
 	}
-	
+
+	/**
+	 * @return the policy part of the node
+	 */
 	public ASTNode getAgentPolicy() {
 		return (ASTNode) this.getChildNode("policy");
 	}
-	
+
+	/**
+	 * @return the location part of the node
+	 */
 	public ASTNode getAgentLocation() {
 		return (ASTNode) this.getChildNode("location");
 	}

@@ -1,14 +1,10 @@
-/*	
- * Update.java 	1.0 	$Revision: 243 $
+/*
+ * Trigger 		1.0
  * 
- *
- * Copyright (C) 2005-2009 Roozbeh Farahbod 
- * 
- * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
- *
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -107,7 +103,7 @@ public class Trigger {
 	}
 	
 	/**
-	 * String view of triggers. Two equal updates should have the same string. 
+	 * String view of triggers. Two equal triggers should have the same string. 
 	 *  
 	 * @see Object#toString()
 	 */
@@ -116,7 +112,11 @@ public class Trigger {
 		return "(" + agent.toString()+ ", " + action + ")"; 
 	}
 	
-	
+	/**
+	 * Puts all the sources in one source set
+	 * @param sources
+	 * @return the source set with all the sources
+	 */
 	private HashSet<ScannerInfo> newSourceSet(ScannerInfo ... sources) {
 		HashSet<ScannerInfo> result = new HashSet<ScannerInfo>();
 		for (ScannerInfo a: sources)

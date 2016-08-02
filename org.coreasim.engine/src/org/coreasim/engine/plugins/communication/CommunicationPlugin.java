@@ -1,5 +1,5 @@
 /*	
- * CommunicationPlugin.java 	1.
+ * CommunicationPlugin.java 	1.0
  * 
  * Copyright (C) 2016 Eric Rothstein, Daniel Schreckling
  *

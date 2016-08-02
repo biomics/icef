@@ -1,14 +1,10 @@
 /*	
- * ChoosePolicyNode.java 	1.0 	$Revision: 243 $
+ * ChoosePolicyNode.java 	1.0 	
  * 
- * Last modified on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $ by $Author: rfarahbod $
- * 
- * Copyright (C) 2006 George Ma
- * Copyright (c) 2007 Roozbeh Farahbod
- *
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -23,9 +19,9 @@ import org.coreasim.engine.interpreter.ScannerInfo;
 import org.coreasim.engine.plugins.chooserule.ChooseRulePlugin;
 
 /** 
- *	ChoosepolicyNode is a Node for choose policy nodes.
+ *	ChoosePolicyNode is a Node for choose policy nodes.
  *   
- *  @author  George Ma, Roozbeh Farahbod
+ *  @author  Eric Rothstein
  *  
  */
 

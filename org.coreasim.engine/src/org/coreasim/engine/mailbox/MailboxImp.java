@@ -1,3 +1,12 @@
+/*
+ * MailboxImp		1.0
+ * 
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ */
 package org.coreasim.engine.mailbox;
 
 import java.util.Collections;
@@ -15,7 +24,13 @@ import org.coreasim.engine.plugins.communication.CommunicationPlugin;
 import org.coreasim.engine.plugins.communication.CommunicationPlugin.CommunicationPSI;
 
 public class MailboxImp implements Mailbox {
-
+	/** 
+	 * Concrete implementation of the mailbox
+	 *   
+	 *  @author Eric Rothstein
+	 *  @author Daniel Schreckling
+	 *  
+	 */
 	private Set<MessageElement> inbox;
 	private Set<MessageElement> outbox;
 	private ControlAPI capi;
@@ -32,6 +47,9 @@ public class MailboxImp implements Mailbox {
         Set<MessageElement> oldOutbox = null;
         oldOutbox = new HashSet<MessageElement>();
         for(MessageElement me : outbox) {
+            oldOutbox.add(new MessageElement(me));
+        }
+        for(MessageElement me : schedulingOutbox) {
             oldOutbox.add(new MessageElement(me));
         }
         schedulingOutbox.clear();
@@ -65,7 +83,10 @@ public class MailboxImp implements Mailbox {
 		outbox.clear();
 
 	}
-
+/**
+ * initializes the Mailbox
+ * @param capi
+ */
 	public MailboxImp(ControlAPI capi) {
 		super();
 		inbox = new HashSet<MessageElement>();

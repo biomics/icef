@@ -1,13 +1,17 @@
 /*
- * JasminePlugin.java 		$Revision: 130 $
+ * JasminePlugin.java 		1.0
  * 
  * Copyright (c) 2007 Roozbeh Farahbod
  *
- * Last modified on $Date: 2010-03-31 01:27:47 +0200 (Mi, 31 Mrz 2010) $  by $Author: rfarahbod $
- * 
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
  *
  */
 

@@ -1,13 +1,11 @@
 /*	
- * ConditionalPolicyNode.java 	1.0 	$Revision: 243 $
+ * ConditionalPolicyNode.java 	1.0 	
  * 
- * Last modified on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $ by $Author: rfarahbod $
- *
- * Copyright (C) 2006 George Ma
- *
+ * 
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -17,7 +15,7 @@ import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
- *	CondtionalRuleNode is a node for conditional (ifThen) nodes.
+ *	CondtionalPolicyNode is a node for conditional (ifThen) nodes.
  *   
  * @author  Eric Rothstein
  * 

@@ -1,14 +1,19 @@
 /*	
- * Update.java 	1.0 	$Revision: 243 $
+ * Update.java 	1.0
  * 
  *
- * Copyright (C) 2005-2009 Roozbeh Farahbod 
- * 
- * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
+ * Copyright (C) 2006 Roozbeh Farahbod
  *
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ * 
  *
  */
  
@@ -132,9 +137,10 @@ public class Update {
 	public String toString() {
 		return "(" + loc.toString() + ", " + value.denotation() + ", " + action + ")"; 
 	}
-	
-	/*
+	/**
 	 * Creates a new set of agents (elements in general) with the given elements.
+	 * @param agents given to create the agent set
+	 * @return the set of agents
 	 */
 	private HashSet<Element> newAgentSet(Element ... agents) {
 		HashSet<Element> result = new HashSet<Element>();
@@ -142,7 +148,11 @@ public class Update {
 			result.add(a);
 		return result;
 	}
-	
+	/**
+	 * Puts all the sources in one source set
+	 * @param sources
+	 * @return the source set with all the sources
+	 */
 	private HashSet<ScannerInfo> newSourceSet(ScannerInfo ... sources) {
 		HashSet<ScannerInfo> result = new HashSet<ScannerInfo>();
 		for (ScannerInfo a: sources)

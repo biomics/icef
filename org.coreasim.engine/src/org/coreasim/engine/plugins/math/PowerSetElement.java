@@ -1,13 +1,17 @@
 /*
- * PowerSetElement.java 		$Revision: 11 $
+ * PowerSetElement.java 		
  * 
  * Copyright (c) 2007 Roozbeh Farahbod
  *
- * Last modified on $Date: 2009-01-28 11:03:35 +0100 (Mi, 28 Jan 2009) $ by $Author: rfarahbod $
- *
- * Licensed under the Academic Free License version 3.0
+ * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
  *
  */
 

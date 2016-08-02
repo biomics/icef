@@ -1,6 +1,5 @@
 /*	
- * VocabularyExtender.java 	1.0 	$Revision: 243 $
- * 
+ * VocabularyExtender.java 	1.0 	
  *
  * Copyright (C) 2006 Mashaal Memon
  *
@@ -8,6 +7,12 @@
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
  *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ * 
  */
 
 package org.coreasim.engine.plugin;
@@ -112,11 +117,11 @@ public interface VocabularyExtender {
 	public Set<String> getRuleNames();
 	
 	/**
-	 * Returns the names of the rules that 
+	 * Returns the names of the policies that 
 	 * are provided by this plugin.
 	 * <p>
 	 * The returned value should NOT be <code>null</code>.
-	 * Plug-ins should return an empty set if they are not providing any rule.
+	 * Plug-ins should return an empty set if they are not providing any policy.
 	 * Hint: use {@link Collections#emptySet()}. 
 	 */
 	public Set<String> getPolicyNames();

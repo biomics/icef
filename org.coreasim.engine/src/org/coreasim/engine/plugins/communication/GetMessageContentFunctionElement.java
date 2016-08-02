@@ -1,13 +1,10 @@
 /*	
- * OutputFunctionElement.java 	1.0 	$Revision: 243 $
+ * GetMessageContentFunctionElement.java 	1.0 	
  * 
- * Copyright (C) 2006 Roozbeh Farahbod
- *
- * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
- *
- * Licensed under the Academic Free License version 3.0
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
+ * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -25,11 +22,10 @@ import org.coreasim.engine.absstorage.MessageElement;
 import org.coreasim.engine.plugins.set.SetElement;
 
 /** 
- * This class implements the 'output' function provided by the IO Plugin.
+ * This class implements the 'getMessageContent' function provided by the Communication Plugin.
  *   
- * @author  Roozbeh Farahbod
+ * @author  Eric Rothstein
  * 
- * @see org.coreasim.engine.plugins.io.IOPlugin
  */
 public class GetMessageContentFunctionElement extends FunctionElement {
 

@@ -1,13 +1,10 @@
 /*	
- * RuleOrFuncElementNode.java 	1.0 	$Revision: 243 $
+ * PolicyOrFuncElementNode.java 	1.0 	
  * 
- * Copyright (C) 2006-2007 Roozbeh Farahbod
- *
- * Last modified by $Author: rfarahbod $ on $Date: 2011-03-29 02:05:21 +0200 (Di, 29 Mrz 2011) $.
- *
- * Licensed under the Academic Free License version 3.0
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
+ * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -17,9 +14,9 @@ import org.coreasim.engine.interpreter.ASTNode;
 import org.coreasim.engine.interpreter.ScannerInfo;
 
 /** 
- * Node of rule/function element terms.
+ * Node of policy/function element terms.
  * 
- * @author Roozbeh Farahbod
+ * @author Eric Rothstein
  * 
  */
 public class PolicyOrFuncElementNode extends ASTNode {
@@ -41,7 +38,7 @@ public class PolicyOrFuncElementNode extends ASTNode {
 	}
 
 	/**
-	 * @return the name of the rule or function
+	 * @return the name of the policy or function
 	 */
 	public String getElementName() {
 		return this.getFirst().getToken();

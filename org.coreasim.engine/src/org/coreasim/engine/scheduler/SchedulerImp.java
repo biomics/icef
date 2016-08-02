@@ -8,6 +8,12 @@
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
  *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
  */
 
 package org.coreasim.engine.scheduler;
@@ -103,11 +109,12 @@ public class SchedulerImp implements Scheduler {
 		this.capi = engine;
 		updateInstructions = new UpdateMultiset();
 		updateSet = new HashSet<Update>();
-		agentSet = null;
+		agentSet = new HashSet<Element>();;
 		selectedAgentSet = new HashSet<Element>();
 		lastSelectedAgents = null;
 		agentContextMap = new AgentContextMap();
 		ASIMSet = new HashSet<Element>();
+		schedule = new HashSet<Element>();
 	}
 
 	public void prepareInitialState() throws InvalidSpecificationException {
@@ -166,14 +173,14 @@ public class SchedulerImp implements Scheduler {
 		// changed by Roozbeh
 		// updateSet.clear();
 		updateSet = new HashSet<Update>();
-		agentSet = null;
+		agentSet = new HashSet<Element>();
 		selectedAgentSet.clear();
 	}
 
 	public synchronized void retrieveAgents() {
 		// debugged by Roozbeh Farahbod, 17-Jan-2006
 		AbstractStorage storage = capi.getStorage();
-		agentSet = new HashSet<Element>();
+		agentSet.clear();
 		Location loc = new Location(
 				AbstractStorage.PROGRAM_FUNCTION_NAME,
 				ElementList.create(selfAgent));
@@ -333,7 +340,7 @@ public class SchedulerImp implements Scheduler {
 			Element value = storage.getValue(loc);
 			if (value.equals(Element.UNDEF)){
 				capi.warning("Scheduler", "Did you set the scheduling policy of the self to undef? If so, please set it to skip instead.");
-				schedule = new HashSet<Element>();
+				schedule.clear();
 				return;
 			}
 			else

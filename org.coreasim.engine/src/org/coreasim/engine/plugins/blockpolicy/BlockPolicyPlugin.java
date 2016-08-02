@@ -1,3 +1,12 @@
+/*
+ * BlockPolicyPlugin.java	1.0
+ * 
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ */
 package org.coreasim.engine.plugins.blockpolicy;
 
 import java.util.Collections;
@@ -25,15 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** 
- * Plugin for BlockRule construct:
+ * Plugin for BlockPolicy construct:
  *    par
- *       rule_1
- *       rule_2
+ *       policy_1
+ *       policy_2
  *       ...
- *       rule_n
+ *       policy_n
  *    endpar
  *   
- *  @author  George Ma, Roozbeh Farahbod
+ *  @author  Eric Rothstein 
  *  
  */
 

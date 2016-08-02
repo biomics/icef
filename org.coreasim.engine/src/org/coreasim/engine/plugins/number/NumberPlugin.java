@@ -8,6 +8,12 @@
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
  *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
  */
 
 package org.coreasim.engine.plugins.number;
@@ -668,8 +674,8 @@ public class NumberPlugin extends Plugin implements ParserPlugin,
 
 	@Override
 	public Map<String, PolicyElement> getPolicies() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return Collections.emptyMap();
 	}
 
 	@Override

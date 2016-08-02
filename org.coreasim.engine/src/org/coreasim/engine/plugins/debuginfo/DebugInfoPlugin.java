@@ -1,14 +1,18 @@
 /*	
 
- * DebugInfoPlugin.java  	$Revision: 236 $
+ * DebugInfoPlugin.java  	1.0
  * 
  * Copyright (C) 2009 Roozbeh Farahbod
  *
- * Last modified by $Author: rfarahbod $ on $Date: 2011-02-03 12:47:12 +0100 (Do, 03 Feb 2011) $.
- *
- * Licensed under the Academic Free License version 3.0
+ * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
  *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
  *
  */
 

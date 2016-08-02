@@ -1,12 +1,10 @@
 /*	
- * ForallPolicyNode.java 	1.0 	$Revision: 243 $
+ * ForallPolicyNode.java 	1.0 	
  * 
- *
- * Copyright (C) 2006 George Ma
- *
+ * This file contains source code developed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS)
  * Licensed under the Academic Free License version 3.0 
  *   http://www.opensource.org/licenses/afl-3.0.php
- *   http://www.coreasm.org/afl-3.0.php
  *
  */
  
@@ -22,7 +20,7 @@ import org.coreasim.engine.interpreter.ScannerInfo;
 /** 
  *	ForallPolicyNode is a NodeWrapper for forall policy nodes.
  *   
- *  @author  Eric Rothstein, George Ma, Michael Stegmaier
+ *  @author  Eric Rothstein
  *  
  */
 

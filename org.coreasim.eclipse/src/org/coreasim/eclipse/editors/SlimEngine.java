@@ -796,10 +796,4 @@ public class SlimEngine implements ControlAPI {
 		return null;
 	}
 
-	@Override
-	public int getCounter() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 }
