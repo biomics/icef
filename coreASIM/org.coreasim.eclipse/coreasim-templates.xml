@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>	
+<template id="coreasim" name="CoreASIM" description="title line of a CoreASIM specification (CoreASIM)" context="coreasim" enabled="true">CoreASIM ${specification_name}</template>
+<template id="coreasim1" name="CoreASIM" description="default header of a CoreASIM specification (CoreASIM)" context="coreasim" enabled="true">CoreASIM ${specification_name}
+
+//use standard plugins
+use Standard
+
+//set program for the executing agent
+init ${Start}
+
+rule ${Start} = ${skip}</template>
+<template id="coremodule" name="CoreModule" description="title line of a CoreASIM module specification (CoreASIM)" context="coreasim" enabled="true">CoreModule ${specification_name}</template>
+<template id="coremodule1" name="CoreModule" description="default header of a CoreASIM module specification (CoreASIM)" context="coreasim" enabled="true">CoreModule ${module_name}
+
+//use standard plugins
+use Standard
+
+${cursor}</template>
+
+<template id="rule" name="rule" description="rule definition (CoreASIM" context="coreasim" enabled="true">rule ${name}(${}) = ${cursor}</template>
+
+<template id="skip" name="skip" description="skip (CoreASIM)" context="coreasim" enabled="true">skip</template>
+
+<template id="par" name="par" description="par block (CoreASIM)" context="coreasim" enabled="true">par
+	${cursor}
+endpar</template>
+
+<template id="seq" name="seq" description="seq next (CoreASIM)" context="coreasim" enabled="true">seq
+	${cursor}
+next
+	${cursor}</template>
+<template id="seq" name="seq block" description="seq block (CoreASIM)" context="coreasim" enabled="true">seqblock
+	${cursor}
+endseqblock</template>
+
+<template id="if" name="if then" description="if condition (CoreASIM)" context="coreasim" deleted="false" enabled="true">if ${condition} then ${cursor}</template>
+<template id="if1" name="if then else" description="if then else condition (CoreASIM)" context="coreasim" deleted="false" enabled="true">if ${condition} then ${skip} else ${skip}</template>
+
+<template id="while" name="while" description="while loop (CoreASIM)" context="coreasim" deleted="false" enabled="true">while (${condition}) do ${cursor}</template>
+
+<template id="iterate" name="iterate" description="iterate (CoreASIM)" context="coreasim" enabled="true">iterate ${rule_block}</template>
+
+<template id="forall" name="forall" description="forall (CoreASIM)" context="coreasim" enabled="true">forall ${element} in ${collection} do ${cursor}</template>
+<template id="forall1" name="forall with guard" description="forall with guard (CoreASIM)" context="coreasim" enabled="true">forall ${element} in ${collection} with ${condition} do ${cursor}</template>
+
+<template id="choose" name="choose" description="choose (CoreASIM)" context="coreasim" enabled="true">choose ${element} in ${collection} do ${cursor}</template>
+<template id="choose1" name="choose with guard" description="choose with guard (CoreASIM)" context="coreasim" enabled="true">choose ${element} in ${collection} with ${condition} do ${cursor}</template>
+
+<template id="pick" name="pick" description="pick and return a value from a colletion (CoreASIM)" context="coreasim" enabled="true">pick ${element} in ${collection}</template>
+<template id="pick1" name="pick with guard" description="pick with guard (CoreASIM)" context="coreasim" enabled="true">pick ${element} in ${collection} with ${condition}</template>
+
+<template id="import" name="import" description="import (CoreASIM)" context="coreasim" enabled="true">import ${element} do ${cursor}</template>
+
+<template id="extend" name="extend" description="extend (CoreASIM)" context="coreasim" enabled="true">extend ${universe} with ${element} do ${cursor}</template>
+
+<template id="case" name="case" description="case rule (CoreASIM)" context="coreasim" enabled="true">case ${element} of ${value_1} : ${rule_block_1} endcase</template>
+
+<template id="function" name="function" description="function definition (CoreASIM)" context="coreasim" enabled="true">function ${name}: ${universe_name} -> ${universe_name}</template>
+<template id="function1" name="function" description="monitored function definition (CoreASIM)" context="coreasim" enabled="true">function monitored ${name}: ${universe_name} -> ${universe_name}</template>
+<template id="function2" name="function" description="controlled function definition (CoreASIM)" context="coreasim" enabled="true">function controlled ${name}: ${universe_name} -> ${universe_name}</template>
+<template id="function3" name="function" description="derived function definition (CoreASIM)" context="coreasim" enabled="true">derived ${name}(${}) = ${cursor}</template>
+<template id="derived" name="derived" description="derived function definition (CoreASIM)" context="coreasim" enabled="true">derived ${name}(${}) = ${cursor}</template>
+
+<template id="return" name="return" description="return block (CoreASIM)" context="coreasim" enabled="true">return ${res} in ${cursor}</template>
+<template id="local" name="local" description="local block (CoreASIM)" context="coreasim" enabled="true">local ${var} in ${cursor}</template>
+
+<template id="let" name="let" description="let variable definition (CoreASIM)" context="coreasim" enabled="true">let ${var} = ${value} in ${cursor}</template>
+
+<template id="use" name="use" description="use plugin (CoreASIM)" context="coreasim" enabled="true">use ${plugin}</template>
+
+<template id="universe" name="universe" description="universe definition (CoreASIM)" context="coreasim" enabled="true">universe ${name}</template>
+<template id="universe1" name="universe" description="universe definition with initial elements(CoreASIM)" context="coreasim" enabled="true">universe ${name} = {${list_of_elements}}</template>
+
+<template id="enum" name="enum" description="enum definition (CoreASIM)" context="coreasim" enabled="true">enum ${name} = ${cursor}</template>
+<template id="enum1" name="enum" description="enum definition with initial elements (CoreASIM)" context="coreasim" enabled="true">enum ${name} = {${list_of_elements}}</template>
+
+<template id="print" name="print" description="print a string (CoreASIM)" context="coreasim" enabled="true">print ${cursor}</template>
+
+<template id="pop" name="pop" description="pop element from stack (CoreASIM)" context="coreasim" enabled="true">pop ${element} from ${stack}</template>
+
+<template id="push" name="push" description="push element on stack (CoreASIM)" context="coreasim" enabled="true">push ${element} into ${stack}</template>
+
+<template id="peek" name="peek" description="return the top element of stack without changing the stack (CoreASIM)" context="coreasim" enabled="true">peek(${element})</template>
+
+
+
+</templates>

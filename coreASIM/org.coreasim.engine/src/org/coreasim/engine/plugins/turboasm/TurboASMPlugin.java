@@ -1,0 +1,786 @@
+/*	
+ * TurboASMPlugin.java 	1.0 	
+ * 
+ *
+ * Copyright (C) 2006 Roozbeh Farahbod 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *   http://www.coreasm.org/afl-3.0.php
+ *
+ * This file contains source code contributed by the European FP7 research project BIOMICS (Grant no. 318202)
+ * Copyright (C) 2016 Daniel Schreckling, Eric Rothstein (BIOMICS) 
+ *
+ * Licensed under the Academic Free License version 3.0 
+ *   http://www.opensource.org/licenses/afl-3.0.php
+ *
+ */
+ 
+package org.coreasim.engine.plugins.turboasm;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.codehaus.jparsec.Parser;
+import org.codehaus.jparsec.Parsers;
+import org.coreasim.compiler.interfaces.CompilerPlugin;
+import org.coreasim.compiler.plugins.turboasm.CompilerTurboASMPlugin;
+import org.coreasim.engine.EngineError;
+import org.coreasim.engine.VersionInfo;
+import org.coreasim.engine.absstorage.AbstractStorage;
+import org.coreasim.engine.absstorage.BackgroundElement;
+import org.coreasim.engine.absstorage.BooleanElement;
+import org.coreasim.engine.absstorage.Element;
+import org.coreasim.engine.absstorage.ElementList;
+import org.coreasim.engine.absstorage.FunctionElement;
+import org.coreasim.engine.absstorage.Location;
+import org.coreasim.engine.absstorage.MapFunction;
+import org.coreasim.engine.absstorage.PolicyElement;
+import org.coreasim.engine.absstorage.RuleElement;
+import org.coreasim.engine.absstorage.Signature;
+import org.coreasim.engine.absstorage.UniverseElement;
+import org.coreasim.engine.absstorage.Update;
+import org.coreasim.engine.absstorage.UpdateMultiset;
+import org.coreasim.engine.interpreter.ASTNode;
+import org.coreasim.engine.interpreter.FunctionRulePolicyTermNode;
+import org.coreasim.engine.interpreter.Interpreter;
+import org.coreasim.engine.interpreter.InterpreterException;
+import org.coreasim.engine.interpreter.Node;
+import org.coreasim.engine.kernel.Kernel;
+import org.coreasim.engine.kernel.KernelServices;
+import org.coreasim.engine.parser.GrammarRule;
+import org.coreasim.engine.parser.ParseMap;
+import org.coreasim.engine.parser.ParserTools;
+import org.coreasim.engine.parser.ParserTools.ArrayParseMap;
+import org.coreasim.engine.plugin.InterpreterPlugin;
+import org.coreasim.engine.plugin.ParserPlugin;
+import org.coreasim.engine.plugin.Plugin;
+import org.coreasim.engine.plugin.VocabularyExtender;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/** 
+ * This plugin provides the following TurboASM rules:
+ * <ol>
+ * <li>R1 <b>seq</b> R2</li>
+ * <li><b>iterate</b> R</li>
+ * <li><b>while</b> (exp) R</li>
+ * </ol> 
+ *   
+ * @author  Roozbeh Farahbod
+ * 
+ */
+public class TurboASMPlugin extends Plugin implements ParserPlugin, InterpreterPlugin, 
+														VocabularyExtender {
+
+	public static final VersionInfo VERSION_INFO = new VersionInfo(0, 9, 2, "beta");
+
+	protected static final Logger logger = LoggerFactory.getLogger(TurboASMPlugin.class);
+
+	public static final String PLUGIN_NAME = TurboASMPlugin.class.getSimpleName();
+
+	/* composed updates cache */
+	private ThreadLocal<Map<ASTNode,UpdateMultiset>> composedUpdatesMap;
+
+	private Map<String, GrammarRule> parsers = null;
+	
+	public static final String RETURN_RESULT_TOKEN = "<-";
+	public static final String RESULT_KEYWORD = "result";
+	public static final String WHILE_KEYWORD = "while";
+	public static final String ITERATE_KEYWORD = "iterate";
+	public static final String SEQ_KEYWORD = "seq";
+	public static final String RETURN_KEYWORD = "return";
+	public static final String LOCAL_KEYWORD = "local";
+	public static final String LOCAL_INIT_OPERATOR = ":=";
+
+	private Map<String, FunctionElement> functions;
+	private FunctionElement resultFunction;
+
+	private final String[] keywords = {"seq", "next", "endseq", "seqblock", "endseqblock", "iterate", "while", 
+			"local", "in", "return", "result"};
+	private final String[] operators = {",", "<-", "[", "]", LOCAL_INIT_OPERATOR};
+	
+	private final CompilerPlugin compilerPlugin = new CompilerTurboASMPlugin(this);
+	
+	@Override
+	public CompilerPlugin getCompilerPlugin(){
+		return compilerPlugin;
+	}
+	
+	@Override
+	public void initialize() {
+		composedUpdatesMap = new ThreadLocal<Map<ASTNode,UpdateMultiset>>() {
+			@Override
+			protected Map<ASTNode, UpdateMultiset> initialValue() {
+				return new IdentityHashMap<ASTNode, UpdateMultiset>();
+			}
+		};
+		logger.debug("TurboASM is loaded!");
+	}
+
+	/*
+	 * Returns the composed updates cache for this thread
+	 */
+	private Map<ASTNode, UpdateMultiset> getThreadComposedUpdates() {
+		return composedUpdatesMap.get();
+	}
+	
+	/**
+	 * @return <code>null</code>
+	 */
+	public Parser<Node> getParser(String nonterminal) {
+		return null;
+	}
+
+
+	public String[] getKeywords() {
+		return keywords;
+	}
+
+	public String[] getOperators() {
+		return operators;
+	}
+
+	public Set<Parser<? extends Object>> getLexers() {
+		return Collections.emptySet();
+	}
+
+	public Map<String, GrammarRule> getParsers() {
+    	if (parsers == null) {
+			parsers = new HashMap<String, GrammarRule>();
+			KernelServices kernel = (KernelServices) capi.getPlugin("Kernel")
+					.getPluginInterface();
+
+			Parser<Node> ruleParser = kernel.getRuleParser();
+			Parser<Node> termParser = kernel.getTermParser();
+			Parser<Node> funcRuleTermParser = kernel.getFunctionRulePolicyTermParser();
+
+			ParserTools pTools = ParserTools.getInstance(capi);
+			Parser<Node> idParser = pTools.getIdParser();
+	
+			// SeqRule : 'seq' Rule ('next' Rule)+ ('endseq')? | 'seq' (Rule)+ 'endseq' | 'seqblock' (Rule)+ 'endseqblock' | '[' (Rule)+ ']'
+			Parser<Node> seqRuleParser = Parsers.or(
+				Parsers.array(
+					pTools.getKeywParser("seq", PLUGIN_NAME),
+					ruleParser,
+					pTools.plus(
+							Parsers.array(
+									pTools.getKeywParser("next", PLUGIN_NAME),
+									ruleParser
+							)
+					),
+					pTools.getKeywParser("endseq", PLUGIN_NAME).optional()
+				),
+				Parsers.array(
+						pTools.getKeywParser("seq", PLUGIN_NAME),
+						pTools.plus(ruleParser),
+						pTools.getKeywParser("endseq", PLUGIN_NAME)
+				),
+				Parsers.array(
+						pTools.getKeywParser("seqblock", PLUGIN_NAME),
+						pTools.plus(ruleParser),
+						pTools.getKeywParser("endseqblock", PLUGIN_NAME)
+				),
+				Parsers.array(
+						pTools.getOprParser("["),
+						pTools.plus(ruleParser),
+						pTools.getOprParser("]")
+				)
+			).map(new SeqRuleParseMap());
+			parsers.put("SeqRule",
+					new GrammarRule("SeqRule", "'seq' Rule ('next' Rule)+ | 'seq' (Rule)+ 'endseq'", 
+							seqRuleParser, PLUGIN_NAME));
+
+			// IterateRule : 'iterate' Rule
+			Parser<Node> iterateRuleParser = Parsers.array(
+					new Parser[] {
+						pTools.getKeywParser("iterate", PLUGIN_NAME),
+						ruleParser,
+					}).map(
+					new ArrayParseMap(PLUGIN_NAME) {
+						public Node map(Object[] vals) {
+							Node node = new IterateRuleNode(((Node)vals[0]).getScannerInfo());
+							addChildren(node, vals);
+							return node;
+						}
+			});
+			parsers.put("IterateRule",
+					new GrammarRule("IterateRule", "'iterate' Rule", 
+							iterateRuleParser, PLUGIN_NAME));
+
+			// WhileRule : 'while' Term Rule
+			Parser<Node> whileRuleParser = Parsers.array(
+					new Parser[] {
+						pTools.getKeywParser("while", PLUGIN_NAME),
+						termParser, //a term already allows surrounding brackets
+						pTools.getKeywParser("do", PLUGIN_NAME).optional(),
+						ruleParser
+					}).map(
+					new WhileParseMap());
+			parsers.put("WhileRule",
+					new GrammarRule("WhileRule", "'while' Term Rule", whileRuleParser, PLUGIN_NAME));
+
+			// ReturnResultRule: FunctionRulePolicyTerm '<-' FunctionRulePolicyTerm
+			Parser<Node> retResRuleParser = Parsers.array(
+					new Parser[] {
+						funcRuleTermParser,
+						pTools.getOprParser("<-"),
+						funcRuleTermParser
+					}).map(
+					new ArrayParseMap(PLUGIN_NAME) {
+
+						public Node map(Object[] vals) {
+							Node node = new ReturnResultNode(((Node)vals[0]).getScannerInfo());
+							addChildren(node, vals);
+							return node;
+						}
+					}
+			 );
+			parsers.put("ReturnResultRule",
+					new GrammarRule("ReturnResultRule", "FunctionRulePolicyTerm '<-' FunctionRulePolicyTerm", 
+							retResRuleParser, PLUGIN_NAME));
+			
+			// ReturnTerm : 'return' Term 'in' Rule
+			Parser<Node> returnTermParser = Parsers.array(
+					new Parser[] {
+						pTools.getKeywParser("return", PLUGIN_NAME),
+						termParser,
+						pTools.getKeywParser("in", PLUGIN_NAME),
+						ruleParser
+					}).map(
+					new ReturnTermParseMap()
+			);
+			parsers.put("ReturnTerm",
+					new GrammarRule("ReturnTerm", "'return' Term 'in' Rule", 
+							returnTermParser, PLUGIN_NAME));
+
+			// LocalRule : 'local' ID (':=' Term)? (',' ID (':=' Term)?)* 'in' Rule
+			Parser<Node> localRuleParser = Parsers.array(
+					new Parser[] {
+						pTools.getKeywParser("local", PLUGIN_NAME),
+						Parsers.array(	pTools.getOprParser(LOCAL_INIT_OPERATOR),
+										termParser).optional(),
+						pTools.csplus(	Parsers.array(	idParser,
+														Parsers.array(	pTools.getOprParser(LOCAL_INIT_OPERATOR),
+																		termParser).optional())),
+						pTools.getKeywParser("in", PLUGIN_NAME),
+						ruleParser
+					}).map(
+					new LocalRuleParseMap());
+			parsers.put("LocalRule",
+					new GrammarRule("LocalRule", "'local' ID (':=' Term)? (',' ID (':=' Term)?)* 'in' Rule", 
+							localRuleParser, PLUGIN_NAME));
+			
+			// TurboASMRules : SeqRule | IterateRule | WhileRule | ReturnResultRule | LocalRule
+			parsers.put("Rule", new GrammarRule("TurboASMRules", 
+					"SeqRule | IterateRule | WhileRule | ReturnResultRule | LocalRule",
+					Parsers.or(seqRuleParser, iterateRuleParser, whileRuleParser, 
+							retResRuleParser, 
+							localRuleParser), PLUGIN_NAME));
+			
+			parsers.put("BasicTerm", 
+					new GrammarRule("TurboASMTerms", "ReturnTerm",
+							returnTermParser, PLUGIN_NAME));
+			
+			// ResultLocation : 'result'
+			Parser<Node> resultLocationParser = //Parsers.map("ResultLocation",
+						pTools.getKeywParser(RESULT_KEYWORD, PLUGIN_NAME).map(
+					new ParseMap<Node, Node>(PLUGIN_NAME) {
+						public Node map(Node v) {
+							/*
+							 *  Here we do a little bit of cheating! :-)
+							 *  We basically make 'result' act as an identifier.
+							 *  
+							 *  see ParserTools.getIdentifierParser()
+							 */
+							
+							Node node = new FunctionRulePolicyTermNode(v.getScannerInfo());
+							node.addChild("alpha", new ASTNode(
+									"Kernel", 
+									ASTNode.ID_CLASS, 
+									"ID", 
+									RESULT_KEYWORD,
+									v.getScannerInfo(),
+									Node.GENERAL_ID_NODE
+									)); 
+							return node;
+						}
+					}
+			);
+			parsers.put("ResultLocation",
+					new GrammarRule("ResultLocation", 
+							"'result'", 
+							resultLocationParser, PLUGIN_NAME));
+			
+			// FunctionRulePolicyTerm : 'result'
+			/*
+			 * !! Notice that to be on the safe side, any
+			 *    grammar rule that extends the FunctionRulePolicyTerm 
+			 *    rule has to return a node of the class FunctionRulePolicyTermNode.
+			 */
+			parsers.put(Kernel.GR_FUNCTION_RULE_POLICY_TERM, 
+					new GrammarRule(resultLocationParser.toString(),
+					"ResultLocation", 
+					resultLocationParser, PLUGIN_NAME));
+    	}
+    	
+    	return parsers;
+    }
+	
+	public ASTNode interpret(Interpreter interpreter, ASTNode pos) throws InterpreterException {
+		AbstractStorage storage = capi.getStorage();
+		
+		if (pos instanceof SeqRuleNode) {
+			SeqRuleNode node = (SeqRuleNode)pos;
+			ASTNode firstRule = node.getFirstRule();
+			ASTNode secondRule = node.getSecondRule();
+			
+			// Evaluate the first rule
+			if (!firstRule.isEvaluated()) 
+				return firstRule;
+			
+			if (!secondRule.isEvaluated()) {
+				// Aggregate updates of the first rule
+				Set<Update> aggregatedUpdate = null;
+				try {
+					aggregatedUpdate = 
+						storage.performAggregation(firstRule.getUpdates());
+					if (storage.isConsistent(aggregatedUpdate)) {
+						storage.pushState();
+						storage.apply(aggregatedUpdate);
+						return secondRule; 
+					}
+				} catch (EngineError e) {
+				}
+				// inconsistent aggregation or inconsistent updateset
+				capi.warning(PLUGIN_NAME, "TurboASM Plugin: Inconsistent updates computed in sequence. Leaving the sequence", 
+						secondRule, interpreter);
+				//TODO better logging (tell where was it)
+				pos.setNode(null, firstRule.getUpdates(), null, null);
+			} else {
+				// second rule is evaluated...
+				
+				UpdateMultiset composed = storage.compose(firstRule.getUpdates(), secondRule.getUpdates());
+				storage.popState();
+				pos.setNode(null, composed, null, null);
+			}
+			
+			
+		} else
+			if (pos instanceof IterateRuleNode) {
+				IterateRuleNode node = (IterateRuleNode)pos;
+				ASTNode childRule = node.getChildRule();
+				
+				Map<ASTNode, UpdateMultiset> composedUpdates = getThreadComposedUpdates();
+
+				if (!childRule.isEvaluated()) {
+					storage.pushState();
+					composedUpdates.put(pos, new UpdateMultiset()); 
+					return childRule;
+				} else {
+					UpdateMultiset u = childRule.getUpdates();
+					if (!u.isEmpty()) {
+						Set<Update> uSet = null;
+						try {
+							uSet = storage.performAggregation(u);
+							composedUpdates.put(pos, storage.compose(composedUpdates.get(pos), u));
+							if (storage.isConsistent(uSet)) {
+								storage.apply(uSet);
+								interpreter.clearTree(childRule);
+								return childRule;
+							}
+						} catch (EngineError e) {
+							// inconsistent aggregation or updateset
+						}
+					}
+					pos.setNode(null, composedUpdates.get(pos), null, null);
+					composedUpdates.remove(pos);
+					storage.popState();
+				}
+			} else
+				if (pos instanceof WhileRuleNode) {
+					WhileRuleNode node = (WhileRuleNode)pos;
+					ASTNode childRule = node.getChildRule();
+					ASTNode whileCond = node.getCondition();
+	
+					Map<ASTNode, UpdateMultiset> composedUpdates = getThreadComposedUpdates();
+					
+					// if the guard is not evaluated, evaluate it
+					if (!whileCond.isEvaluated()) {
+						storage.pushState();
+						composedUpdates.put(pos, new UpdateMultiset()); 
+						return whileCond;
+					}
+					
+					// if condition is TRUE
+					if (whileCond.getValue().equals(BooleanElement.TRUE)) {
+						if (!childRule.isEvaluated()) 
+							return childRule;
+						UpdateMultiset u = childRule.getUpdates();
+						if (!u.isEmpty()) {
+							Set<Update> uSet = null;
+							try {
+								uSet = storage.performAggregation(u);
+								composedUpdates.put(pos, storage.compose(composedUpdates.get(pos), u));
+								if (storage.isConsistent(uSet)) {
+									storage.apply(uSet);
+									interpreter.clearTree(childRule);
+									interpreter.clearTree(whileCond);
+									return whileCond;
+								}
+							} catch (EngineError e) {
+								// inconsistent aggregation or updateset
+							}
+						}
+					}
+					storage.popState();
+					pos.setNode(null, composedUpdates.get(pos), null, null);
+					composedUpdates.remove(pos);
+				} else
+					if (pos instanceof ReturnResultNode) {
+						ReturnResultNode node = (ReturnResultNode)pos;
+						ASTNode loc = node.getLocationNode();
+						FunctionRulePolicyTermNode rule = (FunctionRulePolicyTermNode)node.getRuleNode();
+						
+						// If the rule part is of the form 'x' or 'x(...)'
+						if (rule.hasName()) {
+	
+							String x = rule.getName();
+							
+							// If the rule part is of the form 'x' with no arguments
+							if (!rule.hasArguments()) {
+								
+								if (storage.isRuleName(x)) {
+									pos = ruleCallWithResult(interpreter, storage.getRule(x), null, loc, pos);
+								}
+							
+							} else { // if the rule part 'x(...)' (with arguments)
+								
+								if (storage.isRuleName(x)) {
+									pos = ruleCallWithResult(interpreter, storage.getRule(x), rule.getArguments(), loc, pos);
+								}
+								
+							}
+							if (pos.isEvaluated()) {
+								String name = loc.getFirst().getToken();
+								if (name != null) {
+									for (Update update : pos.getUpdates()) {
+										if (name.equals(update.loc.name))
+											return pos;
+									}
+									capi.warning(PLUGIN_NAME, "result hasn't been set by the rule " + x + ".", rule, interpreter);
+								}
+							}
+						}
+	
+						
+					} else 
+						if (pos instanceof ReturnTermNode) {
+							ReturnTermNode node = (ReturnTermNode)pos;
+							ASTNode exp = node.getExpressionNode();
+							ASTNode rule = node.getRuleNode();
+							
+							// Evaluate the rule
+							if (!rule.isEvaluated()) 
+								return rule;
+							
+							if (!exp.isEvaluated()) {
+								// Aggregate updates of the rule
+								Set<Update> aggregatedUpdate = null;
+								try {
+									aggregatedUpdate = 
+										storage.performAggregation(rule.getUpdates());
+									if (storage.isConsistent(aggregatedUpdate)) {
+										storage.pushState();
+										storage.apply(aggregatedUpdate);
+										return exp; 
+									}
+								} catch (EngineError e) {
+								}
+								pos.setNode(null, new UpdateMultiset(), null, Element.UNDEF);
+							} else {
+								// expression is evaluated...
+								storage.popState();
+								pos.setNode(null, new UpdateMultiset(), null, exp.getValue());
+							}
+						} else 
+							if (pos instanceof LocalRuleNode) {
+								LocalRuleNode node = (LocalRuleNode)pos;
+								ASTNode rule = node.getRuleNode();
+								Map<String, ASTNode> variableMap = node.getFunctionMap();
+					
+								// evaluate all the terms that will be aliased
+								for (ASTNode n : variableMap.values()) {
+									if (n != null && !n.isEvaluated())
+										return n;
+								}
+								
+								// Evaluate the rule
+								if (!rule.isEvaluated()) {
+									Set<Update> updates = new HashSet<Update>();
+									for (Entry<String, ASTNode> entry : variableMap.entrySet()) {
+										ASTNode n = entry.getValue();
+										if (n != null)
+											updates.add(new Update(new Location(entry.getKey(), ElementList.NO_ARGUMENT), n.getValue(), Update.UPDATE_ACTION, interpreter.getSelf(), node.getScannerInfo()));
+									}
+									if (!updates.isEmpty()) {
+										storage.pushState();
+										storage.apply(updates);
+									}
+									return rule;
+								}
+								else {
+									for (ASTNode n : variableMap.values()) {
+										if (n != null) {
+											storage.popState();
+											break;
+										}
+									}
+									// Remove updates of local functions
+									UpdateMultiset updates = rule.getUpdates();
+									UpdateMultiset newUpdates = new UpdateMultiset();
+									Collection<String> fNames = node.getFunctionNames();
+									for (Update u: updates) {
+										if (!fNames.contains(u.loc.name))
+											newUpdates.add(u);
+									}
+									pos.setNode(null, newUpdates, null, rule.getValue());
+								}
+								
+							} else 
+								if (pos instanceof EmptyNode)
+									pos.setNode(null, new UpdateMultiset(), null, null);
+								else
+									throw new InterpreterException(this.getName() + " cannot interpret the given node.");
+		
+		return pos;
+	}
+
+	/**
+	 * Handles a call to a rule that has <b>result</b>.
+	 * 
+	 * @param name rule name
+	 * @param args arguments
+	 * @param pos current node being interpreted
+	 */
+	private ASTNode ruleCallWithResult(Interpreter interpreter, RuleElement rule, List<ASTNode> args, ASTNode loc, ASTNode pos) {
+		
+		List<String> exParams = new ArrayList<String>(rule.getParam());
+		List<ASTNode> exArgs = new ArrayList<ASTNode>();
+		if (args != null)
+			exArgs.addAll(args);
+		exArgs.add(loc);
+		exParams.add(RESULT_KEYWORD);
+		
+		return interpreter.ruleCall(rule, exParams, exArgs, pos);
+	}
+
+	public VersionInfo getVersionInfo() {
+		return VERSION_INFO;
+	}
+
+	public static class WhileParseMap extends ArrayParseMap {
+		
+		String nextChildName = "cond";
+		
+		public WhileParseMap() {
+			super(PLUGIN_NAME);
+		}
+
+		public Node map(Object[] vals) {
+			nextChildName = "cond";
+			Node node = new WhileRuleNode(((Node)vals[0]).getScannerInfo());
+			addChildren(node, vals);
+			return node;
+		}
+		
+		public void addChild(Node parent, Node child) {
+			if (child instanceof ASTNode) {
+				parent.addChild(nextChildName, child);
+				nextChildName = "rule";
+			} else
+				parent.addChild(child);
+		}
+		
+	}
+
+	public static class LocalRuleParseMap extends ArrayParseMap {
+		
+		String nextChildName = "lambda";
+		
+		public LocalRuleParseMap() {
+			super(PLUGIN_NAME);
+		}
+
+		public Node map(Object[] vals) {
+			nextChildName = "lambda";
+			Node node = new LocalRuleNode(((Node)vals[0]).getScannerInfo());
+			addChildren(node, vals);
+			return node;
+		}
+		
+		public void addChild(Node parent, Node child) {
+			if (child instanceof ASTNode) {
+				parent.addChild(nextChildName, child);
+			} else {
+				if (child.getToken().equals("in"))
+					nextChildName = "alpha";
+				parent.addChild(child);
+			}
+		}
+		
+	}
+
+	public static class ReturnTermParseMap extends ArrayParseMap {
+
+		String nextChildName;
+
+		public ReturnTermParseMap() {
+			super(PLUGIN_NAME);
+		}
+
+		public Node map(Object[] vals) {
+			nextChildName = "alpha";
+			Node node = new ReturnTermNode(((Node)vals[0]).getScannerInfo());
+			addChildren(node, vals);
+			return node;
+		}
+
+		public void addChild(Node parent, Node child) {
+			if (child instanceof ASTNode) {
+				parent.addChild(nextChildName, child);
+			} else {
+				if (child.getToken().equals("in"))
+					nextChildName = "beta";
+				parent.addChild(child);
+			}
+		}
+
+	}
+
+	public static class SeqRuleParseMap extends ArrayParseMap {
+
+		public SeqRuleParseMap() {
+			super(PLUGIN_NAME);
+		}
+		
+		public Node map(Object[] vals) {
+			SeqRuleNode node = new SeqRuleNode(((Node)vals[0]).getScannerInfo());
+			ArrayList<Node> nodes = new ArrayList<Node>();
+			int i = unpackChildren(nodes, vals);
+			addSeqChildren(node, nodes, i);
+			return node;
+		}
+
+		private int unpackChildren(List<Node> nodes, Object[] vals) {
+			// 'astCount' is the number of ASTNodes in the list
+			int astCount = 0;
+			for (Object child: vals) {
+				if (child != null) {
+					if (child instanceof ASTNode)
+						astCount++;
+					if (child instanceof Object[])
+						astCount += unpackChildren(nodes, (Object[])child);
+					else
+						if (child instanceof Node)
+							nodes.add((Node)child);
+				}
+			}
+			return astCount;
+		}
+		
+		private void addSeqChildren(SeqRuleNode root, List<Node> children, int astCount) {
+			int i = 1;
+			for (Node child: children) {
+				if (child instanceof ASTNode) {
+					if (astCount == 1) {
+						root.addChild(child);
+						root.addChild(new EmptyNode(child.getScannerInfo()));
+					} else {
+						if (root.getFirst() == null)
+							root.addChild(child);
+						else {
+							if (i == astCount) 
+								root.addChild(child);
+							else {
+								SeqRuleNode newRoot = new SeqRuleNode(child.getScannerInfo());
+								newRoot.addChild(child);
+								root.addChild(newRoot);
+								root = newRoot;
+							}
+						}
+					}
+					i++;
+				} else
+					root.addChild(child);
+			}
+		}
+	}
+
+	public Set<String> getBackgroundNames() {
+		return Collections.emptySet();
+	}
+
+	public Map<String, BackgroundElement> getBackgrounds() {
+		return Collections.emptyMap();
+	}
+
+	public Set<String> getFunctionNames() {
+		return getFunctions().keySet();
+	}
+
+	public Map<String, FunctionElement> getFunctions() {
+		if (functions == null) {
+			functions = new HashMap<String, FunctionElement>();
+			functions.put(RESULT_KEYWORD, getResultFunction());
+		}
+		return functions;
+	}
+
+	/*
+	 * Creates the 'result' function element.
+	 */
+	private FunctionElement getResultFunction() {
+		if (resultFunction == null) {
+			resultFunction = new MapFunction();
+			resultFunction.setFClass(FunctionElement.FunctionClass.fcOut);
+			resultFunction.setSignature(new Signature());
+		}
+		return resultFunction;
+	}
+	
+	public Set<String> getRuleNames() {
+		return Collections.emptySet();
+	}
+
+	public Map<String, RuleElement> getRules() {
+		return Collections.emptyMap();
+	}
+
+	public Set<String> getUniverseNames() {
+		return Collections.emptySet();
+	}
+
+	public Map<String, UniverseElement> getUniverses() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Map<String, PolicyElement> getPolicies() {
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Set<String> getPolicyNames() {
+
+		return Collections.emptySet();
+	}
+}

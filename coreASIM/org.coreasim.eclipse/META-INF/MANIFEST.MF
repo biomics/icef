@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Eclipse-BundleShape: dir
+Bundle-ManifestVersion: 2
+Bundle-Name: CoreASIM Eclipse Plugin
+Bundle-SymbolicName: org.coreasim.eclipse;singleton:=true
+Bundle-Activator: org.coreasim.eclipse.CoreASIMPlugin
+Bundle-Vendor: BIOMICS Consortium
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.debug.ui,
+ org.eclipse.jface.text,
+ org.eclipse.ui.console,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.ide,
+ org.eclipse.jdt.ui,
+ org.eclipse.ui.navigator,
+ org.slf4j.api
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: ., target/lib/org.coreasim.engine.jar
+Import-Package: org.eclipse.ui.dialogs,
+ org.eclipse.ui.texteditor.templates,
+ org.eclipse.ui.views.contentoutline
+Bundle-ActivationPolicy: lazy
+Bundle-Version: 1.1.1.qualifier
+Export-Package: org.coreasim.eclipse,
+ org.coreasim.util,
+ org.coreasim.util.information

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.coreasim.eclipse.feature_1.0.3.qualifier.jar" id="org.coreasim.eclipse.feature" version="1.1.1.qualifier">
+      <category name="CoreASIM_Eclipse_Plugin"/>
+   </feature>
+   <category-def name="CoreASIM_Eclipse_Plugin" label="CoreASIM Eclipse Plugin"/>
+</site>

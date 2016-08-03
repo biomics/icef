@@ -1,0 +1,35 @@
+CoreASM Set3_binary
+
+use Standard
+use Math
+
+init Start
+
+/*
+ * @minsteps 1
+ * @maxsteps 1
+ *
+ * @require "0"
+ * @require "-6"
+ * @require "6"
+ * @require "2"
+ * @require "-2"
+ * @require "10"
+ * @require "-10"
+ * @require "-4"
+ * @require "4"
+ * @require "8" 
+ * @require "-8"
+ * @require "false\ntrue\ntrue\n"
+ */
+rule Start =
+	seqblock
+		set1 := {x is a | a in [-10..10 step 1] with isEvenNumber(a)}
+		set2 := {x is a | a in {y is sqrt(b) | b in [1..100 step 1]} with isEvenNumber(a)}
+		print (set1 intersect set2)
+		print (set1 diff set2)
+		print (set1 union set2)
+		print (set1 subset set2)
+		print ((set1 intersect set2) subset set1)
+		print ({} subset set1)
+	endseqblock

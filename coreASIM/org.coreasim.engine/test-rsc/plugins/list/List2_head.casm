@@ -1,0 +1,21 @@
+CoreASM List2_head
+
+use Standard
+use ListPlugin
+use List
+
+init Start
+
+/*
+ * @minsteps 1
+ * @maxsteps 1
+ *
+ * @require "Head of [1,2,3,4]: 1\nHead of [ head([ [8],[9] ]),[10] ]= [8]\n"
+ */
+rule Start =
+	seqblock
+		list1 := [1,2,3,4]
+		print "Head of [1,2,3,4]: " + head(list1)
+		//Head operation that includes a head operation -> result = 8
+		print "Head of [ head([ [8],[9] ]),[10] ]= " + head([ head([ [8],[9] ]),[10] ])
+	endseqblock
