@@ -145,7 +145,7 @@ public class EngineManager {
         if(req.policy == null || req.policy.equals(""))
             return new CoreASIMError("ASIM specification does not define a policy.");
 
-        String program = "CoreASM "+req.name+"\n\n";
+        String program = "CoreASIM "+req.name+"\n\n";
 
         program += "use Standard\n\n";
 
