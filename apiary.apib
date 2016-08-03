@@ -1,0 +1,931 @@
+FORMAT: 1A
+HOST: http://localhost/
+
+# ICEF - Interaction Computing Execution Framework
+
+The ICEF was developed in the STREP project [BIOMICS](http://biomicsproject.eu) which was financed by the European Comission in FP7 from October 1st, 2012 until March 31st, 2016.
+
+This framework enables asynchronous execution of ASMs. It uses and enhances the CoreASM execution engine to support communicating and interaction ASMs: CoreASIMs. Further, ICEF replaces ASM with BSL which offers additional language primitives specifically designed to define the beahviour of biochemical systems.
+
+This API allows to control the BIOMICS wrapper (brapper) which can host several CoreASIM instances and enables networked CoreASIM instances by implementing a restful API to the outside. This API is also used by the manager which orchestrates several ASIMs to allow the execution of interaction computing simulations. The API controlling the manager is also documented here.
+
+The source code for this framework is available at [github](https://github.com/biomics).
+
+# Group Brapper
+
+Some words on the CoreASM wrapper
+
+### ASIMs [/asims/{simId}]
+
++ Parameters
+    + simId (optional, string, `simulation1`) ... Identifier of the simulation of which we want to query information from. If unspecified the union over all simulations is used.
+
+#### Query Known ASIMs [GET]
+Request information of all ASIMs loaded in this brapper. If `simId` is used, only the ASIMs for the specific simId running in this brapper are reported.
+
++ Request Empty
+
++ Response 200 (application/json)
+
+    + Body
+
+    {
+        "sim" : [ ASIM1, ASIM2 ]
+    }
+    
++ Response 404 (application/json)
+    The brapper does not host any ASIMs for the simulation identified by `simId`
+
+    + Body
+    
+    {
+        "error" : "Brapper does not host any ASIM for this simulation." }  
+    }
+        
+#### Create ASIM [PUT]
+Creates a new ASIM in this brapper.
+
++ Request (application/json)
+    {
+         "name" : "ASIM1",
+         "signature" : "policy noOp = skip\nrule pingInit = { print \"Ping is initialized\" }\nrule pongInit = { print \"Pong is initialized\" }\nrule Start = { createASIM Ping initializedBy pingInit withProgram Ping andPolicy noOp in locPing\ncreateASIM Pong initializedBy pongInit withProgram Pong andPolicy noOp in locPong\n }\nrule Pong = { choose m in inboxOf(self) do { print \"Pong receives msg from \"+messageSender(m)\nsend \"Pong\" to \"Ping\" with subject \"Pong\"\n print \"Respond with a Pong\"\ndestroyASIM \"ABBA\" }}\nrule Ping = { choose m in inboxOf(self) do { print \"Ping receives msg from \"+messageSender(m)\nsend \"Ping\" to \"Pong\" with subject \"Ping\"\n print \"Respond with a Ping\" }\n forall m in inboxOf(self) with messageSubject(m) = \"InitPing\" do { send \"Ack\" to \"ASIM1\" with subject \"Ack\" }}\nrule Program = { print \"Sending init pings ... \"\nsend \"Ping from scheduler\" to \"Ping\" with subject \"InitPing\"\nsend \"Pong from scheduler\" to \"Pong\" with subject \"InitPong\"\n\nchoose m in inboxOf(self) do { if messageSubject(m) = \"Ack\" then { destroyASIM \"Pong\"\ndestroyASIM \"Ping\" } }  }",
+         "init" : "Start",
+         "program": "Program", 
+         "policy" : "noOp",
+         "start" : false
+    }
+    
++ Response 201 (application/json)
+    If the ASIM was created successfully.
+    
+    + Body
+    {"name":"ASIM1","simulation":"sim2"}
+
++ Response 400 (application/json)
+    Some problem occurred during creation of the ASIM. This may be either a syntax problem in the ASIM specification or the JSON format for the ASIM description is incorrect.
+
+    + Body
+    {"name":"ASIM1","simulation":null,"success":false,"error":"org.coreasm.engine.CoreASMError: ASIM specification does not define simulation."}
+
+### Control ASIMs [/asims/{simId}/{asim}/{command}]
+Controlling and querying a specific ASIM of a specific simulation hosted by the queried Brapper.
+
++ Parameters
+    + simId (required, string, `simulation1`) ... Identifier of the simulation of which we want to control.
+    + asim (required, string, `ASIM1`) ... Identifier of the ASIM to be controled.
+    + command (optional, enum[string]) - Command to send to the ASIM to control its current state.
+        + Members
+            + `start`
+            + `stop`
+            + `pause`
+            + `resume`
+            
+#### Query Status [GET]
+Query the current status of a specific ASIM.
+
++ Request Empty
+
++ Response 200 (application/json)
+    Available information about the ASIM.
+    
+    + Body
+        { "ASIM1" :  { "name" : "ASIM1", "simulation" : "sim", "status" : "running", "error" : ""} }
+        
++ Response 404 (application/json)
+The ASIM is not hosted by this brapper or the specified ASIM does not belong to the specified simulation.
+
+    + Body 
+        { 'error' : 'Brapper does not host this ASIM in the specified simulation.'}
+
+#### Changing ASIM State [PUT]
+Request allows to start, stop, pause, and resume the ASIM directly
+    
++ Request Empty
+
++ Response 200 (application/json)
+    The brapper successfully controlled the specified ASIM.
+    
+    + Body
+        { "ASIM1" :  { "name" : "ASIM1", "simulation" : "sim", "status" : "running", "error" : ""} }
+
++ Response 400 (application/json)
+    The brapper is unable to control the ASIM with this command.
+    
+    + Body
+        { "error" : "Unable to control ASIM with command 'pause'" }
+
++ Response 404 (application/json)
+    This brapper does not host the specified ASIM to be controlled.
+    
+    + Body 
+        { "error" : "Brapper does not host any ASIM for this simulation." }
+
+#### Delete an ASIM [DELETE]
+Delete the specified ASIM hosted in this brapper and specified in the indicated simulation.
+
++ Request Emtpy
+
++ Response 200 (application/json)
+    The ASIM was stopped and deleted and the appropriate resources were freed. 
+    
+    + Body
+    { "msg" : "ASIM successfully deleted." }
+    
++ Response 404 (application/json)
+    The ASIM or the simulation hosting this ASIM was not found. The ASIM could not be deleted.
+    
+    + Body 
+    { "error" : "ASIM or Simulation not found." }
+
+### Message [/message/{simId}]
+    Deliver a message to the simulation with identifier `simId`. Routing of the message to the correct ASIM is performed by the brapper receiving this message. However, if the brapper does not host this ASIM, the message is dropped. 
+    
+#### Receive Message [PUT]
+    
++ Request (application/json)
+    
+    + Body
+    
+    {"type":"msg","simulation":"sim","toAgent":"Ping@Ping","fromAgent":"ASIM1@ASIM1","body":"{\"MessageElement\":{\"fromAgent\":\"ASIM1@ASIM1\",\"message\":{\"StringElement\":{\"string\":\"Ping from scheduler\"}},\"toAgent\":\"Ping@Ping\",\"subject\":\"InitPing\",\"type\":\"StringElement\",\"stepcount\":1}}"}
+    
++ Response 200 (application/json)
+    The message was successfully delivered.
+    
+    + Body
+    {
+    "msg": "Message delivered\n"
+    }
+    
++ Response 404 (application/json)
+    The simulation or the ASIM which the message targets does not exist.
+    
+    + Body
+    {
+     "error": "Simulation specified in message does not exist. Ignore."
+    }
+    
++ Response 503 (application/json)
+    The ASIM which the message targets does not run. 
+    
+    + Body
+    {
+     "error": "Message for ASIM 'Ping' ignored. It is not running"
+    }
+
+### Accumulate Updates [/updates/{simId}]
+If a brapper has locations which were registered for reporting updates, it will use this interface to send updates to this brapper. The latter will redistribute these updates to all ASIMs in this simulation that also registered for this update. Note that such updates do not require authentication. Thus, at the moement, updates may also be faked. 
+
+Please note that this interface is currently only used by the manager. In the future it can be used for direct inter-brapper communication.
+
+#### Store [PUT]
+Sends an update set to a specific ASIM.
+
++ Request (application/json)
+    
+    + Body
+    {
+        "type":"update",
+        "simulation":"sim",
+        "toAgent":"@UI@",
+        "fromAgent":"fst",
+        "body":"{\"updates\":[{\"location\":{\"name\":\"state\",\"args\":[]},\"value\":{\"NumberElement\":{\"value\":1.0}},\"action\":\"updateAction\"}]}"
+    }
+
++ Response 200 (application/json)
+    The update has been received and accumulated successfully.
+    
+    + Body
+    { "msg" : "Update received and accumulated successfully." }
+    
++ Response 404 (application/json)
+    The manager could not process the update, e.g. it could not deliver it to the corresponding ASIM or the simulation was not hosted by this brapper.
+    
+    + Body
+    { "msg" : "Unable to process update."}
+
+
+### Register for Updates [/updates/{simId}/register]
+Another brapper or entity (such as the User interface) sign up for updates on specific locations. If registered the brapper will start sending all updates on this location to the specified targets.
+
+#### Register [PUT]
+
++ Request (application/json)
+    { "target" : "AGENT@ASIM1", "registrations" : [ { "location" : "state" }, {"location" : "successor" } ] }
+    
++ Response 201 (application/json)
+
+    + Body 
+    { "msg" : "Registration for specified locations create successfully."}
+
++ Response 403 (application/json)
+    + Body
+    { "msg" : "Registration for specified locations was not successful."}
+
+    
+### Report ASIM Event [/updates/{simId}/{asimName}]
+
+#### Register new ASIM [PUT]
+Report the name of a newly created ASIM to this brapper and the ASIMs hosted by it.
+    
++ Request Empty
+
++ Response 200 (application/json)
+    The ASIM was unregistred successfully.
+
+    + Body
+    { "msg" : "ASIM has been registered successfully." }
+
++ Response 404 (application/json)
+    The brapper is not running as a scheduler or there is no simulation with the specified ID `simId`
+    
+    + Body
+    { "msg" : "Unable to register new ASIM in this brapper."}
+
+#### Deregister of ASIM [DELETE]
+Report the name of an ASIM that has been deleted to this brapper and the ASIMs hosted by it.
+
++ Request Empty
+
++ Response 200 (application/json)
+    The ASIM was unregistred successfully.
+
+    + Body
+    { "msg" : "ASIM successfully deregistered from brapper and its ASIMs." }
+
++ Response 404 (application/json)
+    The ASIM has never been registered with this brapper, the brapper is not running as a scheduler brapper, or the specified simulation is not managed in this brapper.
+    
+    + Body
+    { "msg" : "Unable to deregister ASIM in this brapper."}
+
+## Group Manager
+
+### Simulations [/simulations]
+
+#### Query Known Simulations [GET]
+Get a list of all simulation ids
+
++ Response 200 (application/json)
+    Returns an array of simulation handle.
+
+    + Body
+        {
+            simulations : [
+                "6d104ca8-ef2c-4858-b7f7-1a1629bff730",
+                "044c0b01-b209-412a-a5f1-c0409bfc5034",
+                "0b74b125-dc6b-420e-b89a-002433abf933"
+            ]
+        }
+
+#### Load [PUT]
+Load a new simulation providing a ICEF specification in JSON format.
+
++ Request (application/json)
+
+    + Body  
+    { 
+        "id" : "sim", 
+        "schedulers" :
+        [
+            {
+                "name" : "ASIM1",
+                "signature" : "policy noOp = skip\nrule Start = { counter := 0\nprint \"ASIM1: initialized\"\nsend \"Ping\" to \"Target1\" with subject \"Info\"\nsend \"Ping\" to \"Target2\" with subject \"Info\" }\nrule Program = { print ASIMs if counter > 10 then destroyASIM \"Target1\" else choose m in inboxOf(self) with messageSubject(m)=\"Info\" do { print \"ASIM1: receives: \" + messageContent(m)\ncounter := counter + 1\n send \"Ping \" + counter to \"Target1\" with subject \"Info\"\nsend \"Ping \" + counter to \"Target3\" with subject \"Info\"\nsend \"Ping \" + counter to \"Target2\" with subject \"Info\"}}",
+                "init" : "Start",
+                "program": "Program", 
+                "policy" : "noOp",
+                "start" : true
+            }
+        ], 
+        "asims" : [ 
+            {
+                "name" : "ASIM2",
+                "signature" : "policy noOp = skip\nrule simpleInit = { counter := 0 }\nrule Start = { counter := 0\nTarget1 := \"Target1\"\nTarget3 := \"Target3\"\nTarget2 := \"Target2\"\nprint \"ASIM2 initialized\"\ncreateASIM Target1 initializedBy simpleInit withProgram Program1 andPolicy noOp in L1\ncreateASIM Target2 initializedBy simpleInit withProgram Program2 andPolicy noOp in L2\ncreateASIM Target3 initializedBy simpleInit withProgram Program3 andPolicy noOp in L3 }\nrule Program1 = { choose m in inboxOf(self) with messageSubject(m)=\"Info\" do { print \"Target1: receives: \" + messageContent(m)\ncounter := counter + 1\n send [messageContent(m),\"Pong1 \"+counter] to \"ASIM1\" with subject \"Info\"\n}}\nrule Program2 = { choose m in inboxOf(self) with messageSubject(m)=\"Info\" do { print \"Target2: receives: \" + messageContent(m)\ncounter := counter + 1\n send [messageContent(m),\"Pong2 \"+counter] to \"ASIM1\" with subject \"Info\"\n}}\nrule Program3 = { choose m in inboxOf(self) with messageSubject(m)=\"Info\" do { print \"Target3: receives: \" + messageContent(m)\ncounter := counter + 1\n send   [messageContent(m),\"Pong3 \"+counter] to \"ASIM1\" with subject \"Info\"\n}}\nrule Program = skip",
+                "init" : "Start",
+                "program": "Program", 
+                "policy" : "noOp",
+                "start" : true
+            }
+        ]
+    }
+
++ Response 201 (application/json)
+
+    On successful creation the manager reports on the created ASIMs and Schedulers including the 
+
+    + Body 
+    {
+        "Environment": {
+        "name": "Environment",
+        "simulation": "sim",
+        "brapper": "028153ec-1eec-40cd-bdec-f820cda8bc8b",
+        "status": "empty"
+        },
+        "BirdCreator": {
+        "name": "BirdCreator",
+        "simulation": "sim",
+        "brapper": "78bbc617-a9ea-4c44-bf57-4fc74a226b46",
+        "status": "empty"
+    }
+}
+
++ Response 400 (application/json)
+
+    The manager may fail to create a simulation due to conflicting ASIMs or Schedulers or due to resources, such as brappers, not available to the manager.
+
+    + Body
+    {
+        "msg": "Unable to create all ASIMs required for simulation.",
+        "error": [
+            "Scheduler 'Environment' already exists in this simulation."
+        ]
+    }
+    
+### Control Simulations [/simulations/{id}] 
+
++ Parameters
+    + id (required, string, `sim`) ... identifier of the simulation
+
+#### Status [GET]
+Get more information about the simulation with identifier `id`, e.g. number of ASIMs and number of Brappers in use.
+
++ Response 200 (application/json)
+    
+    + Body
+    
+    {
+        "id": "sim",
+        "status": "loaded",
+        "schedulers": [
+            "Environment"
+        ],
+        "asims": [
+            "BirdCreator"
+        ]
+    }
+    
++ Response 400 (application/json)
+    If simulation does not exist.
+
+    + Body 
+    
+    {
+        "msg": "Simulation 'sim2' does not exist."
+    }
+
+#### Change State [PUT]
+Request controls the simulation `id`. The command allows to `start`, `stop`, `pause`, or `resume`
+
++ Request (application/json)
+
+    + Body
+    
+        {
+            "command" : "start"
+        }
+
++ Response 200 (application/json)
+    Command successful. All ASIMs belonging to this simulation have received the command. The current status of the simulation is reported.
+    
+    + Body  
+    
+    {
+        "id": "sim",
+        "status": "running",
+        "schedulers": [
+            "Environment"
+        ],
+        "asims": [
+            "BirdCreator"
+        ]
+    }
+
++ Response 400
+    Simulation does not exist.
+    
+    + Body 
+
+
+#### Delete [DELETE]
+
+### Brappers [/brappers]
+
+#### Query Known brappers [GET]
+Get a list of all brappers registered with this manager.
+
++ Response 200 (application/json)
+
+{
+    "7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a": {
+    "id": "7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a",
+    "host": "localhost",
+    "port": "8080",
+    "agents": {},
+    "load": 0
+  },
+  "f818d48d-dc03-4b47-9be5-7b18496dd501": {
+    "id": "f818d48d-dc03-4b47-9be5-7b18496dd501",
+    "host": "localhost",
+    "port": "8081",
+    "agents": {},
+    "load": 0
+  }
+}
+
+#### Register new brapper [PUT]
+Register a new brapper. Host and port must be indicated. If no type for the brapper to be registered is specified, the brapper is registered as an ASIM brapper.
+
+Brappers may be of type `asim` or `scheduler`, depending on which type of ASIMs should run on them.
+
++ Request (application/json)
+    
+{   
+    "host" : "localhost", 
+    "port" : "8081",
+    "type" : "asim"
+}
+
++ Response 200 (application/json)
+    If registration was successful the ID of the brapper is reported.
+    
+    +Body
+        {
+        "msg": "Brapper successfully registered.",
+        "id": "565642c3-db32-4e00-898b-9ed3b294736e"
+        }
+
++ Response 409 (application/json)
+
+    {
+        "msg": "Unable to register brapper."
+    }
+
+
+### Control Brappers [/brappers/{id}]
+
+Interacting with specific brappers.
+
++ Parameters
+    + id (required, UUID, `7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a`) ... "id" of brapper
+
+#### Query specific brapper [GET]
+Get information about the brapper specified by `id`
+
++ Response 200 (application/json)
+    If the brapper identified by `id` exists.
+    
+    + Body 
+    {
+        "id": "7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a",
+        "host": "localhost",
+        "port": "8080",
+        "type": "scheduler"
+            "asims": [
+            "Environment"
+        ],
+        "load": 0
+    }
+
++ Response 404 (application/json)
+    If a brapper with `id` does not exist.
+    
+    + Body
+    {
+        "msg": "Brapper with id '7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a' does not existanyo."
+    }
+
+#### Delete brapper [DELETE]
+Delete the brapper from the manager. The manager sends an appropriate signal to the corresponding brapper. However, this does not imply that the brapper must shut itself down.
+
++ Response 200
+    The brapper was deleted
+    
+    + Body
+
++ Response 404 (application/json)
+    If the brapper with `id` does not exist.
+    
+    + Body
+    {
+        "error": "Brapper with id '7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a' does not exist."
+    }
+
+### ASIMs [/asims]
+
+#### Query Known ASIMs [GET]
+Retrieves the manager information of all ASIMs which have been created with this manager.
+
++ Parameters
+    + simId (optional, UUID or String, `044c0b01-b209-412a-a5f1-c0409bfc5034`) ... `scheduleId` of the simulation the ASIM is running inside
+
++ Response 200 (application/json)
+    {
+        "asims": [
+            {
+                "name": "BirdCreator",
+                "simulation": "sim",
+                "brapper": "a7c07189-9f41-4c49-8303-c2e37401fa44",
+                "status": "loaded"
+            }
+        ]
+    }
+
+#### Create ASIM [PUT]
+Creates a new ASIM using the manager, i.e. the manager selects a brapper in which the ASIM should be generated.
+
++ Request (application/json)
+    The request body may also specify the name/id of a simulation. If this simulation exists, the ASIM is created therein. If it does not exist, the simulation is created. In case the simulation property is not specified, the manager will create a new simulation with a UUID, indicated in the response.
+    + Body
+    {
+         "name" : "ASIM1",
+         "signature" : "policy noOp = skip\nrule Start = { counter := 0\nprint \"ASIM1: initialized\"\nsend \"Ping\" to \"Target1\" with subject \"Info\"\nsend \"Ping\" to \"Target2\" with subject \"Info\" }\nrule Program = { print ASIMs if counter > 10 then destroyASIM \"Target1\" else choose m in inboxOf(self) with messageSubject(m)=\"Info\" do { print \"ASIM1: receives: \" + messageContent(m)\ncounter := counter + 1\n send \"Ping \" + counter to \"Target1\" with subject \"Info\"\nsend \"Ping \" + counter to \"Target3\" with subject \"Info\"\nsend \"Ping \" + counter to \"Target2\" with subject \"Info\"}}",
+         "init" : "Start",
+         "program": "Program", 
+         "policy" : "noOp",
+         "start" : true
+    }
+
++ Response 201 (application/json)
+    The ASIM was created successfully.
+    
+    + Body
+    {
+        "msg": "ASIM 'ASIM1' created successfully in simulation 'bce7cb87-b252-445a-8e40-40033386adae'.",
+        "asim": {
+            "name": "ASIM1",
+            "simulation": "bce7cb87-b252-445a-8e40-40033386adae",
+            "brapper": "5cd6cf75-bc2d-429d-9ff7-edff4b4e8922",
+            "status": "loaded"
+        }
+    }
+
++ Response 409 (application/json)
+    If a request tries to register an ASIM with the same name as an ASIM that already exists in a specific simulation.
+
+    + Body
+    {
+        "error": "ASIM 'ASIM1' already exists in simulation 'sim'.\n"
+    }
+
++ Response 503 (application/json)
+    + Body
+    {
+         "error": "Manager has no brappers to run ASIMs. Register or restart them."
+    }
+
+### Control ASIMs [/asims/{simId}/{asimId}]
+
+#### Query Status [GET]
+Tries to retrieve the manager information about the ASIM with the specified `asimId` in the simulation specified with `simId`.
+
+In case only `simId` is specified, the call will retrieve all registered ASIMs.
+
++ Parameters
+    + simId (required, UUID or String, `044c0b01-b209-412a-a5f1-c0409bfc5034`) ... `scheduleId` of the simulation the ASIM is running inside
+    + asimId (optional, UUID or String, `7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a`) ... `asimId` of ASIM
+
++ Response 200 (application/json)
+
+    + Attributes
+        + Catalog (object)
+            + name (string) - Name or ID of the ASIM
+            + init (string) - Init rule for the BSL Program
+            + program (string) - BSL Program of the ASIM
+            + policy (string) - Scheduling policy for the ASIM
+            + brapper (string) - Manager UUID of the brapper where this ASIM is hosted
+            + status (enum[string]) - Current Status of the ASIM
+                + Members
+                    + "idle" - ASIM waits (before or after execution)
+                    + "loaded" - ASIM has a specification loaded for execution
+                    + "init" - ASIM has run the initrule
+                    + "running" - ASIM is running
+                    
+    + Body
+{
+  "name": "4b213263-b1cb-41f6-add1-b6ec4624cf3a",
+  "init": "abc",
+  "program": "prg",
+  "policy": "pol",
+  "brapper": "318c4897-e995-4c46-9326-5923326bf13f",
+  "status": "idle"
+}
+
++ Response 404 (text/plain)
+
+#### Changing ASIM State [PUT]
+Request allows to start, stop, pause, and resume the ASIM directly
+
++ Parameters
+    + simId (required, UUID or String, `044c0b01-b209-412a-a5f1-c0409bfc5034`) ... `simId` of the simulation the ASIM is running inside
+    + asimId (required, UUID or String, `7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a`) ... `asimId` of ASIM
+
+#### Delete an ASIM [DELETE]
+Removes an ASIM with the specified `id` from the manager. This implies that the ASIM is also removed from the hosting brapper.
+
++ Parameters
+    + simId (required, UUID or String, `044c0b01-b209-412a-a5f1-c0409bfc5034`) ... `simId` of the simulation the ASIM is running inside
+    + asimId (required, UUID or String, `7efd4e3e-ec6d-406d-9912-6eb6cfee5b0a`) ... `asimId` of ASIM
+
++ Response 204
+
+    The specified ASIM was deleted successfully
+    
+    + Body
+
++ Response 404
+
+    The specified ASIM was not found and thus, cannot be deleted.
+    
+    + Body
+    
+
+### Message [/message/{simId}]
+Delivering messages.
+
++ Parameters
+    + simId (required, String, `sim2`) ... `simId` is the identifier of the simulation in which the message should be received
+
+#### Receive Message [PUT]
+Send a message to a specific simulation.
+
++ Request (application/json)
+
+
+
++ Response 204
+
+    The message was received and delivered.
+    
+    + Body
+    
++ Response 400 (application/json)
+    The message format was incorrect 
+    
+    + Body attributes
+        + error (string) - Message describing the missing or malformed entity in the message.
+    
+    + Body
+    {
+        "error": "Cannot forward messages without type 'msg'.\n"
+    }
+    
++ Response 404 (application/json)
+    The simulation `simId` to which this message should be delivered does not exist. 
+    
+    + Body attributes
+        + error (string) - Message describing the missing resource.
+    
+    + Body
+    {
+        "error": "Simulation specified in message does not exist. Ignore."
+    }                                                                                                                                                                                                       
+
++ Response 500 (application/json)
+    Internal manager error. The message was received by the manager but there was a problem processing it. 
+    
+    + Body
+
+### Schedulers [/schedulers/{simId}]
+
+Requesting information about schedulers in the simulation identified by `simId`
+
++ Parameters
+    + simId (optional, UUID or String, `044c0b01-b209-412a-a5f1-c0409bfc5034`) ... `simId` of the simulation the scheduler is running inside
+
+#### Query Known Schedulers [GET]
+Retrieves the manager information of all schedulers which have been created with this manager.
+
++ Request Empty (application/json)
+
++ Response 200 (application/json)
+    {
+        "schedulers": [
+            {
+                "name": "Environment",
+                "simulation": "sim",
+                "brapper": "a7c07189-9f41-4c49-8303-c2e37401fa44",
+                "status": "running"
+            }
+        ]
+    }
+    
++ Response 404 (application/json)
+
+    + Body
+        {
+            "error" : "Simulation or schedulers not found."
+        }
+        
++ Response 500 (application/json)
+
+    + Body 
+        {
+            "error" : "Internal manager error!"
+        }
+
+#### Create Scheduler [PUT]
+Creates a new scheduler using the manager, i.e. the manager selects a brapper in which the scheduler should be generated.
+
++ Request (application/json)
+    The request body may also specify the name/id of a simulation. If this simulation exists, the ASIM is created therein. If it does not exist, the simulation is created. In case the simulation property is not specified, the manager will create a new simulation with a UUID, indicated in the response.
+    
+    + Body
+    {
+         "name" : "Environment",
+         "signature" : "universe Birds\nderived distance(b1,b2) = \n\tif abs(xPosition(b1)-xPosition(b2))+abs(yPosition(b1)-yPosition(b2)) = undef then \n\t\t999 \n\telse abs(xPosition(b1)-xPosition(b2))+abs(yPosition(b1)-yPosition(b2)) //Taxicab distance \n \nrule EnvironmentInit = \npar \n \tmode:= \"initialize\" \n \tprogram(self):= EnvironmentProgram \nendpar \n \nrule EnvironmentProgram = \n\tif mode = \"initialize\" then \n\tpar \n\t\tprint \"Waiting for Birds\" \n\t\tRegisterNewBirds \n \t\tif |Birds|>=2 then \n \t\tpar \n \t\t\tprint \"Found enough Birds!\" \n \t\t\tmode := \"Interaction\"\n\t\tendpar \n\tendpar\n\telse if mode =\"Interaction\" then \n\tpar \n\t Report \n\t\tRegisterNewBirds\n\t\t//ScheduleIfNear\n\tendpar \n\t\nrule RegisterNewBirds = \n\tforall m in inboxOf(self) with messageSubject(m)=\"NewBird\" do \n\t\tBirds(messageSender(m)):=true \n \npolicy ChooseIfNear =\n\tchoose b1 in ASIMs with neighbour(b1) = undef do \n\t\tchoose b2 in ASIMs with b1!=b2 and neighbour(b2)=undef and distance(b1,b2) < 20 do \n\t\tpar \n\t\t\tschedule b2 with b1 in neighbour \n\t\t\tschedule b1 with b2 in neighbour \n\t\tendpar\n\t\t\n\t\n rule Report = forall b in ASIMs do forall c in ASIMs do print \"[ASIM1, ASIM2, Distance] \"+[b,c,distance(b,c)]rule ScheduleIfNear = \npar\n\t\n\tchoose b1 in ASIMs with neighbour(b1) = undef do \n\t\t choose b2 in ASIMs with b1!=b2 and neighbour(b2)=undef and distance(b1,b2) < 30 do \n\t\tpar print \"SCHEDULING SHOULD HAVE HAPPENED HERE!\"\n\t\t\tsend b1 to b2 with subject \"neighbour\" \n\t\t\tsend b2 to b1 with subject \"neighbour\" \n\t\tendpar \nendpar\n\n\n",
+         "init" : "EnvironmentInit",
+         "program": "EnvironmentProgram", 
+         "policy" : "ChooseIfNear",
+          "start" : true
+    }
+
++ Response 201 (application/json)
+    The scheduler was created successfully.
+    
+    + Body
+    {
+        "msg": "Scheduler ASIM 'Environment' created successfully in simulation 'bce7cb87-b252-445a-8e40-40033386adae'.",
+        "scheduler": {
+            "name": "Environment",
+            "simulation": "bce7cb87-b252-445a-8e40-40033386adae",
+            "brapper": "5cd6cf75-bc2d-429d-9ff7-edff4b4e8922",
+            "status": "loaded"
+        }
+    }
+    
++ Response 400 (application/json)
+    The creation request was malformed or there was a problem creating the ASIM, e.g. a syntax error in the specification of the ASIM.
+    + Body 
+    {
+        "error": "Error in creation of ASIM 'Environment'.",
+        "details": {
+            name": "Environment",
+            "simulation": "157c72cc-b478-452f-a525-7273d313e372",
+            "success": false,
+            "err    or": "org.coreasm.engine.CoreASMError: Error parsing ^, %, *, div, /, +, -, subset, intersect, diff, >=, <=, union, >, <, !=, =, memberof, notmemberof, and, implies, xor, or, using or do expected, d encountered."
+        }
+    }
+
++ Response 409 (application/json)
+    If a request tries to register a scheduler with the same name as a scheduler that already exists in a specific simulation.
+
+    + Body
+    {
+        "error": "ASIM 'ASIM1' already exists in simulation 'sim'.\n"
+    }
+
++ Response 503 (application/json)
+    + Body
+    {
+         "error": "Manager has no brappers to run ASIMs. Register or restart them."
+    }
+
+
+### Control Schedulers [/schedulers/{simid}/{id}]
+
++ Parameters
+    + simId (required, UUID or String, `044c0b01-b209-412a-a5f1-c0409bfc5034`) ... identifier of the simulation the scheduler is running inside
+    + id (required, UUID or String, `157c72cc-b478-452f-a525-7273d313e372`) ... identifier of the the scheduler
+
+#### Scheduler Status [GET]
+
+Query the status of this specific scheduler.
+
++ Request Empty
+
++ Response 200 (application/json)
+    {
+        "name": "BirdCreator",
+        "simulation": "sim",
+        "brapper": "a7c07189-9f41-4c49-8303-c2e37401fa44",
+        "status": "loaded"
+    }
+    
++ Response 404 (application/json)
+    The scheduler with identifier `id` for which status information was requested, does not exist in simulation `simId`.
+    
+    + Body
+        {
+            "error": "Scheduler identified by 'xyz' does not exist."
+        }
+
+#### Changing Scheduler State [PUT]
+Request allows to start, stop, pause, and resume the scheduler directly
+    
++ Request Empty
+
++ Response 200 (application/json)
+    The brapper successfully controlled the specified scheduler.
+    
+    + Body
+        { "Scheduler1" :  { "name" : "Scheduler1", "simulation" : "sim", "status" : "running", "error" : ""} }
+
++ Response 400 (application/json)
+    The manager is unable to control the scheduler ASIM with this command.
+    
+    + Body
+        { "error" : "Unable to control ASIM with command 'pause'" }
+
++ Response 404 (application/json)
+    This brapper does not host the specified scheduler ASIM to be controlled.
+    
+    + Body 
+        { "error" : "Brapper does not host any scheduler ASIM for this simulation." }
+
+#### Delete Scheduler [DELETE]
+Trigger deletion of a scheduler in a simulation.
+
++ Request Empty
+
++ Response 201 (application/json)
+    The scheduler was successfully deleted from the manager and the scheduler ASIM was destroyed in it hosting brapper.
+    
+    + Body
+    {
+        "msg": "Scheduler 'Environment' successfully deleted."
+    }
+
++ Response 404 (appliation/json)
+    Response if either, the simulation or the scheduler were not found.
+    
+    + Body 
+    {
+        "error": "Scheduler 'Environment' does not exist in simulation 'sim'."
+    }
+    
++ Response 500 (application/json)
+    Response if the manager was not able to trigger the deletion inside the brapper. This may many reason, e.g. the connection to the brapper could not be established, the brapper is not able to stop the scheduler ASIM, etc.
+
+### Channels [/channels]
+
+Not implemented yet.
+
+#### View all Channels [GET]
+
+Not implemented yet.
+
+#### Create new Channel [PUT]
+
+Not implemented yet.
+
+### Control Channels [/channels/{simid}/{id}/]
+
+Not implemented yet.
+
+#### Status [GET]
+
+Not implemented yet.
+
+#### Send a Message [PUT]
+
+Not implemented yet.
+
+#### Delete a Channel [DELETE]
+
+Not implemented yet.
+
+### Accumulate Update [/update/{simId}]
+If a brapper has locations which were registered for reporting updates, it will use this interface to send updates to the manager. The latter will redistribute these updates to all ASIMs in this simulation that also registered for this update. Note that such updates do not require authentication. Thus, at the moement, updates may also be faked. 
+
+#### Store [PUT]
+Sends an update set to a specific ASIM.
+
++ Request (application/json)
+    
+    + Body
+    {
+        "type":"update",
+        "simulation":"sim",
+        "toAgent":"@UI@",
+        "fromAgent":"fst",
+        "body":"{\"updates\":[{\"location\":{\"name\":\"state\",\"args\":[]},\"value\":{\"NumberElement\":{\"value\":1.0}},\"action\":\"updateAction\"}]}"
+    }
+
++ Response 200 (application/json)
+    The update has been received and accumulated successfully.
+    
+    + Body
+    { "msg" : "Update received and accumulated successfully." }
+    
++ Response 404 (application/json)
+    The manager could not process the update, e.g. it could not deliver it to the corresponding ASIM or the simulation was not hosted by this manager.
+    
+    + Body
+    { "msg" : "Unable to process update."}
+
+### Register for Updates [/update/{simId}/register]
+Allows to register for udates occurring during a simulation run, i.e. all changes in the specified locations of all ASIMs belonging to this simulation are reported to a specific target.
+
+#### Register [PUT]
+Apart from valid ICEF addresses, i.e. `AGENT_NAME`@`BRAPPER_NAME`, the target address may also contain the address `@UI@`. This will instruct the manager to register for the appropriate updates in all ASIMs that belong to this simulation and store all the latest values. They can be picked up by frontend, such as user interfaces.
+
++ Request (application/json)
+    { "target" : "AGENT@ASIM1", "registrations" : [ { "location" : "state" }, {"location" : "successor" } ] }
+    
++ Response 201 (application/json)
+
+    + Body 
+    { "msg" : "Registration for specified locations create successfully."}
+
++ Response 403 (application/json)
+    + Body
+    { "msg" : "Registration for specified locations was not successful."}
