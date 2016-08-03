@@ -24,7 +24,7 @@ var Config = {
     scheduler : {
         port : 9091,
         host : 'localhost',
-        jar : '../coreASM/org.coreasm.biomics.wrapper/target/brapper.jar'
+        jar : '../coreASIM/org.coreasim.biomics.wrapper/target/brapper.jar'
     }
 };
 
