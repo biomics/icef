@@ -25,6 +25,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.CmdLineException;
 import java.io.IOException;
 import java.net.URI;
+import java.net.BindException;
 
 public class Wrapper {
     protected WrapperConfig config = null;
@@ -44,13 +45,22 @@ public class Wrapper {
         
 
         // create and start a new instance of grizzly http server
-        server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://"+config.getHost()+":"+config.getPort()+"/"), rc);
+        server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://"+config.getHost()+":"+config.getPort()+"/"), rc, false);
 
         Collection<NetworkListener> listeners = server.getListeners();
         for(NetworkListener l : listeners) {
             KeepAlive ka = l.getKeepAlive();
             l.getKeepAlive().setMaxRequestsCount(0);
         }
+
+	try {
+	    server.start();
+	    System.out.println("Brapper started successfully at http://"+config.getHost()+":"+config.getPort()+"/");
+	} catch (BindException be) {
+	    System.err.println("Unable to bind to port "+config.getPort()+"!");
+	} catch (IOException ioe) {
+	    System.err.println("IO Exception on brapper startup.");
+	}
     }
 
     public void stopServer() {
