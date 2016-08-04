@@ -11,7 +11,6 @@
  *
  */
 
-
 var ASIMState = require("./ASIMState");
 var ASIMCreationError = require("./ASIMCreationError");
 
@@ -349,7 +348,11 @@ var ASIM = (function() {
 			var result = null;
                         try {
                             result = JSON.parse(resData);
-                            self.status = ASIMState.LOADED;
+			    if(self.start)
+				self.status = ASIMState.RUNNING
+			    else
+				self.status = ASIMState.LOADED;
+			    
                             callback({ code : 201, msg : "ASIM '" + self.getName() + "' successfully created."}, null);
                         }
                         catch(e) {
@@ -372,6 +375,7 @@ var ASIM = (function() {
             if(this.status == ASIMState.RUNNING) {
                 this.brapper.recvMsg(msg, callback);
             } else {
+		console.log("WARNING: Message not forwarded. ASIM not running.");
 		callback(null, { code : 503, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" });
 	    }
         },
@@ -464,8 +468,8 @@ var ASIM = (function() {
             this.brapper.register4Updates(simId, reg);
         },
 
-        destroy : function(simId, name) {
-            return this.brapper.destroyASIM(simId, name);
+        destroy : function() {
+            return this.brapper.destroyASIM(this.simulation, this.name);
         },
 
         getName : function() {
