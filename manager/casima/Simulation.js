@@ -230,6 +230,8 @@ var Simulation = (function() {
 
             this.manager.socket.delASIM(asim);
 
+	    asim.destroy();
+
             return true;
         },
 
@@ -435,10 +437,21 @@ var Simulation = (function() {
 				     err.forEach(function(e) {
 					 report.errors[id] = e.msg;
 					 if(e.details != undefined)
-					     report.errors[id] += e.details.asim.error;
-
+					     report.errors[id] += " " + e.details.asim.error;
 					 id++;
 				     });
+
+				     console.log("Stop all created ASIMS: ", result);
+
+				     for(var a in self.asimList)
+					 self.delASIM(a)
+
+				     for(var a in self.schedulerList)
+					 self.delScheduler(a, function(succ, err) {
+					     if(err != null) {
+						 console.log("WARNING: Unable to free all resources after failed simulation upload");
+					     }
+					 });
 
 				     callback({ code : 400, data : report });
 				 } else {
@@ -533,8 +546,6 @@ var Simulation = (function() {
         },
 
         recvMsg : function(msg, callback) {
-            console.log("Simulation receives message");
-
             if(msg == undefined || msg == null)
                 callback(null, { code : 400, msg : "Error: Invalid message\n" });
 
@@ -555,12 +566,12 @@ var Simulation = (function() {
 
             var asim = this.asimList[address[1]];
             if(asim != undefined) {
-                console.log("Forward message from ASIM '"+msg.fromAgent+"' to ASIM '"+msg.toAgent+"'");
+                // console.log("Forward message from ASIM '"+msg.fromAgent+"' to ASIM '"+msg.toAgent+"'");
                 asim.recvMsg(msg, callback);
             } else {
                 var scheduler = this.schedulerList[address[1]];
                 if(scheduler != undefined) {
-                    console.log("Forward message from scheduler ASIM '"+msg.fromAgent+"' to Scheduler '"+msg.toAgent+"'");
+                    // console.log("Forward message from ASIM '"+msg.fromAgent+"' to scheduler ASIM '"+msg.toAgent+"'");
                     scheduler.recvMsg(msg, callback);
                 } else
                     callback(null, { code : 404, msg : "Unable to forward message. Target does not exist." });
