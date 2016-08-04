@@ -1,0 +1,15 @@
+{
+   "id" : "sim", 
+   "schedulers" : [
+       {
+	   "file" : "../casim/ping.casim",
+	   "start" : true
+       }
+   ], 
+   "asims" : [ 
+       {
+           "file" : "../casim/pong.casim",
+           "start" : true
+       }
+   ]
+}

@@ -1,0 +1,35 @@
+CoreASIM Pong
+
+use Standard
+
+init Start
+
+scheduling noOp
+
+policy noOp = skip
+
+controlled running: Int
+
+rule Start = {
+     counter := 0
+     running := 0
+     program(self) := Program
+}
+
+rule Program = {
+     if running = 0 then
+     par
+	print "Sending initializing Pong ... "
+	send "Init" to "Ping" with subject "Init"
+     endpar
+
+     choose m in inboxOf(self) with messageSubject(m)="Ping" do {
+     	    print "Pong receives: " + messageContent(m)
+	    counter := counter + 1
+
+	    if running = 0 then 
+	       running := 1
+	    
+	    send [messageContent(m),"Pong "+counter+" from Pong"] to "Ping" with subject "Pong"
+     }
+}

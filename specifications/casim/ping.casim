@@ -1,0 +1,29 @@
+CoreASIM Ping
+
+use Standard
+
+init Start
+
+scheduling noOp
+
+policy noOp = skip
+
+rule Start = {
+     counter := 0
+     program(self) := Program
+}
+
+rule Program = {
+
+     choose m in inboxOf(self) with messageSubject(m)="Init" do {
+       print "Ping receives: " + messageContent(m)
+       send "Pong 0 from Pong" to "Pong" with subject "Ping"
+     }
+
+     choose m in inboxOf(self) with messageSubject(m)="Pong" do {
+       print "Ping receives: " + messageContent(m)
+       counter := counter + 1
+       
+       send "Ping " + counter + " from Ping" to "Pong" with subject "Ping"
+     }
+ }
