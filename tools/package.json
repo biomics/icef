@@ -1,0 +1,31 @@
+ {
+    "name"         : "loadICEF",
+    "version"      : "1.0.0",
+    "description"  : "CoreASIM Load Utility",
+    "homepage"     : "http://biomicsproject.eu",
+    "license"      : "AFL-3.0",
+    "repository"   : {
+        "type":"git",
+        "url":""
+    },
+    "main"         : "loadICEF.js",
+    "scripts"      : {
+        "start": "node loadICEF.js"
+    },
+    "contributors": [
+        {"name": "Daniel Schreckling"}
+    ],
+    "keywords": [
+        "LIFE", "BIOMICS", "ASM", "BSL", "ICEF", "LIFE 2.0"
+    ],
+    "dependencies": {
+	"jsonfile" : "*"
+    },
+    "optionalDependencies": {
+    },
+    "devDependencies": {
+    },
+    "engines": {
+        "node": ">=0.10 <0.12"
+    }
+}
