@@ -79,11 +79,11 @@ function startScheduler() {
     var scheduler = spawn("java", args);
 
     scheduler.stdout.on('data', function(data) {
-        console.log("[Scheduler ASIM]: "+data);
+        process.stdout.write("[Scheduler ASIM]: "+data);
     });
 
     scheduler.stderr.on('data', function(data) {
-        console.log("[Scheduler ASIM]: Error: "+data);
+        process.stdout.write("[Scheduler ASIM]: Error: "+data);
     });
 
     scheduler.on('error', function(e) {
@@ -92,7 +92,7 @@ function startScheduler() {
 
     scheduler.on('exit', function(code) {
         if(code != 0)
-            console.log("[Scheduler ASIM]: Error: "+code);
+            process.stdout.write("[Scheduler ASIM]: Error: "+code);
     });
 
     manager.registerSchedulerBrapper(config.scheduler);
