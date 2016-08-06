@@ -158,7 +158,7 @@ public class EngineManager {
 
         program += "scheduling "+req.policy+"\n\n";
 
-        System.err.println("Program to execute:\n"+program);
+        // System.out.println("Program to execute:\n"+program);
 
         int delay = 200;
         if(wrapper.config.schedulingMode)
@@ -545,7 +545,6 @@ public class EngineManager {
 
                 List<UpdateLocation> registrations = ur.registrations;
                 for(UpdateLocation reg : registrations) {
-                    
                     if(reg.location == null)
                         continue;
 
@@ -558,8 +557,8 @@ public class EngineManager {
                         }
                     }
                 }
-            }    
-        }
+            }
+	}
     }
 
     // TODO - request does not report ASIM in local asims map of this brapper
@@ -778,9 +777,10 @@ public class EngineManager {
         CoreASMContainer casm = null;
 
         synchronized(asims) {
-            if(!asims.containsKey(simId))
+            if(!asims.containsKey(simId)) {
                 return false;
-
+	    }
+	    
             casm = asims.get(simId).get(name);
             asims.get(simId).remove(name);
         }
@@ -793,8 +793,7 @@ public class EngineManager {
                 } 
                 catch(Exception e) {
                     // nothing
-                }            
-                casm.destroy();
+                }
                 casm = null;
                 asims.get(simId).remove(name);
             }
@@ -806,7 +805,7 @@ public class EngineManager {
     private static void registerWithManager() {
         if(wrapper.config.schedulingMode)
             return;
-            
+
         String registration = "{ \"host\" : \""+ 
             wrapper.config.getHost() + "\", \"port\" : \"" + 
             wrapper.config.getPort() + "\" }";
