@@ -1,0 +1,61 @@
+CoreASIM InputProvider
+
+use Standard
+
+init ProviderStart
+
+scheduling ScheduleWhenNotWaiting
+
+universe Components = {lBit}
+derived Inputs = {"-1","1"}
+
+rule ProviderStart = par
+	number := 0 
+	waiting := false
+	scheduleNow := false 
+	print "InputProvider initialized ... " 
+	program(self):=ProviderProgram
+endpar 
+
+rule ProviderProgram = par  
+	//print "Inbox of InputProvider: "+inboxOf(self)
+	print "scheduleNow: "+scheduleNow 
+	print "waiting: "+waiting 
+	print "number: "+number 
+	print "globalInput: "+globalInput 
+	print "stepcount: "+stepcount
+	
+	if scheduleNow != undef then par
+		if scheduleNow then par 
+			globalInput:=undef
+		  print "SCHEDULING SHOULD HAVE HAPPENED THIS ROUND" 
+		    send globalInput to lBit with subject "input"
+		  waiting := true
+		  scheduleNow:= false 
+	  endpar
+		else par
+			if waiting then par 
+				choose m in inboxOf(self) with messageSubject(m)="Done" do
+				par 
+					waiting:=false 
+					print "I am waiting for the round to be finished" 
+			  endpar  
+		  endpar 
+		  else if not waiting then
+		  par 
+				choose i in Inputs with number+toNumber(i)>0 using {"1"->0.5,  "-1"->0.5} do par
+					print "Chosen "+i+" at stepcount "+stepcount 
+					globalInput := toNumber(i)
+					number := number + toNumber(i) 
+					waiting := true 
+					scheduleNow := true 
+				endpar 
+			endpar
+		endpar 
+	endpar
+endpar
+	
+policy ScheduleWhenNotWaiting =
+    if scheduleNow != undef and globalInput!= undef then
+      if scheduleNow then
+         schedule lBit with globalInput in input

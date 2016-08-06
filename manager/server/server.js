@@ -299,8 +299,6 @@ function initApp() {
                  var simulation = req.params.simulation;
                  var name = req.params.name;
 
-                 console.log("Request deletion of ASIM: "+name);
-
                  if(manager.delASIM(simulation, name))
                      res.send(200);
                  else {
@@ -487,8 +485,9 @@ function initApp() {
 
     app.put("/updates/:simulation",
              express.json(),
-             function(req, res) {
+            function(req, res) {
                 var simulation = req.params.simulation;
+
                  var result = manager.recvUpdate(simulation, req.body);
                  if(!result.success) {
                      console.log("ERROR: "+result.msg);

@@ -323,9 +323,6 @@ public class EngineManager {
     }
 
     public static boolean register4Updates(String simId, UpdateRegistrationRequest req) {
-        /*if(req != null)
-          System.out.println("req.target: "+req.target);*/
-        
         // no target asim given
         if(req.target == null)
             return false;
@@ -350,8 +347,6 @@ public class EngineManager {
         
         List<UpdateLocation> registrations = req.registrations;
         for(UpdateLocation reg : registrations) {
-            // System.out.println("* Register locations: "+reg.location);
-
             if(reg.location == null)
                 continue;
 
@@ -553,7 +548,7 @@ public class EngineManager {
                     
                     if(reg.location == null)
                         continue;
-                    
+
                     HashMap<String, CoreASMContainer> simAsims = asims.get(sim);
                     Set<String> allAsims = simAsims.keySet();
                     for(String asimName : allAsims) {

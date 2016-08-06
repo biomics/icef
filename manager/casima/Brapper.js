@@ -186,7 +186,7 @@ var Brapper = (function() {
 
                 res.on('end', function(chunk) {
                     console.log("[Manager]: Registration ended for '"+self.host+":"+self.port+"'");
-                    callback({ success : true, msg : "Message forwarded\n" });
+                    callback({ success : true, msg : "Registration successful\n" });
                 });
             });
 

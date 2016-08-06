@@ -78,24 +78,15 @@ var Simulation = (function() {
                     delete this.asimList[name];
                     this.manager.socket.delASIM(name);
 
-                    console.log("DELETE LOCATION UPDATES FOR ASIM? '"+name+"'");
                     if(this.locationUpdates[name] != undefined) {
                         console.log("DELETE LOCATION UPDATES FOR ASIM '"+name+"'");
                         delete this.locationUpdates[name]; 
-
-                        for(var trg in this.locationUpdates) {
-                            console.log("REMAINING: "+trg);
-                        }
                     }
-
                     return true;
                 } else {
-                    console.log("Simulation cannot destroy ASIM");
                     return false;
                 }
-
             } else {
-                console.log("ASIM is not in this simulation");
                 return false;
             }
         },
@@ -218,17 +209,23 @@ var Simulation = (function() {
             return true;
         },
 
+	// TODO: Check duplicate and make async
         delASIM : function(asimName) {
+	    var address = asimName.split("@");
+            if(address.length == 2)
+                asimName = address[1];
+
 	    var asim = this.asimList[asimName];
-            if(asim == undefined)
+            if(asim == undefined) {
                 return false;
+	    }
 
             asim.setSimulation(undefined);
             asim.setRegisteredLocations(undefined);
 
             delete this.asimList[asimName];
 
-            this.manager.socket.delASIM(asim);
+            this.manager.socket.delASIM(asimName);
 
 	    asim.destroy();
 
@@ -334,7 +331,7 @@ var Simulation = (function() {
                 try {
                     asim = new ASIM(curASIM);
 
-                    if(self.addASIM(asim)) {                    
+                    if(self.addASIM(asim)) {
                         var asimBrapper = self.manager.getASIMBrapper();
 
                         if(asimBrapper == null) {
@@ -383,8 +380,6 @@ var Simulation = (function() {
 		.done();
 	},
 
-        // TODO: Role back if a problem occurred
-	// START ASIMs as inidicated in spec
         load : function(spec, callback) {
             var created = {};
             var problems = [];
@@ -423,6 +418,13 @@ var Simulation = (function() {
             var numASIMs = spec.asims.length;
 
             console.log("numSchedulers: "+numSchedulers);
+
+	    // TODO make asynchronous!
+	    if(spec.updates != undefined && spec.updates != null && spec.updates instanceof Array) {
+		for(var u in spec.updates) {
+		    self.registerLocations(spec.updates[u]);
+		}
+	    }
 
 	    async.parallel({ schedulers : this.loadSchedulers.bind(null, spec, self),
 			     asims : this.loadASIMs.bind(null, spec, self) }, function(err, result) {
@@ -470,7 +472,6 @@ var Simulation = (function() {
 				     callback({ code : 201, data : createdASIMs });
 				 }
 			     });
-
         },
 
         recvUpdate : function(update) {
@@ -495,10 +496,10 @@ var Simulation = (function() {
 
             /* if(this.updateASIM == undefined || this.updateASIM == null) {
                 return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
-            }*/
+		}*/
 
+	    // TODO: Ugly - generalize
             if(update.toAgent == "@UI@") {
-                console.log("UI UPDATE: "+update.body);
                 var updates = JSON.parse(update.body).updates;
                 this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));
                 return { success : true, msg : "" };
@@ -506,13 +507,11 @@ var Simulation = (function() {
 
             var address = update.toAgent.split("@");
             if(address.length != 2) {
-                // console.log("Target '"+update.toAgent+"' has invalid address format\n");
                 return { success : false, msg : "Invalid address format\n" };
             }
 
             var asim = this.schedulerList[address[1]];
             if(asim != undefined) {
-                // console.log("Forwarding update from ASIM '"+update.fromAgent+"' to scheduler ASIM '"+update.toAgent+"'");
                 var updates = JSON.parse(update.body).updates;
 
                 this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));

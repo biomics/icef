@@ -1,0 +1,149 @@
+CoreASIM lBit
+
+policy noOp = skip
+
+init lBitStart
+scheduling noOp
+
+rule lBitStart =
+par
+	state:= 0
+	program(self):= lBitProgram
+endpar
+
+rule ComponentStart =
+par
+	state:= 1
+	program(self):= ComponentProgram
+	send "Done" to "InputProvider" with subject "Done"
+endpar
+	
+rule lBitProgram =
+par
+	//print "Inbox of lBit: "+inboxOf(self)
+	choose m in inboxOf(self) with messageSubject(m)="Death" do
+	par
+		successor := undef
+		destroyASIM messageSender(m)
+		send "Done" to "InputProvider" with subject "Done"
+	endpar
+	choose m in inboxOf(self) with messageSubject(m)="input" do
+	par
+		print "lBit has the local input "+messageContent(m)+", sent by "+messageSender(m)
+		if messageContent(m) = 1 then
+		par
+			state:= (state+1)%2
+			print "lBit updated its state from "+state+" to "+(state+1)%2
+			if(state = 0)then
+			par
+				send "Done" to "InputProvider" with subject "Done"
+				print "lBit is done computing, sending message to InputProvider "
+			endpar
+			else if (state = 1) then
+			par
+				if successor = undef then
+				par
+					print "Creating new ASIM!"
+					createASIM initializedBy ComponentStart withProgram ComponentProgram andPolicy noOp in successor
+				endpar
+				else
+				par
+					print "Sending +1 carry to successor"
+					send messageContent(m) to successor with subject "input"
+				endpar
+			endpar
+		endpar
+		else if messageContent(m) = -1 then
+		par
+			if(state = 1) then
+			par
+				state:= 0
+				print "lBit updated its state from "+state+" to "+0
+				send "Done" to "InputProvider" with subject "Done"
+				if successor = undef then
+				par
+					//this is where I should die, but I will not, because I am the first component
+					destroyASIM self
+					skip
+				endpar				
+			endpar
+			else if (state = 0) then
+			par
+				state:= 1
+				print "lBit updated its state from "+state+" to "+1
+				print "Sending -1 carry to successor"
+				send messageContent(m) to successor with subject "input"
+			endpar
+		endpar
+	endpar
+endpar
+
+
+rule ComponentProgram =
+par
+	//print "Inbox of "+self+": "+inboxOf(self)
+	//print "Successor of "+self+": "+successor
+	choose m in inboxOf(self) with messageSubject(m)="Death" do
+	par
+		successor := undef
+		destroyASIM messageSender(m)
+		send "Done" to "InputProvider" with subject "Done"
+	endpar
+	choose m in inboxOf(self) with messageSubject(m)="input" do
+	par
+		print self+" has the local input "+messageContent(m)+", sent by "+messageSender(m)
+		if messageContent(m) = 1 then
+		par
+			state:= (state+1)%2
+			print self+" updated its state from "+state+" to "+(state+1)%2
+			if(state = 0)then
+			par
+				send "Done" to "InputProvider" with subject "Done"
+				print self+" is done computing, sending message to InputProvider "
+			endpar
+			else if (state = 1) then
+			par
+				if successor = undef then
+				par
+					print "Creating new ASIM!"
+					createASIM initializedBy ComponentStart withProgram ComponentProgram andPolicy noOp in successor
+				endpar
+				else
+				par
+					print "Sending +1 carry to successor"
+					send messageContent(m) to successor with subject "input"
+				endpar
+			endpar
+		endpar
+		else if messageContent(m) = -1 then
+		par
+			if(state = 1)then
+			par
+				state:= 0
+				print self+" updated its state from "+state+" to "+0
+				if successor = undef then
+				par
+					//this is where I should die
+					print "Destroying myself!"
+					if messageSender(m)!="lBit@lBit" then
+					par
+						send "Death" to messageSender(m) with subject "Death"
+					endpar
+					else
+					par
+						 send "Death" to "lBit" with subject "Death"
+					endpar
+				endpar
+				else
+					send "Done" to "InputProvider" with subject "Done"
+			endpar
+			else if (state = 0) then
+			par
+				state:= 1
+				print self+" updated its state from "+state+" to "+1
+				print "Sending -1 carry to successor"
+				send messageContent(m) to successor with subject "input"
+			endpar
+		endpar
+	endpar
+endpar

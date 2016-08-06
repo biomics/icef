@@ -1,0 +1,24 @@
+{
+	"id" : "mod2cc",
+	"schedulers" : [
+		     {				 
+        "file" : "../casim/inputProvider.casim",
+				"start" : true
+			}
+	],
+	"asims" : [
+		  {
+				"file" : "../casim/lowestBit.casim",
+				"start" : true
+			}
+	],
+	"updates" : [
+		{
+			"target" : "@UI@",
+			"registrations" : [
+					{ "location" : "state" },
+					{ "location" : "successor" }
+			]
+		}
+	]
+}

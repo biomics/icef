@@ -30,6 +30,7 @@ public class UpdateRegistrationRequest {
         } catch (Exception e) {
             System.err.println("ERROR: Unable to create update request object from JSON. Format does not comply!");
             System.err.println("ERROR: "+e.getMessage());
+	    System.err.println("ERROR: JSON: "+json);
         }
 
         return req;

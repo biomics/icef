@@ -225,7 +225,7 @@ var ASIM = (function() {
         },
 
         setRegisteredLocations : function(reg) {
-            if(reg == undefined)
+            if(reg == undefined || reg == null)
                 this.registeredLocations = null;
             else
                 this.registeredLocations = reg;
@@ -352,6 +352,14 @@ var ASIM = (function() {
 				self.status = ASIMState.RUNNING
 			    else
 				self.status = ASIMState.LOADED;
+
+			    if(self.simulation != null && self.brapper != null && self.registeredLocations != null) {
+				self.register4Updates(function(succ, err) {
+				    if(err != null) {
+					console.log("WARNING: Registration for updates not successful!");
+				    }
+				});
+			    }
 			    
                             callback({ code : 201, msg : "ASIM '" + self.getName() + "' successfully created."}, null);
                         }
@@ -398,7 +406,7 @@ var ASIM = (function() {
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
-                path: '/updates/'+this.simulation+'/asim/'+name,
+                path: '/updates/'+this.simulation+'/'+name,
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -433,7 +441,7 @@ var ASIM = (function() {
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
-                path: '/updates/'+this.simulation+'/asim/'+name,
+                path: '/updates/'+this.simulation+'/'+name,
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -464,8 +472,11 @@ var ASIM = (function() {
             return error;
         },
 
-        register4Updates : function(simId, reg) {
-            this.brapper.register4Updates(simId, reg);
+        register4Updates : function(callback) {
+	    for(var trg in this.registeredLocations) {
+		var registration = { target : trg, registrations : this.registeredLocations[trg] };
+		this.brapper.register4Updates(this.simulation, registration, callback);
+	    }
         },
 
         destroy : function() {
