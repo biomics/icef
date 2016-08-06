@@ -510,12 +510,13 @@ function initApp() {
              function(req, res) {
                  var simulation = req.params.simulation;
                 
-                 console.log("Try to register the following locations in simulation: "+simulation);
-                 console.log("Target for updates: "+req.body.target);
-                 for(var r in req.body.registrations) {
-                     console.log("\tloc> "+req.body.registrations[r].location+"; asim> "+req.body.registrations[r].asim);
-                 }
-                 console.log("req.body: "+JSON.stringify(req.body));
+                 /* console.log("Try to register the following locations in simulation: "+simulation);
+                    console.log("Target for updates: "+req.body.target);
+                    for(var r in req.body.registrations) {
+                    console.log("\tloc> "+req.body.registrations[r].location+"; asim> "+req.body.registrations[r].asim);
+                    }
+                    console.log("req.body: "+JSON.stringify(req.body));
+                 */
 
                  var result = manager.register4Updates(simulation, req.body, function(success, error) {
                      if(success != null) {

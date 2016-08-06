@@ -190,8 +190,6 @@ var Socket = (function() {
         this.getUpdates();
 
         var oldQueue = this.updates;
-        var newQueue = [];
-        this.updates = newQueue;
 
         if(oldQueue.length && this.connections.length) {
             for(var conn in this.connections) {
@@ -199,6 +197,8 @@ var Socket = (function() {
                 ws.send(JSON.stringify(oldQueue));
             }
         }
+
+        this.updates = [];
 
         setTimeout(function() { self.send2Clients(); }, 250);
     };
@@ -272,12 +272,6 @@ var Socket = (function() {
             break;
         }
         case "die" : {
-            console.log("Die cell "+cell.id);
-            /* console.log("Before DIE ("+this.allCells.length+"):");
-            for(var id in this.allCells) {
-                var c = this.allCells[id];
-                console.log(c+": "+c.cell);
-            }*/ 
             for(var id in this.allCells) {
                 if(this.allCells[id].id == cell.id) {
                     this.allCells.splice(id, 1);
@@ -285,11 +279,6 @@ var Socket = (function() {
                     break;
                 }
             }
-            /* console.log("After DIE ("+this.allCells.length+"):");
-            for(var id in this.allCells) {
-                var c = this.allCells[id];
-                console.log(c+": "+c.cell);
-            }*/
             
             msg.cmd = "die";
             msg.id = cell.id;
@@ -369,7 +358,7 @@ var Socket = (function() {
 
         this.updateClients(msg);
 
-        this.ASIMUpdates = {};
+        this.ASIMupdates = {};
     };
 
     return cls;
