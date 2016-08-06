@@ -25,7 +25,7 @@ var Brapper = (function() {
         this.port = port;
 
         this.type = type ? type : "asim";
-        this.asims = [];
+        this.asims = {};
         this.load = 0;
     };
 
@@ -43,16 +43,17 @@ var Brapper = (function() {
         },
 
         addASIM : function(asim) {
-            this.asims.push(asim.getName());
+            this.asims[asim.getName()] = asim.getName();
             this.load++;
 
             asim.setBrapper(this);
         },
 
         getASIMs : function() {
-            return this.asims;
+            return Object.keys(this.asims);
         },
 
+	// TODO turn into async call
         destroyASIM : function(simId, name) {
             var asim = this.asims[name];
             if(asim == undefined)
@@ -80,6 +81,9 @@ var Brapper = (function() {
             });
 
             request.end();
+
+	    delete this.asims[name];
+	    this.load--;
 
             return true;
         },

@@ -88,6 +88,8 @@ var Manager = (function() {
             var newBrapper = new Brapper(descr.host, descr.port, "scheduler");
             var id = newBrapper.getId();
 
+	    console.log("[Manager] Register scheduler brapper '"+id+"' at '"+descr.host+":"+descr.port+"'");
+
             if(this.schedulerBrapperMap[id] != undefined) {
                 return { success : false, msg : "Unable to register new scheduling brapper. Brapper already exists!\n" };
             } else {
@@ -251,8 +253,6 @@ var Manager = (function() {
                 callback(null, { code : 409, msg : "ASIM '"+newASIM.getName()+"' already exists in simulation '"+simulation.getId()+"'.\n" });
             else
                 simulation.addASIM(newASIM);
-            
-            brapper.addASIM(newASIM);
 
             var self = this;
             newASIM.load(brapper, function(success, error) {
@@ -324,8 +324,6 @@ var Manager = (function() {
                 callback(null, { code : 409, msg : "Scheduler ASIM '"+newASIM.getName()+"' already exists in simulation '"+simulation.getId()+"'." });
             else
                 newASIM.setSimulation(simulation.getId());
-
-            brapper.addASIM(newASIM);
 
             var self = this;
             newASIM.load(brapper, function(success, error) {

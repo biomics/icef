@@ -169,9 +169,12 @@ function initApp() {
         var allASIMBrappers  = manager.getASIMBrappers();
         var allSchedulerBrappers = manager.getSchedulerBrappers();
 
-        var allBrappers = allASIMBrappers;
+        var allBrappers = [];
+        for(var k in allASIMBrappers) {
+            allBrappers.push(allASIMBrappers[k]);
+        }
         for(var k in allSchedulerBrappers) {
-            allBrappers[k] = allSchedulerBrappers[k];
+            allBrappers.push(allSchedulerBrappers[k]);
         }
         res.send(allBrappers);
     });
