@@ -480,7 +480,15 @@ var ASIM = (function() {
         },
 
         destroy : function() {
-            return this.brapper.destroyASIM(this.simulation, this.name);
+            var result = this.brapper.destroyASIM(this.simulation, this.name);
+
+	    if(result) {
+		this.setSimulation(undefined);
+		this.setRegisteredLocations(undefined);
+		return true;
+	    } 
+
+	    return false;
         },
 
         getName : function() {

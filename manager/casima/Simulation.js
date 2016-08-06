@@ -220,9 +220,6 @@ var Simulation = (function() {
                 return false;
 	    }
 
-            asim.setSimulation(undefined);
-            asim.setRegisteredLocations(undefined);
-
             delete this.asimList[asimName];
 
             this.manager.socket.delASIM(asimName);
