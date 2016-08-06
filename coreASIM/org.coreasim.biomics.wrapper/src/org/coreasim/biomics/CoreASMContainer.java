@@ -127,16 +127,12 @@ public class CoreASMContainer extends Thread {
 
         initEngine();
 
-        System.err.println("#### Load Specification");
-
         if(!loadSpec(newProgram)) {
             System.err.println("[ASIM "+newName+"]: Error while loading BSL specification.");
             System.err.println("[ASIM "+newName+"]: "+getError());
         } else {
             System.out.println("[ASIM "+newName+"]: BSL specification successfully loaded.");
         }
-
-        System.err.println("#### Done Loading Specification");
 
         prepareMapper();
     }
