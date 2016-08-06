@@ -150,11 +150,11 @@ var Simulation = (function() {
             for(var strScheduler in this.schedulerList) {
                 var scheduler = this.schedulerList[strScheduler];
                 switch(command) {
-                    case "start" :
-                    case "resume" : scheduler.reportNewASIM(name); break;
-                    case "pause" : 
-                    case "stop" : scheduler.reportRemovedASIM(name); break;
-                    default : console.log("Unknown command");
+                case "start" :
+                case "resume" : scheduler.reportNewASIM(name); break;
+                case "pause" : 
+                case "stop" : scheduler.reportRemovedASIM(name); break;
+                default : console.log("Unknown command");
                 }
             }
         },
@@ -209,22 +209,23 @@ var Simulation = (function() {
             return true;
         },
 
-	// TODO: Check duplicate and make async
+        // TODO: Check duplicate and make async
         delASIM : function(asimName) {
-	    var address = asimName.split("@");
+            var address = asimName.split("@");
             if(address.length == 2)
                 asimName = address[1];
-
-	    var asim = this.asimList[asimName];
+            
+            var asim = this.asimList[asimName];
             if(asim == undefined) {
                 return false;
-	    }
-
+            }
+            
             delete this.asimList[asimName];
-
+            delete this.locationUpdates[asimName];
+            
             this.manager.socket.delASIM(asimName);
-
-	    asim.destroy();
+            
+            asim.destroy();
 
             return true;
         },
@@ -251,15 +252,15 @@ var Simulation = (function() {
                 return { success : false, msg : "Error starting simulation: " + errorMsg };
         },
 
-	loadSchedulers : function(spec, self, done) {
-	    var problems = [];
-	    var created = [];
-	    var loads = [];
+        loadSchedulers : function(spec, self, done) {
+            var problems = [];
+            var created = [];
+            var loads = [];
 
-	    spec.schedulers.forEach(function(current, index, array) {
+            spec.schedulers.forEach(function(current, index, array) {
                 var scheduler = null;
-		var deferred = q.defer();
-		loads.push(deferred.promise);
+                var deferred = q.defer();
+                loads.push(deferred.promise);
 
                 try {
                     scheduler = new ASIM(current, true);
@@ -267,9 +268,9 @@ var Simulation = (function() {
 
                 catch(e) {
                     if(e instanceof ASIMCreationError)
-			deferred.reject({ msg : "Unable to create scheduler ASIM '"+scheduler.getName()+"' in simulation '"+self.id+"'."});
+                        deferred.reject({ msg : "Unable to create scheduler ASIM '"+scheduler.getName()+"' in simulation '"+self.id+"'."});
                     else {
-			deferred.reject({ msg : "Unable to create scheduler ASIM: "+e } );
+                        deferred.reject({ msg : "Unable to create scheduler ASIM: "+e } );
                         return;
                     }
                 }
@@ -279,51 +280,51 @@ var Simulation = (function() {
 
                     // TODO role back!
                     if(brapper == null) {
-			deferred.reject({ msg : "Unable to load specification. Manager cannot find scheduler brappers."});
-			return;
-		    } else {
+                        deferred.reject({ msg : "Unable to load specification. Manager cannot find scheduler brappers."});
+                        return;
+                    } else {
                         scheduler.load(brapper, function(success, error) {
                             if(success != null)
-				deferred.resolve(scheduler.simplify());
+                                deferred.resolve(scheduler.simplify());
                             else
-				deferred.reject(error);
-			});
-		    }
-		} else {
-		    deferred.reject({ msg : "Scheduler ASIM '"+scheduler.getName()+"' already exists in this simulation."});
-		}
-	    });
+                                deferred.reject(error);
+                        });
+                    }
+                } else {
+                    deferred.reject({ msg : "Scheduler ASIM '"+scheduler.getName()+"' already exists in this simulation."});
+                }
+            });
 
-	    q.allSettled(loads)
-		.then(function(result) {
-		    result.forEach(function(res) {
-			if(res.state === "fulfilled") {
-			    created.push(res.value);
-			} else {
-			    problems.push(res.reason);
-			}
-		    });
+            q.allSettled(loads)
+                .then(function(result) {
+                    result.forEach(function(res) {
+                        if(res.state === "fulfilled") {
+                            created.push(res.value);
+                        } else {
+                            problems.push(res.reason);
+                        }
+                    });
 
-		    if(problems.length == 0)
-			done(null, created);
-		    else
-			done(problems, null);
-		})
-		.done();
-	},
+                    if(problems.length == 0)
+                        done(null, created);
+                    else
+                        done(problems, null);
+                })
+                .done();
+        },
 
-	loadASIMs : function(spec, self, done) {
-	    var problems = [];
-	    var created = [];
-	    var loads = [];
+        loadASIMs : function(spec, self, done) {
+            var problems = [];
+            var created = [];
+            var loads = [];
 
-	    var numSchedulers = spec.schedulers.length;
+            var numSchedulers = spec.schedulers.length;
             var numASIMs = spec.asims.length;
 
-	    spec.asims.forEach(function(curASIM, index, array) {
+            spec.asims.forEach(function(curASIM, index, array) {
                 var asim = null;
-		var deferred = q.defer();
-		loads.push(deferred.promise);
+                var deferred = q.defer();
+                loads.push(deferred.promise);
 
                 try {
                     asim = new ASIM(curASIM);
@@ -332,14 +333,14 @@ var Simulation = (function() {
                         var asimBrapper = self.manager.getASIMBrapper();
 
                         if(asimBrapper == null) {
-			    deferred.reject({ msg : "Unable to load specification. Manager cannot allocate required ASIM brappers."});
+                            deferred.reject({ msg : "Unable to load specification. Manager cannot allocate required ASIM brappers."});
                         } else {
 
                             asim.load(asimBrapper, function(success, error) {
                                 if(error == null)
-				    deferred.resolve(asim.simplify());
+                                    deferred.resolve(asim.simplify());
                                 else
-				    deferred.reject(error);
+                                    deferred.reject(error);
                             });
 
                             // TODO: explicitly start afterwards!
@@ -347,35 +348,35 @@ var Simulation = (function() {
                             //    this.report2Scheduler(asim.getName(), "start");
                         } 
                     } else {
-			deferred.reject({ msg : "ASIM '"+asim.getName()+"' already exists in this simulation."});			
+                        deferred.reject({ msg : "ASIM '"+asim.getName()+"' already exists in this simulation."});
                     }
-		}
+                }
                 catch(e) {
                     if(e instanceof ASIMCreationError)
                         deferred.reject({ msg : "Some ASIM could not be created. Check your specification. "+e});
                     else
                         throw(e);
                 }
-		});
+            });
 
-	    q.allSettled(loads)
-		.then(function(result) {
-		    result.forEach(function(res) {
-			console.log("ASIM: ", res);
-			if(res.state === "fulfilled") {
-			    created.push(res.value);
-			} else {
-			    problems.push(res.reason);
-			}
-		    });
+            q.allSettled(loads)
+                .then(function(result) {
+                    result.forEach(function(res) {
+                        console.log("ASIM: ", res);
+                        if(res.state === "fulfilled") {
+                            created.push(res.value);
+                        } else {
+                            problems.push(res.reason);
+                        }
+                    });
 
-		    if(problems.length == 0)
-			done(null, created);
-		    else
-			done(problems, null);
-		})
-		.done();
-	},
+                    if(problems.length == 0)
+                        done(null, created);
+                    else
+                        done(problems, null);
+                })
+                .done();
+        },
 
         load : function(spec, callback) {
             var created = {};
@@ -416,61 +417,61 @@ var Simulation = (function() {
 
             console.log("numSchedulers: "+numSchedulers);
 
-	    // TODO make asynchronous!
-	    if(spec.updates != undefined && spec.updates != null && spec.updates instanceof Array) {
-		for(var u in spec.updates) {
-		    self.registerLocations(spec.updates[u]);
-		}
-	    }
+            // TODO make asynchronous!
+            if(spec.updates != undefined && spec.updates != null && spec.updates instanceof Array) {
+                for(var u in spec.updates) {
+                    self.registerLocations(spec.updates[u]);
+                }
+            }
 
-	    async.parallel({ schedulers : this.loadSchedulers.bind(null, spec, self),
-			     asims : this.loadASIMs.bind(null, spec, self) }, function(err, result) {
-				 if(err != null) {
+            async.parallel({ schedulers : this.loadSchedulers.bind(null, spec, self),
+                             asims : this.loadASIMs.bind(null, spec, self) }, function(err, result) {
+                                 if(err != null) {
 
-				     self.status = SimulationState.ERROR;
+                                     self.status = SimulationState.ERROR;
 
-				     var report = { msg : "Simulation was not created due to the following errors." };
-				     report.errors = {};
-				     var id = 1;
-				     console.log("XERR: ",err);
-				     err.forEach(function(e) {
-					 report.errors[id] = e.msg;
-					 if(e.details != undefined)
-					     report.errors[id] += " " + e.details.asim.error;
-					 id++;
-				     });
+                                     var report = { msg : "Simulation was not created due to the following errors." };
+                                     report.errors = {};
+                                     var id = 1;
+                                     console.log("XERR: ",err);
+                                     err.forEach(function(e) {
+                                         report.errors[id] = e.msg;
+                                         if(e.details != undefined)
+                                             report.errors[id] += " " + e.details.asim.error;
+                                         id++;
+                                     });
 
-				     console.log("Stop all created ASIMS: ", result);
+                                     console.log("Stop all created ASIMS: ", result);
 
-				     for(var a in self.asimList)
-					 self.delASIM(a)
+                                     for(var a in self.asimList)
+                                         self.delASIM(a)
 
-				     for(var a in self.schedulerList)
-					 self.delScheduler(a, function(succ, err) {
-					     if(err != null) {
-						 console.log("WARNING: Unable to free all resources after failed simulation upload");
-					     }
-					 });
+                                     for(var a in self.schedulerList)
+                                         self.delScheduler(a, function(succ, err) {
+                                             if(err != null) {
+                                                 console.log("WARNING: Unable to free all resources after failed simulation upload");
+                                             }
+                                         });
 
-				     callback({ code : 400, data : report });
-				 } else {
-				     var createdASIMs = {};
+                                     callback({ code : 400, data : report });
+                                 } else {
+                                     var createdASIMs = {};
 
-				     result['schedulers'].forEach(function(asim) {
-					 createdASIMs[asim.name] = asim;
-				     });
+                                     result['schedulers'].forEach(function(asim) {
+                                         createdASIMs[asim.name] = asim;
+                                     });
 
-				     result['asims'].forEach(function(asim) {
-					 createdASIMs[asim.name] = asim;
-				     });
+                                     result['asims'].forEach(function(asim) {
+                                         createdASIMs[asim.name] = asim;
+                                     });
 
-				     self.status = SimulationState.LOADED;
+                                     self.status = SimulationState.LOADED;
 
-				     callback({ code : 201, data : createdASIMs });
-				 }
-			     });
+                                     callback({ code : 201, data : createdASIMs });
+                                 }
+                             });
         },
-
+        
         recvUpdate : function(update) {
             if(update == undefined || update == null)
                 return { success : false, msg : "Error: Invalid update\n" };
@@ -492,10 +493,10 @@ var Simulation = (function() {
             }
 
             /* if(this.updateASIM == undefined || this.updateASIM == null) {
-                return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
-		}*/
+               return { success : false, msg : "FATAL: Manager does not run an updateASIM!\n" };
+               }*/
 
-	    // TODO: Ugly - generalize
+            // TODO: Ugly - generalize
             if(update.toAgent == "@UI@") {
                 var updates = JSON.parse(update.body).updates;
                 this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));
@@ -575,11 +576,11 @@ var Simulation = (function() {
         },
 
         /* getASIM : function(fullAddress) {
-            var address = fullAddress.split("@");
-            if(address.length != 2)
-                return null;
-            return address[1];
-        },*/
+           var address = fullAddress.split("@");
+           if(address.length != 2)
+           return null;
+           return address[1];
+           },*/
 
         registerLocations : function(reg) {
             if(reg.target == undefined || reg.target == null) {
