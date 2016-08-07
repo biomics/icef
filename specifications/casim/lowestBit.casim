@@ -20,7 +20,7 @@ endpar
 	
 rule lBitProgram =
 par
-	//print "Inbox of lBit: "+inboxOf(self)
+	print "running ... " + state
 	choose m in inboxOf(self) with messageSubject(m)="Death" do
 	par
 		successor := undef
@@ -60,19 +60,22 @@ par
 				state:= 0
 				print "lBit updated its state from "+state+" to "+0
 				send "Done" to "InputProvider" with subject "Done"
+			endpar
+			else if (state = 0) then
+			par
 				if successor = undef then
 				par
 					//this is where I should die, but I will not, because I am the first component
 					destroyASIM self
-					skip
-				endpar				
-			endpar
-			else if (state = 0) then
-			par
-				state:= 1
-				print "lBit updated its state from "+state+" to "+1
-				print "Sending -1 carry to successor"
-				send messageContent(m) to successor with subject "input"
+					send "Done" to "InputProvider" with subject "Done"
+				endpar
+				else
+				par
+					state:= 1
+					print "lBit updated its state from "+state+" to "+1
+					print "Sending -1 carry to successor"
+					send messageContent(m) to successor with subject "input"
+				endpar
 			endpar
 		endpar
 	endpar

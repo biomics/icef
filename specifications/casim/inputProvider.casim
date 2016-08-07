@@ -29,17 +29,17 @@ rule ProviderProgram = par
 		if scheduleNow then par 
 			globalInput:=undef
 		  print "SCHEDULING SHOULD HAVE HAPPENED THIS ROUND" 
-		    send globalInput to lBit with subject "input"
+		  send globalInput to lBit with subject "input"
 		  waiting := true
-		  scheduleNow:= false 
+		  scheduleNow:= false
 	  endpar
 		else par
-			if waiting then par 
+			if waiting then par
+				print "I am waiting for the round to be finished" 
 				choose m in inboxOf(self) with messageSubject(m)="Done" do
 				par 
-					waiting:=false 
-					print "I am waiting for the round to be finished" 
-			  endpar  
+				    waiting:=false 
+			        endpar  
 		  endpar 
 		  else if not waiting then
 		  par 
