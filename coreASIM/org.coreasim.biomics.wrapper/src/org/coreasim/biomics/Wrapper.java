@@ -39,10 +39,7 @@ public class Wrapper {
     public void startServer() {
         // TODO: Disable logging
 
-        // search for resources and components in org.coreasim.biomics
-        // final ResourceConfig rc = new ResourceConfig().packages("org.coreasim.biomics.wrapper");
-        ResourceConfig rc = new ResourceConfig().packages("org.coreasim.biomics");
-        
+        ResourceConfig rc = new ResourceConfig().packages("org.coreasim.biomics");     
 
         // create and start a new instance of grizzly http server
         server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://"+config.getHost()+":"+config.getPort()+"/"), rc, false);
@@ -78,6 +75,11 @@ public class Wrapper {
             parser.printUsage(System.err);
             System.exit(1);
         }
+
+	if(config.showUsage) {
+	    parser.printUsage(System.err);
+	    System.exit(0);
+	}
         
         // wrapper to wrapper communicaiton
         if(config.remoteHost != null) {
