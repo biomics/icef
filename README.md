@@ -1,9 +1,15 @@
 ICEF - The Interaction Computing Execution Framework
 ====================================================
 
-This framework extends the original CoreASM modelling and execution framework to enable the specification and execution of distributed and concurrent ASMs.
+This framework extends the original [CoreASM](https://github.com/CoreASM) modelling and execution framework to enable the specification and execution of distributed and concurrent ASMs.
 
-More to come soon ...
+The ICEF was developed in the STREP project BIOMICS which was financed by the European Comission in FP7 from October 1st, 2012 until March 31st, 2016.
+
+ICEF enables asynchronous execution of ASMs. It uses and enhances the CoreASM execution engine to support communicating and interacting ASMs: CoreASIMs. Further, ICEF replaces ASM with BSL which offers additional language primitives specifically designed to define the beahviour of biochemical systems.
+
+This code introduces a restful API to control the BIOMICS wrapper (brapper) which can host several CoreASIM instances and enables networked CoreASIM. It also introduces a manager which orchestrates several ASIMs to allow the execution of interaction computing simulations.
+
+The REST API for both frameworks are documented [here](http://docs.icef.apiary.io/).
 
 Downloading, Building and Setup
 -------------------------------
