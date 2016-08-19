@@ -44,6 +44,7 @@ function reloadJSON(icef, baseDir) {
 		for(var i in asims) {
 		    var asim = asims[i];
 		    if(asim != undefined && asim.file != undefined) {
+		    	console.log("file: ", asim.file);
 			toload.push({ file : asim.file, index : i, prop : prop, start : asim.start });
 		    }
 		}
@@ -53,12 +54,17 @@ function reloadJSON(icef, baseDir) {
     }
     
     for(var i in toload) {
+    	console.log("toload: ", toload);
 	var file = toload[i].file;
 	var index = toload[i].index;
 	var prop = toload[i].prop;
 	var start = toload[i].start;
 
-	if(!file.startsWith("/")) {
+	console.log("file: "+file);
+
+	console.log(((String)("File"))[0]);
+
+	if(file[0] != "/") {
 	    file = baseDir + "/" + file;
 	}
 	
