@@ -15,6 +15,7 @@ package org.coreasim.biomics.serializers;
 
 import org.coreasim.engine.absstorage.MessageElement;
 import org.coreasim.engine.absstorage.RuleElement;
+import org.coreasim.engine.absstorage.BooleanElement;
 import org.coreasim.engine.plugins.list.ListElement;
 import org.coreasim.engine.plugins.map.MapElement;
 import org.coreasim.engine.plugins.number.NumberElement;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
             @Type(value = MessageElement.class, name="MessageElement"),
             @Type(value = StringElement.class, name="StringElement"),
             @Type(value = NumberElement.class, name="NumberElement"),
+            @Type(value = BooleanElement.class, name="BooleanElement"),
             @Type(value = SetElement.class, name="SetElement"),
             @Type(value = ListElement.class, name="ListElement"),
             @Type(value = MapElement.class, name="MapElement"),
