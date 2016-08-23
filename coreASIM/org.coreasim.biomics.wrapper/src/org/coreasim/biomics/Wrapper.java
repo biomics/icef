@@ -18,6 +18,9 @@ import java.util.Collection;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.KeepAlive;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+    
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -39,25 +42,35 @@ public class Wrapper {
     public void startServer() {
         // TODO: Disable logging
 
-        ResourceConfig rc = new ResourceConfig().packages("org.coreasim.biomics");     
+        ResourceConfig rc = new ResourceConfig().packages("org.coreasim.biomics");
 
         // create and start a new instance of grizzly http server
         server = GrizzlyHttpServerFactory.createHttpServer(URI.create("http://"+config.getHost()+":"+config.getPort()+"/"), rc, false);
 
+        ThreadPoolConfig poolConfig = ThreadPoolConfig.defaultConfig()
+            .setPoolName("brapper-server-")
+            .setCorePoolSize(Runtime.getRuntime().availableProcessors())
+            .setMaxPoolSize(Runtime.getRuntime().availableProcessors())
+            .setQueueLimit(-1)/* same as default */;
+        
         Collection<NetworkListener> listeners = server.getListeners();
         for(NetworkListener l : listeners) {
             KeepAlive ka = l.getKeepAlive();
             l.getKeepAlive().setMaxRequestsCount(0);
-        }
 
-	try {
-	    server.start();
-	    System.out.println("Brapper started successfully at http://"+config.getHost()+":"+config.getPort()+"/");
-	} catch (BindException be) {
-	    System.err.println("Unable to bind to port "+config.getPort()+"!");
-	} catch (IOException ioe) {
-	    System.err.println("IO Exception on brapper startup.");
-	}
+            TCPNIOTransport transport = l.getTransport();
+            transport.setSelectorRunnersCount(Math.round(Runtime.getRuntime().availableProcessors() / 2));
+            transport.setWorkerThreadPoolConfig(poolConfig);
+        }
+        
+        try {
+            server.start();
+            System.out.println("Brapper started successfully at http://"+config.getHost()+":"+config.getPort()+"/");
+        } catch (BindException be) {
+            System.err.println("Unable to bind to port "+config.getPort()+"!");
+        } catch (IOException ioe) {
+            System.err.println("IO Exception on brapper startup.");
+        }
     }
 
     public void stopServer() {
@@ -76,10 +89,10 @@ public class Wrapper {
             System.exit(1);
         }
 
-	if(config.showUsage) {
-	    parser.printUsage(System.err);
-	    System.exit(0);
-	}
+        if(config.showUsage) {
+            parser.printUsage(System.err);
+            System.exit(0);
+        }
         
         // wrapper to wrapper communicaiton
         if(config.remoteHost != null) {

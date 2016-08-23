@@ -65,6 +65,10 @@ public class BooleanElement extends Element {
 		return value?TRUE:FALSE;
 	}
 
+    public synchronized static BooleanElement getInstance(boolean v) {
+		return new BooleanElement(v);
+	}
+
 	/**
 	 * A private constructor to creates a new Boolean value.
 	 * 

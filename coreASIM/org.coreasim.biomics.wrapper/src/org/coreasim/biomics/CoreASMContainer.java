@@ -589,11 +589,11 @@ public class CoreASMContainer extends Thread {
         	logger.warn("Could not turn of logging.");
         }
 
-        tempEngine.setProperty(EngineProperties.MAX_PROCESSORS, String.valueOf(1));
-        tempEngine.setProperty(EngineProperties.AGENT_EXECUTION_THREAD_BATCH_SIZE, String.valueOf(1));
+        tempEngine.setProperty(EngineProperties.MAX_PROCESSORS, "1");
+        tempEngine.setProperty(EngineProperties.AGENT_EXECUTION_THREAD_BATCH_SIZE, "1");
 
         tempEngine.initialize();
-		tempEngine.waitWhileBusy();
+        tempEngine.waitWhileBusy();
 
         synchronized(this) {
             engine = tempEngine;
