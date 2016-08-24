@@ -340,9 +340,7 @@ var Socket = (function() {
     };
     
     cls.prototype.putUpdates = function(updates) {
-        console.log("putupdates: "+JSON.stringify(updates));
         for(var asim in updates) {
-            // console.log("UPDATES FOR ASIM "+asim);
             for(var location in updates[asim]) {
                 if(this.ASIMupdates[asim] == undefined)
                     this.ASIMupdates[asim] = {};

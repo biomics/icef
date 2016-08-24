@@ -55,9 +55,9 @@ public class UpdateResource {
 
     @PUT
     @Path("/{simId}/{name}")
+    @Consumes("application/json")
     public Response newASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
         boolean result = false;
-        
         result = EngineManager.newASIM(simId, name);
 
         if(result) {
@@ -69,6 +69,7 @@ public class UpdateResource {
 
     @DELETE
     @Path("/{simId}/{name}")
+    @Consumes("application/json")
     public Response removeASIM(@PathParam("simId") String simId, @PathParam("name") String name) {
         boolean result = false;
 

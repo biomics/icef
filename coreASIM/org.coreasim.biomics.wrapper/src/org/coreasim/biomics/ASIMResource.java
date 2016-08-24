@@ -130,12 +130,12 @@ public class ASIMResource {
         CoreASIMError error = EngineManager.createASIM(req);
 
         ASIMCreationResponse res = new ASIMCreationResponse();
-	res.setMsg("ASIM successfully created");
-	res.asim.setName(req.name);
-	res.asim.setSimulation(req.simulation);
-	res.asim.setStatus("unknown");
-	res.asim.setSuccess(error == null ? true : false);
-	res.asim.setError(error == null ? "" : error.toString());
+        res.setMsg("ASIM successfully created");
+        res.asim.setName(req.name);
+        res.asim.setSimulation(req.simulation);
+        res.asim.setStatus("unknown");
+        res.asim.setSuccess(error == null ? true : false);
+        res.asim.setError(error == null ? "" : error.toString());
 	
         String json = "{}";
 
@@ -148,8 +148,6 @@ public class ASIMResource {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-	System.err.println("RESPONSE TO SEND: "+json);
 
         if(error != null)
             return Response.status(400).entity(json).type(MediaType.APPLICATION_JSON).build();

@@ -384,30 +384,37 @@ public class CoreASMContainer extends Thread {
         }
     }
 
-    public synchronized void newASIM(String name) {
-        asimsToAdd.add(name);
+    public void newASIM(String name) {
+        synchronized(asimsToAdd) {
+            asimsToAdd.add(name);
+        }
     }
 
-    public synchronized void delASIM(String name) {
-        asimsToDel.add(name);
+    public void delASIM(String name) {
+        synchronized(asimsToDel) {
+            asimsToDel.add(name);
+        }
     }
 
-    public synchronized void injectASIMs() {
-        engine.addASIMs(asimsToAdd);
+    public void injectASIMs() {
+        synchronized(asimsToAdd) {
+            engine.addASIMs(asimsToAdd);
+            asimsToAdd.clear();
+        }
 
-        HashSet<String> copy = new HashSet<String>();
-        copy.addAll(asimsToDel);
-        engine.deleteASIMs(asimsToDel);
-
-        asimsToDel.clear();
-        asimsToAdd.clear();
+        synchronized(asimsToDel) {
+            engine.deleteASIMs(asimsToDel);
+            asimsToDel.clear();
+        }
     }
 
     // TODO: NEEDS TO BE SYNCHRONIZED!!!
     public boolean injectUpdates() {
         try {
-            engine.updateState(new HashSet<Update>(updateMap.values()));
-            updateMap.clear();
+            synchronized(this) {
+                engine.updateState(new HashSet<Update>(updateMap.values()));
+                updateMap.clear();
+            }
         } 
         catch(InconsistentUpdateSetException incUpdate) {
             System.err.println("Refuse update as it is inconsistent.");
@@ -430,22 +437,20 @@ public class CoreASMContainer extends Thread {
         }
         Iterator<Update> it = updates.iterator();
 
-        // introduce a scope
-        for(Update u : updates) {
-            // u.loc.args.add(0, new StringElement(req.fromAgent));
-            List<Element> newArgs = new ArrayList<>();
-            newArgs.add(new StringElement(req.fromAgent));
-            newArgs.addAll(u.loc.args);
-            Location newLoc = new Location(u.loc.name, newArgs);
-            Update newUpdate = new Update(newLoc, u.value, u.action, (Element)null, null);
-            Update oldUpdate = updateMap.get(newLoc);
-            /* if(oldUpdate != null) {
-                System.out.println("OVERWRITING OLD UPDATE IN LOCATION "+newLoc);
-                System.out.println("New value of "+newLoc+": "+newUpdate.value);
-                System.out.println("Old value of "+newLoc+": "+oldUpdate.value);
-		}
-	    */
-            updateMap.put(newLoc, newUpdate);
+        synchronized(updateMap) {
+
+            // introduce a scope
+            for(Update u : updates) {
+                // u.loc.args.add(0, new StringElement(req.fromAgent));
+                List<Element> newArgs = new ArrayList<>();
+                newArgs.add(new StringElement(req.fromAgent));
+                newArgs.addAll(u.loc.args);
+                Location newLoc = new Location(u.loc.name, newArgs);
+                Update newUpdate = new Update(newLoc, u.value, u.action, (Element)null, null);
+                Update oldUpdate = updateMap.get(newLoc);
+
+                updateMap.put(newLoc, newUpdate);
+            }
         }
 
         return true;
@@ -486,34 +491,34 @@ public class CoreASMContainer extends Thread {
 	    if (currentStep == 1)
 		lastUpdateSet = new UpdateMultiset();
 
-            injectUpdates();
-            injectASIMs();
+        injectUpdates();
+        injectASIMs();
+        
+        if(getInBoxSize() > 0) {
+            engine.fillInBox(getInBox());
+            emptyInBox();
+        }
             
-            if(getInBoxSize() > 0) {
-                engine.fillInBox(getInBox());
-                emptyInBox();
-            }
-	    
 	    engine.step();
 	    engine.waitWhileBusyOrUntilCreation();
-
-            if(engine.getEngineMode() == EngineMode.emCreateAgent) {
-                Map<String, AgentCreationElement> loc2Agent = engine.getAgentsToCreate();
-                Set<String> locs = loc2Agent.keySet();
-                Iterator<String> it = locs.iterator();
-
-                HashMap<String, String> agents = new HashMap<String,String>();
-                it = locs.iterator();
-                int counter = 1;
-                while(it.hasNext()) {
-                    String loc = it.next();
-                    String name = EngineManager.requestASIMCreation(loc2Agent.get(loc), simId);
-                    agents.put(loc, name);
-                    System.out.println("["+asimName+"]: ASIM "+name+" created.");
-                }
-                engine.reportNewAgents(agents);
+        
+        if(engine.getEngineMode() == EngineMode.emCreateAgent) {
+            Map<String, AgentCreationElement> loc2Agent = engine.getAgentsToCreate();
+            Set<String> locs = loc2Agent.keySet();
+            Iterator<String> it = locs.iterator();
+            
+            HashMap<String, String> agents = new HashMap<String,String>();
+            it = locs.iterator();
+            int counter = 1;
+            while(it.hasNext()) {
+                String loc = it.next();
+                String name = EngineManager.requestASIMCreation(loc2Agent.get(loc), simId);
+                agents.put(loc, name);
+                System.out.println("["+asimName+"]: ASIM "+name+" created.");
             }
-            engine.waitWhileBusy();
+            engine.reportNewAgents(agents);
+        }
+        engine.waitWhileBusy();
 	    
 	    if (engine.getEngineMode() == EngineMode.emError) {
                 System.err.println("[ASIM Execution ERROR]: "+asimName+": "+engine.getError());
@@ -536,7 +541,8 @@ public class CoreASMContainer extends Thread {
     }
 
     public void deleteASIMs() {
-        EngineManager.requestASIMDeletion(simId, engine.getAgentsToDelete());
+        Set<String> del = new HashSet<String>(engine.getAgentsToDelete());        
+        EngineManager.requestASIMDeletion(simId, del);
     }
 
     public boolean receiveMsg(MessageRequest req) {
