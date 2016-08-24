@@ -877,7 +877,6 @@ public class Engine implements ControlAPI {
 		while(it.hasNext()) {
 			String id = it.next();
 			if(agents.containsKey(id)) {
-				System.out.println("Store new agent name: "+agents.get(id)+" in identifier "+id);
 				AgentCreationElement ace = agentsToCreate.get(id);
 				Element e = new EnumerationElement(agents.get(id));
 				Update u = new Update(ace.getLocation(),e, Update.UPDATE_ACTION,interpreter.getSelf(),ace.getScannerInfo());						
@@ -905,7 +904,7 @@ public class Engine implements ControlAPI {
          //   System.out.println("ADDING UPDATE TO SCHEDULER FOR "+asimName);
 				StringElement e = new StringElement(asimName);
 				Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
-				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
+				Update u = new Update(l,BooleanElement.TRUE, Update.UPDATE_ACTION,interpreter.getSelf(),null);
 				//TODO BSL how do you prevent the new element from being overwritten?
 				ASIMsUpdates.add(u);
 		}
@@ -918,16 +917,17 @@ public class Engine implements ControlAPI {
 	public void deleteASIMs(Set<String> asims) {
 		Set<? extends Element> knownASIMs = scheduler.getASIMSet();
 		for(String asimName: asims) {
-		//find the asim in the set of known ASIMs
+            //find the asim in the set of known ASIMs
 			for (Element e: knownASIMs)
 			{
 				StringElement knownASIM = (StringElement)e;
 				if (knownASIM.toString().equals(asimName))
 				{
-					//found it! Remove from universe and list of known asims
-					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(e));
+                    //found it! Remove from universe and list of known asims
+					Location l = new Location(AbstractStorage.ASIMS_UNIVERSE_NAME, ElementList.create(knownASIM));
 					Update u = new Update(l,BooleanElement.FALSE, Update.UPDATE_ACTION,interpreter.getSelf(),null);						
-					scheduler.getUpdateSet().add(u);
+					// scheduler.getUpdateSet()
+                    ASIMsUpdates.add(u);
 					//knownASIMs.remove(e); // removed, this should update from the content in the abstract storage!
 					asims.remove(asimName);
 					break;
@@ -1189,9 +1189,6 @@ public class Engine implements ControlAPI {
 							mailbox.endStep();
 							notifySuccess();
 							next(EngineMode.emIdle);
-							for (String a:agentsToDelete){
-								System.out.println("DestroyASIM "+a+"made it to the emStepSucceeded engine mode");
-							}
 							break;
 
 						case emStepFailed:

@@ -65,32 +65,6 @@ var Simulation = (function() {
                 return true;
         },
 
-        delASIM : function(name) {
-            var address = name.split("@");
-            if(address.length == 2)
-                name = address[1];
-
-            if(this.asimList[name] != undefined) {
-                if(this.asimList[name].destroy(this.id, name)) {
-                    for(var scheduler in this.schedulerList) {
-                        this.schedulerList[scheduler].reportRemovedASIM(name);
-                    }
-                    delete this.asimList[name];
-                    this.manager.socket.delASIM(name);
-
-                    if(this.locationUpdates[name] != undefined) {
-                        console.log("DELETE LOCATION UPDATES FOR ASIM '"+name+"'");
-                        delete this.locationUpdates[name]; 
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        },
-
         getASIM : function(name) {
             return this.asimList[name];
         },
@@ -209,7 +183,7 @@ var Simulation = (function() {
             return true;
         },
 
-        // TODO: Check duplicate and make async
+        // TODO: make async
         delASIM : function(asimName) {
             var address = asimName.split("@");
             if(address.length == 2)
@@ -219,6 +193,13 @@ var Simulation = (function() {
             if(asim == undefined) {
                 return false;
             }
+
+            for(var scheduler in this.schedulerList) {
+                this.schedulerList[scheduler].reportRemovedASIM(asimName);
+            }
+
+            if(this.locationUpdates[asimName] != undefined)
+                delete this.locationUpdates[asimName]; 
             
             delete this.asimList[asimName];
             delete this.locationUpdates[asimName];
@@ -415,8 +396,6 @@ var Simulation = (function() {
             var numSchedulers = spec.schedulers.length;
             var numASIMs = spec.asims.length;
 
-            console.log("numSchedulers: "+numSchedulers);
-
             // TODO make asynchronous!
             if(spec.updates != undefined && spec.updates != null && spec.updates instanceof Array) {
                 for(var u in spec.updates) {
@@ -463,6 +442,11 @@ var Simulation = (function() {
 
                                      result['asims'].forEach(function(asim) {
                                          createdASIMs[asim.name] = asim;
+
+                                         result['schedulers'].forEach(function(scheduler) {
+                                             console.log("getScheduler: ", scheduler);
+                                             self.getScheduler(scheduler.name).reportNewASIM(asim.name);
+                                         });
                                      });
 
                                      self.status = SimulationState.LOADED;
@@ -513,7 +497,7 @@ var Simulation = (function() {
                 var updates = JSON.parse(update.body).updates;
 
                 this.updateLocation(update.fromAgent, JSON.parse(JSON.stringify(updates)));
-
+                
                 return asim.recvUpdate(update);
             } else {
                 return { success : false, msg : "Unable to forward update. Scheduler at '"+update.toAgent+"' does not exist.\n" };
@@ -530,6 +514,10 @@ var Simulation = (function() {
                 var update = {};
 
                 var value = undefined;
+
+                if(updates[location].value.BooleanElement != undefined)
+                    value = updates[location].value.BooleanElement.value;
+                
                 if(updates[location].value.NumberElement != undefined)
                     value = updates[location].value.NumberElement.value;
 

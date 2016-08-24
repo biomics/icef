@@ -389,10 +389,11 @@ var ASIM = (function() {
         },
 
         recvUpdate : function(msg) {
-            if(this.status == ASIMState.RUNNING)
+            if(this.status == ASIMState.RUNNING) {
                 return this.brapper.recvUpdate(msg);
-            else
+            }  else {
                 return { success : false, msg : "Message for ASIM '"+this.getName()+"' ignored. It is not running" };
+            }
         },
 
         unload : function() {
@@ -402,7 +403,7 @@ var ASIM = (function() {
         reportNewASIM : function(name) {
             if(this.status == ASIMState.ERROR)
                 return { success : true, msg : "ERROR: ASIM '"+this.name+"' is in error state\n" };
-
+            
             var options = {
                 host: this.brapper.host,
                 port: this.brapper.port,
@@ -421,8 +422,9 @@ var ASIM = (function() {
                 var resData = "";
                 res.setEncoding('utf8');
 
-                if(res.statusCode != 201) 
+                if(res.statusCode != 201) {
                     error = { success : false, msg : "Unable to report new ASIM '"+this.name+"'\n" };
+                }
             });
 
             request.on('error', function(e) {

@@ -451,7 +451,7 @@ public class EngineManager {
                         asim = asimAddress[1];
                     
                     if(!simAsims.containsKey(asim)) {
-                        // System.out.println("EngineManager does not know this ASIM");
+                        System.out.println("EngineManager does not know this ASIM. Ignore update!");
                         return false;
                     }
                     
@@ -753,9 +753,7 @@ public class EngineManager {
                     .accept("*/*")
                     .delete();
                 int status = response.getStatus(); 
-                if(status == 200) {
-                    // System.out.println(response.readEntity(String.class));
-                } else {
+                if(status != 200) {
                     System.err.println("Unable to delete ASIM '"+name+"'.");
                     success = false;
                 }
@@ -819,9 +817,7 @@ public class EngineManager {
                 .accept("*/*")
                 .put(Entity.json(registration));
             int status = response.getStatus(); 
-            if(status == 200) {
-                // System.out.println(response.readEntity(String.class));
-            } else {
+            if(status != 200) {
                 System.err.println("Unable to register brapper.");
             }
 

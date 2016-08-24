@@ -491,7 +491,10 @@ function initApp() {
             function(req, res) {
                 var simulation = req.params.simulation;
 
-                 var result = manager.recvUpdate(simulation, req.body);
+                // console.log("\tManagerServer: Receive update: "+ JSON.stringify(req.body));
+
+                var result = manager.recvUpdate(simulation, req.body);
+                
                  if(!result.success) {
                      console.log("ERROR: "+result.msg);
                      res.send(400, result.msg);

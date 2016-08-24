@@ -389,7 +389,6 @@ public class CommunicationPlugin extends Plugin implements
 				return pos.getAgentName();
 		}
 		else{
-				System.out.println("DestroyASIM "+pos.getAgentName().getValue().toString());
 				capi.getAgentsToDestroy().add(pos.getAgentName().getValue().toString());
 				pos.setNode(
 						null, 
