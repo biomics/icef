@@ -24,7 +24,7 @@ import org.coreasim.engine.plugins.set.SetElement;
 import org.coreasim.engine.plugins.string.StringElement;
 
 /** 
- * This class implements the 'getMessageReceiver' function provided by the Communication Plugin.
+ * This class implements the 'GetMessageReceiver' function provided by the Communication Plugin.
  *   
  * @author  Eric Rothstein
  * 

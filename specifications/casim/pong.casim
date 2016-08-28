@@ -23,13 +23,13 @@ rule Program = {
 	send "Init" to "Ping" with subject "Init"
      endpar
 
-     choose m in inboxOf(self) with messageSubject(m)="Ping" do {
-     	    print "Pong receives: " + messageContent(m)
+     choose m in inboxOf(self) with getMessageSubject(m)="Ping" do {
+     	    print "Pong receives: " + getMessageContent(m)
 	    counter := counter + 1
 
 	    if running = 0 then 
 	       running := 1
 	    
-	    send [messageContent(m),"Pong "+counter+" from Pong"] to "Ping" with subject "Pong"
+	    send [getMessageContent(m),"Pong "+counter+" from Pong"] to "Ping" with subject "Pong"
      }
 }

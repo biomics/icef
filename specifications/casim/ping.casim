@@ -15,13 +15,13 @@ rule Start = {
 
 rule Program = {
 
-     choose m in inboxOf(self) with messageSubject(m)="Init" do {
-       print "Ping receives: " + messageContent(m)
+     choose m in inboxOf(self) with getMessageSubject(m)="Init" do {
+       print "Ping receives: " + getMessageContent(m)
        send "Pong 0 from Pong" to "Pong" with subject "Ping"
      }
 
-     choose m in inboxOf(self) with messageSubject(m)="Pong" do {
-       print "Ping receives: " + messageContent(m)
+     choose m in inboxOf(self) with getMessageSubject(m)="Pong" do {
+       print "Ping receives: " + getMessageContent(m)
        counter := counter + 1
        
        send "Ping " + counter + " from Ping" to "Pong" with subject "Ping"

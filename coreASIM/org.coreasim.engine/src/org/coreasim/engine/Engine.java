@@ -878,7 +878,7 @@ public class Engine implements ControlAPI {
 			String id = it.next();
 			if(agents.containsKey(id)) {
 				AgentCreationElement ace = agentsToCreate.get(id);
-				Element e = new EnumerationElement(agents.get(id));
+				Element e = new StringElement(agents.get(id));
 				Update u = new Update(ace.getLocation(),e, Update.UPDATE_ACTION,interpreter.getSelf(),ace.getScannerInfo());						
 				//TODO BSL how do you prevent the new element from being overwritten?
 				scheduler.getUpdateInstructions().add(u);

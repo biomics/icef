@@ -1,0 +1,142 @@
+CoreASIM Forum
+
+//use standard plugins
+use Standard 
+
+//set program for the executing agent
+init Start
+scheduling NoPolicy
+
+controlled newParticipant: Participants
+
+//The universe of participants. It initially starts empty.
+universe Participants
+
+rule Start =
+par 
+	//Include "Alice" and "Bob" in the universe of participants. 
+	//Remember to use Strings, because the identifiers Alice and Bob would evaluate to undef!
+	Participants("Alice"):=true
+	Participants("Bob"):=true
+	program(self):= ForumProgram
+endpar
+
+//The forum is in charge of adding new participants, but not of scheduling them 
+policy NoPolicy = skip
+		
+//This program adds and removes participants with certain probability 
+rule ForumProgram = 
+par
+	//Report the participants to the moderator
+	send toSet(Participants) to "Moderator" with subject "Participants"
+
+	//Remind everyone how they are called
+	forall p in Participants do
+			send p to p+"@"+p with subject "Name"
+	//Handle all "Leaving" requests 
+	forall m in inboxOf(self) with getMessageSubject(m)="Leaving" do
+	par
+		//The message content is the name of the participant that is leaving. 
+		print getMessageContent(m)+" has left the Forum."
+		//Remove that name from the universe of participants
+		Participants(getMessageContent(m)):=false
+		//Ask the ICEF scheduler to destroy the ASIM
+		destroyASIM getMessageSender(m)
+		//Remember to send the Address and not the name of the ASIM!
+	endpar
+	//The Forum received a message that needs to be broadcasted. It then creates one copy for each participant
+	forall m in inboxOf(self) with getMessageSubject(m)="Broadcast" do
+	par
+		print "Broadcasting a message!"
+		forall p in Participants do
+		//Send the message only to those participants who are not the sender. Remember that the sender is an address! 
+				if getMessageSender(m)!= p+"@"+p then
+						send getMessageContent(m) to p+"@"+p with subject "Message"
+		//Messages are always sent to addresses of the form "agent@ASIM" of type string. Do avoid sending a message to an identifier; e.g. avoid Alice@Alice and use "Alice@Alice" instead. 
+	endpar
+	//Introduce a new participant with a 1% probability
+	choose b in {true, false} using {false -> 0.99, true -> 0.01} do
+		if b and newParticipant = undef then 
+		//Create an ASIM and use the rules and policies stated to initialize and run it. (See below)
+			createASIM initializedBy ParticipantInit withProgram ParticipantProgram andPolicy ParticipantPolicy in newParticipant
+	//If the new participant was successfully created, we need to register it to the forum!
+	if newParticipant !=undef then
+	par
+		//Make the newParticipant part of the Participants universe.
+		Participants(newParticipant) := true
+		print newParticipant+" entered the Forum"
+		//Wait for a new participant
+		newParticipant := undef 
+	endpar
+endpar 
+
+//Up to here, we have the rules and policies that concern the Forum.
+//The rules and policies that follow are used to create new participants
+
+//Initial rule of the participants introduced by the forum
+rule ParticipantInit = 
+par
+	//Randomly choose a level of tiredness between 1 and 100
+	tiredness:= pick n in [1..100]
+	energy:=100
+	counter:=1
+	activeSpeaker:=false
+	wantsToTalk:=true
+	program(self):= ParticipantProgram
+endpar
+
+//Participants in the forum do not schedule other agents
+policy ParticipantPolicy = skip
+		
+//Program of the participants.
+rule ParticipantProgram = 
+par
+	//Obtain the name that was given to you by the Forum
+	forall m in inboxOf(self) with getMessageSubject(m)="Name" do
+	par
+		myName := getMessageContent(m)
+	endpar
+	//Check if you are currently given permission to speak. If so, you are the active speaker
+	if (exists m in inboxOf(self) with getMessageSubject(m)="Permission") then
+		activeSpeaker:=true
+	else
+		activeSpeaker:=false
+	//Did you hear a Message? If so, acknowledge it
+	forall m in inboxOf(self) with getMessageSubject(m)="Message" do
+		print "I hear: "+ getMessageContent(m)
+	//Determine whether the participant has energy to talk in a uniform, random way that depends on its energy level.	
+	choose e in [1..100] do
+	par
+		if e <= energy then
+			wantsToTalk := true
+		else
+			wantsToTalk := false
+	endpar
+	//If you want to talk and you are the active speaker, then talk
+	if wantsToTalk and activeSpeaker then
+	par
+		print "I express my Opinion #"+counter
+		//Participants broadcasts their opinion by sending it to the Forum. They don't know all participants directly.
+		send myName+"'s Opinion #"+counter to "Forum" with subject "Broadcast"
+		//Increase the opinion counter
+		counter:=counter+1
+		//Talking consumes some energy.
+		energy:=energy-10
+	endpar 
+	//Regain some energy if you do not want to talk
+	if not wantsToTalk then
+		energy:= energy+1
+	//If you are tired, you should leave the forum, but only if you knows your name. We put this condition because we cannot tell the Forum that "undef" wants to leave!
+	if energy < tiredness and myName!= undef then 
+	par
+		//Inform the forum that you are leaving
+		send myName to "Forum" with subject "Leaving"
+		//Print a small report
+		print myName+" wants to leave"
+		//Avoid repeating this step by changing your program to Wait.
+		program(self):= Wait
+	endpar
+endpar
+
+//Wait until you leave the forum
+rule Wait = skip

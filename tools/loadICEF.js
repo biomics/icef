@@ -34,43 +34,6 @@ function reloadJSON(icef, baseDir) {
     var toload = [];
     
     for(var prop in icef) {
-<<<<<<< HEAD
-	switch(prop) {
-	case "asims" :
-	case "schedulers" :
-	    var asims = icef[prop];
-	    if(!(asims instanceof Array)) {
-		console.log("Invalid ICEF specification. Expected array of ASIM specifications in '"+prop+"'.");
-	    } else {
-		for(var i in asims) {
-		    var asim = asims[i];
-		    if(asim != undefined && asim.file != undefined) {
-		    	console.log("file: ", asim.file);
-			toload.push({ file : asim.file, index : i, prop : prop, start : asim.start });
-		    }
-		}
-	    }
-	    break;
-	}
-    }
-    
-    for(var i in toload) {
-    	console.log("toload: ", toload);
-	var file = toload[i].file;
-	var index = toload[i].index;
-	var prop = toload[i].prop;
-	var start = toload[i].start;
-
-	console.log("file: "+file);
-
-	console.log(((String)("File"))[0]);
-
-	if(file[0] != "/") {
-	    file = baseDir + "/" + file;
-	}
-	
-	data = new String(fs.readFileSync(file));
-=======
 	      switch(prop) {
 	      case "asims" :
 	      case "schedulers" :
@@ -100,7 +63,6 @@ function reloadJSON(icef, baseDir) {
 	      }
 	      
 	      data = new String(fs.readFileSync(file));
->>>>>>> 9c925a181cb29fa47e67117fa48d931fb5fec735
 
 	      if(data == null) {
 	          return null;

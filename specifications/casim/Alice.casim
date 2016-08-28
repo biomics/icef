@@ -1,0 +1,68 @@
+CoreASIM Alice
+//Alice broadcasts messages via the forum, and receives messages from Bob
+
+
+//use standard plugins
+use Standard 
+
+//set program for the executing agent
+init Start
+scheduling NoInternalAgents
+
+//These are the controlled locations of Alice. It is not necessary to declare them, but they help readers of CASIM specifications to know what fields are updated in a controlled way.
+controlled activeSpeaker: BOOLEAN
+controlled wantsToTalk: BOOLEAN
+controlled counter:INTEGER
+controlled energy:INTEGER
+
+//The initialization rule.
+rule Start = 
+par
+	energy:=100
+	counter:=1
+	activeSpeaker:=false
+	wantsToTalk:=true
+	program(self):= AlicesProgram
+endpar
+
+//Alice does not need to coordinate anyone 
+policy NoInternalAgents = skip
+		
+rule AlicesProgram = 
+par
+	//Check if Alice has got a message with subject activeSpeaker, if so, she knows she's the active speaker and is to talk.
+	if (exists m in inboxOf(self) with getMessageSubject(m)="Permission") then
+		activeSpeaker:=true
+	else
+		activeSpeaker:=false
+
+	//Acknowledge every received messages sent by other participants
+	forall m in inboxOf(self) with getMessageSubject(m)="Message" do
+		print "I hear: "+ getMessageContent(m)
+
+	//Determine whether Alice has energy to talk in a uniform, random way that depends on her energy level.
+	choose e in [1..100] do
+	par
+		if e <= energy then
+			wantsToTalk := true
+		else
+			wantsToTalk := false
+	endpar
+	//If Alice wanst to talk and she is the active speaker, then she should talk
+	if wantsToTalk and activeSpeaker then
+	par
+		print "I express my Opinion #"+counter
+		//Alice broadcasts her opinion by sending it to the Forum. She doesn't know all participants directly.
+		send "Alice's Opinion #"+counter to "Forum" with subject "Broadcast"
+		//Increase the opinion counter
+		counter:=counter+1
+		//Talking consumes some energy.
+		energy:=energy-10
+	endpar 
+	//If Alice does not want to talk, she will report it, and gain some energy
+	if not wantsToTalk then
+	par
+		print "I do not want to talk for now"
+		energy:=energy+1
+	endpar
+endpar

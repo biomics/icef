@@ -23,7 +23,7 @@ import org.coreasim.engine.plugins.set.SetElement;
 import org.coreasim.engine.plugins.string.StringElement;
 
 /** 
- * This class implements the 'getMessageSender' function provided by the Communications Plugin.
+ * This class implements the 'GetMessageSender' function provided by the Communications Plugin.
  *   
  * @author  Eric Rothstein
  * 

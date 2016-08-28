@@ -1,0 +1,58 @@
+CoreASIM Moderator
+//The moderator is the scheduler of the forum. 
+//It is in charge of deciding who is to speak next.
+
+//use standard plugins
+use Standard 
+
+//Define the initial rule
+init Start
+
+//Define the scheduling policy
+scheduling ChooseActiveSpeaker
+
+//Derived functions are evaluated at the beginning of each round, even before the first round.
+//We check whether ForumParticipants is undef to avoid causing an error during the first round;
+//more precisely, a set construction {x | x in undef ...} results in an error.
+derived Requesters = 
+if ForumParticipants=undef then 
+	{} 
+else 
+	{x | x in ForumParticipants with wantsToTalk(x)}
+
+//Calculate the set of current speakers
+derived Speakers =  
+if ForumParticipants=undef then 
+	{} 
+else 
+	{x | x in ForumParticipants with activeSpeaker(x)}
+
+//Is there a speaker this round?
+derived noSpeaker = (|Speakers|=0)
+
+//Initially, the moderator does not know any forum participants,
+//and we set its program to ModeratorProgram.
+rule Start = 
+par
+	ForumParticipants:= {}
+	program(self):= ModeratorProgram
+endpar
+
+//Choose a speaker whenever there is no speaker among those who request to speak. 
+policy ChooseActiveSpeaker = 
+if noSpeaker then
+	choose r in Requesters do
+	//This instruction is sends a message with subject "Pemission" to r 
+		schedule r with true in Permission
+		
+//Whenever possible, the moderator updates its knowledge of participants.
+rule ModeratorProgram = 
+par
+	//Update your knowledge of Participants
+	choose m in inboxOf(self) with getMessageSubject(m)="Participants" do
+	par
+		ForumParticipants := getMessageContent(m)
+	endpar
+	//Make a small report.
+	print "The current speakers are: "+Speakers+"\nThe following participants want to speak: "+Requesters
+endpar

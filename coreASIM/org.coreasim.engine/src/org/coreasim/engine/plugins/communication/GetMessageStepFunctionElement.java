@@ -18,7 +18,7 @@ import org.coreasim.engine.absstorage.MessageElement;
 import org.coreasim.engine.plugins.number.NumberElement;
 
 /** 
- * This class implements the 'getMessageStep' function provided by the Communication Plugin.
+ * This class implements the 'GetMessageStep' function provided by the Communication Plugin.
  *   
  * @author  Eric Rothstein
  * 

@@ -1,0 +1,59 @@
+CoreASIM Bob
+//Bob only sends messages to Alice. 
+
+//use standard plugins
+use Standard 
+
+//set program for the executing agent
+init Start
+scheduling NoInternalAgents
+
+//These are the controlled locations of Bob. It is not necessary to declare them, but they help readers of CASIM specifications to know what fields are updated in a controlled way.
+controlled activeSpeaker: BOOLEAN
+controlled wantsToTalk: BOOLEAN
+controlled counter:INTEGER
+controlled energy:INTEGER
+
+//The initialization rule.
+rule Start = 
+par
+	energy := 100
+	counter:=1
+	activeSpeaker:=false
+	wantsToTalk:=true
+	program(self):= BobsProgram
+endpar
+
+//Bob does not need to coordinate anyone 
+policy NoInternalAgents = skip
+		
+//If Bob is the active speaker, she will send a message. If he wants to talk, then he'll wait for his turn 
+rule BobsProgram = 
+par
+	if (exists m in inboxOf(self) with getMessageSubject(m)="Permission") then
+		activeSpeaker:=true
+	else
+		activeSpeaker:=false
+	forall m in inboxOf(self) with getMessageSubject(m)="Message" do
+		print "I hear: "+ getMessageContent(m)
+	choose e in [1..100] do
+	par
+		if e <= energy then
+			wantsToTalk := true
+		else
+			wantsToTalk := false
+	endpar
+	if wantsToTalk and activeSpeaker then
+	par
+		print "I express my Opinion #"+counter
+		send "Bob's Opinion #"+counter to "Alice" with subject "Message"
+		counter:=counter+1
+		energy:=energy-2 //Assume that speaking only to Alice takes less effort than speaking to all the forum (costs 10)
+	endpar 
+	//If BOB does not want to talk, he will report it, and gain some energy
+	if not wantsToTalk then
+	par
+		print "I do not want to talk now"
+		energy:= energy+1
+	endpar
+endpar
