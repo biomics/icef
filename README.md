@@ -123,11 +123,16 @@ This will print the following usage information:
 In order to run the modulo two counter cascade example sepcified in `ICEF/specifications/icef/mod2cc.icef` you will be required to run at least one brapper. We show how to run two brappers using the manager which was started as described above (executed in a linux shell):
 
 ```Bash
-java -jar coreASIM/org.coreasim.biomics.wrapper/target/brapper.jar -m localhost -mp 9090 &
-java -jar coreASIM/org.coreasim.biomics.wrapper/target/brapper.jar -m localhost -mp 9090 -p 8090 &
+java -jar coreASIM/org.coreasim.biomics.wrapper/target/brapper.jar -m localhost -mp 9090
 ```
 
-The first command line will start a brapper which connects to the manager running at `localhost` at port `9090`. As no host or port is specified the brapper will use the default values, i.e. the brapper will bind to port `8080` at `localhost`. The second command will also start a brapper which is managed by the same CAIMA instance but the brapper will listen to port `8090` at `localhost` instead. Note, that both brappers will only connect to the manager successfully, if the manager is already running. If the manager is running, the brappers will automatically register with it and can be used by it.
+In a separate shell, you spawn another brapper process with
+
+```Bash
+java -jar coreASIM/org.coreasim.biomics.wrapper/target/brapper.jar -m localhost -mp 9090 -p 8090
+```
+
+The first command line will start a brapper which connects to the manager running at `localhost` at port `9090`. As no host or port is specified the brapper will use the default values, i.e. the brapper will bind to port `8080` at `localhost`. The second brapper will also start a brapper which is managed by the same CASIMA instance but the brapper will listen to port `8090` at `localhost` instead. Note, that both brappers will only connect to the manager successfully, if the manager is already running. If the manager is running, the brappers will automatically register with it and can be used by it.
 
 The brapper provides a REST interface which is also documented [here](http://docs.icef.apiary.io/#reference/brapper).
 
