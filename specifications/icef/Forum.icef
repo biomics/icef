@@ -1,0 +1,23 @@
+{
+	"id" : "Forum",
+	"schedulers" : [
+		     {				 
+        "file" : "../casim/Moderator.casim",
+				"start" : true
+			}
+	],
+	"asims" : [
+		  {
+				"file" : "../casim/Alice.casim",
+				"start" : true
+			},
+		  {
+				"file" : "../casim/Bob.casim",
+				"start" : true
+			},
+			{
+				"file" : "../casim/Forum.casim",
+				"start" : true
+			}
+	]
+}

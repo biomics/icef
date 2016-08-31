@@ -36,7 +36,7 @@ rule ProviderProgram = par
 		else par
 			if waiting then par
 				print "I am waiting for the round to be finished" 
-				choose m in inboxOf(self) with messageSubject(m)="Done" do
+				choose m in inboxOf(self) with getMessageSubject(m)="Done" do
 				par 
 				    waiting:=false 
 			        endpar  

@@ -21,16 +21,16 @@ endpar
 rule lBitProgram =
 par
 	print "running ... " + state
-	choose m in inboxOf(self) with messageSubject(m)="Death" do
+	choose m in inboxOf(self) with getMessageSubject(m)="Death" do
 	par
 		successor := undef
-		destroyASIM messageSender(m)
+		destroyASIM getMessageSender(m)
 		send "Done" to "InputProvider" with subject "Done"
 	endpar
-	choose m in inboxOf(self) with messageSubject(m)="input" do
+	choose m in inboxOf(self) with getMessageSubject(m)="input" do
 	par
-		print "lBit has the local input "+messageContent(m)+", sent by "+messageSender(m)
-		if messageContent(m) = 1 then
+		print "lBit has the local input "+getMessageContent(m)+", sent by "+getMessageSender(m)
+		if getMessageContent(m) = 1 then
 		par
 			state:= (state+1)%2
 			print "lBit updated its state from "+state+" to "+(state+1)%2
@@ -49,11 +49,11 @@ par
 				else
 				par
 					print "Sending +1 carry to successor"
-					send messageContent(m) to successor with subject "input"
+					send getMessageContent(m) to successor with subject "input"
 				endpar
 			endpar
 		endpar
-		else if messageContent(m) = -1 then
+		else if getMessageContent(m) = -1 then
 		par
 			if(state = 1) then
 			par
@@ -74,7 +74,7 @@ par
 					state:= 1
 					print "lBit updated its state from "+state+" to "+1
 					print "Sending -1 carry to successor"
-					send messageContent(m) to successor with subject "input"
+					send getMessageContent(m) to successor with subject "input"
 				endpar
 			endpar
 		endpar
@@ -86,16 +86,16 @@ rule ComponentProgram =
 par
 	//print "Inbox of "+self+": "+inboxOf(self)
 	//print "Successor of "+self+": "+successor
-	choose m in inboxOf(self) with messageSubject(m)="Death" do
+	choose m in inboxOf(self) with getMessageSubject(m)="Death" do
 	par
 		successor := undef
-		destroyASIM messageSender(m)
+		destroyASIM getMessageSender(m)
 		send "Done" to "InputProvider" with subject "Done"
 	endpar
-	choose m in inboxOf(self) with messageSubject(m)="input" do
+	choose m in inboxOf(self) with getMessageSubject(m)="input" do
 	par
-		print self+" has the local input "+messageContent(m)+", sent by "+messageSender(m)
-		if messageContent(m) = 1 then
+		print self+" has the local input "+getMessageContent(m)+", sent by "+getMessageSender(m)
+		if getMessageContent(m) = 1 then
 		par
 			state:= (state+1)%2
 			print self+" updated its state from "+state+" to "+(state+1)%2
@@ -114,11 +114,11 @@ par
 				else
 				par
 					print "Sending +1 carry to successor"
-					send messageContent(m) to successor with subject "input"
+					send getMessageContent(m) to successor with subject "input"
 				endpar
 			endpar
 		endpar
-		else if messageContent(m) = -1 then
+		else if getMessageContent(m) = -1 then
 		par
 			if(state = 1)then
 			par
@@ -128,9 +128,9 @@ par
 				par
 					//this is where I should die
 					print "Destroying myself!"
-					if messageSender(m)!="lBit@lBit" then
+					if getMessageSender(m)!="lBit@lBit" then
 					par
-						send "Death" to messageSender(m) with subject "Death"
+						send "Death" to getMessageSender(m) with subject "Death"
 					endpar
 					else
 					par
@@ -145,7 +145,7 @@ par
 				state:= 1
 				print self+" updated its state from "+state+" to "+1
 				print "Sending -1 carry to successor"
-				send messageContent(m) to successor with subject "input"
+				send getMessageContent(m) to successor with subject "input"
 			endpar
 		endpar
 	endpar

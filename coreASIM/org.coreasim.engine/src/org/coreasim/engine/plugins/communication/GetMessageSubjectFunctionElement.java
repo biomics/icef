@@ -24,7 +24,7 @@ import org.coreasim.engine.plugins.set.SetElement;
 import org.coreasim.engine.plugins.string.StringElement;
 
 /** 
- * This class implements the 'getMessageSubject' function provided by the Communication Plugin.
+ * This class implements the 'GetMessageSubject' function provided by the Communication Plugin.
  *   
  * @author Eric Rothstein
  * 

@@ -109,11 +109,11 @@ public class CommunicationPlugin extends Plugin implements
 	public static final Location INBOX_FUNC_LOC = new Location(CommunicationPlugin.INBOX_FUNC_NAME, ElementList.NO_ARGUMENT);
 	
 	/** The getMessageValue functions */
-	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "messageContent";
-	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "messageSubject";
-	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "messageSender";
-	public static final String GET_MESSAGE_RECEIVER_FUNC_NAME = "messageReceiver";
-	public static final String GET_MESSAGE_STEP_FUNC_NAME = "messageStep";
+	public static final String GET_MESSAGE_CONTENT_FUNC_NAME = "getMessageContent";
+	public static final String GET_MESSAGE_SUBJECT_FUNC_NAME = "getMessageSubject";
+	public static final String GET_MESSAGE_SENDER_FUNC_NAME = "getMessageSender";
+	public static final String GET_MESSAGE_RECEIVER_FUNC_NAME = "getMessageReceiver";
+	public static final String GET_MESSAGE_STEP_FUNC_NAME = "getMessageStep";
 	private final Set<String> dependencyList;
 	
 	/** 

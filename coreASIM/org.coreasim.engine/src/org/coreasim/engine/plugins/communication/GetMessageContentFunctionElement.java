@@ -22,7 +22,7 @@ import org.coreasim.engine.absstorage.MessageElement;
 import org.coreasim.engine.plugins.set.SetElement;
 
 /** 
- * This class implements the 'getMessageContent' function provided by the Communication Plugin.
+ * This class implements the 'GetMessageContent' function provided by the Communication Plugin.
  *   
  * @author  Eric Rothstein
  * 

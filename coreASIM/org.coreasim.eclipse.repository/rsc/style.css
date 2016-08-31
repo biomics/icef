@@ -2803,7 +2803,7 @@ div.csc-textpic-text ul li{list-style-position:inside;}
 ***** wec-discussion **********************
 ******************************************/
 
-.tx-wecdiscussion-forumMessageSubject a:hover {
+.tx-wecdiscussion-forumgetMessageSubject a:hover {
   color:#fff;
   background-color:transparent;
 }
