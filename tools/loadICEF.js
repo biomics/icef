@@ -28,7 +28,6 @@ if(process.argv.length < 5) {
 var specification = process.argv[2];
 var trgHost = process.argv[3];
 var trgPort = process.argv[4];
-console.log("ICEF Specification to load: "+specification);
 
 function reloadJSON(icef, baseDir) {
     var toload = [];
@@ -70,36 +69,53 @@ function reloadJSON(icef, baseDir) {
 	          var newASIM = {};
 	          
 	          data = data.replace(/\/\/.+/g, "");
-	          data = data.replace(/[ \n]*use .+/g, "");
-	          
-	          newASIM.name = /[ \n]*CoreASIM (.+)\n/g.exec(data)[1];
-	          if(newASIM.name == null)
-		            newASIM.name = "undefined";
-	          newASIM.init = /[ \n]*init (.+)\n/g.exec(data)[1];
-	          if(newASIM.init == null)
-		            newASIM.init = "skip";
-	          newASIM.policy = /[ \n]*scheduling (.+)\n/g.exec(data)[1];
-	          if(newASIM.policy == null)
-		            newASIM.policy = "skip";
+	          data = data.replace(/[ \r\n]*use .+/g, "");
+
+              var match = /[ \r\n]*CoreASIM ([^\r\n]+)[\r\n]+/g.exec(data);
+              if(match === null || match[1] === null)
+	              newASIM.name = "undefined";
+              else
+                  newASIM.name = match[1];
+
+	          match = /[ \r\n]*init ([^\r\n]+)[\r\n]+/g.exec(data);
+              if(match === null || match[1] === null)
+                  newASIM.init = "skip";
+              else
+                  newASIM.init = match[1];
+
+	          match = /[ \r\n]*scheduling ([^\r\n]+)[\r\n]+/g.exec(data);
+              if(match === null || match[1] === null)
+                  newASIM.policy = "skip";
+              else {
+                  newASIM.policy = match[1];
+              }
 	          
 	          // guess the init rule and extract program(self)
 	          var initRuleExp = new RegExp("rule[ \t]+"+newASIM.init+".*=(.|[\n\r])+?(rule|derived|controlled|universe)", "m");
-	          var initRule = initRuleExp.exec(data)[0];
-	          newASIM.program = /program\(self\) *:= *(.+?)\n/g.exec(initRule)[1];
-	          if(newASIM.program == null)
-		            newASIM.program = "skip";
+	          var initRule = null;
+              match = initRuleExp.exec(data);
+              if(match === null)
+                  initRule = null;
+              else
+                  initRule = match[0];
+
+	          match = /program\(self\) *:= *([^\r\n]+?)[\r\n]+/g.exec(initRule);
+	          if(match === null || match[1] === null )
+		          newASIM.program = "skip";
+              else
+                  newASIM.program = match[1];
 	          
-	          data = data.replace(/[ \n]*CoreASIM (.+)\n/g, "");
-	          data = data.replace(/[ \n]*init (.+)\n/g, "");
-	          data = data.replace(/[ \n]*scheduling (.+)\n/g, "");
-	          data = data.replace(/^[ \n]*/m, "");
-	          data = data.replace(/[ \n]*$/m, "");
+	          data = data.replace(/[ \r\n]*CoreASIM ([^ \r\n]+)[\r\n]+/g, "\r\n");
+	          data = data.replace(/[ \r\n]*init ([^ \r\n]+)[\r\n]+/g, "\r\n");
+	          data = data.replace(/[ \r\n]*scheduling ([^\r\n]+)[\r\n]+/g, "\r\n");
+	          data = data.replace(/^( |\r\n)*/m, "");
+	          data = data.replace(/( |\r\n)*$/m, "");
 	          
 	          newASIM.signature = data;
 	          
 	          if(start != undefined)
-		            newASIM.start = start;
-	          
+		          newASIM.start = start;
+
 	          icef[prop][index] = newASIM;
 	      }
     }
@@ -114,10 +130,6 @@ jsonfile.readFile(specification, function(err, icef) {
 	      var baseDir = path.dirname(specification);
 	      
 	      var newICEF = reloadJSON(icef, baseDir);
-
-	      console.log("Load the following specification:");
-	      console.log(newICEF);
-
 	      var data = JSON.stringify(icef);
 	      
         var options = {
